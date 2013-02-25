@@ -1,0 +1,481 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Ceceppa Multilingua\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-02-11 17:59+0100\n"
+"PO-Revision-Date: 2013-02-11 18:03+0100\n"
+"Last-Translator: Alessandro Senese <senesealessandro@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-KeywordsList: _;gettext;gettext_noop;__;_e\n"
+"X-Poedit-Basepath: /home/ceceppa/Progetti/www/Blogger/wp/wp-content/plugins/"
+"ceceppa-multilingua/\n"
+"X-Generator: Poedit 1.5.5\n"
+"X-Poedit-SearchPath-0: C:\\Users\\Ceceppa\\Progetti\\www\\Blogger\\wp\\wp-"
+"content\\plugins\\ceceppa-multilingua\n"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/ceceppaml.php:231
+msgid "Collega all'articolo"
+msgstr "Link to the article"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/ceceppaml.php:232
+msgid "Dati della pagina"
+msgstr "Page data"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/ceceppaml.php:239
+msgid "Ceceppa Multilingua"
+msgstr "Ceceppa Multilingua"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/ceceppaml.php:240
+msgid "Elenco articoli"
+msgstr "List of posts"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/ceceppaml.php:241
+msgid "Traduzioni"
+msgstr "Translations"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/ceceppaml.php:242
+msgid "Impostazioni"
+msgstr "Settings"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/ceceppaml.php:284
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/ceceppaml.php:305
+msgid "Lingua della categoria"
+msgstr "Category's language"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/ceceppaml.php:288
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/ceceppaml.php:314
+msgid "Collega alla categoria"
+msgstr "Link to the category"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/ceceppaml.php:309
+msgid ""
+"Seleziona la lingua della categoria solo se a questa non &egrave; abbinato "
+"nessun genitore"
+msgstr ""
+"Chose the language of category only if not combined with no parent category"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/ceceppaml.php:319
+msgid ""
+"Selezionare la categoria a cui deve essere collegata quella che stai "
+"modificando"
+msgstr ""
+"Select the category that you have to connect with to the one you are "
+"modifying"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/ceceppaml.php:371
+msgid "Lingua predefinita"
+msgstr "Main language "
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/ceceppaml.php:931
+msgid "Nessun articolo collegato"
+msgstr "No related article"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/ceceppaml.php:983
+msgid "Lingua della pagina"
+msgstr "Language of the page "
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/ceceppaml.php:986
+msgid "Collega alla pagina"
+msgstr "Link to the page"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:11
+msgid "Configurazione Lingue:"
+msgstr "Languages settings"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:20
+msgid "Predefinita"
+msgstr "Default"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:21
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/widgets.php:98
+msgid "Bandiera"
+msgstr "Flag"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:22
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/widgets.php:104
+msgid "Nome della lingua"
+msgstr "Name of the language "
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:23
+msgid "Pagina base"
+msgstr "Main page"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:24
+msgid "Categoria base"
+msgstr "Main category"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:26
+msgid "Visualizza/Nascondi le opzioni avanzate delle lingue."
+msgstr "Show/Hide advanced options for languages"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:53
+msgid "Nessuna pagina associata"
+msgstr "No related page"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:71
+msgid "Visualizza/Nascondi opzioni avanzate della lingua."
+msgstr "Show/Hide advanced options for the language"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:72
+msgid "Cancella la lingua selezionata"
+msgstr "Delete the selected language"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:79
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:140
+msgid "Abbreviazione url"
+msgstr "Url slug"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:80
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:141
+msgid "Avviso articolo"
+msgstr "Post notice"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:81
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:142
+msgid "Avviso pagina"
+msgstr "Page notice"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:82
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:143
+msgid "Avviso categoria"
+msgstr "Category notice"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:83
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:144
+msgid "Locale Wordpress"
+msgstr "Wordpress local"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:86
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:147
+msgid ""
+"Permette di specificare l'abbreviazione da utilizzare all'interno dell'Url "
+"della pagina.<br />Es: <br />www.example.com/it<br />www.example.com/uk"
+msgstr ""
+"Allows you to specify an abbreviation to be used in the URL of the page. "
+"<br /> Ex: <br /> www.example.com / en <br /> www.example.com / uk"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:87
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:148
+msgid ""
+"Definisci il testo dell'avviso da visualizzare quando l'articolo &egrave; "
+"disponibile nella lingua del visitatore"
+msgstr ""
+"Define the text of the notice to be displayed when the post is available in "
+"the visitor's language "
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:88
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:149
+msgid ""
+"Definisci il testo dell'avviso da visualizzare quando la pagina &egrave; "
+"disponibile nella lingua del visitatore"
+msgstr ""
+"Define the text of the notice to be displayed when the page is available in "
+"the visitor's language "
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:89
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:150
+msgid ""
+"Definisci il testo dell'avviso da visualizzare quando la categoria &egrave; "
+"disponibile nella lingua del visitatore"
+msgstr ""
+"Define the text of the notice to be displayed when the category is available "
+"in the visitor's language "
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:90
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:151
+msgid ""
+"Serve ad abbinare correttamente la lingua definita, con quella del browser "
+"dell'utente."
+msgstr "Helps to link correctly the defined language by the user's browser. "
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:108
+msgid "Pagina da associare"
+msgstr "Page to associate"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:121
+msgid "Categoria da associare"
+msgstr "Related category"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:160
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/translations.php:52
+msgid "Aggiorna"
+msgstr "Refresh"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:177
+msgid "Scegli la linga"
+msgstr "Chose the language"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/languages.php:197
+msgid "Nessuna categoria associata"
+msgstr "No related category"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:2
+msgid "Configurazione plugin:"
+msgstr "Plugin configuration"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:18
+msgid "Rileva lingua browser:"
+msgstr "Detect browser language"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:22
+msgid "Rileva la lingua del browser e:"
+msgstr "Detect browser language and:"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:25
+msgid ""
+"Reindirizza automaticamente il browser a seconda della lingua dell'utente. "
+"<strong><em>Aggiunge il suffisso &lang= alla home del sito</em></strong>"
+msgstr ""
+"Automatically redirects the browser depending on the user's language. "
+"<strong><em>Append the suffix &lang= to the home page</em></strong>"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:27
+msgid "Non fare nulla"
+msgstr "Don’t do anything"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:33
+msgid "Visualizza icona lingue:"
+msgstr "Show language's flag:"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:37
+msgid "Visualizza le bandiere delle lingue disponibili su:"
+msgstr "Show the list flag of available languages on:"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:40
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:66
+msgid "Articoli"
+msgstr "Posts"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:42
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:68
+msgid "Pagine"
+msgstr "Pages"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:44
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:70
+msgid "Categorie"
+msgstr "Categories"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:46
+msgid "Dove:"
+msgstr "Where:"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:49
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:82
+msgid "All'inizio dell'articolo/categoria/pagina"
+msgstr "On the top of page/post/category"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:51
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:84
+msgid "Alla fine dell'articolo/categoria/pagina"
+msgstr "On the bottom of post/page/category"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:57
+msgid "Visualizza avviso"
+msgstr "Show notice"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:60
+msgid ""
+"Quando l'articolo/pagina/categoria che l'utente st&agrave; visualizzando "
+"&egrave; disponibile, in base alle informazioni fornite dal browser, nella "
+"sua lingua:"
+msgstr ""
+"When the post/page/category that user is viewing is available, based on the "
+"information provided by the browser, in their its language:"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:63
+msgid "Aggiungi avviso a:"
+msgstr "Add notice to:"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:73
+msgid "Ignora"
+msgstr "Ignore"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:79
+msgid "Imposta dove visualizzare l'avviso"
+msgstr "Setting where to show the alert"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:86
+msgid "Personalizza avviso:"
+msgstr "Cusomize alert"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:87
+msgid "Prima:"
+msgstr "Before"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:88
+msgid "Dopo:"
+msgstr "After"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:94
+msgid "Filtra query"
+msgstr "Filter query"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:98
+msgid ""
+"Permette di filtrare il risultato di alcuni widget, in modo da visualizzare "
+"solo i record inerenti alla lingua corrente."
+msgstr ""
+"Allows you to filter the result of some widgets to display only those "
+"records relating to the current language."
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:100
+msgid "Widget supportati:"
+msgstr "Supported widgets:"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:102
+msgid "Articoli pi&ugrave; letti"
+msgstr "Least reads posts"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:103
+msgid "Articoli pi&ugrave; commentati"
+msgstr "Most commented"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:107
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:120
+msgid "Attiva"
+msgstr "Enable"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:113
+msgid "Filtra ricerca"
+msgstr "Filter search"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:117
+msgid ""
+"Permette di filtrare il risultato della ricerca, visualizzando solo gli "
+"articoli inerenti alla lingua corrente."
+msgstr ""
+"Allows you to filter the result of the search for show only the posts "
+"relating to the current language."
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:127
+msgid "Commenti"
+msgstr "Comments"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:132
+msgid "Raggruppa"
+msgstr "Group"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:132
+msgid "Visualizza per l'articolo i commenti disponibili in ogni lingua"
+msgstr "View the comments for this article are available in each language"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:134
+msgid "Separati"
+msgstr "Separate"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:134
+msgid "Ogni articolo visualizza solo i propri commenti"
+msgstr "Each post show only own comments"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:141
+msgid "Salva"
+msgstr "Save"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:145
+msgid "Fai una donazione"
+msgstr "Donate"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/options.php:147
+msgid ""
+"Se hai gradito <strong>\"Ceceppa Multilingua\"</strong>, sostieni con una "
+"donazione il suo sviluppo e il suo mantenimento :)"
+msgstr ""
+"If you like this plugin, please donate to support development and "
+"maintenance!"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/posts.php:3
+msgid "Elenco articoli:"
+msgstr "List of posts"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/posts.php:7
+msgid "Titolo"
+msgstr "Title"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/posts.php:49
+msgid "Modifica articolo"
+msgstr "Edit post "
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/posts.php:59
+msgid "Traduci articolo"
+msgstr "Translate post"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/translations.php:3
+msgid "Titoli dei widget"
+msgstr "Widget's titles"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/translations.php:17
+msgid "Titolo widget"
+msgstr "Widget title"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/widgets.php:8
+msgid "Mostra l'elenco delle lingue disponibili"
+msgstr "Show the list of available languages"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/widgets.php:81
+msgid "Titolo:"
+msgstr "Title:"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/widgets.php:86
+msgid "Nascondi titolo:"
+msgstr "Hide title"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/widgets.php:92
+msgid "Visualizza:"
+msgstr "Show"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/widgets.php:110
+msgid "Nome e bandiera"
+msgstr "Name and flag"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/widgets.php:116
+msgid "Elenco"
+msgstr "Dropdown"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/widgets.php:123
+msgid "Dimensione bandiere:"
+msgstr "Flag's size"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/widgets.php:129
+msgid "Piccole (32x23)"
+msgstr "Small (32x23)"
+
+#: C:\Users\Ceceppa\Progetti\www\Blogger\wp\wp-content\plugins\ceceppa-multilingua/widgets.php:135
+msgid "Minuscole (16x11)"
+msgstr "Tiny (16x11)"
+
+#~ msgid "Lingue disponibili"
+#~ msgstr "Available languages"
+
+#~ msgid "Impostazioni avviso"
+#~ msgstr "Setting alert"
+
+#~ msgid "Elenco frasi da tradurre"
+#~ msgstr "List of sentences to translate "
+
+#~ msgid "Frasi"
+#~ msgstr "Sentences"
+
+#~ msgid "Lingua"
+#~ msgstr "Language"
+
+#~ msgid "Cancella"
+#~ msgstr "Delete"
+
+#~ msgid "Post"
+#~ msgstr "Post"
+
+#~ msgid "Page"
+#~ msgstr "Page"
+
+#~ msgid "Category"
+#~ msgstr "Category"
+
+#~ msgid "Delete"
+#~ msgstr "Delete"
+
+#~ msgid "Aggiungi avviso all'inizio dell'articolo."
+#~ msgstr "Add notice to start of post"
