@@ -94,7 +94,7 @@ function cml_get_linked_post($lang_id, $result, $post_id, $browser_lang = null) 
       $new_id = $wpdb->get_row($query);
 
 			if(!empty($new_id)) {
-				if($new_id->cml_post_lang_2 != $result->id) {
+				if($new_id->cml_post_lang_2 != $result->id && $new_id->post_id > 0) {
 					//Se la lingua che ho recuperato è diversa da quella attuale verifico se c'è un altro
 					//post in un'altra lingua collegato a questo
 					$query = sprintf("SELECT *, cml_post_id_1 as post_id FROM %s WHERE cml_post_id_2 = %d AND cml_post_lang_1 = %d",

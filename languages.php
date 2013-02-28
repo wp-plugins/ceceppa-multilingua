@@ -17,11 +17,12 @@
     <table id="ceceppaml-table" class="ceceppaml">
     <tbody>
     <tr>
-      <td style="width: 5%;"><?php _e('Predefinita', 'ceceppaml') ?></td>
+      <td style="width: 1%;"><?php _e('Predefinita', 'ceceppaml') ?></td>
       <td style="width: 5%;"><?php _e('Bandiera', 'ceceppaml') ?></td>
       <td style="width:15%"><?php _e('Nome della lingua', 'ceceppaml') ?></td>
       <td style="width:12%"><?php _e('Pagina base', 'ceceppaml') ?></td>
       <td style="width:10%"><?php _e('Categoria base', 'ceceppaml') ?></td>
+      <td style="width:5%"><?php _e('Attiva', 'ceceppaml') ?></td>
       <td style="width: 5%">
 	  	<a href="#" onclick="javascript: toggleDetails(-1)"><img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/details.png" width="32" title="<?php _e('Visualizza/Nascondi le opzioni avanzate delle lingue.') ?>"></a>
 	  </td>
@@ -66,6 +67,9 @@
       </select></td>
 <!-- combobox categorie -->
       <td><?php ceceppa_show_category($result->cml_category_id) ?></td>
+			<td>
+					<input type="checkbox" id="lang-enabled" name="lang-enabled[]" value="1" <?php echo ($result->cml_enabled == 1) ? "checked" : "" ?>/>
+			</td>
       <th>
 <!-- Dettagli e cancella -->
 		<a href="#" onclick="javascript: toggleDetails(<?php echo $result->id ?>)"><img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/details.png" width="32" title="<?php _e('Visualizza/Nascondi opzioni avanzate della lingua.', 'ceceppaml') ?>"></a>
@@ -129,6 +133,7 @@
 	}
       ?>
       </select></td>
+		<td></td>
 	  <td style="text-align: center">
 	  	<img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/addlang.png" width="32" />
 	  </td>

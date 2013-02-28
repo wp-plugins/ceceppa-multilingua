@@ -3,7 +3,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate
 Requires at least: 3.4.1
 Tested up to: 3.5.1
-Stable tag: 0.3
+Stable tag: 0.3.1
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: http://www.ceceppa.eu/ceceppa-multilingua/
@@ -15,14 +15,17 @@ Adds userfriendly multilingual content management and translation support into W
 I create Ceceppa Multilingua to let Wordpress have an easy to use interface for managing a fully multilingual web site.
 With "Ceceppa Multilingua" you can write your posts and pages in multiple language. Here are some features:
 
-- Separatee posts and pages for each languages, so you can use different SEO and url for each languages.
+- Separated posts and pages for each languages, so you can use different SEO and url for each languages.
 - Different menu for each language.
 - Translate widget's title.
 - Group/Ungroup comments for each post's languages.
 - Show notice when the post/page/category that user is viewing is available, based on the information provided by the browser, in their its language
-- Redirects the browser depending on the user's language. Append the suffix &lang= to the home page
+- Redirects the browser depending on the user's language. Append the suffix &lang= to the home url-
+- Widget for language chooser
 - Least Read Posts, Most Commented, Most Read Posts can show only the posts in user selected language
-- Filter search result, showing only results from user selected language
+- Filter search in accordingly to current language
+- Change wordpress locale according to current language, useful for localized themes
+- Show the list flag of available languages on top or bottom of page/post
 
 Ceceppa Multilingua supports infinite language, which can be easily added/modified/deleted via the comfortable Configuration Page.
 All you need to do is activate the plugin, configure categories and start writing the content!
@@ -61,3 +64,24 @@ For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide
 4. Plugin configuration
 5. Link to the article
 6. Menus configuration
+
+
+== Changelog ==
+
+= 0.3.1 =
+* Added flags near title in "All posts" and "All pages
+* Added checkbox for disable language
+
+= 0.3 =
+* Different post/page for each language
+* Different menu for each language. (need to edit header.php)	 	
+* Translate widget’s titles	 	
+* Group/Ungroup comments for this post/page/category that are available in each language	 	
+* Show notice when the post/page/category is available in the visitor’s language	 	
+* Automatically redirects the browser depending on the user’s language	 	
+* Widget for language chooser		
+* Filter some wordpress widgets, as “Least and Reads Posts”, “Most read post”, “Most commented”		
+* Filter search in accordingly to current language		
+* Change wordpress locale according to current language, useful for localized themes		
+* Show the list flag of available languages on top or bottom of page/post		
+* Show list of all articles with their translatios, if exists

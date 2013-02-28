@@ -28,7 +28,7 @@ function cml_get_default_language_id() {
 function cml_get_languages() {
   global $wpdb;
 
-  return $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE);
+  return $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " WHERE cml_enabled = 1");
 }
 
 /**
@@ -59,6 +59,11 @@ function cml_get_flag($flag, $size = "tiny") {
 
 /**
  * Restituisco il percorso della bandiera in base all'id della lingua
+ *
+ * @param id - id della lingua
+ * @param size - dimensione della bandiera:
+ * 						tiny
+ * 						small
  */
 function cml_get_flag_by_lang_id($id, $size = "tiny") {
   global $wpdb;
@@ -137,7 +142,7 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
   global $wpdb, $wpCeceppaML;
 
   $redirect = get_option('cml_option_redirect');
-  $results = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " ORDER BY cml_language");  
+  $results = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " WHERE cml_enabled = 1 ORDER BY cml_language");  
   $width = ($size == "tiny") ? 16 : 32;
 
   $r = "<ul class='$class_name'>";
@@ -253,6 +258,9 @@ function cml_get_notice_by_lang_id($lang_id) {
 
 /**
  * Restituisco una combo con le lingue configurate
+ *
+ * @name - nome della classe e dell'oggetto <select>
+ * @default - id della lingua predefinita
  */
 function cml_dropdown_langs($name, $default, $link = false) {
   global $wpCeceppaML;
