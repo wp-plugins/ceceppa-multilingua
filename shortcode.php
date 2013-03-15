@@ -46,10 +46,10 @@
   *                "small" = 80x55
   *        
   */
-add_shortcode("cml_text", cml_shortcode_text);
-add_shortcode("cml_shortcode", cml_do_shortcode);
-add_shortcode('cml_show_availables_langs', cml_show_availables_langs);
-add_shortcode('cml_show_flags', cml_shortcode_show_flags);
+add_shortcode("cml_text", 'cml_shortcode_text');
+add_shortcode("cml_shortcode", 'cml_do_shortcode');
+add_shortcode('cml_show_availables_langs', 'cml_show_availables_langs');
+add_shortcode('cml_show_flags', 'cml_shortcode_show_flags');
 
 function cml_shortcode_text($attrs) {
   global $wpCeceppaML;
@@ -65,7 +65,7 @@ function cml_do_shortcode($attrs) {
   global $wpCeceppaML;
 
   $shortcode = $attrs['shortcode'];
-  $params = $attrs['params'];
+  $params = @$attrs['params'];
   $lang = $attrs[$wpCeceppaML->get_current_lang()];
 
   return do_shortcode("[$shortcode $params $lang]");

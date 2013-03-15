@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.3.1
+Version: 0.3.2
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -48,18 +48,7 @@ class CeceppaML {
   public function __construct() {
     global $wpdb;
 
-    //Javascript
-    wp_register_script('ceceppa-dd', WP_PLUGIN_URL . '/ceceppa-multilingua/js/jquery.dd.min.js');
-    wp_register_script('ceceppaml-js', WP_PLUGIN_URL . '/ceceppa-multilingua/js/ceceppa.js', array('ceceppa-dd'));
-    wp_register_script('ceceppa-tipsy', WP_PLUGIN_URL . '/ceceppa-multilingua/js/jquery.tipsy.js');
-//    wp_enqueue_script('ceceppa-search', WP_PLUGIN_URL . '/ceceppa-multilingua/js/ceceppa.search.js', array('jquery'));
-
-    //Css
-    wp_register_style('ceceppaml-style', WP_PLUGIN_URL . '/ceceppa-multilingua/css/ceceppaml.css');
-    wp_register_style('ceceppaml-dd', WP_PLUGIN_URL . '/ceceppa-multilingua/css/dd.css');
-    wp_register_style('ceceppa-tipsy', WP_PLUGIN_URL . '/ceceppa-multilingua/css/tipsy.css');
-    wp_register_style('ceceppaml-widget-style', WP_PLUGIN_URL . '/ceceppa-multilingua/css/widget.css');
-    wp_enqueue_style('ceceppaml-common-style', WP_PLUGIN_URL . '/ceceppa-multilingua/css/common.css');
+		add_action('wp_enqueue_scripts', array(&$this, 'enqueue_scripts'));
 
     //Creo le tabelle al primo avvio
     if(get_option('cml_db_version') != CECEPPA_DB_VERSION) $this->create_table();
@@ -163,7 +152,7 @@ class CeceppaML {
 		 */
     $this->_show_notice = get_option('cml_option_notice', 'notice');
     $this->_show_notice_pos = get_option('cml_option_notice_pos', 'top');
-    if($this->_show_notice != 'nothing' && !is_home() && !is_admin())
+    if($this->_show_notice != 'nothing' && !is_admin()) //!is_home() && 
       add_action('the_content', array(&$this, 'show_notice'));
 
     //Commenti
@@ -580,6 +569,25 @@ class CeceppaML {
     update_option("cml_db_version", CECEPPA_DB_VERSION);
   }
 
+	function enqueue_scripts() {
+		    //Javascript
+    wp_register_script('ceceppa-dd', WP_PLUGIN_URL . '/ceceppa-multilingua/js/jquery.dd.min.js');
+    wp_register_script('ceceppaml-js', WP_PLUGIN_URL . '/ceceppa-multilingua/js/ceceppa.js', array('ceceppa-dd'));
+    wp_register_script('ceceppa-tipsy', WP_PLUGIN_URL . '/ceceppa-multilingua/js/jquery.tipsy.js');
+//    wp_enqueue_script('ceceppa-search', WP_PLUGIN_URL . '/ceceppa-multilingua/js/ceceppa.search.js', array('jquery'));
+
+    //Css
+    wp_register_style('ceceppaml-style', WP_PLUGIN_URL . '/ceceppa-multilingua/css/ceceppaml.css');
+    wp_register_style('ceceppaml-dd', WP_PLUGIN_URL . '/ceceppa-multilingua/css/dd.css');
+    wp_register_style('ceceppa-tipsy', WP_PLUGIN_URL . '/ceceppa-multilingua/css/tipsy.css');
+    wp_register_style('ceceppaml-widget-style', WP_PLUGIN_URL . '/ceceppa-multilingua/css/widget.css');
+    wp_enqueue_style('ceceppaml-common-style', WP_PLUGIN_URL . '/ceceppa-multilingua/css/common.css');
+	}
+
+	function enqueue_script_search() {
+		wp_enqueue_script('ceceppa-search', WP_PLUGIN_URL . '/ceceppa-multilingua/js/ceceppa.search.js', array('jquery'));
+	}
+
   /*
    * Filtro gli articoli più letti aggiungendo alla
    * query la condizione sugli id dei post
@@ -690,7 +698,7 @@ class CeceppaML {
     }
 
     update_option('cml_current_lang', $this->_current_lang);
-    update_option('cml_current_lang_id', $thi->_current_lang_id);
+    update_option('cml_current_lang_id', $this->_current_lang_id);
 
     //Se non è stata specificata nessuna categoria "padre" per la lingua, recupero tutte quelle associate a questa lingua :)
     //Questo accade quando l'utente sceglie una struttura non ad albero
@@ -1633,7 +1641,8 @@ class CeceppaML {
       $this->_current_lang_id = $lang;
 
 			if($this->_filter_search) {
-				wp_enqueue_script('ceceppa-search', WP_PLUGIN_URL . '/ceceppa-multilingua/js/ceceppa.search.js', array('jquery'));
+				//For Fix Notice
+				add_action('wp_enqueue_scripts', array(&$this, 'enqueue_script_search'));
 
 				$array = array('lang' => $this->_current_lang,
 											 'form_class' => $this->_filte_form_class);
