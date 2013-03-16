@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.3.3
+Version: 0.3.4
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -44,11 +44,17 @@ class CeceppaML {
   protected $_show_notice = 'notice';
 	protected $_filter_search = true;
 	protected $_filte_form_class = "searchform";
+	protected $_set_locale = false;
 
   public function __construct() {
     global $wpdb;
 
-		add_action('wp_enqueue_scripts', array(&$this, 'enqueue_scripts'));
+		/*
+		 * Se utilizzo add_action per caricare gli script quando richiesto,
+		 * non mi vengono "caricati" nelle verie funzioni a disposizione :(
+		 */
+		$this->enqueue_scripts();
+		//add_action('wp_enqueue_scripts', array(&$this, 'enqueue_scripts'));
 
     //Creo le tabelle al primo avvio
     if(get_option('cml_db_version') != CECEPPA_DB_VERSION) $this->create_table();
@@ -167,9 +173,9 @@ class CeceppaML {
      */
     add_filter('query_vars', array(&$this, 'add_lang_query_vars'));
 		if(!is_admin() && get_option("cml_option_change_locale", 1) == 1) {
-			add_filter('locale', array(&$this, 'setlocale'), 99);
+			add_filter('locale', array(&$this, 'setlocale'));
 		}
-    
+
 		//Aggiungo le banidere all'elenco dei post
 		add_action('manage_pages_custom_column', array(&$this, 'add_flag_column'), 10, 2);
 		add_filter('manage_pages_columns' , array(&$this, 'add_flags_columns'));
@@ -783,6 +789,12 @@ class CeceppaML {
     return $cats[0];
   }
 
+	function get_language_locale_by_id($id) {
+		global $wpdb;
+		$query = sprintf("SELECT cml_locale FROM %s WHERE id = %d", CECEPPA_ML_TABLE, $id);
+
+		return $wpdb->get_var($query);
+	}
   function get_language_slug_by_id($id) {
     global $wpdb;
 
@@ -1281,6 +1293,7 @@ class CeceppaML {
       //Categoria collegata
       $linked_cat = intval($_POST['linked_cat']);
 
+			//Lingua della categoria
       $cat_lang = intval($_POST['cat_lang']);
 
       //Se è stata scelta una categoria "genitore", recupero la lingua corretta dalla categoria padre
@@ -1300,7 +1313,10 @@ class CeceppaML {
         if(empty($cat_lang)) $cat_lang = get_option("cml_category_lang_$parent");   //Recupero la lingua dal padre
       } else {
         //E' stata selezionata una lingua per la categoria corrente e nessun genitore
-        $linked_lang = -1; //get_option("cml_category_lang_$linked_cat");
+				if(intval($_POST['linked_cat']) == -1)
+					$linked_lang = -1; //get_option("cml_category_lang_$linked_cat");
+				else
+					$linked_lang = $this->get_language_id_by_category($linked_cat);
       }
 
       //Elimino i vecchi collegamenti presenti nel database
@@ -1333,9 +1349,9 @@ class CeceppaML {
           update_option("cml_category_lang_$cat->term_id", $cat_lang);
       endforeach;
 
-      update_option("cml_category_$term_id", $linked_cat);
-      
       $this->save_extra_category_update_posts($term_id, $cat_lang);
+
+      update_option("cml_category_$term_id", $linked_cat);
       update_option("cml_category_lang_$term_id", $cat_lang);
     }
   }
@@ -1470,31 +1486,34 @@ class CeceppaML {
    */  
   function setlocale($locale) {
 		global $wpdb;
-
-		/*
-		 *				global $current_user;
-
-				get_currentuserinfo();
-				$id = $current_user->user_login;
-				$locale = get_option("cml_get_user_$id_locale");
-				
-				if(empty($locale)) {
-					$locale = $wpdb->get_var(sprintf("SELECT cml_locale FROM %s WHERE cml_default = 1",
-							CECEPPA_ML_TABLE));
-				}
-*/
-		//Se sono nel pannello di amministrazione ripristino la lingua "predefinita" :)
+		global $wp_rewrite;
 		if(isset($_GET['lang'])) {
 			$locale = $wpdb->get_var(sprintf("SELECT cml_locale FROM " . CECEPPA_ML_TABLE . " WHERE cml_language_slug = '%s'",
 					$_GET['lang']));
-		} else {
-			$l = get_option("cml_current_locale");
+		}  else {
+			$l = $this->_current_lang_locale;
+
+			/*
+			 * posso modificare il locale solo prima che wp inizi a "stampare"
+			 * il contenuto della pagina (o così mi è sembrato di capire), putroppo
+			 * i metodi is_single(), is_page(), etc... non sono disponibili prima che wordpress
+			 * abbia stampato l'header della pagina.
+			 * A questo punto però non posso più modificare il locale :O
+			 * quindi ho trovato sta "toppa" che permette di recuperare l'id della pagina/post
+			 * e di conseguenza riesco a modificare il locale prima che qualsiasi output venga inviato
+			 * al browser :)
+			 */
+			if(is_object($wp_rewrite)) {
+				//Cerco di recuperare l'id della pagina/articolo dall'url
+				$url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+				$id = url_to_postid($url);
+				
+				$lid = $this->get_language_id_by_post_id($id);
+				$l = $this->get_language_locale_by_id($lid);
+			}
 
 			$locale = empty($l) ? $locale : $l;
 		}
-	
-		//Memorizzo l'ultima lingua "utilizzata"
-		update_option("cml_current_locale", $locale);
 
     return $locale;
   }
@@ -1681,7 +1700,7 @@ class CeceppaML {
       $this->_current_lang_id = get_option('cml_current_lang_id');
       $this->_current_lang_locale = get_option('cml_current_lang_locale');
       */
-			
+
 			/*
 			$this->_current_lang = $_COOKIE['cml_current_lang'];
 			$this->_current_lang_id = $_COOKIE['cml_current_lang_id'];
@@ -1752,6 +1771,7 @@ class CeceppaML {
 
     //Recupero tutti i post collegati a queste categorie
     $results = $wpdb->get_results($query);
+
     foreach($results as $result) :
       if($result->cml_cat_lang_1 == $this->_current_lang_id) $cats[] = $result->cml_cat_id_1;
       if($result->cml_cat_lang_2 == $this->_current_lang_id) $cats[] = $result->cml_cat_id_2;
@@ -1865,14 +1885,12 @@ class CeceppaML {
    * restituisco lo slug della lingua "in uso"
    */
   function get_current_lang() {
-//     if(empty($this->_current_lang)) 
     $this->update_current_lang();
 
     return $this->_current_lang;
   }
   
   function get_current_lang_id() {
-//     if(empty($this->_current_lang_id)) 
     $this->update_current_lang();
 
     return $this->_current_lang_id;

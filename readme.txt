@@ -3,7 +3,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate
 Requires at least: 3.4.1
 Tested up to: 3.5.1
-Stable tag: 0.3.3
+Stable tag: 0.3.4
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: http://www.ceceppa.eu/ceceppa-multilingua/
@@ -68,8 +68,13 @@ For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide
 
 == Changelog ==
 
+= 0.3.4 =
+* Fixed setlocale. Now locale will be changed correctly.
+  Fixed linked categories. Now categories will be linked correctly, so filter post in homepage work correctly.
+                           If you upgade from 0.3.3 or above, you must edit all linked categories by choosing
+                           "Edit" from category page and save it.
 = 0.3.3 =
-* Fixed: setlocale
+* Fixed: setlocale. It was changed only in admin page
 
 = 0.3.2 =
 * Fixed same Notice in debug mode
