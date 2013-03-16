@@ -1508,8 +1508,12 @@ class CeceppaML {
 				$url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 				$id = url_to_postid($url);
 				
-				$lid = $this->get_language_id_by_post_id($id);
-				$l = $this->get_language_locale_by_id($lid);
+				if($id > 0) {
+					$lid = $this->get_language_id_by_post_id($id);
+					$l = $this->get_language_locale_by_id($lid);
+				} else {
+					$l = $this->get_language_locale_by_id($this->get_default_lang_id);
+				}
 			}
 
 			$locale = empty($l) ? $locale : $l;
