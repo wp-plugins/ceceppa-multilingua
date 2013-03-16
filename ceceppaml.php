@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.3.4
+Version: 0.3.5
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -53,7 +53,7 @@ class CeceppaML {
 		 * Se utilizzo add_action per caricare gli script quando richiesto,
 		 * non mi vengono "caricati" nelle verie funzioni a disposizione :(
 		 */
-		$this->enqueue_scripts();
+		$this->register_scripts();
 		//add_action('wp_enqueue_scripts', array(&$this, 'enqueue_scripts'));
 
     //Creo le tabelle al primo avvio
@@ -441,26 +441,18 @@ class CeceppaML {
 	    /* Per comodità  creo nel database un record con la lingua corrente */
 	    $locale = get_locale();
 	    $language = __("Lingua predefinita");
-	    $list = fopen(WP_PLUGIN_URL . "/ceceppa-multilingua/locale_list.csv", "r");
-	    if($list) {
-	      while(!feof($list)) :
-					$line = fgets($list);
-					list($lang, $loc) = explode(",", $line);
-					
-					if(strcasecmp(trim($loc), $locale) == 0) :
-						list($language, $flag) = explode("(", $lang);
-			// 		  if(!empty($flag)) $flag = str_replace(")", "", $flag);
-			
-						break;
-					endif;
-				endwhile;
 
-	      fclose($list);
+			require_once(ABSPATH . "/wp-content/plugins/ceceppa-multilingua/locales_codes.php");
+			$keys = array_keys($_langs);
+			foreach($keys as $key) {
+				if($_langs[$key] == $locale) {
+					$language = $key;
+				}
 			}
 
 	    /* Creo nel database la riga per la lingua corrente di wordpress */
-	    $insert = sprintf("INSERT INTO %s (cml_default, cml_language) VALUES('%d', '%s')",
-			      CECEPPA_ML_TABLE, "1", $language);
+	    $insert = sprintf("INSERT INTO %s (cml_default, cml_language, cml_language_slug, cml_locale, cml_enabled) VALUES('%d', '%s', '%s', '%s', '%d')",
+			      CECEPPA_ML_TABLE, "1", $language, substr($language, 0, 2), $locale, 1);
 
 	    $wpdb->query($insert);
     endif;
@@ -575,7 +567,7 @@ class CeceppaML {
     update_option("cml_db_version", CECEPPA_DB_VERSION);
   }
 
-	function enqueue_scripts() {
+	function register_scripts() {
 		    //Javascript
     wp_register_script('ceceppa-dd', WP_PLUGIN_URL . '/ceceppa-multilingua/js/jquery.dd.min.js');
     wp_register_script('ceceppaml-js', WP_PLUGIN_URL . '/ceceppa-multilingua/js/ceceppa.js', array('ceceppa-dd'));
@@ -1665,51 +1657,25 @@ class CeceppaML {
 
 			if($this->_filter_search) {
 				//For Fix Notice
-				add_action('wp_enqueue_scripts', array(&$this, 'enqueue_script_search'));
+				//add_action('wp_enqueue_scripts', array(&$this, 'enqueue_script_search')); //Non funziona :(
+				$this->enqueue_script_search();
 
 				$array = array('lang' => $this->_current_lang,
 											 'form_class' => $this->_filte_form_class);
 				wp_localize_script('ceceppa-search', 'cml_object', $array);
 
 				//Evito che esegua più di una volta questo if
-				$this->_filter_search = false;
+				//$this->_filter_search = false;
 			}
 
       //Recupero il campo "Locale Wordpress"
       $query = sprintf("SELECT cml_locale FROM %s WHERE id = %d", CECEPPA_ML_TABLE, $lang);
       $this->_current_lang_locale = $wpdb->get_var($query);
 
-      //Memorizzo le info sulla lingua corrente sui cookie :)
-			/* Non riesco a utilizzare i cookie, perché prima che vengano inviati gli headers della pagina
-			 * le funzioni is_home()... e compagnia bella non fungono, quindi dovrò richiamare questa funzione
-			 * (update_current_lang) più volte durante lo script
-			 *
-			setcookie('cml_current_lang', $this->_current_lang, $this->_cookie_expiration, COOKIEPATH, COOKIE_DOMAIN, false);
-			setcookie('cml_current_lang_id', $this->_current_lang_id, $this->_cookie_expiration, COOKIEPATH, COOKIE_DOMAIN, false);
-			setcookie('cml_current_lang_locale', $this->_current_lang_locale, $this->_cookie_expiration, COOKIEPATH, COOKIE_DOMAIN, false);
-			*/
-
-			/*
-      update_option('cml_current_lang', $this->_current_lang);
-      update_option('cml_current_lang_id', $this->_current_lang_id);
-      update_option('cml_current_lang_locale', $this->_current_lang_locale);
-      */
     } else {
 			//Se per qualche ragione non riesco a determinare la lingua corrente, prendo quella predefinita
 			$this->_current_lang_id = $this->_default_language_id;
 			$this->_current_lang = $this->_default_language;
-
-			/*
-      $this->_current_lang = get_option('cml_current_lang');
-      $this->_current_lang_id = get_option('cml_current_lang_id');
-      $this->_current_lang_locale = get_option('cml_current_lang_locale');
-      */
-
-			/*
-			$this->_current_lang = $_COOKIE['cml_current_lang'];
-			$this->_current_lang_id = $_COOKIE['cml_current_lang_id'];
-			$this->_current_lang_locale = $_COOKIE['cml_current_lang_locale'];
-			*/
     }
   }
 
