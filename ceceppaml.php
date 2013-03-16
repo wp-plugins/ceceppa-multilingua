@@ -451,8 +451,8 @@ class CeceppaML {
 			}
 
 	    /* Creo nel database la riga per la lingua corrente di wordpress */
-	    $insert = sprintf("INSERT INTO %s (cml_default, cml_language, cml_language_slug, cml_locale, cml_enabled) VALUES('%d', '%s', '%s', '%s', '%d')",
-			      CECEPPA_ML_TABLE, "1", $language, substr($language, 0, 2), $locale, 1);
+	    $insert = sprintf("INSERT INTO %s (cml_default, cml_language, cml_language_slug, cml_locale, cml_enabled, cml_flag) VALUES('%d', '%s', '%s', '%s', '%d', '%s')",
+			      CECEPPA_ML_TABLE, "1", $language, substr($language, 0, 2), $locale, 1, $locale);
 
 	    $wpdb->query($insert);
     endif;
