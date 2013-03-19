@@ -3,7 +3,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate
 Requires at least: 3.4.1
 Tested up to: 3.5.1
-Stable tag: 0.3.5
+Stable tag: 0.3.6
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: http://www.ceceppa.eu/ceceppa-multilingua/
@@ -67,6 +67,9 @@ For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide
 
 
 == Changelog ==
+
+= 0.3.6 =
+* Fix error in options page.
 
 = 0.3.5 =
 * Get language info correctly during installation
