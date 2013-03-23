@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.3.6
+Version: 0.3.7
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -15,17 +15,17 @@ Tags: multilingual, multi, language, admin, tinymce, qTranslate, Polyglot, bilin
  * Most of flags are downloaded from http://blog.worldofemotions.com/danilka/
  * 
  */
-define('CECEPPA_DB_VERSION', 2);
+define('CECEPPA_DB_VERSION', 3);
 
-define('CECEPPA_ML_TABLE', $wpdb->prefix . 'ceceppa_ml');
-define('CECEPPA_ML_CATS', $wpdb->prefix . 'ceceppa_ml_cats');
-define('CECEPPA_ML_POSTS', $wpdb->prefix . 'ceceppa_ml_posts');
-define('CECEPPA_ML_PAGES', $wpdb->prefix . 'ceceppa_ml_posts');
-//define('CECEPPA_ML_PAGES', $wpdb->prefix . 'ceceppa_ml_pages');
+define('CECEPPA_ML_TABLE', $wpdb->base_prefix . 'ceceppa_ml');
+define('CECEPPA_ML_CATS', $wpdb->base_prefix . 'ceceppa_ml_cats');
+define('CECEPPA_ML_POSTS', $wpdb->base_prefix . 'ceceppa_ml_posts');
+define('CECEPPA_ML_PAGES', $wpdb->base_prefix . 'ceceppa_ml_posts');
+//define('CECEPPA_ML_PAGES', $wpdb->base_prefix . 'ceceppa_ml_pages');
 
 //Tabella delle traduzioni. Al momento mi appoggio a una tabella per le traduzioni in quanto non ho trovato nessun modo
 //per generare un file .po direttamente da php
-define('CECEPPA_ML_TRANS', $wpdb->prefix . 'ceceppa_ml_trans'); 	
+define('CECEPPA_ML_TRANS', $wpdb->base_prefix . 'ceceppa_ml_trans'); 	
 
 require_once(ABSPATH . 'wp-content/plugins/ceceppa-multilingua/functions.php');
 require_once(ABSPATH . 'wp-content/plugins/ceceppa-multilingua/utils.php');
