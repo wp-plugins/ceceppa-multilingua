@@ -127,6 +127,7 @@ class CeceppaML {
      * Nella pagina "menu", aggiungo una lista per ogni lingua
      */
     add_action('init', array(&$this, 'add_menus'));
+		add_action('wp_footer', array(&$this, 'restore_default_menu'));
 
     /*
      * Traduco i titoli dei Widget
@@ -202,7 +203,31 @@ class CeceppaML {
     foreach($results as $result) {
         register_nav_menus(array("cml_menu_$result->cml_language_slug" => $result->cml_language));
     }
+		
+		$locations = get_theme_mod('nav_menu_locations');
+
+		//Se non inizia per cml_ allora sarà quella definita dal tema :)
+		$keys = array_keys($locations);
+		foreach($keys as $key) {
+			if(substr($key, 0, 4) != "cml_") {
+				$menu = $locations[$key];
+				
+				break;
+			}
+		}
+
+		if(!empty($menu)) {
+			$this->_default_menu = $key;
+			$this->_default_menu_id = $menu;
+		}
   }
+
+	function restore_default_menu() {
+		$locations = get_theme_mod('nav_menu_locations');
+		
+		$locations[$this->_default_menu] = $this->_default_menu_id;
+		set_theme_mod('nav_menu_locations', $locations);
+	}
 
   /*
    * Aggingo al menù pulsanti per ogni lingua "Creata"
