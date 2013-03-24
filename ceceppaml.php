@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.3.7
+Version: 0.4
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -124,7 +124,7 @@ class CeceppaML {
 		}
 
     /*
-     * Menu
+     * Nella pagina "menu", aggiungo una lista per ogni lingua
      */
     add_action('init', array(&$this, 'add_menus'));
 
@@ -166,8 +166,6 @@ class CeceppaML {
     if($this->_comments == 'group') 
       add_filter('query', array(&$this, 'get_comments'));
 
-    $menu = wp_get_nav_menus();
-    
     /*
      * Locale
      */
@@ -200,7 +198,7 @@ class CeceppaML {
     
     load_plugin_textdomain('ceceppaml', false, dirname(plugin_basename( __FILE__ )) . '/po/');
 
-    $results = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " WHERE cml_default = 0 ORDER BY cml_language");
+    $results = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " ORDER BY cml_language"); //WHERE cml_default = 1 
     foreach($results as $result) {
         register_nav_menus(array("cml_menu_$result->cml_language_slug" => $result->cml_language));
     }
@@ -240,7 +238,7 @@ class CeceppaML {
   function add_meta_boxes() {
     add_meta_box('ceceppaml-meta-box', __('Collega all\'articolo', 'ceceppaml'), array(&$this, 'post_meta_box'), 'post', 'side', 'high');
     add_meta_box('ceceppaml-meta-box', __('Dati della pagina', 'ceceppaml'), array(&$this, 'page_meta_box'), 'page', 'side', 'high');
-  }
+	}
   
   /**
    * Aggiungo la pagina delle opzioni nella barra laterale di Wordpress
@@ -568,7 +566,7 @@ class CeceppaML {
   }
 
 	function register_scripts() {
-		    //Javascript
+		//Javascript
     wp_register_script('ceceppa-dd', WP_PLUGIN_URL . '/ceceppa-multilingua/js/jquery.dd.min.js');
     wp_register_script('ceceppaml-js', WP_PLUGIN_URL . '/ceceppa-multilingua/js/ceceppa.js', array('ceceppa-dd'));
     wp_register_script('ceceppa-tipsy', WP_PLUGIN_URL . '/ceceppa-multilingua/js/jquery.tipsy.js');
@@ -1652,8 +1650,28 @@ class CeceppaML {
     }
 
     if(!empty($lang)) {
-      $this->_current_lang = $this->get_language_slug_by_id($lang);
-      $this->_current_lang_id = $lang;
+			//Aggiorno le info sulla lingua corrente
+			$this->_current_lang = $this->get_language_slug_by_id($lang);
+			$this->_current_lang_id = $lang;
+
+			//Aggiorno il menu del tema :)
+			$mods = get_theme_mods();
+			$locations = get_theme_mod('nav_menu_locations');
+
+			//Se non inizia per cml_ allora sarà quella definita dal tema :)
+			$keys = array_keys($locations);
+			foreach($keys as $key) {
+				if(substr($key, 0, 4) != "cml_") {
+					$menu = $this->_current_lang;
+					if(!empty($locations["cml_menu_$menu"])) {
+						$locations[$key] = $locations["cml_menu_$menu"];
+						set_theme_mod('nav_menu_locations', $locations);
+					}
+
+					//Esco dal ciclo
+					break;
+				}
+			}
 
 			if($this->_filter_search) {
 				//For Fix Notice
