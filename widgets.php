@@ -5,7 +5,7 @@ class CeceppaMLWidgetChooser extends WP_Widget {
 		parent::__construct(
 	 		'cececepml-chooser', // Base ID
 			'Ceceppa Multilingua Language Chooser', // Name
-			array( 'description' => __( 'Mostra l\'elenco delle lingue disponibili', 'ceceppaml' ), ) // Args
+			array( 'description' => __( 'Show the list of available languages', 'ceceppaml' ), ) // Args
 		);
   }
 
@@ -87,47 +87,47 @@ class CeceppaMLWidgetChooser extends WP_Widget {
 		?>
 		<p>
       <label for="<?php echo $this->get_field_id('title'); ?>">
-        <?php _e('Titolo:'); ?>
+        <?php _e('Title:'); ?>
       </label> 
       <input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" />
       <br />
       <label for="<?php echo $this->get_field_id('hide-title'); ?>">
-        <?php _e('Nascondi titolo:', 'ceceppaml') ?>
+        <?php _e('Hide title:', 'ceceppaml') ?>
         <input type="checkbox" id="<?php echo $this->get_field_id('hide-title'); ?>" name="<?php echo $this->get_field_name('hide-title'); ?>" value="1" <?php echo ($instance['hide-title'] == 1) ? "checked" : ""; ?> />
       </label>
 <!-- Visualizza -->
       <p>
         <label for="<?php echo $this->get_field_id('Visualizza'); ?>">
-          <?php _e('Visualizza:'); ?>
+          <?php _e('Show:'); ?>
         </label>
       </p>
       <p>
         <label>
 					<input type="radio" id="<?php echo $this->get_field_id('display'); ?>" name="<?php echo $this->get_field_name('display'); ?>" value="flag" <?php echo ($display == "flag" || empty($display)) ? "checked=\"checked\"" : ""; ?>/>
-          <?php _e('Bandiera', 'ceceppaml') ?>
+          <?php _e('Flag', 'ceceppaml') ?>
         </label>
       </p>
       <p>
         <label>
           <input type="radio" id="<?php echo $this->get_field_id('display'); ?>" name="<?php echo $this->get_field_name('display'); ?>" value="text" <?php echo ($display == "text") ? "checked=\"checked\"" : ""; ?>/>
-          <?php _e('Nome della lingua', 'ceceppaml') ?>
+          <?php _e('Name of the language', 'ceceppaml') ?>
         </label>
       </p>
       <p>
         <label>
           <input type="radio" id="<?php echo $this->get_field_id('display'); ?>" name="<?php echo $this->get_field_name('display'); ?>" value="both" <?php echo ($display == "both") ? "checked=\"checked\"" : ""; ?>/>
-          <?php _e('Nome e bandiera', 'ceceppaml') ?>
+          <?php _e('Flag and name', 'ceceppaml') ?>
         </label>
       </p>
       <p>
         <label>
           <input type="radio" id="<?php echo $this->get_field_id('display'); ?>" name="<?php echo $this->get_field_name('display'); ?>" value="dropdown" <?php echo ($display == "dropdown") ? "checked=\"checked\"" : ""; ?>/>
-          <?php _e('Elenco', 'ceceppaml') ?>
+          <?php _e('List', 'ceceppaml') ?>
         </label>
 				<blockquote>
 				<label>
           <input type="checkbox" id="<?php echo $this->get_field_id('msdropdown'); ?>" name="<?php echo $this->get_field_name('msdropdown'); ?>" value="1" <?php echo ($dd == 1) ? "checked=\"checked\"" : ""; ?>/>
-          <?php _e('Utilizza il plugin msDropDown', 'ceceppaml') ?>
+          <?php _e('Use the jQuery plugin "msDropDown"', 'ceceppaml') ?>
 				</label>
 				</blockquote>
       </p>
@@ -135,19 +135,19 @@ class CeceppaMLWidgetChooser extends WP_Widget {
 <!-- Dimensione bandiere -->
       <p>
         <label for="<?php echo $this->get_field_id('Dimensione bandiere'); ?>">
-          <?php _e('Dimensione bandiere:'); ?>
+          <?php _e('Flag\'s size:'); ?>
         </label>
       </p>
       <p>
         <label>
           <input type="radio" id="<?php echo $this->get_field_id('size'); ?>" name="<?php echo $this->get_field_name('size'); ?>" value="small" <?php echo ($size == "small" || empty($size)) ? "checked=\"checked\"" : ""; ?>/>
-          <?php _e('Piccole (32x23)', 'ceceppaml') ?>
+          <?php _e('Small (32x23)', 'ceceppaml') ?>
         </label>
       </p>
       <p>
         <label>
           <input type="radio" id="<?php echo $this->get_field_id('size'); ?>" name="<?php echo $this->get_field_name('size'); ?>" value="tiny" <?php echo ($size == "tiny") ? "checked=\"checked\"" : ""; ?>/>
-          <?php _e('Minuscole (16x11)', 'ceceppaml') ?>
+          <?php _e('Tiny (16x11)', 'ceceppaml') ?>
         </label>
       </p>
 

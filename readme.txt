@@ -3,7 +3,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate
 Requires at least: 3.4.1
 Tested up to: 3.5.1
-Stable tag: 0.4
+Stable tag: 0.4.1
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: http://www.ceceppa.eu/ceceppa-multilingua/
@@ -64,9 +64,12 @@ For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide
 4. Plugin configuration
 5. Link to the article
 6. Menus configuration
-
+7. Box for see or add translation to current post/page
 
 == Changelog ==
+
+= 0.4.1 =
+* In edit post it's possible to see and switch to all linked posts, or you can add translation to it.
 
 = 0.4 =
 * Now you can have different menu for each language withouth edit your theme code.

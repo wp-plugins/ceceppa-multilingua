@@ -30,6 +30,7 @@ jQuery(document).ready(function(e) {
 	jQuery(".page_lang").msDropDown();
 	jQuery('.linked_page').msDropDown();
 	jQuery(".ceceppa-form select").msDropDown();
+	jQuery(".cml-widget-flags").msDropDown();
 
 	//Tooltip
 	jQuery('img').tipsy({gravity: 'e'});

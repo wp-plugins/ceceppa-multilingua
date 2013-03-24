@@ -1,6 +1,6 @@
 <div class="wrap">
 
-   <h2><?php _e('Titoli dei widget', 'ceceppaml'); ?></h2>
+   <h2><?php _e('Widget\'s titles', 'ceceppaml'); ?></h2>
 <?php
 function cml_widgets_title($buffer) {
   global $wpdb;
@@ -14,7 +14,7 @@ function cml_widgets_title($buffer) {
     <table class="ceceppaml CSSTableGenerator">
       <tbody>
       <tr>
-		<td><?php _e('Titolo widget', 'ceceppaml') ?></td>
+		<td><?php _e('Widget\'s title', 'ceceppaml') ?></td>
 <?php
 	  foreach($langs as $lang) {
 	    echo "<td><img src='" . cml_get_flag($lang->cml_flag) . "'/>&nbsp;$lang->cml_language</td>";
@@ -49,7 +49,7 @@ function cml_widgets_title($buffer) {
      </tbody>
     </table>
     <div style="text-align:right">
-      <input type="submit" class="ceceppa-salva" name="action" value="<?php _e('Aggiorna', 'ceceppaml') ?>" />
+      <input type="submit" class="ceceppa-salva" name="action" value="<?php _e('Update', 'ceceppaml') ?>" />
     </div>
     </form>
 </div>

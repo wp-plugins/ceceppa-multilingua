@@ -55,7 +55,11 @@ function cml_get_linked_cat($lang_id, $result, $cat_id, $browser_lang = null) {
 }
 
 /**
- *
+ * @param $lang_id - id della lingua corrente
+ * @param $result - result della query (facoltativo)
+ * @param $post_id - id del post
+ * @param $browser_lang - id della lingua per la quale si cerca l'articolo collegato
+ * 
  *      [ A ] <--> [ B ] <--> [ C ]
  *
  * Ipotesi 1: Stò visualizzando l'articolo B, ovvero quello della lingua predefinita.
