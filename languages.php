@@ -68,7 +68,7 @@
 <!-- combobox categorie -->
       <td><?php ceceppa_show_category($result->cml_category_id) ?></td>
 			<td>
-					<input type="checkbox" id="lang-enabled" name="lang-enabled[]" value="1" <?php echo ($result->cml_enabled == 1) ? "checked" : "" ?>/>
+					<input type="checkbox" id="lang-enabled" name="lang-enabled[<?php echo $j++ ?>]" value="1" <?php echo ($result->cml_enabled == 1) ? "checked" : "" ?>/>
 			</td>
       <th>
 <!-- Dettagli e cancella -->

@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.4.3
+Version: 0.4.4
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -45,7 +45,7 @@ class CeceppaML {
 	protected $_filter_search = true;
 	protected $_filte_form_class = "searchform";
 	protected $_set_locale = false;
-
+	protected $_is_flags_on_title = false;	//Mi server per evitare di avere una bandiera vicino a "Commenti", alla fine del post
   public function __construct() {
     global $wpdb;
 
@@ -150,7 +150,7 @@ class CeceppaML {
 			if(get_option('cml_option_flags_on_pos') == "bottom") {
 			  add_filter("the_content", array(&$this, 'add_flags_on_bottom'));
 			} else {
-				add_filter("the_title", array(&$this, 'add_flags_on_top'));
+				add_filter("the_title", array(&$this, 'add_flags_on_top'), 10, 2);
 			}
 		}
 
@@ -207,19 +207,21 @@ class CeceppaML {
 		$locations = get_theme_mod('nav_menu_locations');
 
 		//Se non inizia per cml_ allora sarà quella definita dal tema :)
-		$keys = array_keys($locations);
-		foreach($keys as $key) {
-			if(substr($key, 0, 4) != "cml_") {
-				$menu = $locations[$key];
-				
-				break;
-			}
-		}
+		if(is_array($locations)) :
+			$keys = array_keys($locations);
+			foreach($keys as $key) :
+				if(substr($key, 0, 4) != "cml_") :
+					$menu = $locations[$key];
+					
+					break;
+				endif;
+			endforeach;
 
-		if(!empty($menu)) {
-			$this->_default_menu = $key;
-			$this->_default_menu_id = $menu;
-		}
+			if(!empty($menu)) {
+				$this->_default_menu = $key;
+				$this->_default_menu_id = $menu;
+			}
+		endif;
   }
 
 	function restore_default_menu() {
@@ -332,11 +334,12 @@ class CeceppaML {
 	/*
 	 * Aggiungo le bandiere sotto al titolo del post
 	 */
-	function add_flags_on_top($title) {
+	function add_flags_on_top($title, $id) {
 		if(is_single() && !get_option('cml_option_flags_on_post')) return $title;
 		if(is_page() && !get_option('cml_option_flags_on_page')) return $title;
 		if(is_category() && !get_option('cml_option_flags_on_cats')) return $title;
 		if(!in_the_loop()) return $title;
+		if($this->_is_flags_on_title) return;
 
 		global $post;
 		/* Mi serve per evitare che mi trovi bandiere ovunque :D.
@@ -345,6 +348,7 @@ class CeceppaML {
 		 * Ho bisogno di modificare le "curly quotes" in "double quote", sennò il confronto fallisce :(
 		*/
 		if(esc_attr($post->post_title) == removesmartquotes($title)) {
+			$this->_is_flags_on_title = true;
 			return $title . cml_show_availables_langs(array("class" => "cml_flags_on_top"));
 		} else {
 			return $title;
@@ -475,7 +479,7 @@ class CeceppaML {
 
 	    /* Creo nel database la riga per la lingua corrente di wordpress */
 	    $insert = sprintf("INSERT INTO %s (cml_default, cml_language, cml_language_slug, cml_locale, cml_enabled, cml_flag) VALUES('%d', '%s', '%s', '%s', '%d', '%s')",
-			      CECEPPA_ML_TABLE, "1", $language, substr($language, 0, 2), $locale, 1, $locale);
+			      CECEPPA_ML_TABLE, "1", $language, strtolower(substr($language, 0, 2)), $locale, 1, $locale);
 
 	    $wpdb->query($insert);
     endif;
@@ -952,7 +956,7 @@ class CeceppaML {
               $page_id, $page_slug,
 							$_POST['lang-enabled'][$i],
               $id);
-          }
+	          }
       // 	}
 
         //Eseguo solo se la query nn è vuota :)
@@ -1765,19 +1769,21 @@ class CeceppaML {
 			$locations = get_theme_mod('nav_menu_locations');
 
 			//Se non inizia per cml_ allora sarà quella definita dal tema :)
-			$keys = array_keys($locations);
-			foreach($keys as $key) {
-				if(substr($key, 0, 4) != "cml_") {
-					$menu = $this->_current_lang;
-					if(!empty($locations["cml_menu_$menu"])) {
-						$locations[$key] = $locations["cml_menu_$menu"];
-						set_theme_mod('nav_menu_locations', $locations);
+			if(is_array($locations)) :
+				$keys = array_keys($locations);
+				foreach($keys as $key) :
+					if(substr($key, 0, 4) != "cml_") {
+						$menu = $this->_current_lang;
+						if(!empty($locations["cml_menu_$menu"])) {
+							$locations[$key] = $locations["cml_menu_$menu"];
+							set_theme_mod('nav_menu_locations', $locations);
+						}
+	
+						//Esco dal ciclo
+						break;
 					}
-
-					//Esco dal ciclo
-					break;
-				}
-			}
+				endforeach;
+			endif;
 
 			if($this->_filter_search) {
 				//For Fix Notice
