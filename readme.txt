@@ -4,7 +4,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate
 Requires at least: 3.4.1
 Tested up to: 3.5.1
-Stable tag: 0.6
+Stable tag: 0.6.1
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: http://www.ceceppa.eu/ceceppa-multilingua/
@@ -27,6 +27,8 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 - Filter search in accordingly to current language
 - Change wordpress locale according to current language, useful for localized themes
 - Show the list flag of available languages on top or bottom of page/post
+- Hide translations of posts of the current language
+- Show only posts of the current language
 
 Ceceppa Multilingua supports infinite language, which can be easily added/modified/deleted via the comfortable Configuration Page.
 All you need to do is activate the plugin, configure categories and start writing the content!
@@ -68,6 +70,9 @@ For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide
 7. Box for see or add translation to current post/page
 
 == Changelog ==
+
+= 0.6.1 = 
+* Fixed issue with "Filter Translations"
 
 = 0.6 =
 * Now you can hide translations of posts of the current language in the_loop()
