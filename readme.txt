@@ -3,7 +3,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate
 Requires at least: 3.4.1
 Tested up to: 3.5.1
-Stable tag: 0.4.4
+Stable tag: 0.4.5
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: http://www.ceceppa.eu/ceceppa-multilingua/
@@ -67,6 +67,9 @@ For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide
 7. Box for see or add translation to current post/page
 
 == Changelog ==
+
+= 0.4.5 =
+* Autorefresh list "Link to the categories" withouth reload page.
 
 = 0.4.4 =
 * Fixed warnings

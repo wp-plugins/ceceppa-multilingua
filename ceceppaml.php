@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.4.4
+Version: 0.4.5
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -92,6 +92,7 @@ class CeceppaML {
 			add_action('category_add_form_fields', array(&$this, 'category_add_form_fields'));
 			add_action('edited_category', array(&$this, 'save_extra_category_fileds'));
 			add_action('created_category', array(&$this, 'save_extra_category_fileds'));
+			add_action('deleted_term_taxonomy', array(&$this, 'delete_extra_category_fields'));
     }
 
     /*
@@ -370,12 +371,14 @@ class CeceppaML {
   function category_add_form_fields($tag) {
     $t_id = $tag->term_id;
     $linked_cat = get_option("cml_category_$t_id");
+		
+		wp_enqueue_script('ceceppaml-cat');
 ?>
     <div class="form-field">
       <label for="linked_lang"><?php _e('Language of this category', 'ceceppaml'); ?></label>
       <?php cml_dropdown_langs("cat_lang", null); ?>
     </div>
-    <div class="form-field">
+    <div class="form-field-link">
       <label for="linked_cat"><?php _e('Link to the category', 'ceceppaml'); ?></label>
       <?php wp_dropdown_categories(array('hide_empty' => 0, 'name' => 'linked_cat', 'show_option_none' => ' ', 'hierarchical' => true)); ?>
     </div>
@@ -599,6 +602,7 @@ class CeceppaML {
     wp_register_script('ceceppa-dd', WP_PLUGIN_URL . '/ceceppa-multilingua/js/jquery.dd.min.js');
     wp_register_script('ceceppaml-js', WP_PLUGIN_URL . '/ceceppa-multilingua/js/ceceppa.js', array('ceceppa-dd'));
     wp_register_script('ceceppa-tipsy', WP_PLUGIN_URL . '/ceceppa-multilingua/js/jquery.tipsy.js');
+    wp_register_script('ceceppaml-cat', WP_PLUGIN_URL . '/ceceppa-multilingua/js/ceceppa-cat.js');
 //    wp_enqueue_script('ceceppa-search', WP_PLUGIN_URL . '/ceceppa-multilingua/js/ceceppa.search.js', array('jquery'));
 
     //Css
@@ -1438,7 +1442,7 @@ class CeceppaML {
               intval($linked_cat));
         $wpdb->query($query);
       }
-      
+
       //Aggiorno la lingua di tutte le categorie collegate
       $args = array('child_of' => $term_id, 'hide_empty' => 0);
       $categories = get_categories($args);
@@ -1454,6 +1458,11 @@ class CeceppaML {
       update_option("cml_category_lang_$term_id", $cat_lang);
     }
   }
+
+	function delete_extra_category_fields($term_id) {
+		delete_option("cml_category_$term_id");
+		delete_option("cml_category_lang_$term_id");
+	}
 
   /**
    * Questa funzione viene richiamata quando salvo una categoria e serve ad aggiornare
