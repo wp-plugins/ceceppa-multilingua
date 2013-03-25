@@ -14,10 +14,10 @@ function refreshCat($elements) {
   if(jQuery("div").hasClass('form-invalid')) return;
 //  console.log($elements, jQuery('select#parent option').length);
   if(jQuery('select#parent option').length != $elements) {
-    jQuery('select#linked_cat').remove();
-    $select = jQuery('select#parent').clone().attr('id', 'linked_cat').css('name', 'linked_cat');
-    console.log($select);
-    $select.appendTo('div.form-field-link');
+    jQuery('select#linked_cat option').remove();
+//    $select = jQuery('select#parent').clone().attr('id', 'linked_cat').css('name', 'linked_cat');
+    $select = jQuery('select#parent option').clone().appendTo('select#linked_cat');
+//    $select.appendTo('div.form-field-link');
   } else
     setTimeout(function() { refreshCat($elements) }, 100);
 }
