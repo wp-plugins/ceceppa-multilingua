@@ -1,0 +1,23 @@
+	ul.cml_flags {
+		list-style: none;
+		}.cml_flags li, .ger ul.cml_flags li, .entry ul.cml_flags li {
+		float: left;
+		padding-left: 8px;
+		padding-top:4px;
+		list-style: none;
+	}ul.cml_flags li img {
+		height: 24px;
+		max-width: 40px;
+	}
+
+	.cml_home_flags {
+		float: right;
+		padding-right: 20px;
+		padding-top: 3px;
+	}
+
+	.cml_flags_on_top {
+		float: right;
+		padding-top: 10px;
+	}
+	
