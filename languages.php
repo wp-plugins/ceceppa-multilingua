@@ -21,9 +21,7 @@
     <tr>
       <td style="width: 1%;"><?php _e('Default', 'ceceppaml') ?></td>
       <td style="width: 5%;"><?php _e('Flag', 'ceceppaml') ?></td>
-      <td style="width:15%"><?php _e('Name of the language ', 'ceceppaml') ?></td>
-      <td style="width:12%"><?php _e('Main page', 'ceceppaml') ?></td>
-      <td style="width:10%"><?php _e('Main category', 'ceceppaml') ?></td>
+      <td style="width:65%"><?php _e('Name of the language ', 'ceceppaml') ?></td>
       <td style="width:5%"><?php _e('Enabled', 'ceceppaml') ?></td>
       <td style="width: 5%">
 	  	<a href="#" onclick="javascript: toggleDetails(-1)"><img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/details.png" width="32" title="<?php _e('Show/Hide advanced options for languages.') ?>"></a>
@@ -51,24 +49,6 @@
 	  <td>
 	    <input name="language[]" type="text" id="language-<?php echo $result->id ?>" value="<?php echo $result->cml_language; ?>">
 	  </td>
-<!-- combobox pagine disponibili -->
-      <td><select name="page[]" id="page<?php echo $result->id ?>">
-      <option data-image="<?php echo WP_PLUGIN_URL . "/ceceppa-multilingua/images/no.png"; ?>"><?php _e('No related page', 'ceceppamp'); ?></option>
-      <?php
-	$pages = get_pages(array('hide_empty' => 0));
-	$s = $result->cml_page_id;
-
-	foreach($pages as $page) { 
-	  if($page->post_parent == 0) {
-	    $selected = ($s == $page->ID) ? "selected" : "";
-
-	    echo "<option value=\"$page->ID\" $selected>$page->post_title</option>";
-	  }
-	}
-      ?>
-      </select></td>
-<!-- combobox categorie -->
-      <td><?php ceceppa_show_category($result->cml_category_id, $row) ?></td>
 <!-- Attiva lingua-->
 			<td>
 					<input type="checkbox" id="lang-enabled" name="lang-enabled[<?php echo $row++ ?>]" value="1" <?php echo ($result->cml_enabled == 1) ? "checked" : "" ?>/>
@@ -80,7 +60,7 @@
 	  </th>
     </tr>
 	<tr>
-		<td colspan="5">
+		<td colspan="3">
 			<table>
 				<tr>
 					<td style="background: none; font-size: 1.1em;"><?php _e('Url slug', 'ceceppaml'); ?></td>
@@ -110,32 +90,6 @@
       </td>
       <td><?php ceceppa_show_flags($_langs, "x", null) ?></td>
       <td><input name="language[]" id="language-x" type="text"></td>
-      <td>
-		<select name="page[]" id="page-x">
-		<option value=""><?php _e('Related page', 'ceceppaml') ?></option>
-      <?php
-	$pages = get_pages(array('hide_empty' => 0));
-
-	foreach($pages as $page) { 
-	  if($page->post_parent == 0) {
-	    echo "<option value=\"$page->ID\">$page->post_title</option>";
-	  }
-	}
-      ?>
-      </select></td>
-      <td>
-		<select name="category[]" id="category-x">
-		<option value=""><?php _e('Related category', 'ceceppaml') ?></option>
-      <?php
-	$categories = get_categories(array('hide_empty' => 0));
-
-	foreach($categories as $category) { 
-	  if($category->parent == 0) {
-	    echo "\t\t<option value=\"$category->cat_ID\">$category->name</option>\n";
-	  }
-	}
-      ?>
-      </select></td>
 		<td></td>
 	  <td style="text-align: center">
 	  	<img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/addlang.png" width="32" />
