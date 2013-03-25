@@ -3,8 +3,8 @@
  * senza dover per forza ricaricare la pagina...
  */
 jQuery("form#addtag #submit").click(function() {
-  jQuery(".cat_lang").val(0);   //Resetto "lingua categoria"
-  
+  //jQuery(".cat_lang").val(0);   //Resetto "lingua categoria"
+
   //Aggiorno l'elenco "Collega alla categoria"
   $e = jQuery('select#parent option').length;
   setTimeout(function() { refreshCat($e) }, 100);
