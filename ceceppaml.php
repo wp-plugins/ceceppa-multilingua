@@ -1157,17 +1157,16 @@ class CeceppaML {
 				$href = empty($link) ? (get_bloginfo("url") . "/wp-admin/post-new.php?link-to=$t_id") : get_edit_post_link($link);
 				$icon = empty($link) ? "add" : "go";
 				$title = empty($link) ? __('Translate post', 'ceceppaml') : __('Edit post', 'ceceppaml');
+				$msg = empty($link) ? __('Add translation', 'ceceppaml') : __('Switch to post/page', 'ceceppaml');
 		?>
-			<li class="<?php echo empty($link) ? "no-translation" : "" ?>">
+			<li class="<?php echo empty($link) ? "no-translation" : "" ?> _tipsy" title="<?php echo $msg ?>">
 				<a href="<?php echo $href ?>">
 					<img src="<?php echo cml_get_flag_by_lang_id($lang->id, "small") ?>" title="<?php echo $lang->cml_language ?>" />
-					<?php if(empty($link)) { ?>
-					<span class="cml_add_text"><?php _e('Add translation', 'ceceppaml') ?></span>
-					<?php } else { ?>
+					<?php if(!empty($link)) { ?>
 					<span class="cml_add_text"><?php echo  get_the_title($link) ?></span>
 					<?php } ?>
 					<span class="cml_add_button">
-							<img class="add" src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/<?php echo $icon ?>.png" title="<?php echo $title ?>" width="12" />
+							<!-- <img class="add" src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/<?php echo $icon ?>.png" title="<?php echo $title ?>" width="12" /> -->
 					</span>
 				</a>
 			</li>
