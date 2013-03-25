@@ -4,6 +4,8 @@
 	 * Gestione delle lingue
 	 */
     require_once "locales_codes.php";
+		
+		$row = 0;
 ?>
 
     <div class="wrap">
@@ -66,9 +68,10 @@
       ?>
       </select></td>
 <!-- combobox categorie -->
-      <td><?php ceceppa_show_category($result->cml_category_id) ?></td>
+      <td><?php ceceppa_show_category($result->cml_category_id, $row) ?></td>
+<!-- Attiva lingua-->
 			<td>
-					<input type="checkbox" id="lang-enabled" name="lang-enabled[<?php echo $j++ ?>]" value="1" <?php echo ($result->cml_enabled == 1) ? "checked" : "" ?>/>
+					<input type="checkbox" id="lang-enabled" name="lang-enabled[<?php echo $row++ ?>]" value="1" <?php echo ($result->cml_enabled == 1) ? "checked" : "" ?>/>
 			</td>
       <th>
 <!-- Dettagli e cancella -->
@@ -197,8 +200,8 @@
   /** 
    * Categorie
    */
-   function ceceppa_show_category($id) {
-      echo "\n\t<select name=\"category[]\" id=\"category$id\">\n";
+   function ceceppa_show_category($id, $row) {
+      echo "\n\t<select name=\"category[$row]\" id=\"category$id-$row\">\n";
       echo "\t\t<option data-image=\"" . WP_PLUGIN_URL . "/ceceppa-multilingua/images/no.png\">" . __('No related category', 'ceceppamp') . "</option>\n";
 
       $categories=get_categories(array('hide_empty' => 0));
