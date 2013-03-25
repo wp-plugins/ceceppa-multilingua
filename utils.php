@@ -82,12 +82,6 @@ function cml_get_linked_post($lang_id, $result, $post_id, $browser_lang = null) 
 
 	//Non confronto la lingua con se stessa :D
   if($result->id != $lang_id) {
-    if(cml_is_default_lang($lang_id)) {
-			$query = sprintf("SELECT cml_post_id_1 FROM %s WHERE cml_post_id_2 = %d AND cml_post_lang_1 = %d", 
-				  CECEPPA_ML_POSTS, $post_id, $result->id);
-
-      $new_id = $wpdb->get_var($query);
-		} else {
 			/*
 			 * Devo cercare sia in cml_post_id_1 che in cml_post_id_2, xkè posso avere
 			 * degli articoli collegati tra di loro, ma non a quella predefinita, e considerando
@@ -111,7 +105,6 @@ function cml_get_linked_post($lang_id, $result, $post_id, $browser_lang = null) 
 			}
 			
 			if(is_object($new_id)) $new_id = $new_id->post_id;
-    }
   } else
 		$link = $post_id;
 	

@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.5.1
+Version: 0.5.2
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -45,7 +45,7 @@ class CeceppaML {
 	protected $_filter_search = true;
 	protected $_filte_form_class = "searchform";
 	protected $_set_locale = false;
-	protected $_is_flags_on_title = false;	//Mi server per evitare di avere una bandiera vicino a "Commenti", alla fine del post
+
   public function __construct() {
     global $wpdb;
 
@@ -100,7 +100,9 @@ class CeceppaML {
      */
     add_action('add_meta_boxes', array(&$this, 'add_meta_boxes'));
     add_action('edit_post', array(&$this, 'save_extra_post_fields'));
+		add_action('delete_post', array(&$this, 'delete_extra_post_fields'));
     add_action('edit_page_form', array(&$this, 'save_extra_page_fields'));
+		add_action('delete_page', array(&$this, 'delete_extra_post_fields'));
     
     /*
      * Filtro gli articoli per lingua
@@ -311,7 +313,6 @@ class CeceppaML {
 			//Recupero la lingua del post/pagina
 			$xid = ($post_type == 'post') ? $this->get_language_id_by_post_id($id) :
 																			$this->get_language_id_by_page_id($id);
-	
 			$link = cml_get_linked_post($xid, null, $id, $lang->id);
 			if(!empty($link)) {
 				echo '<a href="' . get_edit_post_link($link) . '">';
@@ -340,7 +341,6 @@ class CeceppaML {
 		if(is_page() && !get_option('cml_option_flags_on_page')) return $title;
 		if(is_category() && !get_option('cml_option_flags_on_cats')) return $title;
 		if(!in_the_loop()) return $title;
-		if($this->_is_flags_on_title) return;
 
 		global $post;
 		/* Mi serve per evitare che mi trovi bandiere ovunque :D.
@@ -349,7 +349,6 @@ class CeceppaML {
 		 * Ho bisogno di modificare le "curly quotes" in "double quote", sennò il confronto fallisce :(
 		*/
 		if(esc_attr($post->post_title) == removesmartquotes($title)) {
-			$this->_is_flags_on_title = true;
 			return $title . cml_show_availables_langs(array("class" => "cml_flags_on_top"));
 		} else {
 			return $title;
@@ -1526,6 +1525,15 @@ class CeceppaML {
 				$this->save_extra_page_fields($term_id);
   }
 
+	function delete_extra_post_fields($id) {
+		global $wpdb;
+
+		$sql = sprintf("DELETE FROM %s WHERE cml_post_id_1 = %d OR cml_post_id_2 = %d",
+									 CECEPPA_ML_POSTS, $id, $id);
+
+		$wpdb->query($sql);
+	}
+
   function save_extra_page_fields($page_id) {
 		global $wpdb;
 
@@ -1741,6 +1749,14 @@ class CeceppaML {
     global $wpdb;
 
     $lang = ""; //$_COOKIE['cml_current_lang'];
+		
+		//Serve a far sì che "il cambio menu" funzioni correttamente anche
+		//con il permalink di default: ?p=#
+		$the_id = get_the_ID();
+		if(empty($the_id)) {
+			$url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+			$the_id  = url_to_postid($url);
+		}
 
     //Categoria
     if(is_category()) {
@@ -1751,11 +1767,11 @@ class CeceppaML {
     }
 
     if(is_single()) {
-      $lang = $this->get_language_id_by_post_id(get_the_ID());
+			$lang = $this->get_language_id_by_post_id($the_id);
     }
 
     if(is_page()) {
-      $lang = $this->get_language_id_by_page_id(get_the_ID());
+      $lang = $this->get_language_id_by_page_id($the_id);
     }
 
     if(is_home() || is_search()) {
@@ -1786,7 +1802,7 @@ class CeceppaML {
 							$locations[$key] = $locations["cml_menu_$menu"];
 							set_theme_mod('nav_menu_locations', $locations);
 						}
-	
+
 						//Esco dal ciclo
 						break;
 					}

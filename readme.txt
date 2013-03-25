@@ -69,6 +69,10 @@ For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide
 
 == Changelog ==
 
+= 0.5.2 =
+* Fixed various bug.
+  Now menu will be changed correctly with default permalink ?p=#
+
 = 0.5.1 =
 * Set new language "enabled"
 
