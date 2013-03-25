@@ -131,8 +131,22 @@
 				<td>
 					<strong><?php _e('Show only posts of the current language', 'ceceppaml') ?></strong>
 					<blockquote>
-						<input id="filter-posts" type="checkbox" value="1" name="filter-posts" <?php echo ((get_option('cml_option_filter_posts', 1) == 1) ? 'checked' : '') ?> />
+						<input id="filter-posts" type="checkbox" value="1" name="filter-posts" <?php echo ((get_option('cml_option_filter_posts', 0) == 1) ? 'checked' : '') ?> />
 						<label for="filter-posts"><?php _e('Enable') ?></label>
+					</blockquote>
+				</td>
+				</tr>
+<!-- Filtra Post tradotti -->
+				<tr>
+				<td><center>
+					<strong><?php _e('Filter translations', 'ceceppaml') ?></strong><br /><br /><br />
+					<img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/posts.png" />
+				</center></td>
+				<td>
+					<strong><?php _e('Hide translations of posts of the current language', 'ceceppaml') ?></strong>
+					<blockquote>
+						<input id="filter-translations" type="checkbox" value="1" name="filter-translations" <?php echo ((get_option('cml_option_filter_translations', 0) == 1) ? 'checked' : '') ?> />
+						<label for="filter-translations"><?php _e('Enable') ?></label>
 					</blockquote>
 				</td>
 				</tr>

@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.5.4
+Version: 0.6
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -93,105 +93,113 @@ class CeceppaML {
 			add_action('edited_category', array(&$this, 'save_extra_category_fileds'));
 			add_action('created_category', array(&$this, 'save_extra_category_fileds'));
 			add_action('deleted_term_taxonomy', array(&$this, 'delete_extra_category_fields'));
-    }
 
-    /*
-     * Aggiungo il box di collegamento nei post e nelle pagine 
-     */
-    add_action('add_meta_boxes', array(&$this, 'add_meta_boxes'));
-    add_action('edit_post', array(&$this, 'save_extra_post_fields'));
-		add_action('delete_post', array(&$this, 'delete_extra_post_fields'));
-    add_action('edit_page_form', array(&$this, 'save_extra_page_fields'));
-		add_action('delete_page', array(&$this, 'delete_extra_post_fields'));
-    
-    /*
-     * Filtro gli articoli per lingua
-     * Filter posts by language
-     */
-		if(!is_admin() && get_option("cml_option_filter_posts", true)) {
-			add_action('pre_get_posts', array(&$this, 'filter_posts_by_language'));
-		}
+			/*
+			 * Aggiungo il box di collegamento nei post e nelle pagine 
+			 */
+			add_action('add_meta_boxes', array(&$this, 'add_meta_boxes'));
+			add_action('edit_post', array(&$this, 'save_extra_post_fields'));
+			add_action('delete_post', array(&$this, 'delete_extra_post_fields'));
+			add_action('edit_page_form', array(&$this, 'save_extra_page_fields'));
+			add_action('delete_page', array(&$this, 'delete_extra_post_fields'));
 
-		/*
-		 * Filtro i risultati della ricerca in modo da visualizzare solo gli articoli inerenti
-		 * alla lingua che l'utente stà visualizzando
-		 */
-		$this->_filter_search = get_option('cml_option_filter_search', true);
-		$this->_filte_form_class = get_option('cml_option_filter_form_class', $this->_filte_form_class);
-
-    /*
-     * Filtro alcune query per lingua (Articoli più letti/commentati)
-     */
-		if(get_option('cml_option_filter_query') && !is_admin()) {
-			add_filter('query', array(&$this, 'filter_query'));
-		}
-
-    /*
-     * Nella pagina "menu", aggiungo una lista per ogni lingua
-     */
-    add_action('init', array(&$this, 'add_menus'));
-		add_action('wp_footer', array(&$this, 'restore_default_menu'));
-
-    /*
-     * Traduco i titoli dei Widget
-     */
-    add_filter('widget_title', array(&$this, 'translate_widget_title'));
-
-    /*
-     * Serve a reindirizzare il browser
-     */
-    $this->_redirect_browser = get_option('cml_option_redirect', 'auto');
-    add_action('plugins_loaded', array(&$this, 'redirect_browser'));
-    
-		/*
-		 * Devo visualizzare le bandiere delle lingue disponibili?
-		 */
-		if(get_option('cml_option_flags_on_post') ||
-			 get_option('cml_option_flags_on_page') ||
-			 get_option('cml_option_flags_on_cats')) {
-			
-			if(get_option('cml_option_flags_on_pos') == "bottom") {
-			  add_filter("the_content", array(&$this, 'add_flags_on_bottom'));
-			} else {
-				add_filter("the_title", array(&$this, 'add_flags_on_top'), 10, 2);
+			//Aggiungo le banidere all'elenco dei post
+			add_action('manage_pages_custom_column', array(&$this, 'add_flag_column'), 10, 2);
+			add_filter('manage_pages_columns' , array(&$this, 'add_flags_columns'));
+			add_action('manage_posts_custom_column', array(&$this, 'add_flag_column'), 10, 2);
+			add_filter('manage_posts_columns' , array(&$this, 'add_flags_columns'));
+			//Filtri
+			add_filter('parse_query', array(&$this, 'filter_all_posts_query'));
+			add_action( 'restrict_manage_posts', array(&$this, 'filter_all_posts_page'));
+    } else {
+			/*
+			 * Filtro gli articoli per lingua
+			 * Filter posts by language
+			 */
+			if(get_option("cml_option_filter_posts", false)) {
+				add_action('pre_get_posts', array(&$this, 'filter_posts_by_language'));
 			}
+
+			/*
+			 * Nascondo i post "collegati", quindi tra quelli collegati visualizzo solo quelli
+			 * della lingua corrente
+			 */
+			if(get_option("cml_option_filter_translations", false)) {
+				add_action('pre_get_posts', array(&$this, 'hide_translations'));
+			}
+
+			/*
+			 * Filtro i risultati della ricerca in modo da visualizzare solo gli articoli inerenti
+			 * alla lingua che l'utente stà visualizzando
+			 */
+			$this->_filter_search = get_option('cml_option_filter_search', true);
+			$this->_filte_form_class = get_option('cml_option_filter_form_class', $this->_filte_form_class);
+	
+			/*
+			 * Filtro alcune query per lingua (Articoli più letti/commentati)
+			 */
+			if(get_option('cml_option_filter_query')) {
+				add_filter('query', array(&$this, 'filter_query'));
+			}
+
+			/*
+			 * Traduco i titoli dei Widget
+			 */
+			add_filter('widget_title', array(&$this, 'translate_widget_title'));
+
+			/*
+			 * Serve a reindirizzare il browser
+			 */
+			$this->_redirect_browser = get_option('cml_option_redirect', 'auto');
+			add_action('plugins_loaded', array(&$this, 'redirect_browser'));
+    
+			/*
+			 * Devo visualizzare le bandiere delle lingue disponibili?
+			 */
+			if(get_option('cml_option_flags_on_post') ||
+				 get_option('cml_option_flags_on_page') ||
+				 get_option('cml_option_flags_on_cats')) :
+				
+				if(get_option('cml_option_flags_on_pos') == "bottom") {
+					add_filter("the_content", array(&$this, 'add_flags_on_bottom'));
+				} else {
+					add_filter("the_title", array(&$this, 'add_flags_on_top'), 10, 2);
+				}
+			endif;
+
+			/*
+			 * Devo visualizzare l'avviso?
+			 */
+			$this->_show_notice = get_option('cml_option_notice', 'notice');
+			$this->_show_notice_pos = get_option('cml_option_notice_pos', 'top');
+			if($this->_show_notice != 'nothing' && !is_admin()) //!is_home() && 
+				add_action('the_content', array(&$this, 'show_notice'));
+	
+			//Commenti
+			$this->_comments = get_option('cml_option_comments', 'group');
+			if($this->_comments == 'group') 
+				add_filter('query', array(&$this, 'get_comments'));
+
+			/*
+			 * Locale
+			 */
+			add_filter('query_vars', array(&$this, 'add_lang_query_vars'));
+			if(get_option("cml_option_change_locale", 1) == 1) {
+				add_filter('locale', array(&$this, 'setlocale'));
+			}
+			
+			//Aggiorno la lingua corrente quando sto per visualizzare un post
+			add_filter('pre_get_posts', array(&$this, 'update_current_lang'));
 		}
-
-		/*
-		 * Devo visualizzare l'avviso?
-		 */
-    $this->_show_notice = get_option('cml_option_notice', 'notice');
-    $this->_show_notice_pos = get_option('cml_option_notice_pos', 'top');
-    if($this->_show_notice != 'nothing' && !is_admin()) //!is_home() && 
-      add_action('the_content', array(&$this, 'show_notice'));
-
-    //Commenti
-    $this->_comments = get_option('cml_option_comments', 'group');
-    if($this->_comments == 'group') 
-      add_filter('query', array(&$this, 'get_comments'));
-
-    /*
-     * Locale
-     */
-    add_filter('query_vars', array(&$this, 'add_lang_query_vars'));
-		if(!is_admin() && get_option("cml_option_change_locale", 1) == 1) {
-			add_filter('locale', array(&$this, 'setlocale'));
-		}
-
-		//Aggiungo le banidere all'elenco dei post
-		add_action('manage_pages_custom_column', array(&$this, 'add_flag_column'), 10, 2);
-		add_filter('manage_pages_columns' , array(&$this, 'add_flags_columns'));
-		add_action('manage_posts_custom_column', array(&$this, 'add_flag_column'), 10, 2);
-		add_filter('manage_posts_columns' , array(&$this, 'add_flags_columns'));
-		//Filtri
-		add_filter('parse_query', array(&$this, 'filter_all_posts_query'));
-		add_action( 'restrict_manage_posts', array(&$this, 'filter_all_posts_page'));
 
 		//Update current language
 		add_action( 'init', array(&$this, 'update_current_lang'));
-		
-		//Aggiorno la lingua corrente quando sto per visualizzare un post
-    add_filter('pre_get_posts', array(&$this, 'update_current_lang'));
+
+		/*
+		* Nella pagina "menu", aggiungo una lista per ogni lingua
+		*/
+		add_action('init', array(&$this, 'add_menus'));
+		add_action('wp_footer', array(&$this, 'restore_default_menu'));
   }
 
   /*
@@ -336,7 +344,8 @@ class CeceppaML {
 	/*
 	 * Aggiungo le bandiere sotto al titolo del post
 	 */
-	function add_flags_on_top($title, $id) {
+	function add_flags_on_top($title, $id = -1) {
+		if($id < 0) return $title;
 		if(is_single() && !get_option('cml_option_flags_on_post')) return $title;
 		if(is_page() && !get_option('cml_option_flags_on_page')) return $title;
 		if(is_category() && !get_option('cml_option_flags_on_cats')) return $title;
@@ -738,6 +747,30 @@ class CeceppaML {
     set_query_var('cat', $cat);
   }
 
+	/*
+	 * Nascondo i post tradotti
+	 */
+	function hide_translations($wp_query) {
+		global $wpdb;
+
+		//Se è uno spione, lo lascio spiare :)
+		if(isCrawler()) return;
+
+		if(empty($this->_exclude_posts)) :
+			$query = sprintf("SELECT * FROM %s WHERE cml_post_lang_1 = %d OR cml_post_lang_2 = %d",
+											 CECEPPA_ML_POSTS, $this->_current_lang_id, $this->_current_lang_id);
+			
+			$results = $wpdb->get_results($query);
+			foreach($results as $result) :
+				if($result->cml_post_lang_1 == $this->_current_lang_id) $posts[] = $result->cml_post_id_2;
+				if($result->cml_post_lang_2 == $this->_current_lang_id) $posts[] = $result->cml_post_id_1;
+			endforeach;
+	
+			$this->_exclude_posts = $posts;
+		endif;
+
+		set_query_var('post__not_in', $this->_exclude_posts);
+	}
   /**
     * Questa funzione si occupa di
     * "Filtrare tutte le query WordPress allo scopo di filtrare automaticamente gli articoli più letti, più commentati, etc…"
@@ -1011,6 +1044,9 @@ class CeceppaML {
 			//Filter posts
       update_option("cml_option_filter_posts", intval($_POST['filter-posts']));
 
+			//Filter translations
+      update_option("cml_option_filter_translations", intval($_POST['filter-translations']));
+			
 			//Filter query
       update_option("cml_option_filter_query", intval($_POST['filter-query']));
 			

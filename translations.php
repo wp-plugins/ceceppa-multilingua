@@ -5,7 +5,7 @@
 function cml_widgets_title($buffer) {
   global $wpdb;
 
-  preg_match_all("(<h3>(.*?)</h3>)", $buffer , $widgets);
+  preg_match_all("(<h3(.*?)/h3>)", $buffer , $widgets);
 
   $langs = cml_get_languages();
 ?>
@@ -24,28 +24,33 @@ function cml_widgets_title($buffer) {
 <?php 
   $titles = $widgets[1];
 
-  foreach($titles as $title) :
-    if($title[0] != '<') {
-      echo "<tr>";
-
-
-      echo "<td style=\"height:2.5em\">\n";
-      echo "\t<input type=\"hidden\" name=\"string[]\" value=\"$title\" />\n";
-      echo "$title</td>";
-      $i = 0;
-      foreach($langs as $lang) {
-	  $d = cml_translate($title, $lang->id);
-// 	  setlocale($lang->cml_locale);
-// 	  echo "<td><input type=\"text\" name=\"$lang->id[]\" value=\"" . _($title) . "\" /></td>";
-	  echo "<td>\n";
-	  echo "<input type=\"text\" name=\"lang_" . $lang->id . "[]\" value=\"$d\" /></td>\n";
-	  
-	  $i++;
-      }
-	  echo "</tr>";
-    }
-
-  endforeach; ?>
+   foreach($titles as $title) :
+			preg_match('(>.*?<)', $title, $t);
+			$title = $t[0];
+			$title = str_replace(array(">", "<"), "", $title);
+			
+			if(!empty($title)) $wtitles[$title] = $title;;
+	 endforeach;
+	 
+	 if(is_array($wtitles)) :
+			foreach($wtitles as $title) :
+						echo "<tr>";
+				 
+						echo "<td style=\"height:2.5em\">\n";
+						echo "\t<input type=\"hidden\" name=\"string[]\" value=\"$title\" />\n";
+						echo $title . "</td>";
+						$i = 0;
+	 
+						foreach($langs as $lang) :
+							 $d = cml_translate($title, $lang->id);
+							 echo "<td>\n";
+							 echo "<input type=\"text\" name=\"lang_" . $lang->id . "[]\" value=\"$d\" /></td>\n";
+							 
+							 $i++;
+						endforeach;
+						echo "</tr>";
+		 endforeach;
+	 endif;	 ?>
      </tbody>
     </table>
     <div style="text-align:right">
@@ -66,11 +71,25 @@ function cml_print_title($title) {
   }  
 }
 
+//Recupero tutte le sidebar
+global $wp_registered_sidebars;
+
 ob_start();
-  if ( !function_exists('dynamic_sidebar') || !dynamic_sidebar("Sidebar") ) {
-    echo ":(";
+  if ( !function_exists('dynamic_sidebar') ) { //|| !dynamic_sidebar("Sidebar") ) {
+    echo "No widgets...";
+		
+		return;
   }
-$content = ob_get_contents();
+
+	if(is_array($wp_registered_sidebars)) :
+	 $keys = array_keys($wp_registered_sidebars);
+	 
+	 foreach($keys as $key) :
+		dynamic_sidebar($key);
+
+		$content .= ob_get_contents();
+	 endforeach;
+  endif;
 ob_end_clean();
 
 cml_widgets_title($content);
