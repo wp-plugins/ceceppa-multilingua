@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.6.1
+Version: 0.6.2
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -211,9 +211,9 @@ class CeceppaML {
     load_plugin_textdomain('ceceppaml', false, dirname(plugin_basename( __FILE__ )) . '/po/');
 
     $results = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " ORDER BY cml_language"); //WHERE cml_default = 1 
-    foreach($results as $result) {
+    foreach($results as $result) :
         register_nav_menus(array("cml_menu_$result->cml_language_slug" => $result->cml_language));
-    }
+    endforeach;
 		
 		$locations = get_theme_mod('nav_menu_locations');
 
@@ -753,7 +753,9 @@ class CeceppaML {
 	function hide_translations($wp_query) {
 		global $wpdb;
 
-		if(is_page() || is_single() || is_category() || isCrawler()) return;
+		if(is_page() || is_single() || isCrawler()) return;
+
+		$this->update_current_lang();
 
 		if(empty($this->_exclude_posts)) :
 			$query = sprintf("SELECT * FROM %s WHERE cml_post_lang_1 = %d OR cml_post_lang_2 = %d",
@@ -1789,7 +1791,7 @@ class CeceppaML {
 		//con il permalink di default: ?p=#
 		$the_id = get_the_ID();
 		$permalink = get_option("permalink_structure");
-		if(empty($permalink) && empty($the_id)) {
+		if(!is_admin() && empty($permalink) && empty($the_id)) {
 			$url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 			$the_id  = url_to_postid($url);
 		}
