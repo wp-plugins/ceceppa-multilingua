@@ -29,17 +29,19 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 - Show the list flag of available languages on top or bottom of page/post
 - Hide translations of posts of the current language
 - Show only posts of the current language
+- One-Click-Switching between the languages
+- One-Click-Switching between the translations
 
 Ceceppa Multilingua supports infinite language, which can be easily added/modified/deleted via the comfortable Configuration Page.
 All you need to do is activate the plugin, configure categories and start writing the content!
 
-For more Information visit the [Plugin Homepage](http://www.ceceppa.eu/ceceppa-multilingua/)
-
-Flags directory are downloaded from [Flags] (http://blog.worldofemotions.com/danilka/)
-Some icons from [Icons] (http://www.iconfinder.com/)
-Directions icon from (http://emey87.deviantart.com/)
-Tooltip plugin for Jquery [Tipsy] (http://onehackoranother.com/projects/jquery/tipsy/)
-jQuery image dropdown [DD] (http://www.marghoobsuleman.com/jquery-image-dropdown)
+For more Information visit the [Plugin Homepage](http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/)
+Video demo: [Plugin demo](http://www.youtube.com/watch?v=fAPIQonud-E)
+Flags directory are downloaded from [Flags](http://blog.worldofemotions.com/danilka/)
+Some icons from [Icons](http://www.iconfinder.com/)
+Directions icon from [Deviantart](http://emey87.deviantart.com/)
+Tooltip plugin for Jquery [Tipsy](http://onehackoranother.com/projects/jquery/tipsy/)
+jQuery image dropdown [DD](http://www.marghoobsuleman.com/jquery-image-dropdown)
 
 == Installation ==
 
