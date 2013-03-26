@@ -35,7 +35,8 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 Ceceppa Multilingua supports infinite language, which can be easily added/modified/deleted via the comfortable Configuration Page.
 All you need to do is activate the plugin, configure categories and start writing the content!
 
-For more Information visit the [Plugin Homepage](http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/).
+For more Information visit the [Plugin Homepage](http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/)
+
 Video demo: [Plugin demo](http://www.youtube.com/watch?v=fAPIQonud-E).
 
 Flags directory are downloaded from [Flags](http://blog.worldofemotions.com/danilka/)
