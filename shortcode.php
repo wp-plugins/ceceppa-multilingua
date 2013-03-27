@@ -82,17 +82,26 @@ function cml_show_availables_langs($attrs) {
   $cat_id = $wpCeceppaML->get_category_id(single_cat_title("", false));
 
   $r = "<ul class='cml_flags $class'>";
+  
+  /*
+   * Se è stata impostata una pagina statica come home
+   * aggiungo solo il suffisso ?lang=##
+   */
+  $is_static = is_front_page() && is_page();
   foreach($langs as $lang) {
-
     if(is_category()) $link = cml_get_linked_cat($l_id, $lang, $cat_id, null);
     if(is_single() || is_page()) $link = cml_get_linked_post($l_id, $lang, get_the_ID(), null);
     //if(is_page()) $link = cml_get_linked_post($l_id, $lang, get_the_ID(), null);
 
     if(!empty($link)) {
-      $link = (is_category()) ? get_category_link($link) : get_permalink($link);
+      if(!$is_static) {
+        $link = (is_category()) ? get_category_link($link) : get_permalink($link);
+      } else {
+        $link = add_query_arg(array("lang" => $lang->cml_language_slug, "sp" => 1), get_site_url());
+      }
 
       $title = ($notice && $l_id != $lang->id) ? cml_get_notice_by_lang_id($lang->id) : $lang->cml_language;
-      $r .= "<li><a href='$link'><img src='" . cml_get_flag_by_lang_id($lang->id, 'small') . "' title=\"$title\" class=\"tipsy-me\"/></a></li>";
+      $r .= "<li><a href=\"$link\"><img src='" . cml_get_flag_by_lang_id($lang->id, 'small') . "' title=\"$title\" class=\"tipsy-me\"/></a></li>";
     }
   }
 

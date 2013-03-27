@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.6.2
+Version: 0.6.3
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -82,7 +82,7 @@ class CeceppaML {
 			*/
 			add_action('admin_menu', array(&$this, 'add_option_page'));
 			add_action('admin_menu', array(&$this, 'add_menu_flags'));
-			
+
 			/*
 			* IT: Campi extra nelle categorie
 			* EN: Category extra fields
@@ -132,7 +132,7 @@ class CeceppaML {
 			 * Filtro i risultati della ricerca in modo da visualizzare solo gli articoli inerenti
 			 * alla lingua che l'utente stà visualizzando
 			 */
-			$this->_filter_search = get_option('cml_option_filter_search', true);
+			$this->_filter_search = get_option('cml_option_filter_search', false);
 			$this->_filte_form_class = get_option('cml_option_filter_form_class', $this->_filte_form_class);
 	
 			/*
@@ -183,13 +183,17 @@ class CeceppaML {
 			/*
 			 * Locale
 			 */
-			add_filter('query_vars', array(&$this, 'add_lang_query_vars'));
+			//add_filter('query_vars', array(&$this, 'add_lang_query_vars'));
 			if(get_option("cml_option_change_locale", 1) == 1) {
 				add_filter('locale', array(&$this, 'setlocale'));
 			}
-			
+
 			//Aggiorno la lingua corrente quando sto per visualizzare un post
 			add_filter('pre_get_posts', array(&$this, 'update_current_lang'));
+
+			//E' stata utilizzata una pagina statica come homepage?
+			if(array_key_exists("sp", $_GET))
+				add_filter('pre_get_posts', array(&$this, 'get_static_page'));
 		}
 
 		//Update current language
@@ -334,7 +338,7 @@ class CeceppaML {
 				$xid = $wpdb->get_var($query);
 	
 				$id = (empty($xid)) ? $id : $xid;
-				echo '<a href="' . get_bloginfo("url") . '/wp-admin/post-new.php?link-to=' . $id . '">';
+				echo '<a href="' . get_bloginfo("url") . '/wp-admin/post-new.php?post_type=' . $post_type . '&link-to=' . $id . '&page-lang=' . $lang->id . '">';
 				echo '	<img class="add" src="' . WP_PLUGIN_URL . '/ceceppa-multilingua/images/add.png" title="' . __('Translate', 'ceceppaml') . '" />';
 				echo '</a>';
 			}
@@ -1240,22 +1244,18 @@ class CeceppaML {
     echo "<h4>" . __('Link to the page', 'ceceppaml') . "</h4>";
     echo "<select name=\"linked_page\" class=\"linked_page\">";
     echo "<option>" . __('No page linked', 'ceceppaml') . "</option>";
-    foreach ( $pages as $page ) {
+    foreach ( $pages as $page ) :
 
       //Recupero il padre della pagina corrente per sapere a quale lingua appartiene
       $parent = $page->post_parent;
 
       $page_parent = $this->get_page_parent($page);
 
-      //Lingua della pagina padre
-      $page_lang = $wpdb->get_var(sprintf("SELECT id FROM %s WHERE cml_page_id = %d", CECEPPA_ML_TABLE, $page_parent));
+      //Lingua della pagina
+			$page_lang = $this->get_language_id_by_page_id($page);
       if(empty($page_lang)) {
 				$page_lang = get_option("cml_page_lang_$page_parent");
       }
-
-      //Pagina collegata
-//      $linked = $wpdb->get_var(sprintf("SELECT cml_page_id_2 FROM %s WHERE cml_page_id_1 = %d",
-//					CECEPPA_ML_PAGES, $tag->ID));
 
       $selected = ($page->ID == $linked) ? "selected" : "";
 
@@ -1265,7 +1265,7 @@ class CeceppaML {
       $option .= $page->post_title;
       $option .= '</option>';
       echo $option;
-    }
+    endforeach;
 
     echo "</select>";
 
@@ -1312,7 +1312,6 @@ class CeceppaML {
      * devo filtrare i contenuti in base alla lingua corrente
      */
     if($this->_redirect_browser == 'nothing' || isCrawler()) return;
-
     if(is_admin()) return;
 
     //Non posso utilizzare la funzione is_home, quindi controllo "manualmente"
@@ -1630,7 +1629,7 @@ class CeceppaML {
 
   function add_lang_query_vars($vars) {
     $vars[] = 'lang';
-    
+
     return $vars;
   }
 
@@ -1641,8 +1640,10 @@ class CeceppaML {
 		global $wpdb;
 		global $wp_rewrite;
 		if(isset($_GET['lang'])) {
+			$slug = $_GET['slug'];
+
 			$locale = $wpdb->get_var(sprintf("SELECT cml_locale FROM " . CECEPPA_ML_TABLE . " WHERE cml_language_slug = '%s'",
-					$_GET['lang']));
+					$slug));
 		}  else {
 			$l = $this->_current_lang_locale;
 
@@ -1812,7 +1813,7 @@ class CeceppaML {
       $lang = $this->get_language_id_by_page_id($the_id);
     }
 
-    if(is_home() || is_search()) {
+    if(is_home() || is_search() || array_key_exists("lang", $_GET)) {
       if(isset($_GET['lang'])) {
         $lang = $_GET['lang'];
       } else
@@ -2092,6 +2093,26 @@ class CeceppaML {
     $replacement = 'comment_post_ID IN(' . implode( ',', $post_ids ) . ')';
     return preg_replace( '~comment_post_ID = \d+~', $replacement, $query );
   }
+	
+	/*
+	 * Modifico l'id della query in modo che punti all'articolo tradotto
+	 */
+	function get_static_page($query) {
+		if($this->_static_page) return;
+	
+		//Recupero l'id della lingua
+		$slug = $_GET['lang'];	
+		$lang_id = $this->get_language_id_by_slug($slug);
+
+		//Id attuale
+		$id = $query->query_vars['page_id'];
+		
+		//Recupero l'id collegato
+		$nid = cml_get_linked_post($this->_default_language_id, null, $id, $lang_id);
+		$query->query_vars['page_id'] = $nid;
+
+		$this->_static_page = true;
+	}
 }
 
 function removesmartquotes($content) {
