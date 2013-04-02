@@ -21,12 +21,12 @@
 					<td>
 						<label for="url-mode-path">
 							<input type="radio" name="url-mode" id="url-mode-path" value="2" <?php checked(get_option("cml_modification_mode", 2), 2) ?> />
-							Use Pre-Path Mode (Default, puts /en/ in front of URL) <i>(www.example.com/en/)</i>
+							<?php _e('Use Pre-Path Mode (Default, puts /en/ in front of URL)', 'ceceppaml') ?><i>(www.example.com/en/)</i>
 						</label>
 						<br />
 						<label for="url-mode-domain">
 							<input type="radio" name="url-mode" id="url-mode-domain" value="3" <?php checked(get_option("cml_modification_mode"), 3) ?> />
-							Use Pre-Domain Mode <i>(en.example.com)</i>
+							<?php _('Use Pre-Domain Mode', 'ceceppaml') ?><i>(en.example.com)</i>
 						</label>
 						<br /><br />
 						<input type="checkbox" id="add-slug" name="add-slug" value="1" <?php checked(get_option('cml_add_slug_to_link', true), true) ?> />
