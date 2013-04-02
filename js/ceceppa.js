@@ -28,6 +28,7 @@ jQuery(document).ready(function(e) {
 	jQuery(".linked_post").msDropDown();
 	jQuery(".link-category").msDropDown();
 	jQuery(".page_lang").msDropDown();
+	jQuery(".post_lang").msDropDown();
 	jQuery('.linked_page').msDropDown();
 	jQuery(".ceceppa-form select").msDropDown();
 	jQuery(".cml-widget-flags").msDropDown();

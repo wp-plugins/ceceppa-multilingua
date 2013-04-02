@@ -321,7 +321,7 @@ img.delete {
 	color: #000;
 	text-decoration: none;
 }
-.cml-box-translations h4 {
+.cml-box-translations h4, #ceceppaml-meta-box h4 {
 	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
   font-weight: 300;
 	font-size: 1.6em;

@@ -4,7 +4,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate
 Requires at least: 3.4.1
 Tested up to: 3.5.1
-Stable tag: 0.6.3
+Stable tag: 0.7.0
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: http://www.ceceppa.eu/ceceppa-multilingua/
@@ -79,6 +79,13 @@ For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide
 
 == Changelog ==
 
+= 0.7.0 =
+* Now you can translate a category in other languages, or use different categories for each language.
+  Added Url Modification mode:
+    Use Pre-Path Mode (Default, puts /%slug%/ in front of URL) (www.example.com/en/) (default)
+    Use Pre-Domain Mode (en.example.com)
+  It is enabled by default, you can change or disable in settings page
+    
 = 0.6.3 =
 * If you use "static page" as homepage, the plugin add ?lang=[]&sp=1 to url
 

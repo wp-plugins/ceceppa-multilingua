@@ -261,10 +261,13 @@ function cml_get_notice_by_lang_id($lang_id) {
  *
  * @name - nome della classe e dell'oggetto <select>
  * @default - id della lingua predefinita
+ * @link - indica se devo cambiare pagina al cambio della voce
+ * @none - indica se mostrare l'elemento "Scegli una lingua dall'elenco"
  */
-function cml_dropdown_langs($name, $default, $link = false) {
+function cml_dropdown_langs($name, $default, $link = false, $none = false) {
   global $wpCeceppaML;
   
+	$none_text = ($none) ? __('No language selected', 'ceceppaml') : "";
 	if($link) :
 	?>
 		<script type="text/javascript">
@@ -277,7 +280,7 @@ function cml_dropdown_langs($name, $default, $link = false) {
 	<?php endif; ?>
 
   <select class="<?php echo $name ?>" name="<?php echo $name ?>">
-  <option></option>
+	<option><?php echo $none_text ?></option>
 	
 	<?php
 	$id = $wpCeceppaML->get_current_lang_id();
