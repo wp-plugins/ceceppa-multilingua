@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.7.1
+Version: 0.7.2
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -15,7 +15,7 @@ Tags: multilingual, multi, language, admin, tinymce, qTranslate, Polyglot, bilin
  * Most of flags are downloaded from http://blog.worldofemotions.com/danilka/
  * 
  */
-define('CECEPPA_DB_VERSION', 4);
+define('CECEPPA_DB_VERSION', 5);
 
 define('CECEPPA_ML_TABLE', $wpdb->base_prefix . 'ceceppa_ml');
 define('CECEPPA_ML_CATS', $wpdb->base_prefix . 'ceceppa_ml_cats');
