@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.7.4
+Version: 0.7.5
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -2241,7 +2241,7 @@ class CeceppaML {
             $homeUrl = str_replace("http://", "http://$slug.", $homeUrl);
             $slug = "";
         endif;
-        
+
         $plinks = split("/", str_replace(home_url(), "", $permalink));
         if($lang_id != $this->_default_language_id) :
             array_pop($plinks);
@@ -2251,13 +2251,18 @@ class CeceppaML {
                 //Cerco la traduzione della categoria nella lingua del post :)
                 $id = get_cat_ID($plink);
 
-                if(!empty($plink)) $cats[] = strtolower(get_option("cml_category_$id_lang_$lang_id", $plink));
+                if(!empty($plink)) :
+		  $cat = strtolower(get_option("cml_category_" . $id . "_lang_" . $lang_id, $plink));
+		  $url = str_replace(" ", "-", $cat);
+		  $url = urlencode($url);
+		  $cats[] = $url;
+		endif;
             endforeach;
 
             //Ricreo il permalink con le categorie tradotte... :)
             return $homeUrl . "$slug/" . join("/", $cats) . "/$title/";
         endif;
-    
+
         //Aggiungo il suffisso /%lang%/
         return $homeUrl . $slug . join("/", $plinks);
     }
