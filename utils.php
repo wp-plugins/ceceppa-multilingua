@@ -87,7 +87,7 @@ function cml_get_linked_post($lang_id, $result, $post_id, $browser_lang = null) 
 			 * degli articoli collegati tra di loro, ma non a quella predefinita, e considerando
 			 * solo cml_post_id_1 perderei questa informazione :(
 			 */
-			$query = sprintf("SELECT *, cml_post_id_2 as post_id FROM %s WHERE cml_post_id_1 = %d OR cml_post_id_2 = %d",
+			$query = sprintf("SELECT *, cml_post_id_2 as post_id FROM %s WHERE (cml_post_id_1 = %d OR cml_post_id_2 = %d) AND (cml_post_id_1 > 0 AND cml_post_id_2 > 0)",
 																			 CECEPPA_ML_POSTS, $post_id, $post_id);
       $new_id = $wpdb->get_row($query);
 

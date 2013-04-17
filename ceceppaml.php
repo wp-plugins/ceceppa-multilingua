@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.7.7
+Version: 0.7.8
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -209,12 +209,12 @@ class CeceppaML {
       add_filter('term_link', array(&$this, 'translate_term_link'), 10);
       add_filter('term_name', array(&$this, 'translate_term_name'), 10, 1);
 
-      /*
-	* Locale
-	*/
+			/*
+			* Locale
+			*/
       //add_filter('query_vars', array(&$this, 'add_lang_query_vars'));
       if(get_option("cml_option_change_locale", 1) == 1 || is_admin()) :
-	  add_filter('locale', array(&$this, 'setlocale'));
+			  add_filter('locale', array(&$this, 'setlocale'));
       endif;
   }
 
@@ -336,7 +336,8 @@ class CeceppaML {
         foreach($langs as $lang) :
             //Recupero la lingua del post/pagina
             $xid = ($post_type == 'post') ? $this->get_language_id_by_post_id($id) :
-                                                                            $this->get_language_id_by_page_id($id);
+                                            $this->get_language_id_by_page_id($id);
+
             $link = cml_get_linked_post($xid, null, $id, $lang->id);
             if(!empty($link)) {
                 echo '<a href="' . get_edit_post_link($link) . '">';
@@ -1384,7 +1385,7 @@ class CeceppaML {
                     <span class="cml_add_text"><?php echo  get_the_title($link) ?></span>
                     <?php } ?>
                     <span class="cml_add_button">
-                            <img class="add" src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/<?php echo $icon ?>.png" title="<?php echo $title ?>" width="12" />
+                            <!-- <img class="add" src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/<?php echo $icon ?>.png" title="<?php echo $title ?>" width="12" /> -->
                     </span>
                 </a>
             </li>
