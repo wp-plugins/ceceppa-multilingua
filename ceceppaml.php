@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.7.8
+Version: 0.8.0
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -118,104 +118,108 @@ class CeceppaML {
       add_action( 'restrict_manage_posts', array(&$this, 'filter_all_posts_page'));
     } else {
       /*
-	* Filtro gli articoli per lingua
-	* Filter posts by language
-	*/
+      * Filtro gli articoli per lingua
+      * Filter posts by language
+      */
       if(get_option("cml_option_filter_posts", false)) {
-	  add_action('pre_get_posts', array(&$this, 'filter_posts_by_language'));
+	add_action('pre_get_posts', array(&$this, 'filter_posts_by_language'));
       }
 
       /*
-	* Nascondo i post "collegati", quindi tra quelli collegati visualizzo solo quelli
-	* della lingua corrente
-	*/
+      * Nascondo i post "collegati", quindi tra quelli collegati visualizzo solo quelli
+      * della lingua corrente
+      */
       if(get_option("cml_option_filter_translations", false) || array_key_exists("ht", $_GET)) {
-	  add_action('pre_get_posts', array(&$this, 'hide_translations'));
+	add_action('pre_get_posts', array(&$this, 'hide_translations'));
       }
 
       /*
-	* Filtro i risultati della ricerca in modo da visualizzare solo gli articoli inerenti
-	* alla lingua che l'utente st‡ visualizzando
-	*/
+      * Filtro i risultati della ricerca in modo da visualizzare solo gli articoli inerenti
+      * alla lingua che l'utente st√† visualizzando
+      */
       $this->_filter_search = get_option('cml_option_filter_search', false);
       $this->_filte_form_class = get_option('cml_option_filter_form_class', $this->_filte_form_class);
 
       /*
-	* Filtro alcune query per lingua (Articoli pi˘ letti/commentati)
-	*/
+      * Filtro alcune query per lingua (Articoli pi√π letti/commentati)
+      */
       if(get_option('cml_option_filter_query')) {
-	  add_filter('query', array(&$this, 'filter_query'));
+	add_filter('query', array(&$this, 'filter_query'));
       }
 
       /*
-	* Traduco i titoli dei Widget
-	*/
+      * Traduco i titoli dei Widget
+      */
       add_filter('widget_title', array(&$this, 'translate_widget_title'));
 
       /*
-	* Serve a reindirizzare il browser
-	*/
+      * Serve a reindirizzare il browser
+      */
       $this->_redirect_browser = get_option('cml_option_redirect', 'auto');
       add_action('plugins_loaded', array(&$this, 'redirect_browser'));
 
       /*
-	* Devo visualizzare le bandiere delle lingue disponibili?
-	*/
+      * Devo visualizzare le bandiere delle lingue disponibili?
+      */
       if(get_option('cml_option_flags_on_post') ||
-	    get_option('cml_option_flags_on_page') ||
-	    get_option('cml_option_flags_on_cats')) :
-	  
-	  if(get_option('cml_option_flags_on_pos') == "bottom") {
-	      add_filter("the_content", array(&$this, 'add_flags_on_bottom'));
-	  } else {
-	      add_filter("the_title", array(&$this, 'add_flags_on_top'), 10, 2);
-	  }
+	  get_option('cml_option_flags_on_page') ||
+	  get_option('cml_option_flags_on_cats')) :
+	
+	if(get_option('cml_option_flags_on_pos') == "bottom") {
+	    add_filter("the_content", array(&$this, 'add_flags_on_bottom'));
+	} else {
+	    add_filter("the_title", array(&$this, 'add_flags_on_top'), 10, 2);
+	}
       endif;
 
       /*
-	* Devo visualizzare l'avviso?
-	*/
+      * Devo visualizzare l'avviso?
+      */
       $this->_show_notice = get_option('cml_option_notice', 'notice');
       $this->_show_notice_pos = get_option('cml_option_notice_pos', 'top');
       if($this->_show_notice != 'nothing' && !is_admin()) //!is_home() && 
-	  add_action('the_content', array(&$this, 'show_notice'));
+	add_action('the_content', array(&$this, 'show_notice'));
 
       //Commenti
       $this->_comments = get_option('cml_option_comments', 'group');
       if($this->_comments == 'group') 
-	  add_filter('query', array(&$this, 'get_comments'));
+	add_filter('query', array(&$this, 'get_comments'));
 
       //Aggiorno la lingua corrente quando sto per visualizzare un post
       add_filter('pre_get_posts', array(&$this, 'update_current_lang'));
 
       //E' stata utilizzata una pagina statica come homepage?
       if(array_key_exists("sp", $_GET))
-	  add_filter('pre_get_posts', array(&$this, 'get_static_page'));
-      
+	add_filter('pre_get_posts', array(&$this, 'get_static_page'));
+
       //Translate menu items    
       add_filter('wp_setup_nav_menu_item', array(&$this, 'translate_menu_item'));
+
+      add_filter('wp_get_object_terms', array(&$this, 'translate_object_terms'));
+      add_filter('list_cats', array(&$this, 'translate_category'));
     }
-      //Update current language
-      add_action( 'init', array(&$this, 'update_current_lang'));
+    
+    //Update current language
+    add_action( 'init', array(&$this, 'update_current_lang'));
 
-      /*
-      * Nella pagina "menu", aggiungo una lista per ogni lingua
-      */
-      add_action('init', array(&$this, 'add_menus'));
-      add_action('wp_footer', array(&$this, 'restore_default_menu'));
-      
-      //Translate post_link
-      add_filter('post_link', array(&$this, 'translate_post_link'), 10, 3);
-      add_filter('term_link', array(&$this, 'translate_term_link'), 10);
-      add_filter('term_name', array(&$this, 'translate_term_name'), 10, 1);
+    /*
+    * Nella pagina "menu", aggiungo una lista per ogni lingua
+    */
+    add_action('init', array(&$this, 'add_menus'));
+    add_action('wp_footer', array(&$this, 'restore_default_menu'));
+    
+    //Translate post_link
+    add_filter('post_link', array(&$this, 'translate_post_link'), 0, 3);
+    add_filter('term_link', array(&$this, 'translate_term_link'), 0);
+    add_filter('term_name', array(&$this, 'translate_term_name'), 0, 1);
 
-			/*
-			* Locale
-			*/
-      //add_filter('query_vars', array(&$this, 'add_lang_query_vars'));
-      if(get_option("cml_option_change_locale", 1) == 1 || is_admin()) :
-			  add_filter('locale', array(&$this, 'setlocale'));
-      endif;
+    /*
+    * Locale
+    */
+    //add_filter('query_vars', array(&$this, 'add_lang_query_vars'));
+    if(get_option("cml_option_change_locale", 1) == 1 || is_admin()) :
+			add_filter('locale', array(&$this, 'setlocale'));
+    endif;
   }
 
   /*
@@ -233,7 +237,7 @@ class CeceppaML {
         
     $locations = get_theme_mod('nav_menu_locations');
 
-    //Se non inizia per cml_ allora sar‡ quella definita dal tema :)
+    //Se non inizia per cml_ allora sar√† quella definita dal tema :)
     if(is_array($locations)) :
       $keys = array_keys($locations);
       foreach($keys as $key) :
@@ -259,7 +263,7 @@ class CeceppaML {
     }
 
   /*
-   * Aggingo al men˘ pulsanti per ogni lingua "Creata"
+   * Aggingo al men√π pulsanti per ogni lingua "Creata"
    */
   function add_menu_flags() {
     global $wpdb;
@@ -371,8 +375,8 @@ class CeceppaML {
         global $post;
         /* Mi serve per evitare che mi trovi bandiere ovunque :D.
          * Non posso utilizzare in_the_loop senno rischio di trovarmi bandiere anche vicino ai
-         * "post correlati" a piË di pagina :(
-         * Ho bisogno di modificare le "curly quotes" in "double quote", sennÚ il confronto fallisce :(
+         * "post correlati" a pi√® di pagina :(
+         * Ho bisogno di modificare le "curly quotes" in "double quote", senn√≤ il confronto fallisce :(
         */
         if(esc_attr($post->post_title) == removesmartquotes($title)) {
             return $title . cml_show_availables_langs(array("class" => "cml_flags_on_top"));
@@ -436,51 +440,50 @@ class CeceppaML {
   function category_edit_form_fields($tag) {
     $t_id = $tag->term_id;
     $linked_cat = get_option("cml_category_$t_id");
-    $lang = get_option("cml_category_lang_$t_id");
+    $cat_lang = get_option("cml_category_lang_$t_id");
 ?>
-            <?php
-                $langs = cml_get_languages();
-                
-                foreach($langs as $lang) :
-                    if(!$lang->cml_default) :
-                        $id = $lang->id;
-                        echo $t_id;
-            ?>
-            <tr class="form-field">
-                <td>
-                    <img src="<?php echo cml_get_flag($lang->cml_flag); ?>" />
-                    <?php echo $lang->cml_language ?>
-                </td>
-                <td>
-                    <input type="text" name="cat_name[<?php echo $lang->id ?>]" id="cat_name_<?php echo $lang->id ?>" size="40" value="<?php echo get_option("cml_category_" . $t_id . "_lang_$id", "k") ?>"/>
-                </td>
-            </tr>
-            <?php
-                    endif;
-                endforeach;
-            ?>
+    <?php
+      $langs = cml_get_languages();
+      
+      foreach($langs as $lang) :
+	  if(!$lang->cml_default) :
+	      $id = $lang->id;
+    ?>
+    <tr class="form-field">
+	<td>
+	    <img src="<?php echo cml_get_flag($lang->cml_flag); ?>" />
+	    <?php echo $lang->cml_language ?>
+	</td>
+	<td>
+	    <input type="text" name="cat_name[<?php echo $lang->id ?>]" id="cat_name_<?php echo $lang->id ?>" size="40" value="<?php echo get_option("cml_category_" . $t_id . "_lang_$id", "k") ?>"/>
+	</td>
+    </tr>
+    <?php
+	    endif;
+	endforeach;
+    ?>
     <tr class="form-field">
       <th scope="row" valign="top">
         <label for="cat_lang">
-                    <?php _e('Language of this category'); ?>
-                </label>
+	  <?php _e('Language of this category'); ?>
+	</label>
       </th>
       <td>
-        <?php cml_dropdown_langs("cat_lang", $lang); ?><br />
-        <span class="description"><?php _e('Chose the language of category only if not combined with no parent category'); ?></span>
+        <?php cml_dropdown_langs("cat_lang", $cat_lang); ?><br />
+        <span class="description"><?php _e('Choose the language of current category only if it will exists in this language', 'ceceppaml'); ?></span>
       </td>
     </tr>
     <tr class="form-field">
       <th scope="row" valign="top">
         <label for="linked_cat">
-                    <?php _e('Link to the category'); ?>
-                    <em><?php _e('Do not use it. It exists only for backward compatibility.') ?></em>
-                </label>
+	  <?php _e('Link to the category'); ?>
+	  <em><?php _e('Do not use it. It exists only for backward compatibility.') ?></em>
+	</label>
       </th>
       <td>
         <?php wp_dropdown_categories(array('hide_empty' => 0, 'name' => 'linked_cat', 'show_option_none' => ' ', 'hierarchical' => true, 'selected' => $linked_cat)); ?>
         <br />
-        <span class="description"><?php _e('Select the category that you have to connect with to the one you are modifying'); ?></span>
+        <span class="description"><?php _e('Select the category that you have to connect with to the one you are modifying', 'ceceppaml'); ?></span>
       </td>
     </tr>
 <?php 
@@ -505,11 +508,11 @@ class CeceppaML {
         /**
          * Tabella contenente le lingue da gestire
          *
-         *  cml_default     - indica se Ë la lingua predefinita
+         *  cml_default     - indica se √® la lingua predefinita
          *  cml_flag        - bandiera della lingua
          *  cml_language    - nome della nuova lingua
-         *  cml_category_id - categoria base a cui Ë collegata la nuova lingua
-         *  cml_category    - descrizione della categoria a cui Ë collegata la lingua 
+         *  cml_category_id - categoria base a cui √® collegata la nuova lingua
+         *  cml_category    - descrizione della categoria a cui √® collegata la lingua 
          */
         $sql = "CREATE TABLE $table_name (
         id INT(11) NOT NULL AUTO_INCREMENT,
@@ -538,7 +541,7 @@ class CeceppaML {
         //$wpdb->update(CECEPPA_ML_TABLE, array("cml_enabled" => 1), array("IS NULL"));
 
         if($first_time) :
-        /* Per comodit‡† creo nel database un record con la lingua corrente */
+        /* Per comodit√†¬† creo nel database un record con la lingua corrente */
         $locale = get_locale();
         $language = __("Default language");
 
@@ -558,10 +561,10 @@ class CeceppaML {
     endif;
 
     /**
-     * Creo la tabella che conterr‡† gli abbinamenti tra i post.
-     * La mia necessit‡ Ë quella di creare un collegamento bidirezionale tra i post per "passare" da una lingua all'altra.
+     * Creo la tabella che conterr√†¬† gli abbinamenti tra i post.
+     * La mia necessit√† √® quella di creare un collegamento bidirezionale tra i post per "passare" da una lingua all'altra.
      *
-     * UtilizzerÚ una tabella dove nelle prime 2 collonne saranno memorizzati tutti i figli e nelle seconde due i "padri":
+     * Utilizzer√≤ una tabella dove nelle prime 2 collonne saranno memorizzati tutti i figli e nelle seconde due i "padri":
      *    id_categoria_1 | id_post_1 | id_categoria_2 | id_post2
      * 
      * Per poter funzionare correttamente tutti gli articoli dovranno essere collegati alla lingua principale, 
@@ -573,7 +576,7 @@ class CeceppaML {
      *     2. Scrivo l'articolo in inglese e lo collego a quello italiano
      *     3. Scrivo l'articolo in esperanto e lo collego a quello italiano
      *
-     *  Supponendo che gli id degli articoli siano rispettivamente 1, 2, 3 nella tabella avrÚ memorizzato i seguenti valori:
+     *  Supponendo che gli id degli articoli siano rispettivamente 1, 2, 3 nella tabella avr√≤ memorizzato i seguenti valori:
      *
      *     [EN]  | 2 | [IT] | 1
      *     [EPO] | 3 | [IT] | 1
@@ -581,10 +584,10 @@ class CeceppaML {
      *  Ora se voglio passare dall'articolo italiano a quello inglese mi basta fare una query impostando come condizioni:
      *    * id del post italiano, id della lingua italiana e id della lingua inglese
      *
-     *  Mentre se voglio passare dalla lingua inglese a quella esperanto, analogamente a quanto fatto prima, dovrÚ eseguire 2 query
+     *  Mentre se voglio passare dalla lingua inglese a quella esperanto, analogamente a quanto fatto prima, dovr√≤ eseguire 2 query
      *  per ottenere l'id del post che desidero.
      * 
-     * Ora supponiamo di voler scrivere un post solo in Esperanto e Inglese una delle due lingue dovr‡ diventare il "fulcro" per le altre
+     * Ora supponiamo di voler scrivere un post solo in Esperanto e Inglese una delle due lingue dovr√† diventare il "fulcro" per le altre
      * ES:
      *     1. Scrivo il post in esperanto
      *     2. Scrivo il post in inglese e lo collego a quello esperanto
@@ -592,8 +595,8 @@ class CeceppaML {
      *
      * Anche in questo caso tramite la struttura della tabella che implementato riesco a passare tranquillamenta da una lingua all'altra
      *
-     * Quindi per ogni post che scriverÚ dovrÚ avere uno E UNO SOLTATO di post di riferimento a cui tutti gli altri si agggancerano.
-     * Cambi la lingua di default???? Non Ë un problema, scrivi tranquillamenta i nuovi post in riferimento alla nuova lingua :)
+     * Quindi per ogni post che scriver√≤ dovr√≤ avere uno E UNO SOLTATO di post di riferimento a cui tutti gli altri si agggancerano.
+     * Cambi la lingua di default???? Non √® un problema, scrivi tranquillamenta i nuovi post in riferimento alla nuova lingua :)
      *
      * Lo stesso ragionamento vale anche per la tabella delle categorie che trovi sotto.
      */
@@ -611,9 +614,9 @@ class CeceppaML {
 //    }
 
     /**
-     * Creo la tabella che conterr‡† gli abbinamenti tra le categorie.
+     * Creo la tabella che conterr√†¬† gli abbinamenti tra le categorie.
      *
-     * Anche in questo caso per rendere pi˘ flessibile il plugin utilizzo una tabella a 4 colonne:
+     * Anche in questo caso per rendere pi√π flessibile il plugin utilizzo una tabella a 4 colonne:
      *
      *  cml_cat_lang_1 - id della lingua 1
      *  cml_cat_id_1      - id della categoria della lingua 1
@@ -685,7 +688,7 @@ class CeceppaML {
     }
 
   /*
-   * Filtro gli articoli pi˘ letti aggiungendo alla
+   * Filtro gli articoli pi√π letti aggiungendo alla
    * query la condizione sugli id dei post
    */
   function filter_least_read_post($query, $pos) {
@@ -700,7 +703,7 @@ class CeceppaML {
   }
 
   /*
-   * Filtro gli articoli pi˘ commentati aggiungendo nella
+   * Filtro gli articoli pi√π commentati aggiungendo nella
    * query la condizione sugli id dei post
    */
   function filter_most_commented($query, $pos) {
@@ -727,7 +730,7 @@ class CeceppaML {
   }
 
     /**
-     * Aggiungo il filtro "lingua" alla pagina "Tutti gli articoli", cosÏ
+     * Aggiungo il filtro "lingua" alla pagina "Tutti gli articoli", cos√¨
      * posso filtrare l'elenco a solo gli articoli della lingua che mi interessa
      */
     function filter_all_posts_page() {
@@ -764,20 +767,20 @@ class CeceppaML {
   *
   */
   function filter_posts_by_language($wp_query) {
-        if(!is_search()) {
-            if(!is_home() || is_admin() || isCrawler()) return;
-        } else {
-            if(!$this->_filter_search) return;
+    if(!is_search()) {
+      if(!is_home() || is_admin() || isCrawler()) return;
+    } else {
+      if(!$this->_filter_search) return;
 
-            $this->update_current_lang();
-        }
+      $this->update_current_lang();
+    }
 
     global $wpdb;
 
     //Categoria base della lingua predefinita
     $cat = $wpdb->get_var(sprintf("SELECT cml_category_id FROM %s WHERE cml_default = 1", CECEPPA_ML_TABLE));
 
-    if(isset($_GET['lang'])) {
+    if(isset($_GET['lang'])) :
       $lang = $_GET['lang'];
 
       //Recupero la categoria base associata alla lingua
@@ -788,36 +791,33 @@ class CeceppaML {
       $cat = $c;
 
       if(!empty($lang)) {
-        $this->_current_lang = $lang;
-        $this->_current_lang_id = $this->get_language_id_by_category($cat_id);
+	$this->_current_lang = $lang;
+	$this->_current_lang_id = $this->get_language_id_by_category($cat);
       }
-    }
+    endif;
 
-    update_option('cml_current_lang', $this->_current_lang);
-    update_option('cml_current_lang_id', $this->_current_lang_id);
-
-    //Se non Ë stata specificata nessuna categoria "padre" per la lingua, recupero tutte quelle associate a questa lingua :)
+    //Se non √® stata specificata nessuna categoria "padre" per la lingua, recupero tutte quelle associate a questa lingua :)
     //Questo accade quando l'utente sceglie una struttura non ad albero
     if($cat == 0) {
       $cat = implode(",", $this->get_language_categories());
-      //Se $cat Ë vuoto, vuol dire che alla lingua non Ë stata assegnata alcuna categoria.. e ciÚ non Ë buono :)
+      //Se $cat √® vuoto, vuol dire che alla lingua non √® stata assegnata alcuna categoria.. e ci√≤ non √® buono :)
     }
 
-        //Recupero tutti i post associati alla lingua corrente
-        $posts = get_option("cml_relations_post_" . $this->_current_lang_id, array());
+    //Recupero tutti i post associati alla lingua corrente
+    $posts = get_option("cml_relations_post_" . $this->_current_lang_id, array());
 
-        //Recupero tutte le categorie dei posts
-        foreach($posts as $post) :
-            $c = get_the_category($post);
-            $cats[] = $c[0]->term_id;
-        endforeach;
-        if(!empty($cats)) $cat .= "," . join(",", $cats);
+    //Recupero tutte le categorie dei posts
+    foreach($posts as $post) :
+	$c = get_the_category($post);
+	@$cats[] = $c[0]->term_id;
+    endforeach;
+    if(!empty($cats)) $cat .= "," . join(",", $cats);
 
-        if(!empty($cat))
-          set_query_var('cat', $cat);
+    if(!empty($cat))
+      set_query_var('cat', $cat);
 
-        if(!empty($posts))
-            set_query_var('post__in', $posts);
+    if(!empty($posts))
+	set_query_var('post__in', $posts);
   }
 
     /*
@@ -847,7 +847,7 @@ class CeceppaML {
     }
   /**
     * Questa funzione si occupa di
-    * "Filtrare tutte le query WordPress allo scopo di filtrare automaticamente gli articoli pi˘ letti, pi˘ commentati, etcÖ"
+    * "Filtrare tutte le query WordPress allo scopo di filtrare automaticamente gli articoli pi√π letti, pi√π commentati, etc¬Ö"
     *
     * Invece di:
     *   1) recuperare tutte le categorie associate alla lingua
@@ -858,16 +858,15 @@ class CeceppaML {
     * eseguire anche il punto 2
   */
   function filter_query($query) {
-    //Filtro la query "Articoli pi˘ letti" (Least Read Post)
+    //Filtro la query "Articoli pi√π letti" (Least Read Post)
     $pos = strpos($query, 'ORDER BY m.meta_value');
     if(FALSE === $pos)
     {
     } else {
       return $this->filter_least_read_post($query, $pos);
     }
-    //echo $query;
     
-    //Articoli pi˘ commentati
+    //Articoli pi√π commentati
     $pos = strpos($query, 'ORDER BY comment_count');
     if(FALSE === $pos)
     {
@@ -904,7 +903,7 @@ class CeceppaML {
   function get_category_id($cat_name){
     $term = get_term_by('name', $cat_name, 'category');
 
-    return $term->term_id;
+    return (is_object($term)) ? $term->term_id : $term;
   }
 
   /**
@@ -959,24 +958,25 @@ class CeceppaML {
   function get_language_id_by_post_id($post_id) {
     global $wpdb;
 
-        //E' stata specificata una lingua "manuale"?
-        $val = get_option("cml_post_lang_$post_id", 0);
-        if($val > 0) return $val;
+    //E' stata specificata una lingua "manuale"?
+    $val = get_option("cml_post_lang_$post_id", 0);
+    if($val > 0) return $val;
 
     $cats = get_the_category($post_id);
+    if(empty($cats)) return $this->_default_language_id;
 
-        $cats_id = $cats[0]->term_id;
-        $val = get_option("cml_category_lang_$cat_id");
+    $cats_id = $cats[0]->term_id;
+    $val = get_option("cml_category_lang_$cats_id");
 
-        /*
-         * Alla categoria non Ë stata associata alcuna lingua,
-         * controllo nella tabella CECEPPA_ML_POSTS se Ë stata associata
-         * direttamente all'articolo
-         */
-        if(empty($val)) :
-            $query = sprintf("SELECT cml_post_lang_1 FROM %s WHERE cml_post_id_1 = %d", CECEPPA_ML_POSTS, $post_id);
-            $val = $wpdb->get_var($query);
-        endif;
+    /*
+      * Alla categoria non √® stata associata alcuna lingua,
+      * controllo nella tabella CECEPPA_ML_POSTS se √® stata associata
+      * direttamente all'articolo
+      */
+    if(empty($val)) :
+	$query = sprintf("SELECT cml_post_lang_1 FROM %s WHERE cml_post_id_1 = %d", CECEPPA_ML_POSTS, $post_id);
+	$val = $wpdb->get_var($query);
+    endif;
 
     return $val;
   }
@@ -984,12 +984,12 @@ class CeceppaML {
   function get_language_id_by_page_id($page_id) {
     global $wpdb;
 
-        //Se Ë stata scelta una struttura ad albero, recupero il padre e dal padre la lingua correntta
+        //Se √® stata scelta una struttura ad albero, recupero il padre e dal padre la lingua correntta
     $parent_id = $this->get_page_parent_by_id($page_id);
     $r = $wpdb->get_var(sprintf("SELECT id FROM %s WHERE cml_page_id = %d", CECEPPA_ML_TABLE, $parent_id));
         
         /*
-         * Non Ë stata scelta una struttra ad albero...
+         * Non √® stata scelta una struttra ad albero...
          * Recupero dalla tabella CECEPPA_ML_POSTS la lingua della pagina, se specificata
          */
         if(empty($r)) {
@@ -1037,7 +1037,7 @@ class CeceppaML {
 
           list($lang, $lang_slug) = explode("@", $_POST['flags'][$i]);
           
-          //Se Ë vuoto, Ë una "nuova lingua"
+          //Se √® vuoto, √® una "nuova lingua"
           if(empty($id)) {
             if(!empty($_POST['language'][$i])) {
               $query = sprintf("INSERT INTO %s (cml_default, cml_flag, cml_language_slug, cml_language, cml_category_id, cml_category_name, cml_category_slug, cml_locale, cml_notice_post, cml_notice_page, cml_notice_category, cml_page_id, cml_page_slug, cml_enabled) VALUES('%d', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%d')",
@@ -1077,7 +1077,7 @@ class CeceppaML {
               }
       //     }
 
-        //Eseguo solo se la query nn Ë vuota :)
+        //Eseguo solo se la query nn √® vuota :)
         if(!empty($query)) {
           $wpdb->query($query);
 
@@ -1221,7 +1221,7 @@ class CeceppaML {
   function post_meta_box($tag) {
     global $wpdb;
     
-        wp_enqueue_script('ceceppa-tipsy');
+    wp_enqueue_script('ceceppa-tipsy');
     wp_enqueue_script('ceceppaml-js');
     wp_enqueue_style('ceceppaml-style');
     wp_enqueue_style('ceceppaml-dd');
@@ -1229,92 +1229,89 @@ class CeceppaML {
 
     $langs = cml_get_languages();
 
-        //Ho specificato in quale lingua sar‡ il nuovo post?
-        if(array_key_exists("post-lang", $_GET) || array_key_exists("page-lang", $_GET)) {
-            $post_lang = intval($_GET['post-lang']) + intval($_GET['page-lang']);
-        }
+    //Ho specificato in quale lingua sar√† il nuovo post?
+    if(array_key_exists("post-lang", $_GET) || array_key_exists("page-lang", $_GET)) {
+      $post_lang = intval($_GET['post-lang']) + intval($_GET['page-lang']);
+    }
 
-        //Lingua dell'articolo
+    //Lingua dell'articolo
     echo "<h4>" . __('Language of this post', 'ceceppaml') . "</h4>";
-        $lang_id = empty($post_lang) ? $this->get_language_id_by_post_id($tag->ID) : $post_lang;
-        cml_dropdown_langs("post_lang", $lang_id, false, true);
+    $lang_id = empty($post_lang) ? $this->get_language_id_by_post_id($tag->ID) : $post_lang;
+    cml_dropdown_langs("post_lang", $lang_id, false, true);
 
-        echo "<h4>" . __('Link to post', 'ceceppaml') . "</h4>";
+    echo "<h4>" . __('Link to post', 'ceceppaml') . "</h4>";
     echo "<select name='linked_post' style=\"width:100%\" class='link-category'>";
     echo "<option value=''>" . __('No post linked', 'ceceppaml') . "</option>";
 
-        //Ho passato come parametro l'id del post da collegare?
-        if(array_key_exists("link-to", $_GET)) {
-            $linked_post = intval($_GET['link-to']);
-        }
-
-    foreach($langs as $lang) {
-      //Recupero tutte le categorie associate alla lingua
-            $cats = $this->get_language_categories($lang->id);
-
-            if($cats == 0) continue;
-
-      $args = array('category' => "$cats", 'numberposts' => -1, 'order' => 'ASC', 'orderby' => 'title', 'status' => 'publish');
-      $posts = get_posts($args);
-
-      //Recupero l'id del post collegato
-      $t_id = $tag->ID;
-      $linked_to = $wpdb->get_var(sprintf("SELECT cml_post_id_2 FROM %s WHERE cml_post_id_1 = %d",
-                      CECEPPA_ML_POSTS, $t_id));
-
-            $linked_post = (empty($linked_to)) ? $linked_post : $linked_to;
-      echo "<option class='lang-separator'>$lang->cml_language</option>";
-      foreach($posts as $post) :
-        $selected = ($post->ID == $linked_post) ? "selected" : "";
-        $id = $post->ID;
-        $parent_id = $this->get_language_id_by_post_id($id);
-
-        //echo "parent $parent_id";
-        $flag = cml_get_flag_by_lang_id($parent_id);
-        echo "<option value=\"$parent_id@$id\" data-image=\"$flag\" $selected>&nbsp;&nbsp;&nbsp;" . $post->post_title . "</option>";
-      endforeach;
+    //Ho passato come parametro l'id del post da collegare?
+    if(array_key_exists("link-to", $_GET)) {
+      $linked_post = intval($_GET['link-to']);
     }
+
+    //Recupero l'id del post collegato
+    $t_id = $tag->ID;
+    $linked_to = $wpdb->get_var(sprintf("SELECT cml_post_id_2 FROM %s WHERE cml_post_id_1 = %d",
+		    CECEPPA_ML_POSTS, $t_id));
+
+    //Elenco degli articoli
+    $args = array('numberposts' => -1, 'order' => 'ASC', 'orderby' => 'title', 'posts_per_page' => 9999,
+		    'status' => 'publish,inherit,pending,private,future,draft');
+
+    $posts = new WP_Query($args);
+
+    //Scorro gli articoli
+    $linked_post = (empty($linked_to)) ? $linked_post : $linked_to;
+    while($posts->have_posts()) :
+      $posts->next_post();
+
+      $id = $posts->post->ID;
+      $selected = ($id == $linked_post) ? "selected" : "";
+
+      $lang_id = $this->get_language_id_by_post_id($id);
+      $flag = cml_get_flag_by_lang_id($lang_id);
+      echo "<option value=\"$lang_id@$id\" data-image=\"$flag\" $selected>&nbsp;&nbsp;&nbsp;" . get_the_title($id) . "</option>";
+    endwhile;
     echo "</select>";
         
-        //Visualizzo le traduzioni disponibili per l'articolo, oppure i tasti + per aggiungerne una
-        ?>
-        <div class="cml-box-translations">
-            <h4><?php _e('Translations:', 'ceceppaml') ?></h4>
-            <ul>
-        <?php
-            $id = $this->get_language_id_by_post_id($t_id);
+      //Visualizzo le traduzioni disponibili per l'articolo, oppure i tasti + per aggiungerne una
+      ?>
+      <div class="cml-box-translations">
+	  <h4><?php _e('Translations:', 'ceceppaml') ?></h4>
+	  <ul>
+      <?php
+	$id = $this->get_language_id_by_post_id($t_id);
 
-            foreach($langs as $lang) :
-                if($lang->id != $id) :
+	foreach($langs as $lang) :
+	  if($lang->id != $id) :
 
-                $link = cml_get_linked_post($id, null, $t_id, $lang->id);
-                $href = empty($link) ? (get_bloginfo("url") . "/wp-admin/post-new.php?link-to=$t_id&post-lang=$lang->id") : get_edit_post_link($link);
-                $icon = empty($link) ? "add" : "go";
-                $title = empty($link) ? __('Translate post', 'ceceppaml') : __('Edit post', 'ceceppaml');
-                $msg = empty($link) ? __('Add translation', 'ceceppaml') : __('Switch to post/page', 'ceceppaml');
-        ?>
-            <li class="<?php echo empty($link) ? "no-translation" : "" ?> _tipsy" title="<?php echo $msg ?>">
-                <a href="<?php echo $href ?>">
-                    <img src="<?php echo cml_get_flag_by_lang_id($lang->id, "small") ?>" title="<?php echo $lang->cml_language ?>" />
-                    <?php if(!empty($link)) { ?>
-                    <span class="cml_add_text"><?php echo  get_the_title($link) ?></span>
-                    <?php } ?>
-                    <span class="cml_add_button">
-                            <!-- <img class="add" src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/<?php echo $icon ?>.png" title="<?php echo $title ?>" width="12" /> -->
-                    </span>
-                </a>
-            </li>
-        <?php endif; ?>
-        <?php endforeach; ?>
-            </ul>
-        </div>
-        <?php
+	  $link = cml_get_linked_post($id, null, $t_id, $lang->id);
+	  $href = empty($link) ? (get_bloginfo("url") . "/wp-admin/post-new.php?link-to=$t_id&post-lang=$lang->id") : get_edit_post_link($link);
+	  $icon = empty($link) ? "add" : "go";
+	  $title = empty($link) ? __('Translate post', 'ceceppaml') : __('Edit post', 'ceceppaml');
+	  $msg = empty($link) ? __('Add translation', 'ceceppaml') : __('Switch to post/page', 'ceceppaml');
+      ?>
+	  <li class="<?php echo empty($link) ? "no-translation" : "" ?> _tipsy" title="<?php echo $msg ?>">
+	      <a href="<?php echo $href ?>">
+		  <img src="<?php echo cml_get_flag_by_lang_id($lang->id, "small") ?>" title="<?php echo $lang->cml_language ?>" />
+		  <?php if(!empty($link)) { ?>
+		  <span class="cml_add_text"><?php echo  get_the_title($link) ?></span>
+		  <?php } ?>
+		  <span class="cml_add_button">
+			  <!-- <img class="add" src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/<?php echo $icon ?>.png" title="<?php echo $title ?>" width="12" /> -->
+		  </span>
+	      </a>
+	  </li>
+      <?php endif; ?>
+      <?php endforeach; ?>
+	  </ul>
+      </div>
+      <?php
   }
 
   function page_meta_box($tag) {
     global $wpdb;
 
-        wp_enqueue_script('ceceppa-tipsy');
+    wp_enqueue_script('ceceppa-tipsy');
     wp_enqueue_script('ceceppaml-js');
     wp_enqueue_style('ceceppaml-style');
     wp_enqueue_style('ceceppaml-dd');
@@ -1323,10 +1320,12 @@ class CeceppaML {
     $linked_page = $wpdb->get_var(sprintf("SELECT cml_post_id_2 FROM %s WHERE cml_post_id_1 = %d",
                                                                             CECEPPA_ML_PAGES, $tag->ID));
 
-        $page_lang = array_key_exists("page-lang", $_GET) ? intval($_GET['page-lang']) : get_option("cml_page_lang_$tag->ID");
-        $linked = array_key_exists("page-lang", $_GET) ? intval($_GET['link-to']) : $linked_page;
+    $page_lang = array_key_exists("page-lang", $_GET) ? intval($_GET['page-lang']) : get_option("cml_page_lang_$tag->ID");
+    $linked = array_key_exists("page-lang", $_GET) ? intval($_GET['link-to']) : $linked_page;
 
-    $pages = get_pages();
+    $args = array('post_status' => 'publish,inherit,pending,private,future,draft',
+		  'post_type' => 'page');
+    $pages = get_pages($args);
 
     echo "<h4>" . __('Language of this page', 'ceceppaml') . "</h4>";
     cml_dropdown_langs("page_lang", $page_lang);
@@ -1335,21 +1334,18 @@ class CeceppaML {
     echo "<select name=\"linked_page\" class=\"linked_page\">";
     echo "<option>" . __('No page linked', 'ceceppaml') . "</option>";
     foreach ( $pages as $page ) :
-
       //Recupero il padre della pagina corrente per sapere a quale lingua appartiene
       $parent = $page->post_parent;
-
       $page_parent = $this->get_page_parent($page);
 
       //Lingua della pagina
-            $page_lang = $this->get_language_id_by_page_id($page);
+      $page_lang = $this->get_language_id_by_page_id($page);
       if(empty($page_lang)) {
-                $page_lang = get_option("cml_page_lang_$page_parent");
+	$page_lang = get_option("cml_page_lang_$page_parent");
       }
 
       $selected = ($page->ID == $linked) ? "selected" : "";
-
-            $flag = cml_get_flag_by_lang_id($page_lang);
+      $flag = cml_get_flag_by_lang_id($page_lang);
 
       $option = "<option value=\"$page_lang@$page->ID\" data-image=\"$flag\" $selected>";
       $option .= $page->post_title;
@@ -1398,7 +1394,7 @@ class CeceppaML {
 
   function redirect_browser() {
     /*
-     * Se  non Ë abilitato il redirect del browser nella homepage
+     * Se  non √® abilitato il redirect del browser nella homepage
      * devo filtrare i contenuti in base alla lingua corrente
      */
     if($this->_redirect_browser == 'nothing' || isCrawler()) return;
@@ -1413,7 +1409,7 @@ class CeceppaML {
       return;
     }
 
-    //Recupero info sulla disponibilit‡ della lingua del browser
+    //Recupero info sulla disponibilit√† della lingua del browser
     global $wpdb;
 
     $lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
@@ -1455,7 +1451,7 @@ class CeceppaML {
       $locale[] = str_replace("-", "_", $code2);
     endforeach;
 
-    //Controllo se la lingua del browser Ë tra quelle gestite, se non lo Ë non visualizzo alcun messaggio.
+    //Controllo se la lingua del browser √® tra quelle gestite, se non lo √® non visualizzo alcun messaggio.
     $browser_lang_id = $this->get_language_id_by_locale(array_unique($locale));
     if(empty($browser_lang_id)) return $content;
 
@@ -1520,7 +1516,7 @@ class CeceppaML {
             //Lingua della categoria
       $cat_lang = intval($_POST['cat_lang']);
 
-      //Se Ë stata scelta una categoria "genitore", recupero la lingua corretta dalla categoria padre
+      //Se √® stata scelta una categoria "genitore", recupero la lingua corretta dalla categoria padre
       $category = get_category($term_id);
       $parent = $category->category_parent;
       if($parent > 0) {
@@ -1553,7 +1549,7 @@ class CeceppaML {
         $wpdb->query($query);
       }
 
-      //Aggiungo un record se Ë stata specificata la categoria o la lingua collegata :)
+      //Aggiungo un record se √® stata specificata la categoria o la lingua collegata :)
       if($linked_cat >= 0 || $cat_lang > 0) {
         $query = sprintf("INSERT INTO %s (cml_cat_lang_1, cml_cat_id_1, cml_cat_lang_2, cml_cat_id_2) VALUES ('%d', '%d', '%d', '%d')",
               CECEPPA_ML_CATS,
@@ -1575,10 +1571,10 @@ class CeceppaML {
 
       $this->save_extra_category_update_posts($term_id, $cat_lang);
 
-            $keys = array_keys($_POST['cat_name']);
-            foreach($keys as $key) :
-                update_option("cml_category_" . $term_id . "_lang_$key", $_POST['cat_name'][$key]);
-            endforeach;
+      $keys = array_keys($_POST['cat_name']);
+      foreach($keys as $key) :
+	  update_option("cml_category_" . $term_id . "_lang_$key", $_POST['cat_name'][$key]);
+      endforeach;
 
       update_option("cml_category_$term_id", $linked_cat);
       update_option("cml_category_lang_$term_id", $cat_lang);
@@ -1618,61 +1614,58 @@ class CeceppaML {
       global $wpdb;
 
       $post_id = $term_id;
-      if (isset($_POST['linked_post'])) {
-              $query = "";
+      if(isset($_POST['linked_post'])) {
+	  $query = "";
 
-              list($linked_lang, $linked_post) = split("@", $_POST['linked_post']);
-      
-                //Recupero dalla mia tabella l'id della lingua :)
-                if(empty($_POST['post_lang']))
-                    $post_lang = $this->get_language_id_by_post_id($term_id);
-                else
-                    $post_lang = intval($_POST['post_lang']);
+	  list($linked_lang, $linked_post) = split("@", $_POST['linked_post']);
+  
+	  //Recupero dalla mia tabella l'id della lingua :)
+	  if(empty($_POST['post_lang']))
+	    $post_lang = $this->get_language_id_by_post_id($term_id);
+	  else
+	    $post_lang = intval($_POST['post_lang']);
 
-                //Elimino i vecchi collegamenti presenti nel database
-                $query = sprintf("SELECT id FROM %s WHERE cml_post_id_1 = %d",
-                            CECEPPA_ML_POSTS, intval($post_id));
-                $id = intval($wpdb->get_var($query));
-                if($id > 0) {
-                    $query = "DELETE FROM " . CECEPPA_ML_POSTS . " WHERE id = " .intval($id);
-                    $wpdb->query($query);
-                }
+	  //Elimino i vecchi collegamenti presenti nel database
+	  $query = sprintf("SELECT id FROM %s WHERE cml_post_id_1 = %d", CECEPPA_ML_POSTS, intval($post_id));
+	  $id = intval($wpdb->get_var($query));
+	  if($id > 0) {
+	      $query = "DELETE FROM " . CECEPPA_ML_POSTS . " WHERE id = " .intval($id);
+	      $wpdb->query($query);
+	  }
 
-                $query = "";
+	  $query = "";
+	  if(intval($linked_post) > 0) {
+	      $query = sprintf("INSERT INTO %s (cml_post_lang_1, cml_post_id_1, cml_post_lang_2, cml_post_id_2) VALUES ('%d', '%d', '%d', '%d')",
+			  CECEPPA_ML_POSTS,
+			  intval($post_lang),
+			  intval($post_id),
+			  intval($linked_lang),
+			  intval($linked_post));
+	  
+	  }
 
-                if(intval($linked_post) > 0) {
-                    $query = sprintf("INSERT INTO %s (cml_post_lang_1, cml_post_id_1, cml_post_lang_2, cml_post_id_2) VALUES ('%d', '%d', '%d', '%d')",
-                                CECEPPA_ML_POSTS,
-                                intval($post_lang),
-                                intval($post_id),
-                                intval($linked_lang),
-                                intval($linked_post));
-                
-                }
-
-                if(!empty($query))
-              $wpdb->query($query);
+	  if(!empty($query)) $wpdb->query($query);
       }
       
       if(isset($_POST['linked_page']))
-                $this->save_extra_page_fields($term_id);
+	$this->save_extra_page_fields($term_id);
 
-            update_option("cml_post_lang_$term_id", $post_lang);
+      update_option("cml_post_lang_$term_id", $post_lang);
 
-            //Aggiorno la variabile contenente le relazioni tra post e lingua
-            $posts = get_option("cml_relations_post_$post_lang", array());
-            $posts[] = $term_id;
-            update_option("cml_relations_post_$post_lang", $posts);
+      //Aggiorno la variabile contenente le relazioni tra post e lingua
+      $posts = get_option("cml_relations_post_$post_lang", array());
+      $posts[] = $term_id;
+      update_option("cml_relations_post_$post_lang", $posts);
   }
 
-    function delete_extra_post_fields($id) {
-        global $wpdb;
+  function delete_extra_post_fields($id) {
+    global $wpdb;
 
-        $sql = sprintf("DELETE FROM %s WHERE cml_post_id_1 = %d OR cml_post_id_2 = %d",
-                                     CECEPPA_ML_POSTS, $id, $id);
+    $sql = sprintf("DELETE FROM %s WHERE cml_post_id_1 = %d OR cml_post_id_2 = %d",
+				  CECEPPA_ML_POSTS, $id, $id);
 
-        $wpdb->query($sql);
-    }
+    $wpdb->query($sql);
+  }
 
   function save_extra_page_fields($page_id) {
         global $wpdb;
@@ -1684,9 +1677,9 @@ class CeceppaML {
         $page_parent = $this->get_page_parent_by_id($page_id);
         $page_lang = intval($_POST['page_lang']);
 
-        //Se Ë stata specificata la pagina padre, recupero l'info della lingua da questa :)
+        //Se √® stata specificata la pagina padre, recupero l'info della lingua da questa :)
         if($page_parent != $page_id && $page_parent > 0) {
-            //Recupero la lingua corretta se Ë stata scelta una struttura ad albero
+            //Recupero la lingua corretta se √® stata scelta una struttura ad albero
             $page_lang = $wpdb->get_var(sprintf("SELECT id FROM %s WHERE cml_page_id = %d",
                                     CECEPPA_ML_TABLE, $page_parent));
             
@@ -1754,10 +1747,10 @@ class CeceppaML {
 
             /*
              * posso modificare il locale solo prima che wp inizi a "stampare"
-             * il contenuto della pagina (o cosÏ mi Ë sembrato di capire), putroppo
+             * il contenuto della pagina (o cos√¨ mi √® sembrato di capire), putroppo
              * i metodi is_single(), is_page(), etc... non sono disponibili prima che wordpress
              * abbia stampato l'header della pagina.
-             * A questo punto perÚ non posso pi˘ modificare il locale :O
+             * A questo punto per√≤ non posso pi√π modificare il locale :O
              * quindi ho trovato sta "toppa" che permette di recuperare l'id della pagina/post
              * e di conseguenza riesco a modificare il locale prima che qualsiasi output venga inviato
              * al browser :)
@@ -1771,7 +1764,7 @@ class CeceppaML {
                     $lid = $this->get_language_id_by_post_id($id);
                     $l = $this->get_language_locale_by_id($lid);
                 } else {
-                    $l = $this->get_language_locale_by_id($this->get_default_lang_id);
+                    $l = $this->get_language_locale_by_id($this->get_default_lang_id());
                 }
             }
 
@@ -1800,7 +1793,7 @@ class CeceppaML {
    *
    * In fase di creazione delle categorie relative alle altre lingue che vogliamo configurare non ho a disposizione
    * l'id della lingua in quanto il collegamento tra lingua e categoria, passo 2, avviene in un secondo momento,
-   * oppure perchË l'utente apporta delle modifiche alle lingue in un secondo momento.
+   * oppure perch√® l'utente apporta delle modifiche alle lingue in un secondo momento.
    *
    * Quindi quando eseguo il passo 2 vado a correggere nella tabella delle categorie l'id della lingua "collegata"
    */
@@ -1893,7 +1886,7 @@ class CeceppaML {
 
     $lang = ""; //$_COOKIE['cml_current_lang'];
         
-        //Serve a far sÏ che "il cambio menu" funzioni correttamente anche
+        //Serve a far s√¨ che "il cambio menu" funzioni correttamente anche
         //con il permalink di default: ?p=#
         $the_id = get_the_ID();
         $permalink = get_option("permalink_structure");
@@ -1936,7 +1929,7 @@ class CeceppaML {
             $mods = get_theme_mods();
             $locations = get_theme_mod('nav_menu_locations');
 
-            //Se non inizia per cml_ allora sar‡ quella definita dal tema :)
+            //Se non inizia per cml_ allora sar√† quella definita dal tema :)
             if(is_array($locations)) :
                 $keys = array_keys($locations);
                 foreach($keys as $key) :
@@ -1962,7 +1955,7 @@ class CeceppaML {
                                              'form_class' => $this->_filte_form_class);
                 wp_localize_script('ceceppa-search', 'cml_object', $array);
 
-                //Evito che esegua pi˘ di una volta questo if
+                //Evito che esegua pi√π di una volta questo if
                 //$this->_filter_search = false;
             }
 
@@ -1995,7 +1988,7 @@ class CeceppaML {
    *  1) Se ho utilizzato una struttura ad albero:
    *    - recupero la categoria padre associata alla lingua, e poi tutte le categorie figlie
    *  2) Se ho associato ogni categoria della lingua corrente in un'altra lingua:
-   *    - recupero le associazioni dalla tabella "CECEPPA_ML_CATS" ed il gioco Ë fatto
+   *    - recupero le associazioni dalla tabella "CECEPPA_ML_CATS" ed il gioco √® fatto
    *  3) Ho specificato la lingua per ogni categoria
    *
    * @return array contenente le categorie
@@ -2003,12 +1996,12 @@ class CeceppaML {
   function get_language_categories($lang_id = "") {
     global $wpdb;
 
-        if(empty($lang_id)) $lang_id = $this->_current_lang_id;
+    if(empty($lang_id)) $lang_id = $this->_current_lang_id;
     $cats = array();
 
     if($this->get_language_category($lang_id) > 0) {
       /*
-       * Se Ë stata utilizzata una struttura ad albero, recupero l'id del padre e di tutti i figli
+       * Se √® stata utilizzata una struttura ad albero, recupero l'id del padre e di tutti i figli
        */
       $args = array(
         'type'                     => 'post',
@@ -2051,27 +2044,37 @@ class CeceppaML {
    * Recupero tutti gli id dei post collegati alla lingua
    *
    * @param cats - id delle categorie appartenenti alla lingua
-   *                il parametro Ë facoltativo, se non specificato viene richiamata la funzione get_language_categories();
+   *                il parametro √® facoltativo, se non specificato viene richiamata la funzione get_language_categories();
    *
    * @return gli id dei post associati a quelle categorie
    */
-  function get_language_posts($cats = null) {
-    if(empty($cats)) $cats = $this->get_language_categories();
+  function get_language_posts($cats = null, $lang = null) {
+    if(empty($lang)) $lang = $this->_current_lang_id;
+    if(empty($cats)) $cats = $this->get_language_categories($lang);
     if(empty($cats)) return array();
 
-        $args = array('category' => implode(",", $cats),
-                                    'post_type' => 'post',
-                                    'numberposts' => 9999,
-                                    'post_status' => 'publish');
+    //Se alla categoria √® stata assegnata una lingua in particolare la prendo, senno la scarto :)
+    foreach($cats as $cat) :
+      $c_lang = get_option("cml_category_lang_$cat");
+      if(!empty($c_lang) && $c_lang == $lang) :
+	$args = array('category' => implode(",", $cats),
+				    'post_type' => 'post',
+				    'numberposts' => 9999,
+				    'post_status' => 'publish');
 
-        $posts = get_posts($args);
+	$posts = get_posts($args);
+	foreach($posts as $post) :
+	    $posts_id[] = $post->ID;
+	endforeach;
+      endif;
+    endforeach;
 
-        foreach($posts as $post) :
-            $posts_id[] = $post->ID;
-        endforeach;
+    $ids = get_option("cml_relations_post_" . $lang, array());
+    foreach($ids as $id) :
+      $posts_id[] = $id;
+    endforeach;
 
-        $ids = get_option("cml_relations_post_" . $this->_current_lang_id, array());
-    //$post_id puÚ essere vuoto quando non esiste alcun articolo associato alla lingua
+    //$post_id pu√≤ essere vuoto quando non esiste alcun articolo associato alla lingua
     return !empty($posts_id) ? array_unique($posts_id) : array();
   }
   
@@ -2088,7 +2091,7 @@ class CeceppaML {
 
         if(!empty($parent)) {
       /*
-       * Se Ë stata utilizzata una struttura ad albero, recupero l'id del padre e di tutti i figli
+       * Se √® stata utilizzata una struttura ad albero, recupero l'id del padre e di tutti i figli
        */
       $args = array(
         'post_type'    => 'page',
@@ -2187,7 +2190,7 @@ class CeceppaML {
       $table = CECEPPA_ML_PAGES;
     }
 
-    //Recupero tutti i post collegati a quello che l'utente st‡ visualizzando
+    //Recupero tutti i post collegati a quello che l'utente st√† visualizzando
     $post_ids = array(get_the_ID());
     $results = $wpdb->get_results(sprintf("SELECT * FROM %s WHERE %s = %d OR %s = %d",
                                           $table, $id_1, get_the_ID(), $id_2, get_the_ID()));
@@ -2251,14 +2254,14 @@ class CeceppaML {
             foreach($plinks as $plink) :
                 //Cerco la traduzione della categoria nella lingua del post :)
                 $_cat = get_category_by_slug($plink);
-								$id = $_cat->term_id;
+		$id = $_cat->term_id;
 
                 if(!empty($plink)) :
-									$cat = strtolower(get_option("cml_category_" . $id . "_lang_" . $lang_id, $plink));
-									$url = str_replace(" ", "-", $cat);
-									$url = urlencode($url);
-									$cats[] = $url;
-							endif;
+		  $cat = strtolower(get_option("cml_category_" . $id . "_lang_" . $lang_id, $plink));
+		  $url = str_replace(" ", "-", $cat);
+		  $url = urlencode($url);
+		  $cats[] = $url;
+		endif;
             endforeach;
 
             //Ricreo il permalink con le categorie tradotte... :)
@@ -2285,15 +2288,26 @@ class CeceppaML {
     }
     
     function translate_term_name($name) {
-        if($this->_current_lang_id == $this->_default_language_id) return $name;
+	if($this->_current_lang_id == $this->_default_language_id) return $name;
 
-        $id = get_cat_ID($name);
-        if(!empty($id)) :
+	$depth = 0;
+	$pos = strpos($name, " ");
+	$simbolo = html_entity_decode("&#8212;");
+	if($pos !== FALSE) :
+	  $depth = substr_count($name, $simbolo);
+
+	  $name = str_replace($simbolo, "", $name);
+	endif;
+
+	$id = get_cat_ID(trim($name));
+        if($id > 0) :
             $lang = $this->_current_lang_id;
-            $name     = get_option("cml_category_$id_lang_$lang", $name);
+
+            $n = get_option("cml_category_" . $id . "_lang_" . $lang);
+            $name = empty($n) ? $name : $n;
         endif;
 
-        return $name;
+        return str_repeat($simbolo . " ", $depth) . $name;
     }
     
     function translate_term_link($link) {
@@ -2303,6 +2317,39 @@ class CeceppaML {
 
         $slug = strtolower($this->get_language_slug_by_id($lang_id));
         return $link . "?lang=$slug&ht=1";
+    }
+    
+    function translate_object_terms($obj) {
+      if(empty($obj)) return $obj;
+
+      if(is_object($obj)) :
+	if($obj->taxonomy == 'category') {
+	  $term_id = $obj->term_id;
+	  $post_id = (isset($obj->object_id)) ? $obj->object_id : -1;
+	  
+	  if($post_id > 1 || $this->_current_lang_id != $this->_default_language_id) :
+	    $lang = ($post_id > 1) ? $this->get_language_id_by_post_id($post_id) : $this->_current_lang_id;
+	    if($lang == $this->_default_language_id) return $obj;	//La lingua del post √® la stessa di quella dell'articolo?
+
+	    $n = get_option("cml_category_" . $term_id . "_lang_" . $lang);
+	    $obj->name = empty($n) ? $obj->name : $n;
+	  endif;
+	}
+	
+	return $obj;
+      endif;
+
+      if(is_array($obj)) :
+	foreach($obj as $o) :
+	  $nobj[] = $this->translate_object_terms($o);
+	endforeach;
+      endif;
+      
+      return $nobj;
+    }
+    
+    function translate_category($name) {
+      return $this->translate_term_name($name);
     }
 }
 

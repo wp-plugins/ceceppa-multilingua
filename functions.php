@@ -207,7 +207,6 @@ function cml_translate($string, $id) {
   $ret = $wpdb->get_var(sprintf("SELECT cml_translation FROM %s WHERE cml_text = '%s' AND cml_lang_id = %d",
 			  CECEPPA_ML_TRANS, $string, $id));
 
-//     return utf8_decode($ret);
   return (!isset($ret)) ? $string : utf8_decode($ret);
 }
 
@@ -284,14 +283,15 @@ function cml_dropdown_langs($name, $default, $link = false, $none = false) {
 	
 	<?php
 	$id = $wpCeceppaML->get_current_lang_id();
-  $langs = cml_get_languages();
-  foreach($langs as $lang) :
-    $selected = ($lang->id == $default) ? "selected" : "";
+	  $langs = cml_get_languages();
+	  foreach($langs as $lang) :
+	    $selected = ($lang->id == $default) ? "selected" : "";
 
-		$value = (!$link) ? $lang->id : get_permalink(cml_get_linked_post($id, null, get_the_ID(), $lang->id));
-		$dataimage = 'data-image="' . cml_get_flag_by_lang_id($lang->id) . '"';
-    echo "<option $dataimage value=\"$value\" $selected>$lang->cml_language</option>";
-  endforeach;
+	    $value = (!$link) ? $lang->id : get_permalink(cml_get_linked_post($id, null, get_the_ID(), $lang->id));
+	    $dataimage = 'data-image="' . cml_get_flag_by_lang_id($lang->id) . '"';
+
+	    echo "<option $dataimage value=\"$value\" $selected>$lang->cml_language</option>";
+	  endforeach;
 
   echo "</select>";
 }
