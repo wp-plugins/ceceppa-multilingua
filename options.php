@@ -1,4 +1,4 @@
-	<div class="wrap">
+      <div class="wrap">
 	&nbsp;&nbsp; <h2><?php _e("Plugin configuration:", 'ceceppaml') ?></h2>
 
 <!-- Reindirizzamento -->

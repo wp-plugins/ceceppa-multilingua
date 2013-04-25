@@ -29,10 +29,11 @@ class CeceppaMLWidgetRecentPosts extends WP_Widget {
 
       $number = ($instance['number'] > 0) ? $instance['number'] : 10;
       
-      $the_query = new WP_Query(array('post_status'=>'publish',
+      $the_args = array('post_status'=>'publish',
 				      'post__in' => $wpCeceppaML->get_language_posts(),
 				      'orderby' => 'post_date',
-				      'order' => 'ASC'));
+				      'order' => 'ASC');
+      $the_query = new WP_Query($the_args);
 
       echo "<ul>\n";
       while($the_query->have_posts()) :
@@ -111,7 +112,7 @@ class CeceppaMLWidgetChooser extends WP_Widget {
     wp_enqueue_style('ceceppaml-widget-style');
 
     $title = apply_filters('widget_title', $instance['title'] );
-    $hide_title = intval($instance['hide-title']);
+    $hide_title = array_key_exists('hide-title', $instance) ? intval($instance['hide-title']) : 0;
 
     echo $before_widget;
     if (!empty($title) && $hide_title != 1)
