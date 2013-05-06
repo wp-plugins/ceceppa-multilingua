@@ -56,11 +56,11 @@
 					<td>
 						<strong><?php _e('Show the list flag of available languages on:', 'ceceppaml') ?></strong>
 						<blockquote>
-							<input type="checkbox" id="flags-on-posts" name="flags-on-posts" value="1" <?php echo ((get_option('cml_option_flags_on_post', 'flags-on-posts') == 1) ? 'checked' : '') ?> />
+							<input type="checkbox" id="flags-on-posts" name="flags-on-posts" value="1" <?php echo ((get_option('cml_option_flags_on_post', '1') == 1) ? 'checked' : '') ?> />
 							<label for="flags-on-posts"><?php _e('Posts', 'ceceppaml') ?></label> <br />
-							<input type="checkbox" id="flags-on-pages" name="flags-on-pages" value="1" <?php echo ((get_option('cml_option_flags_on_page', 'flags-on-pages') == 1) ? 'checked' : '') ?> />
+							<input type="checkbox" id="flags-on-pages" name="flags-on-pages" value="1" <?php echo ((get_option('cml_option_flags_on_page', '1') == 1) ? 'checked' : '') ?> />
 							<label for="flags-on-pages"><?php _e('Pages', 'ceceppaml') ?></label><br />
-							<input type="checkbox" id="flags-on-cats" name="flags-on-cats" value="1" <?php echo ((get_option('cml_option_flags_on_cats', 'flags-on-cats') == 1) ? 'checked' : '') ?> />
+							<input type="checkbox" id="flags-on-cats" name="flags-on-cats" value="1" <?php echo ((get_option('cml_option_flags_on_cats', '0') == 1) ? 'checked' : '') ?> />
 							<label for="flags-on-cats"><?php _e('Categories', 'ceceppaml') ?></label><br />
 						</blockquote>
 						<strong><?php _e('Where:', 'ceceppaml') ?></strong>

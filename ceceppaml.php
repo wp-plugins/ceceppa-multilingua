@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.8.1
+Version: 0.8.2
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -116,6 +116,11 @@ class CeceppaML {
       //Filtri
       add_filter('parse_query', array(&$this, 'filter_all_posts_query'));
       add_action( 'restrict_manage_posts', array(&$this, 'filter_all_posts_page'));
+      
+      /*
+      * Traduco i titoli dei Widget
+      */
+      add_filter('widget_title', array(&$this, 'admin_translate_widget_title'));
     } else {
       /*
       * Filtro gli articoli per lingua
@@ -1134,13 +1139,9 @@ class CeceppaML {
 	update_option("cml_option_post_redirect", $_POST['posts']);
 
       //Flags
-      update_option("cml_option_flags_on_pos", $_POST['flags_on_pos']);
-      if(array_key_exists("flags-on-cats", $_POST))
-      update_option("cml_option_flags_on_post", intval($_POST['flags-on-posts']));
-      if(array_key_exists("flags-on-posts", $_POST))
-      update_option("cml_option_flags_on_page", intval($_POST['flags-on-pages']));
-      if(array_key_exists("flags-on-cats", $_POST))
-	update_option("cml_option_flags_on_cats", intval($_POST['flags-on-cats']));
+      @update_option("cml_option_flags_on_post", intval($_POST['flags-on-posts']));
+      @update_option("cml_option_flags_on_page", intval($_POST['flags-on-pages']));
+      @update_option("cml_option_flags_on_cats", intval($_POST['flags-on-cats']));
 
       //Change locale
       update_option("cml_option_change_locale", intval($_POST['change-locale']));
@@ -1229,7 +1230,34 @@ class CeceppaML {
       endfor;
     }
 
-    include dirname(__FILE__) . '/translations.php';
+    //Evito che l'output vada a video
+    ob_start();
+    
+    //Richiamo la sidebar, così wordpress mi richiamerà la funzione admin_translate_widget_title per ogni titolo dei widget
+    global $wp_registered_sidebars;
+
+    ob_start();
+      if ( !function_exists('dynamic_sidebar') ) { //|| !dynamic_sidebar("Sidebar") ) {
+	echo "No widgets...";
+	return;
+      }
+
+      if(is_array($wp_registered_sidebars)) :
+	$keys = array_keys($wp_registered_sidebars);
+
+	foreach($keys as $key) :
+	  dynamic_sidebar($key);
+	endforeach;
+      endif;
+    
+    //Cancello l'output
+    ob_end_clean();
+
+    //Stampo a video i titoli
+    include dirname(__FILE__) . '/titles.php';
+    cml_widgets_title($this->_titles);
+
+    $this->_titles = "";
   }
 
   /**
@@ -1799,6 +1827,10 @@ class CeceppaML {
       return $title;
 
     return cml_translate($title, $this->_current_lang_id);
+  }
+
+  function admin_translate_widget_title($title) {
+    $this->_titles[] = $title;
   }
 
   /**
