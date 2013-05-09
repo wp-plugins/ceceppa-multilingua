@@ -28,18 +28,28 @@ class CeceppaMLWidgetRecentPosts extends WP_Widget {
       echo $before_title . $title . $after_title;
 
       $number = ($instance['number'] > 0) ? $instance['number'] : 10;
-      
+      $count = $number + 20;
+
+      $ids = $wpCeceppaML->get_language_posts();
       $the_args = array('post_status'=>'publish',
-				      'post__in' => $wpCeceppaML->get_language_posts(),
+				      'post__in' => $ids,
 				      'orderby' => 'post_date',
-				      'order' => 'ASC');
+				      'order' => 'ASC',
+				      'posts_per_page' => $number);
+
       $the_query = new WP_Query($the_args);
 
+      $i = 1;
       echo "<ul>\n";
       while($the_query->have_posts()) :
 	$the_query->next_post();
 
-	echo '<li><a href="' . get_permalink($the_query->post->ID) . '" title="' . get_the_title($the_query->post->ID) . '">' . get_the_title($the_query->post->ID) . '</a></li>';
+	if(in_array($the_query->post->ID, $ids)) :
+	  echo '<li><a href="' . get_permalink($the_query->post->ID) . '" title="' . get_the_title($the_query->post->ID) . '">' . get_the_title($the_query->post->ID) . '</a></li>';
+	  
+	  $i++;
+	  if($i > $number) break;
+	endif;
       endwhile;
       echo "</ul>\n";
 
