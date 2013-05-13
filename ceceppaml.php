@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.8.3
+Version: 0.8.4
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -97,6 +97,10 @@ class CeceppaML {
       add_action('edited_category', array(&$this, 'save_extra_category_fileds'));
       add_action('created_category', array(&$this, 'save_extra_category_fileds'));
       add_action('deleted_term_taxonomy', array(&$this, 'delete_extra_category_fields'));
+      add_action('edit_tag_form_fields', array(&$this, 'category_edit_form_fields'));
+      add_action('edited_term', array(&$this, 'save_extra_category_fileds'));
+      add_action('add_tag_form_fields', array(&$this, 'category_add_form_fields'));
+      add_action('created_term', array(&$this, 'save_extra_category_fileds'));
 
       /*
 	* Aggiungo il box di collegamento nei post e nelle pagine 
@@ -202,6 +206,7 @@ class CeceppaML {
 
       add_filter('wp_get_object_terms', array(&$this, 'translate_object_terms'));
       add_filter('list_cats', array(&$this, 'translate_category'));
+      add_filter('get_terms', array(&$this, 'translate_object_terms'));
     }
     
     //Update current language
@@ -424,6 +429,7 @@ class CeceppaML {
             endforeach;
         ?>
         </div>
+<!--
     <div class="form-field">
       <label for="linked_lang"><?php _e('Language of this category', 'ceceppaml'); ?></label>
       <?php cml_dropdown_langs("cat_lang", null); ?>
@@ -435,6 +441,7 @@ class CeceppaML {
             </label>
       <?php wp_dropdown_categories(array('hide_empty' => 0, 'name' => 'linked_cat', 'show_option_none' => ' ', 'hierarchical' => true)); ?>
     </div>
+-->
 <?php
   }
 
@@ -460,13 +467,15 @@ class CeceppaML {
 	    <?php echo $lang->cml_language ?>
 	</td>
 	<td>
-	    <input type="text" name="cat_name[<?php echo $lang->id ?>]" id="cat_name_<?php echo $lang->id ?>" size="40" value="<?php echo get_option("cml_category_" . $t_id . "_lang_$id", "k") ?>"/>
+	    <input type="text" name="cat_name[<?php echo $lang->id ?>]" id="cat_name_<?php echo $lang->id ?>" size="40" value="<?php echo get_option("cml_category_" . $t_id . "_lang_$id", $tag->name) ?>"/>
 	</td>
     </tr>
     <?php
 	    endif;
 	endforeach;
     ?>
+
+    <!--
     <tr class="form-field">
       <th scope="row" valign="top">
         <label for="cat_lang">
@@ -491,6 +500,7 @@ class CeceppaML {
         <span class="description"><?php _e('Select the category that you have to connect with to the one you are modifying', 'ceceppaml'); ?></span>
       </td>
     </tr>
+    -->
 <?php 
   }
 
@@ -1553,7 +1563,7 @@ class CeceppaML {
   function save_extra_category_fileds($term_id) {
     global $wpdb;
 
-    if(isset($_POST['linked_cat'])) {
+    //if(isset($_POST['linked_cat'])) {
       $query = "";
 
       //Categoria collegata
@@ -1624,12 +1634,17 @@ class CeceppaML {
 
       update_option("cml_category_$term_id", $linked_cat);
       update_option("cml_category_lang_$term_id", $cat_lang);
-    }
+    //}
   }
 
     function delete_extra_category_fields($term_id) {
-        delete_option("cml_category_$term_id");
-        delete_option("cml_category_lang_$term_id");
+      $langs = cml_get_languages();
+      foreach($langs as $lang) :
+	delete_option("cml_category" . $term_id . "_lang_" . $lang->id);
+      endforeach;
+
+      delete_option("cml_category_$term_id");
+      delete_option("cml_category_lang_$term_id");
     }
 
   /**
@@ -2335,26 +2350,29 @@ class CeceppaML {
     }
     
     function translate_term_name($name) {
-	if($this->_current_lang_id == $this->_default_language_id) return $name;
+      if($this->_current_lang_id == $this->_default_language_id) return $name;
+	
+      $depth = 0;
+      $pos = strpos($name, " ");
+      $simbolo = html_entity_decode("&#8212;");
+      if($pos !== FALSE) :
+	$depth = substr_count($name, $simbolo);
 
-	$depth = 0;
-	$pos = strpos($name, " ");
-	$simbolo = html_entity_decode("&#8212;");
-	if($pos !== FALSE) :
-	  $depth = substr_count($name, $simbolo);
+	$name = str_replace($simbolo, "", $name);
+      endif;
 
-	  $name = str_replace($simbolo, "", $name);
-	endif;
+      //$id = ($_GET['taxonomy'] == 'category') ? get_cat_ID(trim($name)) : get_term_ID(trim($nanme));
+      $where = $_GET['taxonomy'];
+      $term = get_term_by('name', trim($name), $where);
+      $id = $term->term_id;
+      if($id > 0) :
+	  $lang = $this->_current_lang_id;
 
-	$id = get_cat_ID(trim($name));
-        if($id > 0) :
-            $lang = $this->_current_lang_id;
+	  $n = get_option("cml_category_" . $id . "_lang_" . $lang);
+	  $name = empty($n) ? $name : $n;
+      endif;
 
-            $n = get_option("cml_category_" . $id . "_lang_" . $lang);
-            $name = empty($n) ? $name : $n;
-        endif;
-
-        return str_repeat($simbolo . " ", $depth) . $name;
+      return str_repeat($simbolo . " ", $depth) . $name;
     }
     
     function translate_term_link($link) {
@@ -2363,17 +2381,19 @@ class CeceppaML {
         if($lang_id == $this->_default_language_id || empty($lang_id)) return $link;
 
         $slug = strtolower($this->get_language_slug_by_id($lang_id));
-        return $link . "?lang=$slug&ht=1";
+        
+        $link = add_query_arg(array("lang" => $slug, "ht" => 1), $link);
+        return $link;
     }
     
     function translate_object_terms($obj) {
       if(empty($obj)) return $obj;
 
       if(is_object($obj)) :
-	if($obj->taxonomy == 'category') {
+	if($obj->taxonomy == 'category' || $obj->taxonomy == 'post_tag') {
 	  $term_id = $obj->term_id;
 	  $post_id = (isset($obj->object_id)) ? $obj->object_id : -1;
-	  
+
 	  if($post_id > 1 || $this->_current_lang_id != $this->_default_language_id) :
 	    $lang = ($post_id > 1) ? $this->get_language_id_by_post_id($post_id) : $this->_current_lang_id;
 	    if($lang == $this->_default_language_id) return $obj;	//La lingua del post è la stessa di quella dell'articolo?
@@ -2397,6 +2417,10 @@ class CeceppaML {
     
     function translate_category($name) {
       return $this->translate_term_name($name);
+    }
+    
+    function prova($t) {
+      return $this->translate_term_name($t->name);
     }
 }
 
