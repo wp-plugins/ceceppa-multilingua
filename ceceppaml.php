@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.8.4
+Version: 0.8.5
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -294,7 +294,9 @@ class CeceppaML {
               $link = 'edit.php?lang='.$language;
       }
 
-      add_menu_page($result->cml_language, $result->cml_language, 'read', $link, null, //array(&$this, 'switch_language'), 
+      $italic = ($this->_default_language_id == $result->id) ? "<u>" : "";
+      $_italic = (empty($italic)) ? "" : "</u>";
+      add_menu_page($result->cml_language, $italic . $result->cml_language . $_italic, 'read', $link, null, //array(&$this, 'switch_language'), 
             WP_PLUGIN_URL . '/ceceppa-multilingua/flags/tiny/' . $result->cml_flag . '.png');
     endforeach;
   }
@@ -1518,9 +1520,9 @@ class CeceppaML {
       if(get_option("cml_option_notice_cats") != 1) return $content;
 
       $id = $this->get_category_id(single_cat_title("", false));
-      $link = cml_get_linked_cat($lang_id, null, $id, $browser_lang_id);
-
-      $link = get_category_link($link);
+      $link = get_category_link($id);
+      
+      $link = $this->translate_term_link($link);
     }
     
     if(is_page()) {
@@ -2375,15 +2377,21 @@ class CeceppaML {
       return str_repeat($simbolo . " ", $depth) . $name;
     }
     
-    function translate_term_link($link) {
-        //Lingua dell'articolo
-        $lang_id = $this->get_language_id_by_post_id(get_the_ID());
-        if($lang_id == $this->_default_language_id || empty($lang_id)) return $link;
+    function translate_term_link($link, $lang = null) {
+      if(!is_category()) {
+	//Lingua dell'articolo
+	$lang_id = $this->get_language_id_by_post_id(get_the_ID());
 
-        $slug = strtolower($this->get_language_slug_by_id($lang_id));
-        
-        $link = add_query_arg(array("lang" => $slug, "ht" => 1), $link);
-        return $link;
+	if($lang_id == $this->_default_language_id || empty($lang_id)) 
+	  return $link;
+      } else {
+	$lang_id = $lang;
+      }
+
+      $slug = strtolower($this->get_language_slug_by_id($lang_id));
+
+      $link = add_query_arg(array("lang" => $slug, "ht" => 1), $link);
+      return $link;
     }
     
     function translate_object_terms($obj) {

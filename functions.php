@@ -146,7 +146,7 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
   $width = ($size == "tiny") ? 16 : 32;
 
   $r = "<ul class='$class_name'>";
-  foreach($results as $result) {
+  foreach($results as $result) :
     $lang = ($show == "flag") ? "" : $result->cml_language;
 
     if(is_home()) {
@@ -158,23 +158,22 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
 
       $lang_id = $wpCeceppaML->get_current_lang_id();
 
-			if($linked) {
-				//Collego le categorie delle varie lingue
-				if(is_category()) {
-					$cat_id = $wpCeceppaML->get_category_id(single_cat_title("", false)); //Id della categoria
-					$cat = get_category($cat_id);
-	
-					$link = cml_get_linked_cat($lang_id, $result, $cat->term_id);
-					if(!empty($link)) $link = get_category_link($link);
-				}
-	
-				//Collego gli articoli delle varie pagine
-				if(is_single() || is_page()) {
-					$link = cml_get_linked_post($lang_id, $result, get_the_ID());
-	
-					if(!empty($link)) $link = get_permalink($link);
-				}
-			}
+      if($linked) {
+	//Collego le categorie delle varie lingue
+	if(is_category()) {
+	  $cat_id = $wpCeceppaML->get_category_id(single_cat_title("", false)); //Id della categoria
+	  $link = get_category_link($cat_id);
+
+	  $link = $wpCeceppaML->translate_term_link($link, $result->id);
+	}
+
+	//Collego gli articoli delle varie pagine
+	if(is_single() || is_page()) {
+	  $link = cml_get_linked_post($lang_id, $result, get_the_ID());
+
+	  if(!empty($link)) $link = get_permalink($link);
+	}
+      }
 
       if(empty($link)) $link = home_url() . "/?lang=$result->cml_language_slug";
     }
@@ -183,7 +182,7 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
     if($show == "text") $img = "";
 
     $r .= "<li><a href='$link'>$img$lang</a></li>";
-  }
+  endforeach;
 
   $r .= "</ul>";
 

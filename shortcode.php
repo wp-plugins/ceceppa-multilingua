@@ -87,15 +87,15 @@ function cml_show_availables_langs($attrs) {
    * Se è stata impostata una pagina statica come home
    * aggiungo solo il suffisso ?lang=##
    */
-  $is_static = is_front_page() && is_page();
+  $is_static = (is_front_page() && is_page()) || (array_key_exists("sp", $_GET));
   foreach($langs as $lang) {
-    if(is_category()) $link = cml_get_linked_cat($l_id, $lang, $cat_id, null);
+    if(is_category()) $link = $wpCeceppaML->translate_term_link(get_category_link($cat_id), $lang->id);
     if(is_single() || is_page()) $link = cml_get_linked_post($l_id, $lang, get_the_ID(), null);
     //if(is_page()) $link = cml_get_linked_post($l_id, $lang, get_the_ID(), null);
 
     if(!empty($link)) {
       if(!$is_static) {
-        $link = (is_category()) ? get_category_link($link) : get_permalink($link);
+        $link = (is_category()) ? $link : get_permalink($link);
       } else {
         $link = add_query_arg(array("lang" => $lang->cml_language_slug, "sp" => 1), get_site_url());
       }
