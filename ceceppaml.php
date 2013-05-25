@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.8.5
+Version: 0.8.6
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -47,8 +47,8 @@ class CeceppaML {
   protected $_default_category;         //Categoria predefinita
   protected $_redirect_browser = 'auto';
   protected $_show_notice = 'notice';
-    protected $_filter_search = true;
-    protected $_filte_form_class = "searchform";
+  protected $_filter_search = true;
+  protected $_filte_form_class = "searchform";
 
   public function __construct() {
     global $wpdb;
@@ -119,7 +119,7 @@ class CeceppaML {
 
       //Filtri
       add_filter('parse_query', array(&$this, 'filter_all_posts_query'));
-      add_action( 'restrict_manage_posts', array(&$this, 'filter_all_posts_page'));
+      add_action('restrict_manage_posts', array(&$this, 'filter_all_posts_page'));
       
       /*
       * Traduco i titoli dei Widget
@@ -2152,33 +2152,34 @@ class CeceppaML {
     * @param lang_id - lingua da ricercare
     */
   function get_language_pages($lang_id) {
-      global $wpdb;
+    global $wpdb;
 
-      //Recupero la pagina base, se specificata
-      $parent = $wpdb->get_var(sprintf("SELECT cml_page_id FROM %s WHERE id = %d", CECEPPA_ML_TABLE, $lang_id));
+    //Recupero la pagina base, se specificata
+    $parent = $wpdb->get_var(sprintf("SELECT cml_page_id FROM %s WHERE id = %d", CECEPPA_ML_TABLE, $lang_id));
+    $ids = array();
 
-      if(!empty($parent)) {
-	/*
-	  * Se è stata utilizzata una struttura ad albero, recupero l'id del padre e di tutti i figli
-	  */
-	$args = array(
-	  'post_type'    => 'page',
-	  'parent'       => -1,
-	  'child_of'     => $parent,
-	  'orderby'      => 'name',
-	  'order'        => 'ASC');
+    if(!empty($parent)) {
+      /*
+	* Se è stata utilizzata una struttura ad albero, recupero l'id del padre e di tutti i figli
+	*/
+      $args = array(
+	'post_type'    => 'page',
+	'parent'       => -1,
+	'child_of'     => $parent,
+	'orderby'      => 'name',
+	'order'        => 'ASC');
 
-	$pages = get_pages($args);
-	foreach($pages as $page) :
-	    $ids[] = $page->ID;
-	endforeach;
-	
-	$ids[] = $parent;
-      }
-
-      $ids = array_merge($ids, $this->get_language_posts($lang_id));
+      $pages = get_pages($args);
+      foreach($pages as $page) :
+	  $ids[] = $page->ID;
+      endforeach;
       
-      return empty($ids) ? array(0) : array_unique($ids);
+      $ids[] = $parent;
+    }
+
+    $ids = array_merge($ids, $this->get_language_posts($lang_id));
+
+    return empty($ids) ? array(0) : array_unique($ids);
   }
 
   /**
