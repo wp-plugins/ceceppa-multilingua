@@ -63,6 +63,19 @@ Installation of this plugin is fairly easy:
 
 == Frequently Asked Questions ==
 
+= Can I translate also the Widget Text =
+
+Yes, you can translate text in the widget, page or post using the shortcode cml_text.
+The syntax is:
+
+[cml_text lang1="text..." lang2="text..." ....]
+
+Replace lang1 and lang2 with your languages slug, for example:
+
+[cml_text it="Ciao" en="Hello" epo="Saluton"]
+
+For complete shortcode list visit: [Shortcode] (http://www.ceceppa.eu/it/pillole/wp-guide/ceceppa-multilingua-configurare-e-utilizzare-il-plugin/4/)
+
 The FAQ is available at the [Plugin Homepage](http://www.ceceppa.eu/it/pillole/wp-guide/ceceppa-multilingua-configurare-e-utilizzare-il-plugin/)
 
 For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide/ceceppa-multilingua-configurare-e-utilizzare-il-plugin/)
