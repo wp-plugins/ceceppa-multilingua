@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.8.6
+Version: 0.8.7
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -1217,28 +1217,22 @@ class CeceppaML {
 
       $langs = cml_get_languages();
       for($i = 0; $i < count($_REQUEST['string']); $i++) :
-                $id = $_REQUEST['id'][$i];
-            
-                //Per ogni lingua
-                foreach($langs as $lang) :
-                    $lang = $lang->id;
-                    
-            //       if(empty($id)) {
-                        $text = $_REQUEST['lang_' . $lang][$i];
-                        $sql = sprintf("INSERT INTO %s (cml_text, cml_lang_id, cml_translation) VALUES('%s', '%s', '%s')",
-                                CECEPPA_ML_TRANS,
-                                $_REQUEST['string'][$i],
-                                $lang,
-                                utf8_encode($text));
-            //       } else {
-            //         $sql = sprintf("UPDATE %s SET cml_translation = '%s' WHERE cml_text = '%s' AND cml_lang_id = %d",
-            //                 CECEPPA_ML_TRANS, $_REQUEST["lang_$lang"][$i],
-            //                 $id, $lang);
-            //       }
-                    
-                    if(!empty($sql))
-                        $wpdb->query($sql);
-                endforeach;
+	  $id = $_REQUEST['id'][$i];
+      
+	  //Per ogni lingua
+	  foreach($langs as $lang) :
+	    $lang = $lang->id;
+
+	    //       if(empty($id)) {
+	    $text = $_REQUEST['lang_' . $lang][$i];
+	    $sql = sprintf("INSERT INTO %s (cml_text, cml_lang_id, cml_translation) VALUES('%s', '%s', '%s')",
+			    CECEPPA_ML_TRANS,
+			    $_REQUEST['string'][$i],
+			    $lang,
+			    utf8_encode($text));
+
+	    if(!empty($sql)) $wpdb->query($sql);
+	  endforeach;
       endfor;
     }
 

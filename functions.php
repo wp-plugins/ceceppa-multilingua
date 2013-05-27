@@ -25,10 +25,10 @@ function cml_get_default_language_id() {
  *	cml_page_id - id della pagina padre collegata alla lingua
  *	cml_page_slug - abbreviazione della pagina collegata alla lingua
  */
-function cml_get_languages() {
+function cml_get_languages($enabled = 1) {
   global $wpdb;
 
-  return $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " WHERE cml_enabled = 1");
+  return $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " WHERE cml_enabled >= $enabled");
 }
 
 /**
@@ -202,9 +202,11 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
  */
 function cml_translate($string, $id) {
   global $wpdb;
-  
-  $ret = $wpdb->get_var(sprintf("SELECT cml_translation FROM %s WHERE cml_text = '%s' AND cml_lang_id = %d",
-			  CECEPPA_ML_TRANS, $string, $id));
+
+  $query = sprintf("SELECT cml_translation FROM %s WHERE cml_text = '%s' AND cml_lang_id = %d",
+			  CECEPPA_ML_TRANS, html_entity_decode($string), $id);
+
+  $ret = $wpdb->get_var($query);
 
   return (!isset($ret)) ? $string : utf8_decode($ret);
 }
