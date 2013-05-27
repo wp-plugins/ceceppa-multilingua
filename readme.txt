@@ -16,6 +16,8 @@ Adds userfriendly multilingual content management and translation support into W
 I create Ceceppa Multilingua to let Wordpress have an easy to use interface for managing a fully multilingual web site.
 With "Ceceppa Multilingua" you can write your posts and pages in multiple language. Here are some features:
 
+= Features =
+
 - Separated posts and pages for each languages, so you can use different SEO and url for each languages.
 - Different menu for each language.
 - Translate widget's title.
@@ -31,6 +33,12 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 - Show only posts of the current language
 - One-Click-Switching between the languages
 - One-Click-Switching between the translations
+
+= Widgets =
+
+- "CML: Language Chooser" - Show the list of available languages
+- "CML: Recent Posts" - The most recent posts on your site
+- "CML: Text" - You can write arbitrary text or HTML separately for each language
 
 Ceceppa Multilingua supports infinite language, which can be easily added/modified/deleted via the comfortable Configuration Page.
 All you need to do is activate the plugin, configure categories and start writing the content!
