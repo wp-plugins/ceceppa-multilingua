@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.8.7
+Version: 0.8.8
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -330,7 +330,8 @@ class CeceppaML {
     wp_enqueue_style('ceceppaml-style-all-posts', WP_PLUGIN_URL . '/ceceppa-multilingua/css/all_posts.php?langs=' . count($langs));
 
     foreach($langs as $lang) :
-      $img .= "<img src=\"" . cml_get_flag_by_lang_id($lang->id, "small") . "\" width=\"20\" />";
+      $a = add_query_arg(array("cml_language" => $lang->id));
+      $img .= "<a href=\"$a\" title=\"" . __('Show only posts/pages in: ', 'ceceppaml') . "$lang->cml_language\"><img src=\"" . cml_get_flag_by_lang_id($lang->id, "small") . "\" width=\"20\" /></a>";
     endforeach;
 
     $cols = array_merge(array_slice($columns, 0, 2),
@@ -751,13 +752,13 @@ class CeceppaML {
      * posso filtrare l'elenco a solo gli articoli della lingua che mi interessa
      */
     function filter_all_posts_page() {
-        $d = isset($_GET['cml_language']) ? $_GET['cml_language'] : "";
+        $d = isset($_GET['cml_language']) ? $_GET['cml_language'] : $this->_default_language_id;
 
         //All languages
         cml_dropdown_langs("cml_language", $d, false, true, __('Show all languages', 'ceceppaml'), -1);
 
-        $c = checked(array_key_exists('hide-tr', $_GET), true, false);
-        echo "<label><input name=\"hide-tr\" type=\"checkbox\" value=\"1\" $c />" . __('Hide translations', 'ceceppaml') . "</label>&nbsp;&nbsp;&nbsp;";
+        //$c = checked(array_key_exists('hide-tr', $_GET), true, false);
+        //echo "<input name=\"hide-tr\" type=\"hidden\" value=\"1\" />";
     }
 
     /**
@@ -765,26 +766,32 @@ class CeceppaML {
      *
      */
     function filter_all_posts_query($query) {
-        global $pagenow;
-        
+        global $pagenow, $wpdb;
+
         if (!array_key_exists('post_type', $_GET))
             $post_type = 'post';
         else
             $post_type = $_GET['post_type'];
 
-        $id = array_key_exists('cml_language', $_GET) ? intval($_GET['cml_language']) : 0;
+        $id = array_key_exists('cml_language', $_GET) ? intval($_GET['cml_language']) : $this->_default_language_id;
         if(is_admin() && $pagenow == "edit.php") :
 	  if($id > 0) :
 	    if($_GET['post_type'] == "post") {
-	      $query->query_vars['post__in'] = $this->get_language_posts($id);
+	      $posts = $this->get_language_posts($id);;
 	    } else {
-	      $query->query_vars['post__in'] = $this->get_language_pages($id);
+	      $posts = $this->get_language_pages($id);
 	    }
+
+	    $sql = "SELECT ID FROM wp_posts WHERE id not in (SELECT cml_post_id_1 FROM " . CECEPPA_ML_POSTS . ")";
+	    $results = $wpdb->get_results($sql);
+	    foreach($results as $result) :
+	      $posts[] = $result->ID;
+	    endforeach;
+
+	    $query->query_vars['post__in'] = $posts;
 	  endif;
 	  
-	  if(array_key_exists("hide-tr", $_GET)) :
-	    $this->hide_translations($query);
-	  endif;
+	  $this->hide_translations($query);
 	endif;
     }
     
@@ -1291,7 +1298,7 @@ class CeceppaML {
     $lang_id = empty($post_lang) ? $this->get_language_id_by_post_id($tag->ID) : $post_lang;
     cml_dropdown_langs("post_lang", $lang_id, false, true);
 
-    echo "<h4>" . __('Link to post', 'ceceppaml') . "</h4>";
+    echo "<h4>" . __('This is translation of', 'ceceppaml') . "</h4>";
     echo "<select name='linked_post' style=\"width:100%\" class='link-category'>";
     echo "<option value=''>" . __('No post linked', 'ceceppaml') . "</option>";
 
@@ -1704,15 +1711,15 @@ class CeceppaML {
 
       if(!empty($query)) 
 	$wpdb->query($query);
-      
+
       if(isset($_POST['linked_page']))
 	$this->save_extra_page_fields($term_id);
 
       if(!isset($post_lang))
-	remove_option("cml_post_lang_$term_id");
+	delete_option("cml_post_lang_$term_id");
 
       if(!isset($post_lang))
-	remove_option("cml_post_lang_$term_id");
+	delete_option("cml_post_lang_$term_id");
   }
 
   function delete_extra_post_fields($id) {
