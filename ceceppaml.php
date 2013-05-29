@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.8.8
+Version: 0.8.9
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -1564,7 +1564,10 @@ class CeceppaML {
   
    //Save extra category extra fields callback function
   function save_extra_category_fileds($term_id) {
-    global $wpdb;
+    global $wpdb, $pagenow;
+
+    //In wp 3.6 viene richiamata questa funzione anche quando salvo i menu... :O
+    if(strpos($pagenow, "nav-menus") !== FALSE) return;
 
     //if(isset($_POST['linked_cat'])) {
       $query = "";
@@ -1988,43 +1991,43 @@ class CeceppaML {
     }
 
     if(!empty($lang)) {
-            //Aggiorno le info sulla lingua corrente
-            $this->_current_lang = $this->get_language_slug_by_id($lang);
-            $this->_current_lang_id = $lang;
+      //Aggiorno le info sulla lingua corrente
+      $this->_current_lang = $this->get_language_slug_by_id($lang);
+      $this->_current_lang_id = $lang;
 
-            //Aggiorno il menu del tema :)
-            $mods = get_theme_mods();
-            $locations = get_theme_mod('nav_menu_locations');
+      //Aggiorno il menu del tema :)
+      $mods = get_theme_mods();
+      $locations = get_theme_mod('nav_menu_locations');
 
-            //Se non inizia per cml_ allora sarà quella definita dal tema :)
-            if(is_array($locations)) :
-                $keys = array_keys($locations);
-                foreach($keys as $key) :
-                    if(substr($key, 0, 4) != "cml_") {
-                        $menu = $this->_current_lang;
-                        if(!empty($locations["cml_menu_$menu"])) {
-                            $locations[$key] = $locations["cml_menu_$menu"];
-                            set_theme_mod('nav_menu_locations', $locations);
-                        }
+      //Se non inizia per cml_ allora sarà quella definita dal tema :)
+      if(is_array($locations)) :
+	  $keys = array_keys($locations);
+	  foreach($keys as $key) :
+	    if(!empty($key) && substr($key, 0, 4) != "cml_") {
+	      $menu = $this->_current_lang;
+	      if(!empty($locations["cml_menu_$menu"])) {
+		  $locations[$key] = $locations["cml_menu_$menu"];
+		  set_theme_mod('nav_menu_locations', $locations);
+	      }
 
-                        //Esco dal ciclo
-                        break;
-                    }
-                endforeach;
-            endif;
+	      //Esco dal ciclo
+	      break;
+	    }
+	  endforeach;
+      endif;
 
-            if($this->_filter_search) {
-                //For Fix Notice
-                //add_action('wp_enqueue_scripts', array(&$this, 'enqueue_script_search')); //Non funziona :(
-                $this->enqueue_script_search();
+      if($this->_filter_search) {
+	  //For Fix Notice
+	  //add_action('wp_enqueue_scripts', array(&$this, 'enqueue_script_search')); //Non funziona :(
+	  $this->enqueue_script_search();
 
-                $array = array('lang' => $this->_current_lang,
-                                             'form_class' => $this->_filte_form_class);
-                wp_localize_script('ceceppa-search', 'cml_object', $array);
+	  $array = array('lang' => $this->_current_lang,
+					'form_class' => $this->_filte_form_class);
+	  wp_localize_script('ceceppa-search', 'cml_object', $array);
 
-                //Evito che esegua più di una volta questo if
-                //$this->_filter_search = false;
-            }
+	  //Evito che esegua più di una volta questo if
+	  //$this->_filter_search = false;
+      }
 
       //Recupero il campo "Locale Wordpress"
       $query = sprintf("SELECT cml_locale FROM %s WHERE id = %d", CECEPPA_ML_TABLE, $lang);
@@ -2366,7 +2369,7 @@ class CeceppaML {
       endif;
 
       //$id = ($_GET['taxonomy'] == 'category') ? get_cat_ID(trim($name)) : get_term_ID(trim($nanme));
-      $where = $_GET['taxonomy'];
+      $where = isset($_GET['taxonomy']) ? $_GET['taxonomy'] : 'category';
       $term = get_term_by('name', trim($name), $where);
       $id = $term->term_id;
       if($id > 0) :
