@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.8.11
+Version: 0.8.12
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -214,6 +214,7 @@ class CeceppaML {
     
     //Update current language
     add_action( 'init', array(&$this, 'update_current_lang'));
+    add_filter('wp_title', array(&$this, 'update_current_lang'));
 
     /*
     * Nella pagina "menu", aggiungo una lista per ogni lingua
@@ -1852,7 +1853,7 @@ class CeceppaML {
       //Aggiorno il menu del tema :)
       $mods = get_theme_mods();
       $locations = get_theme_mod('nav_menu_locations');
-
+      
       //Se non inizia per cml_ allora sarà quella definita dal tema :)
       if(is_array($locations)) :
 	  $keys = array_keys($locations);
@@ -2203,9 +2204,8 @@ class CeceppaML {
             $id = get_cat_ID($item->title);
             if(!empty($id)) :
                 $lang = $this->_current_lang_id;
-                $id = $id->term_id;
 
-                $item->title = get_option("cml_category_$id_lang_$lang", $item->title);
+                $item->title = get_option("cml_category_" . $id . "_lang_" . $lang, $item->title);
             endif;
         endif;
 
@@ -2247,11 +2247,6 @@ class CeceppaML {
 	  $lang_id = $this->get_language_id_by_post_id(get_the_ID());
 	else
 	  $lang_id = $this->_current_lang_id;
-
-	/*
-	if($lang_id == $this->_default_language_id || empty($lang_id)) 
-	  return $link;
-	*/
       } else {
 	if(!empty($lang))
 	  $lang_id = $lang;
@@ -2311,11 +2306,4 @@ function removesmartquotes($content) {
 }
 
 $wpCeceppaML = new CeceppaML();
-
-function create_custom_taxonomies(){
-    register_taxonomy('guide', 'posttypename', array( 'hierarchical' => true, 'label' => 'Tutorial'));
-    register_taxonomy('taxonomy2', 'posttypename', array( 'hierarchical' => true, 'label' => 'Taxonomy2'));
-    flush_rewrite_rules( false );/* Please read "Update 2" before adding this line */
-}
-add_action('init', 'create_custom_taxonomies' );
 ?>

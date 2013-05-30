@@ -159,14 +159,6 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
       $lang_id = $wpCeceppaML->get_current_lang_id();
 
       if($linked) {
-	//Collego le categorie delle varie lingue
-	if(is_category()) {
-	  $cat_id = $wpCeceppaML->get_category_id(single_cat_title("", false)); //Id della categoria
-	  $link = get_category_link($cat_id);
-
-	  $link = $wpCeceppaML->translate_term_link($link, $result->id);
-	}
-
 	//Collego gli articoli delle varie pagine
 	if(is_single() || is_page()) {
 	  $link = cml_get_linked_post($lang_id, $result, get_the_ID());
@@ -179,6 +171,14 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
 
 	  $link = home_url($wp->request) . "/";
 	  $link = add_query_arg(array("lang" => $result->cml_language_slug), $link);
+	}
+
+	//Collego le categorie delle varie lingue
+	if(is_category()) {
+	  $cat_id = $wpCeceppaML->get_category_id(single_cat_title("", false)); //Id della categoria
+	  $link = get_category_link($cat_id);
+
+	  $link = $wpCeceppaML->translate_term_link($link, $result->id);
 	}
       }
 
