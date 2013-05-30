@@ -173,6 +173,13 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
 
 	  if(!empty($link)) $link = get_permalink($link);
 	}
+	
+	if(is_archive()) {
+	  global $wp;
+
+	  $link = home_url($wp->request) . "/";
+	  $link = add_query_arg(array("lang" => $result->cml_language_slug), $link);
+	}
       }
 
       if(empty($link)) $link = home_url() . "/?lang=$result->cml_language_slug";
