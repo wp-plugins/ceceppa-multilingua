@@ -1,26 +1,53 @@
 function toggleDetails(index) {
-	jQuery('#ceceppaml-table').find('.lang-row').each(function() {
-		$this = jQuery(this);
-		var id = $this.attr('id');
-		var row = id.split('-');
+  jQuery('#ceceppaml-table').find('.lang-row').each(function() {
+    $this = jQuery(this);
+    var id = $this.attr('id');
+    var row = id.split('-');
 
-		//Se index == -1, controllo che l'utente abbia fornito le descrizioni degli avvisi :)
-		if(index < 0 || row[1] == index) {
-			//Trovo la riga successiva
-			var $next = $this.next('tr');
-			$next.toggle();
+    //Se index == -1, controllo che l'utente abbia fornito le descrizioni degli avvisi :)
+    if(index < 0 || row[1] == index) {
+      //Trovo la riga successiva
+      var $next = $this.next('tr');
+      $next.toggle();
 
-			var ok = ($next.find('input:text[value=""]').length == 0);
-			//if(ok) { non funziona :(
-				//Rimuovo/aggiungo rowspan senno succede un casino :)
-				if($next.is(":visible")) {
-					$this.find('td:first').attr('rowspan', '2')
-				} else {
-					$this.find('td[rowspan="2"]').removeAttr('rowspan');
-				}
-			//}
-		}
-	});
+      var ok = ($next.find('input:text[value=""]').length == 0);
+	//Rimuovo/aggiungo rowspan senno succede un casino :)
+	if($next.is(":visible")) {
+	    $this.find('td:first').attr('rowspan', '2')
+	} else {
+	    $this.find('td[rowspan="2"]').removeAttr('rowspan');
+	}
+    }
+  });
+}
+
+function addRow(count, lid) {
+  $table = jQuery("table.ceceppaml");
+  $tr = jQuery("<tr>");
+  
+  //Stringa
+  $td = jQuery("<td>");
+    $hidden = jQuery("<input>").attr('type', 'hidden').attr('name', 'id[]');
+    $td.append($hidden);
+
+    $input = jQuery("<input>").attr('type', 'text').attr('name', 'string[]');
+    $td.append($input);
+    $tr.append($td);
+
+  id = lid.split(',');
+  row = $table.find("tr").length - 1;
+  for(var i = 0; i < count; i++) {
+    $td = jQuery("<td>");
+
+    $hidden = jQuery("<input>").attr('type', 'hidden').attr('name', 'lang_id[][]').attr('value', id[i]);
+    $td.append($hidden);
+
+    $input = jQuery("<input>").attr('type', 'text').attr('name', 'value[][]');
+    $td.append($input);
+    $tr.append($td);
+  }
+
+  $table.append($tr);
 }
 
 jQuery(document).ready(function(e) {

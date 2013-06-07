@@ -6,7 +6,7 @@ function cml_widgets_title($wtitles) {
 
   $langs = cml_get_languages();
 ?>
-    <form class="ceceppa-form" name="wrap" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>?page=ceceppaml-translations-page">
+    <form class="ceceppa-form" name="wrap" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>?page=ceceppaml-widgettitles-page">
     <input type="hidden" name="form" value="1" />
     <table class="ceceppaml CSSTableGenerator">
       <tbody>

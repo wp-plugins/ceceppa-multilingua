@@ -4,10 +4,10 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate
 Requires at least: 3.4.1
 Tested up to: 3.5.1
-Stable tag: 0.8.13
+Stable tag: 0.9.0
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Donate Link: http://www.ceceppa.eu/ceceppa-multilingua/
+Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG
 
 Adds userfriendly multilingual content management and translation support into Wordpress.
 
@@ -99,6 +99,10 @@ For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide
 7. Box for see or add translation to current post/page
 
 == Changelog ==
+
+= 0.9.0 =
+* You don't need to assign different menu to each language, because now all items of menu will be automatically translated.
+* In the widget "CML: Language Chooser" add field "CSS ClassName"
 
 = 0.8.7 =
 * Fixed the translation of widget titles

@@ -117,12 +117,13 @@ class CeceppaMLWidgetChooser extends WP_Widget {
   */
   public function widget($args, $instance) {
     extract($args);
-    
+
     //Aggiungo lo stile ;)
     wp_enqueue_style('ceceppaml-widget-style');
 
     $title = apply_filters('widget_title', $instance['title'] );
     $hide_title = array_key_exists('hide-title', $instance) ? intval($instance['hide-title']) : 0;
+    $classname = array_key_exists('classname', $instance) ? ($instance['classname']) : 'cml_widget_flag';
 
     echo $before_widget;
     if (!empty($title) && $hide_title != 1)
@@ -133,9 +134,9 @@ class CeceppaMLWidgetChooser extends WP_Widget {
 
     $size = $instance['size'];
 
-    if($display != "dropdown") {
-      cml_show_flags($display, $size, true, "cml_widget_$display");
-    } else {
+    if($display != "dropdown") :
+      cml_show_flags($display, $size, $classname, "cml_widget_$display");
+    else :
       $dd = intval($instance['msdropdown']);
 
       if($dd == 1) {
@@ -145,7 +146,7 @@ class CeceppaMLWidgetChooser extends WP_Widget {
 	wp_enqueue_script('ceceppa-widget', WP_PLUGIN_URL . '/ceceppa-multilingua/js/ceceppa.widget.js');
       }
       $this->_dropdown($args);
-    }
+    endif;
 
     echo $after_widget;
   }
@@ -180,29 +181,32 @@ class CeceppaMLWidgetChooser extends WP_Widget {
       $title = $instance[ 'title' ];
     }
 
-    $dd = $instance['msdropdown'];
+    $dd = array_key_exists('msdropdown', $instance) ? $instance['msdropdown'] : null;
     $display = $instance['display'];
     $size = $instance['size'];
+    $hide_title = array_key_exists('hide-title', $instance) ? $instance['hide-title'] : 0;
+    $classname = array_key_exists('classname', $instance) ? $instance['classname'] : 'cml_widget_flag';
 ?>
     <p>
       <label for="<?php echo $this->get_field_id('title'); ?>">
-        <?php _e('Title:'); ?>
+        <strong><?php _e('Title:'); ?></strong>
       </label> 
       <input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" />
       <br />
       <label for="<?php echo $this->get_field_id('hide-title'); ?>">
         <?php _e('Hide title:', 'ceceppaml') ?>
-        <input type="checkbox" id="<?php echo $this->get_field_id('hide-title'); ?>" name="<?php echo $this->get_field_name('hide-title'); ?>" value="1" <?php echo ($instance['hide-title'] == 1) ? "checked" : ""; ?> />
+        <input type="checkbox" id="<?php echo $this->get_field_id('hide-title'); ?>" name="<?php echo $this->get_field_name('hide-title'); ?>" value="1" <?php checked($hide_title, 1) ?> />
       </label>
 <!-- Visualizza -->
       <p>
         <label for="<?php echo $this->get_field_id('Visualizza'); ?>">
-          <?php _e('Show:'); ?>
+          <strong><?php _e('Show:'); ?></strong>
         </label>
       </p>
+      <blockquote>
       <p>
         <label>
-					<input type="radio" id="<?php echo $this->get_field_id('display'); ?>" name="<?php echo $this->get_field_name('display'); ?>" value="flag" <?php echo ($display == "flag" || empty($display)) ? "checked=\"checked\"" : ""; ?>/>
+	  <input type="radio" id="<?php echo $this->get_field_id('display'); ?>" name="<?php echo $this->get_field_name('display'); ?>" value="flag" <?php echo ($display == "flag" || empty($display)) ? "checked=\"checked\"" : ""; ?>/>
           <?php _e('Flag', 'ceceppaml') ?>
         </label>
       </p>
@@ -226,17 +230,19 @@ class CeceppaMLWidgetChooser extends WP_Widget {
 				<blockquote>
 				<label>
           <input type="checkbox" id="<?php echo $this->get_field_id('msdropdown'); ?>" name="<?php echo $this->get_field_name('msdropdown'); ?>" value="1" <?php echo ($dd == 1) ? "checked=\"checked\"" : ""; ?>/>
-          <?php _e('Use the jQuery plugin "msDropDown"', 'ceceppaml') ?>
+          <?php _e('Use the jQuery plugin "msDropDown (list)"', 'ceceppaml') ?>
 				</label>
 				</blockquote>
       </p>
+      </blockquote>
       <br />
 <!-- Dimensione bandiere -->
       <p>
         <label for="<?php echo $this->get_field_id('Dimensione bandiere'); ?>">
-          <?php _e('Flag\'s size:'); ?>
+          <strong><?php _e('Flag\'s size:', 'ceceppaml'); ?></strong>
         </label>
       </p>
+      <blockquote>
       <p>
         <label>
           <input type="radio" id="<?php echo $this->get_field_id('size'); ?>" name="<?php echo $this->get_field_name('size'); ?>" value="small" <?php echo ($size == "small" || empty($size)) ? "checked=\"checked\"" : ""; ?>/>
@@ -249,11 +255,21 @@ class CeceppaMLWidgetChooser extends WP_Widget {
           <?php _e('Tiny (16x11)', 'ceceppaml') ?>
         </label>
       </p>
-
-		</p>
-		<?php 
+      </blockquote>
+<!-- Classe css -->
+      <p>
+        <label for="<?php echo $this->get_field_id('classname'); ?>">
+          <strong><?php _e('Css ClassName:', 'ceceppaml'); ?></strong>
+        </label>
+      </p>
+      <blockquote>
+      <p>
+          <input type="text" id="<?php echo $this->get_field_id('classname'); ?>" name="<?php echo $this->get_field_name('classname'); ?>" value="<?php echo $classname ?>" />
+      </p>
+      </blockquote>
+<?php 
 	}
-	
+
 	function _dropdown($args) {
 		global $wpCeceppaML;
 

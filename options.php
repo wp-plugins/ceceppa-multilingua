@@ -218,13 +218,10 @@
 				<div id="donate" class="cml-donate">
 				<h3><?php _e('Donate') ?></h3>
 				<div class="content">
-					<?php _e('If you like this plugin, please donate to support development and maintenance :)', 'ceceppaml') ?>
-					<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
-						<input type="hidden" name="cmd" value="_s-xclick">
-						<input type="hidden" name="hosted_button_id" value="E8X3DAVGNSD6E">
-						<input type="image" src="https://www.paypalobjects.com/it_IT/IT/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - Il metodo rapido, affidabile e innovativo per pagare e farsi pagare.">
-						<img alt="" border="0" src="https://www.paypalobjects.com/it_IT/i/scr/pixel.gif" width="1" height="1">
-					</form>
+				    <?php _e('If you like this plugin, please donate to support development and maintenance :)', 'ceceppaml') ?>
+				    <a target="_blank" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG">
+				      <img src="https://www.paypalobjects.com/it_IT/IT/i/btn/btn_donateCC_LG.gif" alt="PayPal - Il metodo rapido, affidabile e innovativo per pagare e farsi pagare.">
+				    </a>
 				</div>
 			</li>
 		</ul>

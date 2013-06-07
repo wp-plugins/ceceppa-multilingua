@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.8.13
+Version: 0.9.0
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -17,7 +17,7 @@ Tags: multilingual, multi, language, admin, tinymce, qTranslate, Polyglot, bilin
  */
 global $wpdb;
 
-define('CECEPPA_DB_VERSION', 6);
+define('CECEPPA_DB_VERSION', 7);
 
 define('CECEPPA_ML_TABLE', $wpdb->base_prefix . 'ceceppa_ml');
 define('CECEPPA_ML_CATS', $wpdb->base_prefix . 'ceceppa_ml_cats');
@@ -26,16 +26,18 @@ define('CECEPPA_ML_PAGES', $wpdb->base_prefix . 'ceceppa_ml_posts');
 
 //Memorizzo gli id degli articoli/pagine al fine di poter "filtrare" i post per lingua
 define('CECEPPA_ML_RELATIONS', $wpdb->base_prefix . 'ceceppa_ml_relations');
-//define('CECEPPA_ML_PAGES', $wpdb->base_prefix . 'ceceppa_ml_pages');
 
 //Tabella delle traduzioni. Al momento mi appoggio a una tabella per le traduzioni in quanto non ho trovato nessun modo
 //per generare un file .po direttamente da php
 define('CECEPPA_ML_TRANS', $wpdb->base_prefix . 'ceceppa_ml_trans');     
 
-require_once(ABSPATH . 'wp-content/plugins/ceceppa-multilingua/functions.php');
-require_once(ABSPATH . 'wp-content/plugins/ceceppa-multilingua/utils.php');
-require_once(ABSPATH . 'wp-content/plugins/ceceppa-multilingua/shortcode.php');
-require_once(ABSPATH . 'wp-content/plugins/ceceppa-multilingua/widgets.php');
+define('CECEPPA_PLUGIN_URL', plugin_dir_url(__FILE__));
+define('CECEPPA_PLUGIN_PATH', plugin_dir_path(__FILE__));
+
+require_once(CECEPPA_PLUGIN_PATH . 'functions.php');
+require_once(CECEPPA_PLUGIN_PATH . 'utils.php');
+require_once(CECEPPA_PLUGIN_PATH . 'shortcode.php');
+require_once(CECEPPA_PLUGIN_PATH . 'widgets.php');
 
 class CeceppaML {
   protected $_current_lang;              //Nome della lingua corrente
@@ -127,6 +129,16 @@ class CeceppaML {
       * Traduco i titoli dei Widget
       */
       add_filter('widget_title', array(&$this, 'admin_translate_widget_title'));
+      
+      /*
+       * Visualizzo alcune informazioni quali:
+       *   Avvisi su categorie e tag non tradotti
+       */
+      add_action( 'admin_notices', array(&$this, 'admin_notices'));
+      
+      if(array_key_exists("cml-hide-notice", $_GET)) update_option('cml_show_admin_notice', 0);
+      if(get_option('cml_show_admin_notice', 1))
+	add_action( 'admin_notices', array(&$this, 'show_admin_notice'));
     } else {
       /*
       * Filtro gli articoli per lingua
@@ -214,6 +226,7 @@ class CeceppaML {
     
     //Update current language
     add_action( 'init', array(&$this, 'update_current_lang'));
+    add_filter('wp_head', array(&$this, 'update_current_lang'));
     add_filter('wp_title', array(&$this, 'update_current_lang'));
 
     /*
@@ -270,8 +283,10 @@ class CeceppaML {
   }
 
     function restore_default_menu() {
+	if(empty($this->_defalt_menu_id)) return;
+
         $locations = get_theme_mod('nav_menu_locations');
-        
+	
         $locations[$this->_default_menu] = $this->_default_menu_id;
         set_theme_mod('nav_menu_locations', $locations);
     }
@@ -320,9 +335,10 @@ class CeceppaML {
    * Aggiungo la pagina delle opzioni nella barra laterale di Wordpress
    */
   function add_option_page() {
-    add_menu_page('Ceceppa ML Options', __('Ceceppa Multilingua', 'ceceppaml'), 'administrator', 'ceceppaml-language-page', array(&$this, 'form_languages'), WP_PLUGIN_URL . '/ceceppa-multilingua/images/logo.png');
+    add_menu_page('Ceceppa ML Options', __('Ceceppa Multilingua', 'ceceppaml'), 'administrator', 'ceceppaml-language-page', array(&$this, 'form_languages'), CECEPPA_PLUGIN_URL . '/images/logo.png');
     //add_submenu_page('ceceppaml-language-page', __('Elenco articoli', 'ceceppaml'), __('Elenco articoli', 'ceceppaml'), 'manage_options', 'ceceppaml-posts-page', array(&$this, 'get_posts'));
-    add_submenu_page('ceceppaml-language-page', __('Widget titles', 'ceceppaml'), __('Widget titles', 'ceceppaml'), 'manage_options', 'ceceppaml-translations-page', array(&$this, 'form_translations'));
+    add_submenu_page('ceceppaml-language-page', __('Widget titles', 'ceceppaml'), __('Widget titles', 'ceceppaml'), 'manage_options', 'ceceppaml-widgettitles-page', array(&$this, 'form_widgettitles'));
+    add_submenu_page('ceceppaml-language-page', __('My translations', 'ceceppaml'), __('My translations', 'ceceppaml'), 'manage_options', 'ceceppaml-translations-page', array(&$this, 'form_translations'));
     add_submenu_page('ceceppaml-language-page', __('Settings', 'ceceppaml'), __('Settings', 'ceceppaml'), 'manage_options', 'ceceppaml-options-page', array(&$this, 'form_options'));
   }
 
@@ -375,7 +391,7 @@ class CeceppaML {
     
                 $id = (empty($xid)) ? $id : $xid;
                 echo '<a href="' . get_bloginfo("url") . '/wp-admin/post-new.php?post_type=' . $post_type . '&link-to=' . $id . '&page-lang=' . $lang->id . '">';
-                echo '    <img class="add" src="' . WP_PLUGIN_URL . '/ceceppa-multilingua/images/add.png" title="' . __('Translate', 'ceceppaml') . '" />';
+                echo '    <img class="add" src="' . CECEPPA_PLUGIN_URL . 'images/add.png" title="' . __('Translate', 'ceceppaml') . '" />';
                 echo '</a>';
             }
         endforeach;
@@ -510,7 +526,7 @@ class CeceppaML {
      * CECEPPA_ML_TABLE: Contiene le informazioni sulle lingue da gestire
      */
     $table_name = CECEPPA_ML_TABLE;
-        $first_time = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name;
+    $first_time = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name;
     //if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name)
     {
         /**
@@ -537,7 +553,7 @@ class CeceppaML {
         cml_locale TEXT,
         cml_page_id INT,
         cml_page_slug TEXT,
-            cml_enabled INT,
+	cml_enabled INT,
         PRIMARY KEY  id (id)
         );";
 
@@ -549,24 +565,29 @@ class CeceppaML {
         //$wpdb->update(CECEPPA_ML_TABLE, array("cml_enabled" => 1), array("IS NULL"));
 
         if($first_time) :
-        /* Per comodità  creo nel database un record con la lingua corrente */
-        $locale = get_locale();
-        $language = __("Default language");
+	  /* Per comodità  creo nel database un record con la lingua corrente */
+	  $locale = get_locale();
+	  $language = __("Default language");
 
-            require_once(ABSPATH . "/wp-content/plugins/ceceppa-multilingua/locales_codes.php");
-            $keys = array_keys($_langs);
-            foreach($keys as $key) {
-                if($_langs[$key] == $locale) {
-                    $language = $key;
-                }
-            }
+	  require_once(CECEPPA_PLUGIN_PATH . "locales_codes.php");
+	  $keys = array_keys($_langs);
+	  foreach($keys as $key) {
+	      if($_langs[$key] == $locale) {
+		  $language = $key;
+	      }
+	  }
 
-        /* Creo nel database la riga per la lingua corrente di wordpress */
-        $insert = sprintf("INSERT INTO %s (cml_default, cml_language, cml_language_slug, cml_locale, cml_enabled, cml_flag) VALUES('%d', '%s', '%s', '%s', '%d', '%s')",
-                  CECEPPA_ML_TABLE, "1", $language, strtolower(substr($language, 0, 2)), $locale, 1, $locale);
+	  /* Creo nel database la riga per la lingua corrente di wordpress */
+	  $insert = sprintf("INSERT INTO %s (cml_default, cml_language, cml_language_slug, cml_locale, cml_enabled, cml_flag) VALUES('%d', '%s', '%s', '%s', '%d', '%s')",
+		    CECEPPA_ML_TABLE, "1", $language, strtolower(substr($language, 0, 2)), $locale, 1, $locale);
 
-        $wpdb->query($insert);
-    endif;
+	  //$wpdb->query($insert);
+	  
+	  $this->_installed_language = $language;
+	  $this->_installed_language_id = $wpdb->get_var("SELECT id FROM " . CECEPPA_ML_TABLE);
+
+	  add_action( 'admin_notices', array(&$this, 'successfully_installed'));
+      endif;
 
     /**
      * Creo la tabella che conterrà  gli abbinamenti tra i post.
@@ -620,55 +641,27 @@ class CeceppaML {
 
       dbDelta($query);
 //    }
-
-    /**
-     * Creo la tabella che conterrà  gli abbinamenti tra le categorie.
-     *
-     * Anche in questo caso per rendere più flessibile il plugin utilizzo una tabella a 4 colonne:
-     *
-     *  cml_cat_lang_1 - id della lingua 1
-     *  cml_cat_id_1      - id della categoria della lingua 1
-     *  cml_cat_lang_2 - id della lingua 2 (lingua "padre")
-     *  cml_cat_id_2      - id della categoria della lingua 2 (categoria "padre")
-     */
-    $table_name = CECEPPA_ML_CATS;
-//    if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
-      $query = "CREATE TABLE $table_name (
-        id INT(11) NOT NULL AUTO_INCREMENT,
-        cml_cat_lang_1 INT(11),
-        cml_cat_id_1 INT(11),
-        cml_cat_lang_2 INT(11),
-        cml_cat_id_2 INT(11),
-        PRIMARY KEY  id (id))";
-
-      dbDelta($query);
-//    }
-
-    $table_name = CECEPPA_ML_RELATIONS;
-      $query = "CREATE TABLE $table_name (
-        cml_type VARCHAR(10),
-        cml_id INT(11),
-        cml_lang_id INT(11),
-        PRIMARY KEY id (cml_id))";
-
-      dbDelta($query);
-        /*
-         * Importo tutte le categorie "tradotte"?
-         */
         
     /**
      * Per le traduzioni momentaneamente mi appoggio ad un database.
      * Appena trovo il modo di gestire tutto da php e generare file po al volo rimuovo la tabella :)
+     *
      */
     $table_name = CECEPPA_ML_TRANS;
-    //if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name ) {
-      $query = "CREATE TABLE  $table_name (
-        `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
-        cml_text TEXT NOT NULL ,
-        `cml_lang_id` INT NOT NULL ,
-        `cml_translation` TEXT)";
+    if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name ) {
+      $sql = "ALTER TABLE " . CECEPPA_ML_TRANS . " ADD COLUMN `cml_type` TEXT";
+      $wpdb->query($sql);
+      $wpdb->query("UPDATE " . CECEPPA_ML_TRANS . " SET cml_type = 'W'");
+    }
 
-      dbDelta($query);
+    $query = "CREATE TABLE  $table_name (
+      `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+      cml_text TEXT NOT NULL ,
+      `cml_lang_id` INT NOT NULL ,
+      `cml_translation` TEXT,
+      `cml_type` TEXT)";
+
+    dbDelta($query);
     //}
 
     //for updates
@@ -1197,10 +1190,66 @@ class CeceppaML {
     include dirname(__FILE__) . '/posts.php';
     }
 
+  function form_translations() {
+    global $wpdb;
+
+    wp_enqueue_script('ceceppaml-js');
+    wp_enqueue_style('ceceppaml-style');
+
+    $langs = cml_get_languages();
+    for($i = 0; $i < count($langs); $i++) :
+      if($langs[$i]->cml_default == 1) :
+	unset($langs[$i]);
+	break;
+      endif;
+    endfor;
+
+    if(array_key_exists("form", $_POST) && array_key_exists("id", $_POST)) :
+      $ids = $_POST['id'];
+      $delete = (array_key_exists('remove', $_POST)) ? $_POST['remove'] : array();
+
+      for($i = 0; $i < count($_POST['string']); $i++) :
+	$string = $_POST['string'][$i];
+
+	for($j = 0; $j < count($_POST['value'][$i]); $j++) :
+	  $value = $_POST['value'][$i][$j];
+	  $lang_id = $_POST['lang_id'][$i][$j];
+
+	  if(!isset($ids[$i]) || empty($ids[$i])) :
+	    if(!empty($string)) :
+	      $wpdb->insert(CECEPPA_ML_TRANS, 
+			    array('cml_text' => $string, 
+				  'cml_lang_id' => $lang_id,
+				  'cml_translation' => $value,
+				  'cml_type' => 'S'),
+			    array('%s', '%d', '%s', '%s'));
+	    endif;
+	  else :
+	    $id = $ids[$i];
+	    if(isset($delete[$id]) && $delete[$id] == 1) :
+	      $query = sprintf("DELETE FROM %s WHERE id = %d ", CECEPPA_ML_TRANS, $id);
+	      $wpdb->query($query);
+	    else :
+	      $wpdb->update(CECEPPA_ML_TRANS,
+			    array('cml_translation' => $value,
+				  'cml_type' => 'S'),
+			    array('id' => $id, 'cml_lang_id' => $lang_id),
+			    array('%s', '%s'),
+			    array('%d', '%d'));
+	    endif;
+	  endif;
+	endfor;
+
+      endfor;
+    endif;
+
+    require_once('translations.php');
+  }
+
   /*
    * Form per la traduzione dei titoli dei widget
    */
-  function form_translations() {
+  function form_widgettitles() {
     global $wpdb;
 
     //Css
@@ -1215,15 +1264,13 @@ class CeceppaML {
 
       $langs = cml_get_languages();
       for($i = 0; $i < count($_REQUEST['string']); $i++) :
-	  $id = $_REQUEST['id'][$i];
-      
 	  //Per ogni lingua
 	  foreach($langs as $lang) :
 	    $lang = $lang->id;
 
 	    //       if(empty($id)) {
 	    $text = $_REQUEST['lang_' . $lang][$i];
-	    $sql = sprintf("INSERT INTO %s (cml_text, cml_lang_id, cml_translation) VALUES('%s', '%s', '%s')",
+	    $sql = sprintf("INSERT INTO %s (cml_text, cml_lang_id, cml_translation, cml_type) VALUES('%s', '%s', '%s', 'W')",
 			    CECEPPA_ML_TRANS,
 			    $_REQUEST['string'][$i],
 			    $lang,
@@ -2172,27 +2219,27 @@ class CeceppaML {
 
         $plinks = split("/", str_replace(home_url(), "", $permalink));
         if($lang_id != $this->_default_language_id) :
-            array_pop($plinks);
-            $title = array_pop($plinks);
+	  array_pop($plinks);
+	  $title = array_pop($plinks);
 
-            foreach($plinks as $plink) :
-                //Cerco la traduzione della categoria nella lingua del post :)
-                $_cat = get_category_by_slug($plink);
-                if(is_object($_cat)) :
-		  $id = $_cat->term_id;
+	  foreach($plinks as $plink) :
+	    //Cerco la traduzione della categoria nella lingua del post :)
+	    $_cat = get_category_by_slug($plink);
+	    if(is_object($_cat)) :
+	      $id = $_cat->term_id;
 
-		  if(!empty($plink)) :
-		    $cat = strtolower(get_option("cml_category_" . $id . "_lang_" . $lang_id, $plink));
-		    $url = str_replace(" ", "-", $cat);
-		    $url = urlencode($url);
-		    $cats[] = $url;
-		  endif;
-		endif;
-            endforeach;
+	      if(!empty($plink)) :
+		$cat = strtolower(get_option("cml_category_" . $id . "_lang_" . $lang_id, $plink));
+		$url = str_replace(" ", "-", $cat);
+		$url = urlencode($url);
+		$cats[] = $url;
+	      endif;
+	    endif;
+	  endforeach;
 
-            //Ricreo il permalink con le categorie tradotte... :)
-						if(!empty($cats))
-							return $homeUrl . "$slug/" . join("/", $cats) . "/$title/";
+	  //Ricreo il permalink con le categorie tradotte... :)
+	  if(!empty($cats))
+	    return $homeUrl . "$slug/" . join("/", $cats) . "/$title/";
         endif;
 
         //Aggiungo il suffisso /%lang%/
@@ -2201,12 +2248,31 @@ class CeceppaML {
     
     function translate_menu_item($item) {
         if($this->_current_lang_id != $this->_default_language_id) :
-            $id = get_cat_ID($item->title);
-            if(!empty($id)) :
-                $lang = $this->_current_lang_id;
+	    switch($item->object) : 
+	    case 'page':
+	      $page_id = cml_get_linked_post($this->_default_language_id, null, $item->object_id, $this->_current_lang_id);
 
-                $item->title = get_option("cml_category_" . $id . "_lang_" . $lang, $item->title);
-            endif;
+	      if(!empty($page_id)) :
+		$item->title = get_the_title($page_id);
+		$item->object_id = $page_id;
+		$item->url = get_permalink($page_id);
+	      endif;
+
+	      break;
+	    case 'category':
+	      $id = get_cat_ID($item->title);
+	      if(!empty($id)) :
+		  $lang = $this->_current_lang_id;
+
+		  $item->title = get_option("cml_category_" . $id . "_lang_" . $lang, $item->title);
+	      endif;
+	      break;
+	    case 'custom':
+	      $item->title = cml_translate($item->title, $this->_current_lang_id);
+	      break;
+	    default:
+	      return $item;
+	    endswitch;
         endif;
 
         return $item;
@@ -2297,6 +2363,91 @@ class CeceppaML {
     
     function translate_category($name) {
       return $this->translate_term_name($name);
+    }
+
+    function show_admin_notice() {
+?>
+	<div class="updated">
+	<?php _e('If you like this plugin, you can:', 'ceceppaml') ?>
+	  <ul style="list-style: circle;padding-left: 30px">
+	    <li>
+	      <a href="http://wordpress.org/support/view/plugin-reviews/ceceppa-multilingua" target="_blank">
+		<?php _e('Add your own review here', 'ceceppaml') ?></a>
+	    </li>
+	    <li>
+		<?php _e('Write a review of the plugin on your blog', 'ceceppaml') ?>
+	    </li>
+	    <li>
+	      <?php _e('Translate the plugin in your own language.', 'ceceppaml') ?>
+	      <a href="http://www.ceceppa.eu/chi-sono/" target="_blank">
+		<?php _e('Contact me if you don\'t know how to do.', 'ceceppaml') ?>
+	      </a>
+	    </li>
+	    <li>
+	      <a target="_blank" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG">
+		<?php _e('Donate to support development and maintenance.', 'ceceppaml') ?>
+	      </a>
+	    </li>
+	  </ul>
+	  <br />
+	  <a href="http://wordpress.org/support/view/plugin-reviews/ceceppa-multilingua" target="_blank">
+	    <?php _e('If you have any question or you need new features contact me :)', 'ceceppaml') ?>
+	  </a>
+	  <br /></br>
+	  <?php       
+	      $link = add_query_arg('cml-hide-notice', 1);
+	  ?>
+	  <div style="text-align: right;width:100%">
+	    <a href="<?php echo $link ?>"><?php _e('Dismiss') ?></a>
+	  </div>
+	</div>
+
+<?php
+    }
+    
+    function admin_notices() {
+      global $pagenow;
+      
+      if($pagenow == 'nav-menus.php') :
+?>
+	<div class="updated">
+	    <p>
+	      Ceceppa Multilingua: <strong><?php _e('Tip', 'ceceppaml') ?></strong><br /><br />
+	      <?php _e('All items will be automatically translated when user switch between languages.', 'ceceppaml') ?><br />
+	      <?php _e('If you add an custom item ("Links"), you must add translation of navigation label in "Ceceppa Multilingua" -> "My translations"', 'ceceppaml') ?>
+	      <br /><br />
+	      <?php _e('If you need to customize "Navigation Label" or if you want to have different items for each languages, create a menu for each language', 'ceceppaml') ?>
+	      <?php _e('and assigns it to the corresponding menu, otherwise assign it only to the primary menu', 'ceceppaml') ?>
+	    </p>
+	</div>
+<?php
+      endif;
+    }
+    
+    function admin_menu_notice() {
+      
+    }
+
+    function successfully_installed() {
+?>
+      <div class="updated">
+	<p>
+	  <?php _e('Plugin successfully installed', 'ceceppaml') ?><br /><br />
+	  <label>
+	    <?php _e('Language detected:', 'ceceppaml') ?>
+	    <strong>
+		<img src="<?php echo cml_get_flag_by_lang_id($this->_installed_language_id) ?>" />
+		<?php echo $this->_installed_language ?>
+	    </strong>
+	  </label>
+	  <br /><br />
+	  <a href="<?php echo home_url('wp-admin') ?>/?page=ceceppaml-language-page">
+	    <?php _e('Click here for advanced settings or for add another language', 'ceceppaml') ?>
+	  </a>
+	  <br />
+	</p>
+      </div>
+<?php
     }
 }
 

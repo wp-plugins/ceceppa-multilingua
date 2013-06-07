@@ -25,10 +25,11 @@ function cml_get_default_language_id() {
  *	cml_page_id - id della pagina padre collegata alla lingua
  *	cml_page_slug - abbreviazione della pagina collegata alla lingua
  */
-function cml_get_languages($enabled = 1) {
+function cml_get_languages($enabled = 1, $default = 1) {
   global $wpdb;
 
-  return $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " WHERE cml_enabled >= $enabled");
+  return $wpdb->get_results(sprintf("SELECT * FROM %s WHERE cml_enabled >= %d AND cml_default <= %d",
+    					CECEPPA_ML_TABLE, $enabled, $default));
 }
 
 /**
@@ -54,7 +55,7 @@ function cml_get_languages_list() {
 function cml_get_flag($flag, $size = "tiny") {
   if(empty($flag)) return "";
 
-  return plugins_url() . "/ceceppa-multilingua/flags/$size/$flag.png";
+  return CECEPPA_PLUGIN_URL . "flags/$size/$flag.png";
 }
 
 /**
@@ -278,13 +279,13 @@ function cml_dropdown_langs($name, $default, $link = false, $none = false, $none
 	$none_text = ($none) ? $none_text : "";
 	if($link) :
 	?>
-		<script type="text/javascript">
-			jQuery(document).ready(function(){
-				jQuery('.<?php echo $name ?>').change(function() {
-					window.location.href = jQuery((".<?php echo $name ?> option:selected")).val();
-				});
-			});
-		</script>
+	  <script type="text/javascript">
+	    jQuery(document).ready(function(){
+		    jQuery('.<?php echo $name ?>').change(function() {
+			    window.location.href = jQuery((".<?php echo $name ?> option:selected")).val();
+		    });
+	    });
+	  </script>
 	<?php endif; ?>
 
   <select class="<?php echo $name ?>" name="<?php echo $name ?>">
@@ -292,15 +293,15 @@ function cml_dropdown_langs($name, $default, $link = false, $none = false, $none
 	
 	<?php
 	$id = $wpCeceppaML->get_current_lang_id();
-	  $langs = cml_get_languages();
-	  foreach($langs as $lang) :
-	    $selected = ($lang->id == $default) ? "selected" : "";
+	$langs = cml_get_languages();
+	foreach($langs as $lang) :
+	  $selected = ($lang->id == $default) ? "selected" : "";
 
-	    $value = (!$link) ? $lang->id : get_permalink(cml_get_linked_post($id, null, get_the_ID(), $lang->id));
-	    $dataimage = 'data-image="' . cml_get_flag_by_lang_id($lang->id) . '"';
+	  $value = (!$link) ? $lang->id : get_permalink(cml_get_linked_post($id, null, get_the_ID(), $lang->id));
+	  $dataimage = 'data-image="' . cml_get_flag_by_lang_id($lang->id) . '"';
 
-	    echo "<option $dataimage value=\"$value\" $selected>$lang->cml_language</option>";
-	  endforeach;
+	  echo "<option $dataimage value=\"$value\" $selected>$lang->cml_language</option>";
+	endforeach;
 
   echo "</select>";
 }
