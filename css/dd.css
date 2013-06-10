@@ -26,7 +26,7 @@ color:#999999;
 .borderRadiusBtm .border{-moz-border-radius:5px 5px 0 0; border-radius:5px 5px 0 0;}
 img.fnone{float:none !important}
 .ddcommon .divider{width:0; height:100%; position:absolute;}
-.ddcommon .arrow{display:inline-block; position:absolute; top:50%; right:4px;}
+.ddcommon .arrow{display:inline-block; position:absolute; top:50%; right:4px;left: auto !important;}
 .ddcommon .arrow:hover{background-position:0 100%;}
 .ddcommon .ddTitle{padding:0; position:relative; display:inline-block; width:100%}
 .ddcommon .ddTitle .ddTitleText{display:block;}

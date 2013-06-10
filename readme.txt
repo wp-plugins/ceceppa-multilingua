@@ -1,10 +1,9 @@
-
 === Ceceppa Multilingua ===
 Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate
 Requires at least: 3.4.1
 Tested up to: 3.5.1
-Stable tag: 0.9.0
+Stable tag: 0.9.1
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG
@@ -19,12 +18,12 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 = Features =
 
 - Separated posts and pages for each languages, so you can use different SEO and url for each languages.
+- URLs pretty and SEO-friendly. ?lang=en, /en/foo/ or en.yoursite.com
 - Different menu for each language.
 - Translate widget's title.
 - Group/Ungroup comments for each post's languages.
 - Show notice when the post/page/category that user is viewing is available, based on the information provided by the browser, in their its language
 - Redirects the browser depending on the user's language. Append the suffix &lang= to the home url-
-- Widget for language chooser
 - Least Read Posts, Most Commented, Most Read Posts can show only the posts in user selected language
 - Filter search in accordingly to current language
 - Change wordpress locale according to current language, useful for localized themes
@@ -99,6 +98,8 @@ For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide
 7. Box for see or add translation to current post/page
 
 == Changelog ==
+
+= 0.9.1 =
 
 = 0.9.0 =
 * You don't need to assign different menu to each language, because now all items of menu will be automatically translated.
