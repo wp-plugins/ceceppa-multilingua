@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.9.1
+Version: 0.9.2
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -17,7 +17,7 @@ Tags: multilingual, multi, language, admin, tinymce, qTranslate, Polyglot, bilin
  */
 global $wpdb;
 
-define('CECEPPA_DB_VERSION', 8);
+define('CECEPPA_DB_VERSION', 9);
 
 define('CECEPPA_ML_TABLE', $wpdb->base_prefix . 'ceceppa_ml');
 define('CECEPPA_ML_CATS', $wpdb->base_prefix . 'ceceppa_ml_cats');
@@ -152,9 +152,12 @@ class CeceppaML {
       * Nascondo i post "collegati", quindi tra quelli collegati visualizzo solo quelli
       * della lingua corrente
       */
-      if(get_option("cml_option_filter_translations", true) || array_key_exists("ht", $_GET) || is_category()) {
+      if(get_option("cml_option_filter_translations", true) || array_key_exists("ht", $_GET)) {
 	add_action('pre_get_posts', array(&$this, 'hide_translations'));
       }
+
+      //Per le categorie forzo l'opzione 'hide_translations'
+      add_action('pre_get_posts', array(&$this, 'hide_category_translations'));
 
       /*
       * Filtro i risultati della ricerca in modo da visualizzare solo gli articoli inerenti
@@ -446,17 +449,15 @@ class CeceppaML {
 ?>
         <div class="form-field">
         <?php
-            $langs = cml_get_languages();
-            
-            foreach($langs as $lang) :
-                if(!$lang->cml_default) : ?>
+            $langs = cml_get_languages(1, 0);
+
+            foreach($langs as $lang) : ?>
                     <label for="cat_name[<?php echo $lang->id ?>]">
                         <img src="<?php echo cml_get_flag($lang->cml_flag) ?>" />
                         <?php echo $lang->cml_language ?>
                     </label>
                     <input type="text" name="cat_name[<?php echo $lang->id ?>]" id="cat_name[<?php echo $lang->id ?>]" size="40" />
                 <?php 
-                endif;
             endforeach;
         ?>
         </div>
@@ -474,7 +475,7 @@ class CeceppaML {
 ?>
     <?php
       $langs = cml_get_languages();
-      
+
       foreach($langs as $lang) :
 	  if(!$lang->cml_default) :
 	      $id = $lang->id;
@@ -648,6 +649,10 @@ class CeceppaML {
 
     //Rimuovo le colonne non più necessarie
     $wpdb->query("ALTER table " . CECEPPA_ML_TABLE . " DROP cml_category_name, DROP cml_category_id, DROP cml_category_slug, DROP cml_page_id, DROP cml_page_slug");
+
+    //Fix dovuto alla 0.9.1, tutte le lingue venivano impostate come default se l'utente face click su update :(
+    $wpdb->query("UPDATE " . CECEPPA_ML_TABLE . " SET cml_default = 0");
+    $wpdb->query("UPDATE " . CECEPPA_ML_TABLE . " SET cml_default = 1 WHERE id = 1");
 
     //for updates
     update_option("cml_db_version", CECEPPA_DB_VERSION);
@@ -1060,7 +1065,7 @@ class CeceppaML {
       for($i = 0; $i < count($_POST['id']); $i++) :
           $id = $_POST['id'][$i];
           list($lang, $lang_slug) = explode("@", $_POST['flags'][$i]);
-          $default = array_key_exists('default', $_POST) ? 1 : 0;
+          $default = (array_key_exists('default', $_POST) && $_POST['default'] == $id) ? 1 : 0;
 
           //Se è vuoto, è una "nuova lingua"
           if(empty($id)) {
@@ -2382,6 +2387,12 @@ class CeceppaML {
       $title = '<img src="' . cml_get_flag($lang->cml_flag) . '">&nbsp;' . $lang->cml_language;
       $wp_admin_bar->add_menu( array( 'id' => 'cml_lang' . $lang->id, 'title' => $title, 'href' => $link) );
     endforeach;
+  }
+  
+  function hide_category_translations($wp_query) {
+    if(!is_category()) return;
+    
+    return $this->hide_translations($wp_query);
   }
 }
 
