@@ -39,15 +39,17 @@ function cml_widgets_title($wtitles) {
 <?php 
   foreach($wtitles as $title) :
     if(!empty($title)) :
+      $title = htmlentities($title);
       echo "<tr>";
 
       echo "<td style=\"height:2.5em\">\n";
       echo "\t<input type=\"hidden\" name=\"string[]\" value=\"$title\" />\n";
-      echo $title . "</td>";
+      echo html_entity_decode($title) . "</td>";
       $i = 0;
 
       foreach($langs as $lang) :
-	$d = cml_translate($title, $lang->id);
+	$d = html_entity_decode(cml_translate($title, $lang->id));
+	$d = htmlentities($d);
 	echo "<td>\n";
 	echo "<input type=\"text\" name=\"lang_" . $lang->id . "[]\" value=\"$d\" /></td>\n";
 

@@ -61,8 +61,9 @@ jQuery(document).ready(function(e) {
 	jQuery(".cml-widget-flags").msDropDown();
 
 	//Tooltip
-	jQuery('img').tipsy({gravity: 'e'});
 	jQuery('._tipsy').tipsy({gravity: 'n', html: true});
+	jQuery('img').tipsy({gravity: 'e'});
+	jQuery('th.column-cml_flags a').tipsy();
 
 	//Delete language
 	jQuery('a._delete').click(function() {

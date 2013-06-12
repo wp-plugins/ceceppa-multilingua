@@ -228,8 +228,10 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
 function cml_translate($string, $id) {
   global $wpdb;
 
+  $string = html_entity_decode($string, ENT_QUOTES);
+  $string = htmlentities($string);
   $query = sprintf("SELECT cml_translation FROM %s WHERE cml_text = '%s' AND cml_lang_id = %d",
-			  CECEPPA_ML_TRANS, html_entity_decode($string), $id);
+			  CECEPPA_ML_TRANS, $string, $id);
 
   $ret = $wpdb->get_var($query);
 
