@@ -230,7 +230,7 @@ function cml_translate($string, $id) {
 
   $string = html_entity_decode($string, ENT_QUOTES);
   $string = htmlentities($string);
-  $query = sprintf("SELECT cml_translation FROM %s WHERE cml_text = '%s' AND cml_lang_id = %d",
+  $query = sprintf("SELECT UNHEX(cml_translation) FROM %s WHERE cml_text = HEX('%s') AND cml_lang_id = %d",
 			  CECEPPA_ML_TRANS, $string, $id);
 
   $ret = $wpdb->get_var($query);
@@ -265,14 +265,14 @@ function cml_get_notice($lang_slug) {
   $row = $wpdb->get_row(sprintf("SELECT * FROM %s WHERE cml_language_slug = '%s' OR id = %d",
 			 	  CECEPPA_ML_TABLE , $lang_slug, intval($lang_slug)));
 
-  if(is_category()) $r = utf8_decode($row->cml_notice_category);
-  if(is_page()) $r = utf8_decode($row->cml_notice_page);
-  if(is_single()) $r = utf8_decode($row->cml_notice_post);
-	
-	if(!empty($r))
-		return $r;
-	else
-		return $row->cml_language;
+  if(is_category()) $r = hex2bin($row->cml_notice_category);
+  if(is_page()) $r = hex2bin($row->cml_notice_page);
+  if(is_single()) $r = hex2bin($row->cml_notice_post);
+
+  if(!empty($r))
+    return $r;
+  else
+    return $row->cml_language;
 }
 
 function cml_get_notice_by_lang_id($lang_id) {

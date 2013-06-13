@@ -80,17 +80,15 @@ $row = 0;
 		<td colspan="3">
 			<table>
 				<tr>
-					<td style="background: none; font-size: 1.1em;"><?php _e('Url slug', 'ceceppaml'); ?></td>
+					<td style="background: none; font-size: 1.1em;width: 100px"><?php _e('Url slug', 'ceceppaml'); ?></td>
 					<td style="background: none; font-size: 1.1em;"><?php _e('Post notice', 'ceceppaml'); ?></td>
 					<td style="background: none; font-size: 1.1em;"><?php _e('Page notice', 'ceceppaml'); ?></td>
-					<td style="background: none; font-size: 1.1em;"><?php _e('Category notice', 'ceceppaml'); ?></td>
-					<td style="background: none; font-size: 1.1em;"><?php _e('Locale Wordpress', 'ceceppaml') ?></td>
+					<td style="background: none; font-size: 1.1em;width: 100px"><?php _e('Locale Wordpress', 'ceceppaml') ?></td>
 				</tr>
 				<tr>
-					<td><input name="language_slug[]" class="_tipsy" id="slug-<?php echo $result->id ?>" value="<?php echo utf8_decode($result->cml_language_slug) ?>" type="text" style="margin-left:2%;width:98%" title="<?php _e('Allows you to specify an abbreviation to be used in the URL of the page. <br /> Ex: <br /> www.example.com / en <br /> www.example.com / uk', 'ceceppaml') ?>" /></td>
-					<td><input name="notice_post[]" class="_tipsy" type="text" value="<?php echo utf8_decode($result->cml_notice_post); ?>" style="margin-left:2%;width:98%" title="<?php _e('Define the text of the notice to be displayed when the post is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
-					<td><input name="notice_page[]" class="_tipsy" type="text" value="<?php echo utf8_decode($result->cml_notice_page); ?>" style="margin-left:2%;width:98%" title="<?php _e('Define the text of the notice to be displayed when the page is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
-					<td><input name="notice_category[]" class="_tipsy" type="text" value="<?php echo utf8_decode($result->cml_notice_category); ?>"  style="margin-left:2%;width:98%" title="<?php _e('Define the text of the notice to be displayed when the category is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
+					<td><input name="language_slug[]" class="_tipsy" id="slug-<?php echo $result->id ?>" value="<?php echo $result->cml_language_slug ?>" type="text" style="margin-left:2%;width:98%" title="<?php _e('Allows you to specify an abbreviation to be used in the URL of the page. <br /> Ex: <br /> www.example.com / en <br /> www.example.com / uk', 'ceceppaml') ?>" /></td>
+					<td><input name="notice_post[]" class="_tipsy" type="text" value="<?php echo hex2bin($result->cml_notice_post); ?>" style="margin-left:2%;width:98%" title="<?php _e('Define the text of the notice to be displayed when the post is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
+					<td><input name="notice_page[]" class="_tipsy" type="text" value="<?php echo hex2bin($result->cml_notice_page); ?>" style="margin-left:2%;width:98%" title="<?php _e('Define the text of the notice to be displayed when the page is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
 					<td><input name="locale[]" class="_tipsy" id="locale-<?php echo $result->id ?>" type="text" value="<?php echo $result->cml_locale ?>" title="<?php _e('Helps to link correctly the defined language by the user\'s browser. ') ?>" /></td>
 				</tr>
 			</table>
@@ -116,17 +114,15 @@ $row = 0;
 		<td colspan="5">
 			<table>
 				<tr>
-					<td style="background: none; font-size: 1.1em;"><?php _e('Url slug', 'ceceppaml'); ?></td>
+					<td style="background: none; font-size: 1.1em;width: 100px"><?php _e('Url slug', 'ceceppaml'); ?></td>
 					<td style="background: none; font-size: 1.1em;"><?php _e('Post notice', 'ceceppaml'); ?></td>
 					<td style="background: none; font-size: 1.1em;"><?php _e('Page notice', 'ceceppaml'); ?></td>
-					<td style="background: none; font-size: 1.1em;"><?php _e('Category notice', 'ceceppaml'); ?></td>
-					<td style="background: none; font-size: 1.1em;"><?php _e('Locale Wordpress', 'ceceppaml') ?></td>
+					<td style="background: none; font-size: 1.1em;width: 100px"><?php _e('Locale Wordpress', 'ceceppaml') ?></td>
 				</tr>
 				<tr>
 					<td><input name="language_slug[]" class="_tipsy" id="slug-x" type="text" style="margin-left:2%;width:98%" title="<?php _e('Allows you to specify an abbreviation to be used in the URL of the page. <br /> Ex: <br /> www.example.com / en <br /> www.example.com / uk', 'ceceppaml') ?>" /></td>
 					<td><input name="notice_post[]" class="_tipsy" type="text" style="margin-left:2%;width:98%" title="<?php _e('Define the text of the notice to be displayed when the post is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
 					<td><input name="notice_page[]" class="_tipsy" type="text" style="margin-left:2%;width:98%" title="<?php _e('Define the text of the notice to be displayed when the page is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
-					<td><input name="notice_category[]" class="_tipsy" type="text" style="margin-left:2%;width:98%" title="<?php _e('Define the text of the notice to be displayed when the category is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
 					<td><input name="locale[]" class="_tipsy" id="locale-x" type="text" title="<?php _e('Helps to link correctly the defined language by the user\'s browser. ') ?>" /></td>
 				</tr>
 			</table>

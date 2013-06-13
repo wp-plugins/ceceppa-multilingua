@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.9.5
+Version: 0.9.6
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -430,9 +430,9 @@ class CeceppaML {
          * Ho bisogno di modificare le "curly quotes" in "double quote", sennò il confronto fallisce :(
         */
         if(esc_attr($post->post_title) == removesmartquotes($title)) {
+	    $this->_title_applied = true;
+
             return $title . cml_show_availables_langs(array("class" => "cml_flags_on_top"));
-            
-            $this->_title_applied = true;
         } else {
             return $title;
         }
@@ -796,7 +796,6 @@ class CeceppaML {
       $this->update_current_lang();
     }
 
-    return $wp_query;
     global $wpdb;
 
     //Categoria base della lingua predefinita
@@ -1063,7 +1062,7 @@ class CeceppaML {
 
       for($i = 0; $i < count($_POST['id']); $i++) :
           $id = $_POST['id'][$i];
-          list($lang, $lang_slug) = explode("@", $_POST['flags'][$i]);
+          @list($lang, $lang_slug) = explode("@", $_POST['flags'][$i]);
           $default = (array_key_exists('default', $_POST) && $_POST['default'] == $id) ? 1 : 0;
 
           //Se è vuoto, è una "nuova lingua"
@@ -1075,9 +1074,9 @@ class CeceppaML {
 				  'cml_language_slug' => $_POST['language_slug'][$i],
 				  'cml_language' => $_POST['language'][$i],
 				  'cml_locale' => $_POST['locale'][$i],
-				  'cml_notice_post' => addslashes($_POST['notice_post'][$i]),
-				  'cml_notice_page' => addslashes($_POST['notice_page'][$i]),
-				  'cml_notice_category' => addslashes($_POST['notice_category'][$i]),
+				  'cml_notice_post' => bin2hex(htmlentities($_POST['notice_post'][$i])),
+				  'cml_notice_page' => bin2hex(htmlentities($_POST['notice_page'][$i])),
+				  'cml_notice_category' => bin2hex(htmlentities($_POST['notice_category'][$i])),
 				  'cml_enabled' => 1),
 			     array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d'));
             endif;
@@ -1088,9 +1087,9 @@ class CeceppaML {
 				  'cml_language_slug' => $_POST['language_slug'][$i],
 				  'cml_language' => $_POST['language'][$i],
 				  'cml_locale' => $_POST['locale'][$i],
-				  'cml_notice_post' => addslashes($_POST['notice_post'][$i]),
-				  'cml_notice_page' => addslashes($_POST['notice_page'][$i]),
-				  'cml_notice_category' => addslashes($_POST['notice_category'][$i]),
+				  'cml_notice_post' => bin2hex(htmlentities($_POST['notice_post'][$i])),
+				  'cml_notice_page' => bin2hex(htmlentities($_POST['notice_page'][$i])),
+				  'cml_notice_category' => bin2hex(htmlentities($_POST['notice_category'][$i])),
 				  'cml_enabled' => 1),
 			     array('id' => $id),
 			     array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d'),
@@ -1157,7 +1156,6 @@ class CeceppaML {
       @update_option("cml_option_notice_before", $_POST['notice_before']);
       @update_option("cml_option_notice_post", intval($_POST['notice-post']));
       @update_option("cml_option_notice_page", intval($_POST['notice-page']));
-      @update_option("cml_option_notice_cats", intval($_POST['notice-cats']));
 
       //Commenti
       @update_option('cml_option_comments', $_POST['comments']);
@@ -1263,7 +1261,7 @@ class CeceppaML {
 	    $title = $_POST['string'][$i];
 	    $title = htmlentities($title);
 	    $query = sprintf("INSERT INTO %s (cml_text, cml_lang_id, cml_translation, cml_type) VALUES ('%s', '%d', '%s', 'W')",
-				CECEPPA_ML_TRANS, $title, $lang, $text);
+				CECEPPA_ML_TRANS, bin2hex($title), $lang, bin2hex($text));
 	    $wpdb->query($query);
 	  endforeach;
       endfor;
@@ -1505,12 +1503,7 @@ class CeceppaML {
     //Recupero info sulla disponibilità della lingua del browser
     global $wpdb;
 
-    $lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
-
-    //Controllo che la lingua esista nel mio db, altrimenti vis quella di default
-    $slug = $wpdb->get_var(sprintf("SELECT id FROM %s WHERE cml_flag = '%s'",
-                CECEPPA_ML_TABLE, $lang));
-
+    $lang = $this->get_browser_lang();
     $lang = (empty($slug)) ? $this->_default_language_slug : $lang;
     if($this->_redirect_browser == 'auto') {
       //Redirect abilitato
@@ -1531,52 +1524,29 @@ class CeceppaML {
 
     if(isCrawler()) return $content;
     
-    $browser_langs = explode(";", $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+    //Recuper la lingua del browser
+    $browser_lang_id = $this->get_browser_lang();
 
-    //Se la lingua del browser coincide con una di quella attuale della pagina, ignoro tutto
-    foreach($browser_langs as $lang) :
-      @list($code1, $code2) = explode(",", $lang);
-
-      if($code1 == $this->_current_lang_locale) return $content;
-      if($code2 == $this->_current_lang_locale) return $content;
-
-      $locale[] = str_replace("-", "_", $code1);
-      $locale[] = str_replace("-", "_", $code2);
-    endforeach;
-
-    //Controllo se la lingua del browser è tra quelle gestite, se non lo è non visualizzo alcun messaggio.
-    $browser_lang_id = $this->get_language_id_by_locale(array_unique($locale));
     if(empty($browser_lang_id)) return $content;
 
     //Recupero l'd della lingua dal database
-    $lang_id = $this->get_current_lang_id();
+    $lang_id = $this->_current_lang_id;
 
-    if(is_category()) {
-      if(get_option("cml_option_notice_cats") != 1) return $content;
-
-      $id = $this->get_category_id(single_cat_title("", false));
-      $link = get_category_link($id);
-      
-      $link = $this->translate_term_link($link);
-    }
-    
     if(is_page()) {
       if(get_option("cml_option_notice_page") != 1) return $content;
 
       //$link = cml_get_linked_page($lang_id, null, get_the_ID(), $browser_lang_id);
-            $link = cml_get_linked_post($lang_id, null, get_the_ID(), $browser_lang_id);
-
-      $link = ($link == get_the_ID() || $link == null) ? null : get_permalink($link);
+      $link = cml_get_linked_post($browser_lang_id, null, get_the_ID(), $lang_id);
     }
     
     if(is_single()) {
       if(get_option("cml_option_notice_post") != 1) return $content;
-
       $link = cml_get_linked_post($lang_id, null, get_the_ID(), $browser_lang_id);
-
-      $link = ($link == get_the_ID() || $link == null) ? null : get_permalink($link);
     }
 
+    echo "$lang_id, $browser_lang_id.";
+    echo $link;
+    $link = ($link == get_the_ID() || $link == null) ? null : get_permalink($link);
     if(!empty($link)) :
       $notice = cml_get_notice($browser_lang_id);
       $before = stripcslashes(get_option('cml_option_notice_before', '<h5 class="cml-notice">'));
@@ -1596,6 +1566,36 @@ class CeceppaML {
     return $content;
   }
   
+  function get_browser_lang() {
+    if(isset($this->_browser_lang)) return $this->_browser_lang;
+
+    $browser_langs = explode(";", $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+    $lang = null;
+
+    //Se la lingua del browser coincide con una di quella attuale della pagina, ignoro tutto
+    foreach($browser_langs as $lang) :
+      @list($code1, $code2) = explode(",", $lang);
+
+      if($code1 == $this->_current_lang_locale) return $content;
+      if($code2 == $this->_current_lang_locale) return $content;
+
+      $locale1 = str_replace("-", "_", $code1);
+      $locale2 = str_replace("-", "_", $code2);
+      
+      //Per ogni codice che trovo verifico se è gestito, appena ne trovo 1 mi fermo
+      //Perché il mio browser mi restituisce sia it-IT, che en-EN, quindi mi devo fermare appena trovo un riscontro
+      //Senno mi ritrovo sempre la lingua en-EN come $browser_langs;
+      $lang = $this->get_language_id_by_locale(array($locale1, $locale2));
+      if(!empty($lang)) {
+	break;
+      }
+    endforeach;
+
+    $this->_browser_lang = $lang;
+
+    return $this->_browser_lang;
+  }
+
    //Save extra category extra fields callback function
   function save_extra_category_fileds($term_id) {
     global $wpdb, $pagenow;
@@ -1762,16 +1762,6 @@ class CeceppaML {
 	$the_id  = url_to_postid($url);
     }
 
-    //Categoria
-    /*
-    if(is_category()) {
-      $id = $this->get_category_id(single_cat_title("", false));
-      $parent = get_category_by_slug($this->get_category_parent($id));
-
-      $lang = $this->get_language_id_by_category($parent->term_id);
-    }
-*/
-
     if(is_single()) {
       $lang = $this->get_language_id_by_post_id($the_id);
     }
@@ -1795,27 +1785,8 @@ class CeceppaML {
       $this->_current_lang_id = $lang;
 
       //Aggiorno il menu del tema :)
-      $mods = get_theme_mods();
-      $locations = get_theme_mod('nav_menu_locations');
-      
-      //Se non inizia per cml_ allora sarà quella definita dal tema :)
-      if(is_array($locations)) :
-	  $keys = array_keys($locations);
-	  foreach($keys as $key) :
-	    if(!empty($key) && substr($key, 0, 4) != "cml_") {
-	      $menu = $this->_current_lang;
-
-	      if(!empty($locations["cml_menu_$menu"])) {
-		  $locations[$key] = $locations["cml_menu_$menu"];
-
-		  $this->_no_translate_menu_item = true;
-		  set_theme_mod('nav_menu_locations', $locations);
-	      }
-
-	      //Esco dal ciclo
-	      break;
-	    }
-	  endforeach;
+      if(!isset($this->_menu_changed)) :
+	$this->change_menu();
       endif;
 
       if($this->_filter_search) {
@@ -1842,6 +1813,34 @@ class CeceppaML {
     }
   }
 
+
+  /*
+   * Cambio il menu predefinito del tema, in accordo con quello della lingua corrente
+   */
+  function change_menu() {
+    $mods = get_theme_mods();
+    $locations = get_theme_mod('nav_menu_locations');
+
+    //Se non inizia per cml_ allora sarà quella definita dal tema :)
+    if(is_array($locations)) :
+	$keys = array_keys($locations);
+	foreach($keys as $key) :
+	  if(!empty($key) && substr($key, 0, 4) != "cml_") {
+	    $menu = $this->_current_lang;
+
+	    if(!empty($locations["cml_menu_$menu"])) {
+		$locations[$key] = $locations["cml_menu_$menu"];
+
+		$this->_no_translate_menu_item = true;
+		set_theme_mod('nav_menu_locations', $locations);
+	    }
+
+	    //Esco dal ciclo
+	    break;
+	  }
+	endforeach;
+    endif;
+  }
 
   /**
    * Recupero tutte le categorie della lingua corrente:
@@ -2344,6 +2343,8 @@ class CeceppaML {
 	      <br /><br />
 	      <?php _e('If you need to customize "Navigation Label" or if you want to have different items for each languages, create a menu for each language', 'ceceppaml') ?>
 	      <?php _e('and assigns it to the corresponding menu, otherwise assign it only to the primary menu', 'ceceppaml') ?>
+	      <br /><br />
+	      <strong><?php _e('In same cases is displayed a blank menu for non default language. If that happens you must create different menu for each language. :(', 'ceceppaml') ?></strong>
 	    </p>
 	</div>
 <?php

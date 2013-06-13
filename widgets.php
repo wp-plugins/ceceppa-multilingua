@@ -377,6 +377,9 @@ class CeceppaMLWidgetText extends WP_Widget {
   }
 };
 
+function unichr($u) {
+    return mb_convert_encoding('&#' . intval($u) . ';', 'UTF-8', 'HTML-ENTITIES');
+}
 add_action( 'widgets_init', create_function( '', 'register_widget( "CeceppaMLWidgetChooser" );' ) );
 add_action( 'widgets_init', create_function( '', 'register_widget( "CeceppaMLWidgetRecentPosts" );' ) );
 add_action( 'widgets_init', create_function( '', 'register_widget( "CeceppaMLWidgetText" );' ) );

@@ -105,8 +105,6 @@
 							<label for="notice-post"><?php _e('Posts', 'ceceppaml') ?></label> <br />
 						<input type="checkbox" id="notice-page" name="notice-page" value="1" <?php echo ((get_option('cml_option_notice_page', 'notice-page') == 1) ? 'checked' : '') ?> />
 							<label for="notice-page"><?php _e('Pages', 'ceceppaml') ?></label><br />
-						<input type="checkbox" id="notice-cats" name="notice-cats" value="1" <?php echo ((get_option('cml_option_notice_cats', 'notice-cats') == 1) ? 'checked' : '') ?> />
-							<label for="notice-cats"><?php _e('Categories', 'ceceppaml') ?></label><br />
 					</blockquote>
 					<input type="radio" id="no-notice" name="notice" value="nothing" <?php echo ((get_option('cml_option_notice') == 'nothing') ? 'checked' : '') ?>/>
 							<label for="no-notice"><?php _e('Ignore', 'ceceppaml') ?></label><br />
