@@ -35,10 +35,10 @@
       global $wpCeceppaML;
 
       //$posts = new WP_Query('order=ASC;post_per_page=-1,numberposts=10,status=publish');
-			$posts = get_posts(array('order' => 'ASC',
-                               'orderby' => 'title',
-															 'numberposts' => -1,
-															 'status' => 'publish'));
+$posts = get_posts(array('order' => 'ASC',
+  'orderby' => 'title',
+  'numberposts' => -1,
+  'status' => 'publish'));
       $default_id = cml_get_default_language_id();
 
       //while ($posts->have_posts()) : $posts->the_post(); 

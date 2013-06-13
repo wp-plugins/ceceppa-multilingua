@@ -235,7 +235,7 @@ function cml_translate($string, $id) {
 
   $ret = $wpdb->get_var($query);
 
-  return (!isset($ret)) ? $string : utf8_decode($ret);
+  return (!isset($ret)) ? $string : $ret;
 }
 
 /**

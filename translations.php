@@ -47,7 +47,7 @@
 
       echo "<td style=\"height:2.5em\">\n";
       echo "\t<input type=\"hidden\" name=\"id[]\" value=\"$result->id\" />\n";
-      echo "\t<input type=\"hidden\" name=\"string[]\" value=\"$result->cml_text\" />\n";
+      echo "\t<input type=\"hidden\" name=\"string[]\" value=\"" . utf8_decode($result->cml_text) . "\" />\n";
       echo $result->cml_text . "</td>";
       $i = 0;
 

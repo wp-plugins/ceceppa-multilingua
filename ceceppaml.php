@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.9.3
+Version: 0.9.4
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -17,7 +17,7 @@ Tags: multilingual, multi, language, admin, tinymce, qTranslate, Polyglot, bilin
  */
 global $wpdb;
 
-define('CECEPPA_DB_VERSION', 9);
+define('CECEPPA_DB_VERSION', 10);
 
 define('CECEPPA_ML_TABLE', $wpdb->base_prefix . 'ceceppa_ml');
 define('CECEPPA_ML_CATS', $wpdb->base_prefix . 'ceceppa_ml_cats');
@@ -539,7 +539,7 @@ class CeceppaML {
         cml_locale TEXT,
 	cml_enabled INT,
         PRIMARY KEY  id (id)
-        );";
+        ) ENGINE=InnoDB CHARACTER SET=utf8;";
 
         dbDelta($sql);
       }
@@ -628,7 +628,7 @@ class CeceppaML {
         cml_post_id_1 INT(11),
         cml_post_lang_2 INT(11),
         cml_post_id_2 INT(11),
-        PRIMARY KEY  id (id))";
+        PRIMARY KEY  id (id)) ENGINE=InnoDB CHARACTER SET=utf8;";
 
       dbDelta($query);
 //    }
@@ -650,7 +650,7 @@ class CeceppaML {
       cml_text TEXT NOT NULL ,
       `cml_lang_id` INT NOT NULL ,
       `cml_translation` TEXT,
-      `cml_type` TEXT)";
+      `cml_type` TEXT) ENGINE=InnoDB CHARACTER SET=utf8;";
 
     dbDelta($query);
     //}
@@ -658,9 +658,25 @@ class CeceppaML {
     //Rimuovo le colonne non più necessarie
     $wpdb->query("ALTER table " . CECEPPA_ML_TABLE . " DROP cml_category_name, DROP cml_category_id, DROP cml_category_slug, DROP cml_page_id, DROP cml_page_slug");
 
+    //modifico il charset della tabella
+    if(get_option("CECEPPA_DB_VERSION", 0) <= 9) :
+      $alter = "ALTER TABLE  " . CECEPPA_ML_TABLE . " CHANGE  `cml_language`  `cml_language` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NULL DEFAULT NULL,"
+		. "CHANGE  `cml_notice_post`  `cml_notice_post` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NULL DEFAULT NULL ,"
+		. "CHANGE  `cml_notice_page`  `cml_notice_page` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NULL DEFAULT NULL ,"
+		. "CHANGE  `cml_notice_category`  `cml_notice_category` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NULL DEFAULT NULL ,"
+		. "CHANGE  `cml_locale`  `cml_locale` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NULL DEFAULT NULL";
+      $wpdb->query($alter);
+
+      $alter = "ALTER TABLE  `wp_ceceppa_ml_trans` CHANGE  `cml_text`  `cml_text` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL ,"
+		. "CHANGE  `cml_translation`  `cml_translation` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NULL DEFAULT NULL";
+      $wpdb->query($alter);
+    endif;
+
     //Fix dovuto alla 0.9.1, tutte le lingue venivano impostate come default se l'utente face click su update :(
-    $wpdb->query("UPDATE " . CECEPPA_ML_TABLE . " SET cml_default = 0");
-    $wpdb->query("UPDATE " . CECEPPA_ML_TABLE . " SET cml_default = 1 WHERE id = 1");
+    if(get_option("CECEPPA_DB_VERSION", 0) != 9) :
+      $wpdb->query("UPDATE " . CECEPPA_ML_TABLE . " SET cml_default = 0");
+      $wpdb->query("UPDATE " . CECEPPA_ML_TABLE . " SET cml_default = 1 WHERE id = 1");
+    endif;
 
     //for updates
     update_option("cml_db_version", CECEPPA_DB_VERSION);
@@ -1066,9 +1082,9 @@ class CeceppaML {
 				  'cml_language_slug' => $_POST['language_slug'][$i],
 				  'cml_language' => $_POST['language'][$i],
 				  'cml_locale' => $_POST['locale'][$i],
-				  'cml_notice_post' => utf8_encode($_POST['notice_post'][$i]),
-				  'cml_notice_page' => utf8_encode($_POST['notice_page'][$i]),
-				  'cml_notice_category' => utf8_encode($_POST['notice_category'][$i]),
+				  'cml_notice_post' => addslashes($_POST['notice_post'][$i]),
+				  'cml_notice_page' => addslashes($_POST['notice_page'][$i]),
+				  'cml_notice_category' => addslashes($_POST['notice_category'][$i]),
 				  'cml_enabled' => 1),
 			     array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d'));
             endif;
@@ -1079,9 +1095,9 @@ class CeceppaML {
 				  'cml_language_slug' => $_POST['language_slug'][$i],
 				  'cml_language' => $_POST['language'][$i],
 				  'cml_locale' => $_POST['locale'][$i],
-				  'cml_notice_post' => utf8_encode($_POST['notice_post'][$i]),
-				  'cml_notice_page' => utf8_encode($_POST['notice_page'][$i]),
-				  'cml_notice_category' => utf8_encode($_POST['notice_category'][$i]),
+				  'cml_notice_post' => addslashes($_POST['notice_post'][$i]),
+				  'cml_notice_page' => addslashes($_POST['notice_page'][$i]),
+				  'cml_notice_category' => addslashes($_POST['notice_category'][$i]),
 				  'cml_enabled' => 1),
 			     array('id' => $id),
 			     array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d'),
