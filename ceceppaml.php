@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.9.7
+Version: 0.9.8
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -849,7 +849,7 @@ class CeceppaML {
             foreach($results as $result) :
                 if($result->cml_post_id_2 > 0 && $result->cml_fake_id_1 == $this->_current_lang_id) $posts[] = $result->cml_post_id_2;
                 if($result->cml_post_id_1 > 0 && $result->cml_fake_id_2 == $this->_current_lang_id) $posts[] = $result->cml_post_id_1;
-                if($result->cml_fake_id_1 == $result->cml_fake_id_2) array_pop($posts);
+                if($result->cml_fake_id_1 == $result->cml_fake_id_2 && !empty($posts)) array_pop($posts);
 
                 //Può capitare che ho n (> 2) lingue e alcuni articoli non sono tradotti in queste, allora nascondo gli articoli
                 //per evitare che vengano visualizzati entrambi.
@@ -1460,7 +1460,7 @@ class CeceppaML {
 	  if($lang->id != $id && $lang->id != $post_lang) :
 
 	  $link = cml_get_linked_post($id, null, $t_id, $lang->id);
-	  $href = empty($link) ? (get_bloginfo("url") . "/wp-admin/post-new.php?link-to=$t_id&post-lang=$lang->id") : get_edit_post_link($link);
+	  $href = empty($link) ? (get_bloginfo("url") . "/wp-admin/post-new.php?post_type=page&link-to=$t_id&post-lang=$lang->id") : get_edit_post_link($link);
 	  $icon = empty($link) ? "add" : "go";
 	  $title = empty($link) ? __('Translate post', 'ceceppaml') : __('Edit post', 'ceceppaml');
 	  $msg = empty($link) ? __('Add translation', 'ceceppaml') : __('Switch to post/page', 'ceceppaml');
