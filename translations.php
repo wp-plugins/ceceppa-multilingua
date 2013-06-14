@@ -25,7 +25,7 @@
     <table class="ceceppaml CSSTableGenerator">
       <tbody>
       <tr>
-	  <td><?php _e('Text', 'ceceppaml') ?></td>
+	  <td><img src="<?php echo cml_get_flag_by_lang_id(cml_get_default_language_id()) ?>" />&nbsp;<?php echo cml_get_language_title(cml_get_default_language_id()) ?></td>
 <?php
 	  $langs = cml_get_languages(1, 0);
 	  foreach($langs as $lang) {
@@ -40,31 +40,41 @@
       </td>
       </tr>
 <?php 
-  $results = $wpdb->get_results("SELECT min(id) as id, cml_text FROM " . CECEPPA_ML_TRANS . " WHERE cml_type='S' GROUP BY cml_text");
+  $results = $wpdb->get_results("SELECT min(id) as id, UNHEX(cml_text) as cml_text FROM " . CECEPPA_ML_TRANS . " WHERE cml_type='S' GROUP BY cml_text");
 
+  $c = 0;
   foreach($results as $result) :
+      $title = html_entity_decode($result->cml_text);
+	//Non posso utilizzare htmlentities perché sennò su un sito in lingua russa mi ritrovo tutti simboli strani :'(
+      $title = str_replace("\"", "&quot;", $title);
+
       echo "<tr>";
 
       echo "<td style=\"height:2.5em\">\n";
       echo "\t<input type=\"hidden\" name=\"id[]\" value=\"$result->id\" />\n";
-      echo "\t<input type=\"hidden\" name=\"string[]\" value=\"" . utf8_decode($result->cml_text) . "\" />\n";
-      echo $result->cml_text . "</td>";
+      echo "\t<input type=\"hidden\" name=\"string[]\" value=\"$title\" />\n";
+      echo "$title</td>";
       $i = 0;
 
       foreach($langs as $lang) :
-	$d = cml_translate($result->cml_text, $lang->id);
+	$d = cml_translate($title, $lang->id);
+	$d = str_replace("\"", "&quot;", $d);
 	echo "<td>\n";
-	echo "<input type=\"hidden\" name=\"lang_id[][]\" value=\"$lang->id\" />\n";
-	echo "<input type=\"text\" name=\"value[][]\" value=\"$d\" /></td>\n";
+	echo "<input type=\"hidden\" name=\"lang_id[$c][$i]\" value=\"$lang->id\" />\n";
+	echo "<input type=\"text\" name=\"value[$c][$i]\" value=\"$d\" /></td>\n";
 
 	$i++;
+      endforeach;
+
 ?>
       <td>
 	<input type="checkbox" name="remove[<?php echo $result->id ?>]" value="1">
       </td>
 <?php
-      endforeach;
+
     echo "</tr>";
+    
+    $c++;
   endforeach;
 ?>
      </tbody>

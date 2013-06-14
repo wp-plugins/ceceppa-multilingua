@@ -154,7 +154,7 @@ function cml_is_default_lang($lang = null) {
  * @param "class_nam" - nome della classe da assegnare alla lista <ul></ul>
  * @param "echo" - indica se false non esegue il costrutto echo ma ritornerò la lista <ul> che ho creato
  * @param "linked" - se true: la bandiera deve restituire il link all'articolo nelle varie lingue (se presente),
- * 										  false: la bandiera punterà alla home aggiungendo il suffisso "?lang=##"
+* 				false: la bandiera punterà alla home aggiungendo il suffisso "?lang=##"
  */
 function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags", $image_class = "", $echo = true, $linked = true) {
   global $wpdb, $wpCeceppaML;
@@ -228,14 +228,12 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
 function cml_translate($string, $id) {
   global $wpdb;
 
-  $string = html_entity_decode($string, ENT_QUOTES);
-  $string = htmlentities($string);
-  $query = sprintf("SELECT UNHEX(cml_translation) FROM %s WHERE cml_text = HEX('%s') AND cml_lang_id = %d",
-			  CECEPPA_ML_TRANS, $string, $id);
+  $query = sprintf("SELECT UNHEX(cml_translation) FROM %s WHERE cml_text = '%s' AND cml_lang_id = %d",
+			  CECEPPA_ML_TRANS, bin2hex($string), $id);
 
   $ret = $wpdb->get_var($query);
 
-  return (!isset($ret)) ? $string : $ret;
+  return (!isset($ret)) ? $string : html_entity_decode(stripslashes($ret));
 }
 
 /**

@@ -39,17 +39,19 @@ function cml_widgets_title($wtitles) {
 <?php 
   foreach($wtitles as $title) :
     if(!empty($title)) :
-      $title = htmlentities($title);
+      $title = html_entity_decode($title);
+	//Non posso utilizzare htmlentities perché sennò su un sito in lingua russa mi ritrovo tutti simboli strani :'(
+      $title = str_replace("\"", "&quot;", $title);
       echo "<tr>";
 
       echo "<td style=\"height:2.5em\">\n";
       echo "\t<input type=\"hidden\" name=\"string[]\" value=\"$title\" />\n";
-      echo html_entity_decode($title) . "</td>";
+      echo $title . "</td>";
       $i = 0;
 
       foreach($langs as $lang) :
-	$d = html_entity_decode(cml_translate($title, $lang->id));
-	$d = htmlentities($d);
+	$d = cml_translate($title, $lang->id);
+	$d = str_replace("\"", "&quot;", $d);
 	echo "<td>\n";
 	echo "<input type=\"text\" name=\"lang_" . $lang->id . "[]\" value=\"$d\" /></td>\n";
 

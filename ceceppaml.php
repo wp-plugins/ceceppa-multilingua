@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.9.8
+Version: 0.9.9
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -354,6 +354,7 @@ class CeceppaML {
     add_submenu_page('ceceppaml-language-page', __('Widget titles', 'ceceppaml'), __('Widget titles', 'ceceppaml'), 'manage_options', 'ceceppaml-widgettitles-page', array(&$this, 'form_widgettitles'));
     add_submenu_page('ceceppaml-language-page', __('My translations', 'ceceppaml'), __('My translations', 'ceceppaml'), 'manage_options', 'ceceppaml-translations-page', array(&$this, 'form_translations'));
     add_submenu_page('ceceppaml-language-page', __('Settings', 'ceceppaml'), __('Settings', 'ceceppaml'), 'manage_options', 'ceceppaml-options-page', array(&$this, 'form_options'));
+    add_submenu_page('ceceppaml-language-page', __('Shortcode', 'ceceppaml'), __('Shortcode', 'ceceppaml'), 'manage_options', 'ceceppaml-shortcode-page', array(&$this, 'shortcode_page'));
   }
 
   /**
@@ -432,7 +433,7 @@ class CeceppaML {
         if(esc_attr($post->post_title) == removesmartquotes($title)) {
 	    $this->_title_applied = true;
 
-            return $title . cml_show_availables_langs(array("class" => "cml_flags_on_top"));
+	    return $title . cml_show_available_langs(array("class" => "cml_flags_on_top"));
         } else {
             return $title;
         }
@@ -443,7 +444,7 @@ class CeceppaML {
         if(is_page() && !get_option('cml_option_flags_on_page')) return $title;
         if(is_category() && !get_option('cml_option_flags_on_cats')) return $title;
 
-        return $title . cml_show_availables_langs(array("class" => "cml_flags_on_top"));
+        return $title . cml_show_available_langs(array("class" => "cml_flags_on_top"));
     }
 
   /**
@@ -546,7 +547,6 @@ class CeceppaML {
 
         $query = "UPDATE " . CECEPPA_ML_TABLE . " SET cml_enabled = 1 WHERE cml_enabled IS NULL";
         $wpdb->query($query);
-        //$wpdb->update(CECEPPA_ML_TABLE, array("cml_enabled" => 1), array("IS NULL"));
 
         if($first_time) :
 	  update_option("cml_need_update_posts", true);
@@ -1076,7 +1076,7 @@ class CeceppaML {
 				  'cml_locale' => $_POST['locale'][$i],
 				  'cml_notice_post' => bin2hex(htmlentities($_POST['notice_post'][$i])),
 				  'cml_notice_page' => bin2hex(htmlentities($_POST['notice_page'][$i])),
-				  'cml_notice_category' => bin2hex(htmlentities($_POST['notice_category'][$i])),
+				  'cml_notice_category' => '',
 				  'cml_enabled' => 1),
 			     array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d'));
             endif;
@@ -1089,7 +1089,7 @@ class CeceppaML {
 				  'cml_locale' => $_POST['locale'][$i],
 				  'cml_notice_post' => bin2hex(htmlentities($_POST['notice_post'][$i])),
 				  'cml_notice_page' => bin2hex(htmlentities($_POST['notice_page'][$i])),
-				  'cml_notice_category' => bin2hex(htmlentities($_POST['notice_category'][$i])),
+				  'cml_notice_category' => '',
 				  'cml_enabled' => 1),
 			     array('id' => $id),
 			     array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d'),
@@ -1191,38 +1191,29 @@ class CeceppaML {
     endfor;
 
     if(array_key_exists("form", $_POST) && array_key_exists("id", $_POST)) :
+      $query = "DELETE FROM " . CECEPPA_ML_TRANS . " WHERE cml_type = 'S'";
+      $wpdb->query($query);
+
       $ids = $_POST['id'];
       $delete = (array_key_exists('remove', $_POST)) ? $_POST['remove'] : array();
 
       for($i = 0; $i < count($_POST['string']); $i++) :
 	$string = $_POST['string'][$i];
 
+	$id = $ids[$i];
+	if(!empty($delete) && (@isset($delete[$id]) || @$delete[$id] == 1)) continue;
+
 	for($j = 0; $j < count($_POST['value'][$i]); $j++) :
 	  $value = $_POST['value'][$i][$j];
 	  $lang_id = $_POST['lang_id'][$i][$j];
 
-	  if(!isset($ids[$i]) || empty($ids[$i])) :
-	    if(!empty($string)) :
-	      $wpdb->insert(CECEPPA_ML_TRANS, 
-			    array('cml_text' => $string, 
-				  'cml_lang_id' => $lang_id,
-				  'cml_translation' => $value,
-				  'cml_type' => 'S'),
-			    array('%s', '%d', '%s', '%s'));
-	    endif;
-	  else :
-	    $id = $ids[$i];
-	    if(isset($delete[$id]) && $delete[$id] == 1) :
-	      $query = sprintf("DELETE FROM %s WHERE id = %d ", CECEPPA_ML_TRANS, $id);
-	      $wpdb->query($query);
-	    else :
-	      $wpdb->update(CECEPPA_ML_TRANS,
-			    array('cml_translation' => $value,
-				  'cml_type' => 'S'),
-			    array('id' => $id, 'cml_lang_id' => $lang_id),
-			    array('%s', '%s'),
-			    array('%d', '%d'));
-	    endif;
+	  if(!empty($string)) :
+	    $wpdb->insert(CECEPPA_ML_TRANS, 
+			  array('cml_text' => bin2hex($string),
+				'cml_lang_id' => $lang_id,
+				'cml_translation' => bin2hex($value),
+				'cml_type' => 'S'),
+			  array('%s', '%d', '%s', '%s'));
 	  endif;
 	endfor;
 
@@ -1256,12 +1247,13 @@ class CeceppaML {
 
 	    //       if(empty($id)) {
 	    $text = $_POST['lang_' . $lang][$i];
-	    $text = htmlentities($text);
+	    //$text = htmlentities($text);
 
 	    $title = $_POST['string'][$i];
-	    $title = htmlentities($title);
-	    $query = sprintf("INSERT INTO %s (cml_text, cml_lang_id, cml_translation, cml_type) VALUES ('%s', '%d', '%s', 'W')",
-				CECEPPA_ML_TRANS, bin2hex($title), $lang, bin2hex($text));
+	    //$title = htmlentities($title);
+	    $query = sprintf("INSERT INTO %s (cml_text, cml_lang_id, cml_translation, cml_type) VALUES (HEX('%s'), '%d', HEX('%s'), 'W')",
+				CECEPPA_ML_TRANS, addslashes($title), $lang, addslashes($text));
+
 	    $wpdb->query($query);
 	  endforeach;
       endfor;
@@ -1535,12 +1527,12 @@ class CeceppaML {
     if(is_page()) {
       if(get_option("cml_option_notice_page") != 1) return $content;
 
-      //$link = cml_get_linked_page($lang_id, null, get_the_ID(), $browser_lang_id);
-      $link = cml_get_linked_post($browser_lang_id, null, get_the_ID(), $lang_id);
+      $link = cml_get_linked_post($lang_id, null, get_the_ID(), $browser_lang_id);
     }
     
     if(is_single()) {
       if(get_option("cml_option_notice_post") != 1) return $content;
+
       $link = cml_get_linked_post($lang_id, null, get_the_ID(), $browser_lang_id);
     }
 
@@ -1658,11 +1650,8 @@ class CeceppaML {
       if(!isset($post_lang))
 	delete_option("cml_post_lang_$term_id");
 
-      if(!isset($post_lang))
-	delete_option("cml_post_lang_$term_id");
-
       update_option("cml_page_$term_id", $linked_post);
-      update_option("cml_page_lang_$term_id", $post_lang);
+      update_option("cml_post_lang_$term_id", $post_lang);
   }
 
   function delete_extra_post_fields($id) {
@@ -2449,6 +2438,10 @@ class CeceppaML {
 		    "cml_post_id_2" => 0),
 	      array('%d', '%d', '%d', '%d'));
     endforeach;
+  }
+  
+  function shortcode_page() {
+    require_once(CECEPPA_PLUGIN_PATH . "shortcode_page.php");
   }
 }
 

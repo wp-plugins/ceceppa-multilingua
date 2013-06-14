@@ -39,10 +39,10 @@ function addRow(count, lid) {
   for(var i = 0; i < count; i++) {
     $td = jQuery("<td>");
 
-    $hidden = jQuery("<input>").attr('type', 'hidden').attr('name', 'lang_id[][]').attr('value', id[i]);
+    $hidden = jQuery("<input>").attr('type', 'hidden').attr('name', 'lang_id[' + row + '][' + i + ']').attr('value', id[i]);
     $td.append($hidden);
 
-    $input = jQuery("<input>").attr('type', 'text').attr('name', 'value[][]');
+    $input = jQuery("<input>").attr('type', 'text').attr('name', 'value[' + row + '][' + i + ']');
     $td.append($input);
     $tr.append($td);
   }

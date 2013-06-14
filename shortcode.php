@@ -22,17 +22,7 @@
   *    Esempio:
   *      [amrp parameters="limit=4" it="cats=28" epo="1" en="2"]
   *
-  *
-  *  cml_flag - serve a visualizzare l'icona e/o il testo della lingua specificata
-  *      Utilizzo:
-  *       [cml_flag lang="it" show="flag|text"]
-  *          
-  *       @lang - slug della lingua da visualizzare
-  *       @show - (facolativo) serve specificare se vogliamo che la funzione restituisca la bandiera della lingua (flag) 
-  *               oppure vogliamo il nome della lingua.
-  *               Se non è specificato restituisce entrambi
-  *
-  *  cml_show_availables_lang - Serve a visualizzare l'elenco delle lingue in cui è disponibile la catagoria/pagina/articolo
+  *  cml_show_available_lang - Serve a visualizzare l'elenco delle lingue in cui è disponibile la catagoria/pagina/articolo
   *
   *  cml_show_flags - visualizza le lingue disponibile con le relative bandiere
   *      Utilizzo:
@@ -48,7 +38,7 @@
   */
 add_shortcode("cml_text", 'cml_shortcode_text');
 add_shortcode("cml_shortcode", 'cml_do_shortcode');
-add_shortcode('cml_show_availables_langs', 'cml_show_availables_langs');
+add_shortcode('cml_show_available_langs', 'cml_show_available_langs');
 add_shortcode('cml_show_flags', 'cml_shortcode_show_flags');
 
 function cml_shortcode_text($attrs) {
@@ -61,6 +51,18 @@ function cml_shortcode_text($attrs) {
     return $attrs[$wpCeceppaML->get_default_language_slug()];
 }
 
+/*
+  [cml_translate string="Hello" in="it"]
+*/
+function cml_shortcode_translate($attrs) {
+  global $wpCeceppaML;
+
+  extract($attrs);
+  
+  $id = (!empty($in)) ? $wpCeceppaML->get_language_id_by_slug($in) : $wpCeceppaML->get_default_language_id();
+  return cml_translate($string, $id);
+}
+
 function cml_do_shortcode($attrs) {
   global $wpCeceppaML;
 
@@ -71,10 +73,10 @@ function cml_do_shortcode($attrs) {
   return do_shortcode("[$shortcode $params $lang]");
 }
 
-function cml_show_availables_langs($attrs) {
+function cml_show_available_langs($attrs) {
   global $wpdb, $wpCeceppaML;
 
-  $notice = isset($attrs['notice']) ? $attrs['notice'] : true;
+  //$notice = isset($attrs['notice']) ? $attrs['notice'] : true;
   $class = $attrs['class'];
 
   $langs = cml_get_languages();
@@ -100,7 +102,7 @@ function cml_show_availables_langs($attrs) {
         $link = add_query_arg(array("lang" => $lang->cml_language_slug, "sp" => 1), get_site_url());
       }
 
-      $title = ($notice && $l_id != $lang->id) ? cml_get_notice_by_lang_id($lang->id) : $lang->cml_language;
+      $title = $lang->cml_language; //($notice && $l_id != $lang->id) ? cml_get_notice_by_lang_id($lang->id) : $lang->cml_language;
       $r .= "<li><a href=\"$link\"><img src='" . cml_get_flag_by_lang_id($lang->id, 'small') . "' title=\"$title\" class=\"tipsy-me\"/></a></li>";
     }
   }
@@ -111,10 +113,12 @@ function cml_show_availables_langs($attrs) {
 }
 
 function cml_shortcode_show_flags($attrs) {
-  $show = $attrs['show'];
-  $flag = $attrs['size'];
+  extract(shortcode_atts(array("show" => "flag", 
+				"size" => "tiny", 
+				"class" => "cml_flags",
+				"image" => ""), $attrs));
 
-  return cml_show_flags($show, $flag, false);
+  return cml_show_flags($show, $size, $class, $image, false, true);
 }
 
 ?>
