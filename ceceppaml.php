@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.9.9
+Version: 0.9.10
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -17,7 +17,7 @@ Tags: multilingual, multi, language, admin, tinymce, qTranslate, Polyglot, bilin
  */
 global $wpdb;
 
-define('CECEPPA_DB_VERSION', 10);
+define('CECEPPA_DB_VERSION', 11);
 
 define('CECEPPA_ML_TABLE', $wpdb->base_prefix . 'ceceppa_ml');
 define('CECEPPA_ML_CATS', $wpdb->base_prefix . 'ceceppa_ml_cats');
@@ -639,11 +639,13 @@ class CeceppaML {
      *
      */
     $table_name = CECEPPA_ML_TRANS;
-    if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name ) {
-      $sql = "ALTER TABLE " . CECEPPA_ML_TRANS . " ADD COLUMN `cml_type` TEXT";
-      $wpdb->query($sql);
-      $wpdb->query("UPDATE " . CECEPPA_ML_TRANS . " SET cml_type = 'W'");
-    }
+    if(get_option("cml_db_version", CECEPPA_DB_VERSION) <= 9) :
+      if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name ) {
+	$sql = "ALTER TABLE " . CECEPPA_ML_TRANS . " ADD COLUMN `cml_type` TEXT";
+	$wpdb->query($sql);
+	$wpdb->query("UPDATE " . CECEPPA_ML_TRANS . " SET cml_type = 'W'");
+      }
+    endif;
 
     $query = "CREATE TABLE  $table_name (
       `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
@@ -656,10 +658,12 @@ class CeceppaML {
     //}
 
     //Rimuovo le colonne non più necessarie
-    $wpdb->query("ALTER table " . CECEPPA_ML_TABLE . " DROP cml_category_name, DROP cml_category_id, DROP cml_category_slug, DROP cml_page_id, DROP cml_page_slug");
+    if(get_option("cml_db_version", CECEPPA_DB_VERSION) <= 9) :
+      $wpdb->query("ALTER table " . CECEPPA_ML_TABLE . " DROP cml_category_name, DROP cml_category_id, DROP cml_category_slug, DROP cml_page_id, DROP cml_page_slug");
+    endif;
 
     //modifico il charset della tabella
-    if(get_option("CECEPPA_DB_VERSION", 0) <= 9) :
+    if(get_option("cml_db_version", CECEPPA_DB_VERSION) <= 9) :
       $alter = "ALTER TABLE  " . CECEPPA_ML_TABLE . " CHANGE  `cml_language`  `cml_language` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NULL DEFAULT NULL,"
 		. "CHANGE  `cml_notice_post`  `cml_notice_post` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NULL DEFAULT NULL ,"
 		. "CHANGE  `cml_notice_page`  `cml_notice_page` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NULL DEFAULT NULL ,"
@@ -673,9 +677,21 @@ class CeceppaML {
     endif;
 
     //Fix dovuto alla 0.9.1, tutte le lingue venivano impostate come default se l'utente face click su update :(
-    if(get_option("CECEPPA_DB_VERSION", 0) != 9) :
+    if(get_option("cml_db_version", CECEPPA_DB_VERSION) != 9) :
       $wpdb->query("UPDATE " . CECEPPA_ML_TABLE . " SET cml_default = 0");
       $wpdb->query("UPDATE " . CECEPPA_ML_TABLE . " SET cml_default = 1 WHERE id = 1");
+    endif;
+
+    //Ricreo tutti gli indici "cml_post_lang_##" in "cml_page_lang"
+    if(get_option("cml_db_version", CECEPPA_DB_VERSION) <= 10) :
+      $results = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_POSTS);
+      foreach($results as $result) :
+	  if($result->cml_post_lang_1 > 0) update_option("cml_page_lang_" . $result->cml_post_id_1, $result->cml_post_lang_1);
+	  if($result->cml_post_lang_2 > 0) update_option("cml_page_lang_" . $result->cml_post_id_2, $result->cml_post_lang_2);
+
+	  delete_option("cml_post_lang_" . $result->cml_post_id_1);
+	  delete_option("cml_post_lang_" . $result->cml_post_id_2);
+      endforeach;
     endif;
 
     //for updates
@@ -1019,7 +1035,7 @@ class CeceppaML {
     global $wpdb;
 
     //E' stata specificata una lingua "manuale"?
-    $val = get_option("cml_post_lang_$post_id", 0);
+    $val = get_option("cml_page_lang_$post_id", 0);
     if($val > 0) return $val;
 
     /*
@@ -1124,6 +1140,7 @@ class CeceppaML {
 
       //Redirect
       update_option("cml_option_redirect", $_POST['redirect']);
+      update_option("cml_option_redirect_type", $_POST['redirect-type']);
 
       if(array_key_exists("posts", $_POST))
 	update_option("cml_option_post_redirect", $_POST['posts']);
@@ -1497,13 +1514,26 @@ class CeceppaML {
 
     $lang = $this->get_browser_lang();
     $lang = (empty($slug)) ? $this->_default_language_slug : $lang;
+    //Redirect abilitato?
     if($this->_redirect_browser == 'auto') {
-      //Redirect abilitato
-      $location = home_url() . "/?lang=$lang";
+      //Pagina statica?
+      $type = get_option("cml_option_redirect_type");
+      $permalink = get_option("permalink_structure");
+      if($type == 'slug' && !empty($permalink)) :
+	//Devo azzerare le opzioni sennò vado in loop :(
+	update_option('show_on_front', 'posts');
+	update_option('page_parent', 0);
+
+	$location = home_url() . "/$lang/";
+      else:
+	$location = home_url() . "/?lang=$lang";
+      endif;
     }
 
     if(!empty($location)) {
-      wp_redirect($location, $status );
+      $this->_redirect_browser = 'nothing';
+
+      wp_redirect($location, $status);
       exit;
     }
   }
@@ -1648,10 +1678,10 @@ class CeceppaML {
 	$wpdb->query($query);
 
       if(!isset($post_lang))
-	delete_option("cml_post_lang_$term_id");
+	delete_option("cml_page_lang_$term_id");
 
       update_option("cml_page_$term_id", $linked_post);
-      update_option("cml_post_lang_$term_id", $post_lang);
+      update_option("cml_page_lang_$term_id", $post_lang);
   }
 
   function delete_extra_post_fields($id) {
@@ -2414,7 +2444,7 @@ class CeceppaML {
       'status' => 'publish, draft'));
 
     foreach($posts as $post) :
-      update_option("cml_post_lang_" . $post->ID, $this->_default_language_id);
+      update_option("cml_page_lang_" . $post->ID, $this->_default_language_id);
       $wpdb->insert(CECEPPA_ML_POSTS, 
 		    array("cml_post_lang_1" => $this->_default_language_id,
 			  "cml_post_id_1" => $post->ID, 

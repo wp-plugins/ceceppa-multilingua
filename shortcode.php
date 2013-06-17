@@ -57,7 +57,8 @@ function cml_shortcode_text($attrs) {
 function cml_shortcode_translate($attrs) {
   global $wpCeceppaML;
 
-  extract($attrs);
+  extract(shortcode_atts(array("string" => "", 
+				"in" => ""), $attrs));
   
   $id = (!empty($in)) ? $wpCeceppaML->get_language_id_by_slug($in) : $wpCeceppaML->get_default_language_id();
   return cml_translate($string, $id);

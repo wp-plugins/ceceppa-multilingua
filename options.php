@@ -60,7 +60,28 @@
 						<strong><em><?php _e('Detect browser language and:', 'ceceppaml') ?></em></strong>
 						<blockquote>
 							<input type="radio" id="redirect" name="redirect" value="auto" <?php echo ((get_option('cml_option_redirect', 'auto') == 'auto') ? 'checked' : '') ?> />
-							<label for="redirect"><?php _e('Automatically redirects the browser depending on the user\'s language. <strong><em>Append the suffix &lang= to the home page</em></strong>', 'ceceppaml') ?></label><br>
+							<label for="redirect">
+							  <?php _e('Automatically redirects the browser depending on the user\'s language.', 'ceceppaml'); ?>
+							</label>
+							      <ul style="list-style: square; padding-left: 20px;">
+								<li style="display: block;">
+								  <label>
+								    <input type="radio" id="redirect-type" name="redirect-type" value="suffix" <?php checked(get_option('cml_option_redirect_type', 'suffix'), 'suffix'); ?> /><?php _e('Append the suffix <strong>&amp;lang=</strong> to the home page', 'ceceppaml') ?>
+								  </label>
+								</li>
+								<li style="display: block;">
+								  <label>
+								    <input type="radio" id="redirect-type" name="redirect-type" value="slug" <?php checked(get_option('cml_option_redirect_type', 'suffix'), 'slug'); ?>/>
+								      <?php _e('Append language slug to home url. <br />Example www.example.com/en/', 'ceceppaml'); ?><br />
+								      <div  style="margin-left: 20px;">
+								      <strong><?php _e('This options doesn\'t work with "Default permalink" (?p=##)', 'ceceppaml'); ?></strong>
+								      <em><?php _e('Enable this options only if you want to use a static page as homepage.', 'ceceppaml'); ?><br />
+									  <?php _e('You must edit the permalink for you homepage and their translations, using the language slug as permalink.', 'ceceppaml') ?><br />
+									  <?php _e('Example: the permalink of your homepage must be "en".', 'ceceppaml') ?></em>
+								      </div>
+								  </label>
+								</li>
+							      </ul>
 							<input type="radio" id="no-redirect" name="redirect" value="nothing" <?php echo ((get_option('cml_option_redirect') == 'nothing') ? 'checked' : '') ?>/>
 							<label for="no-redirect"><?php _e('Do nothing', 'ceceppaml') ?></label><br />
 						</blockquote>

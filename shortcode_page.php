@@ -40,7 +40,7 @@
       </p>
 	<ul style="float: none; list-style: circle;padding-left: 50px;">
 	  <li><strong>string:</strong> - string previously saved in "My Translation"</li>
-	  <li><strong>in:</strong> - language to translate</li>
+	  <li><strong>in:</strong> - <i>(optional)</i>language to translate. If you don't pass this parameter, will be used the current language</li>
 	</ul>
       <br />
       <strong><?php _e('Example:', 'ceceppaml') ?></strong>
