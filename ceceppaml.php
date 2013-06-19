@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.9.10
+Version: 0.9.11
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -1342,7 +1342,7 @@ class CeceppaML {
 
     //Recupero l'id del post collegato
     $t_id = $tag->ID;
-    $linked_to = $wpdb->get_var(sprintf("SELECT cml_post_id_2 FROM %s WHERE cml_post_id_1 = %d",
+    $linked_to = $wpdb->get_var(sprintf("SELECT cml_post_id_2 FROM %s WHERE cml_post_id_1 = %d AND cml_post_id_2 > 0",
 		    CECEPPA_ML_POSTS, $t_id));
 
     //Elenco degli articoli
@@ -1436,7 +1436,7 @@ class CeceppaML {
 
     //Recupero l'id del post collegato
     $t_id = $tag->ID;
-    $linked_to = $wpdb->get_var(sprintf("SELECT cml_post_id_2 FROM %s WHERE cml_post_id_1 = %d",
+    $linked_to = $wpdb->get_var(sprintf("SELECT cml_post_id_2 FROM %s WHERE cml_post_id_1 = %d AND cml_post_id_2 > 0",
 		    CECEPPA_ML_POSTS, $t_id));
 
     $args = array('post_status' => 'publish,inherit,pending,private,future,draft',
@@ -1941,7 +1941,7 @@ class CeceppaML {
      * se la lingua non è cambiata
      */
     if(!isset($this->_language_lang_id) || $lang != $this->_language_lang_id) :
-      $query = sprintf("SELECT *, case when cml_post_lang_1 > 0 then cml_post_lang_1 else  %d end as cml_fake_id_1, case when cml_post_lang_2 > 0 then cml_post_lang_2 else  %d end as cml_fake_id_2 FROM %s", $lang, $lang, CECEPPA_ML_POSTS);
+      $query = sprintf("SELECT *, case when cml_post_lang_1 > 0 then cml_post_lang_1 else %d end as cml_fake_id_1, case when cml_post_lang_2 > 0 then cml_post_lang_2 else %d end as cml_fake_id_2 FROM %s", $lang, $lang, CECEPPA_ML_POSTS);
       $results = $wpdb->get_results($query);
 
       $posts = array();

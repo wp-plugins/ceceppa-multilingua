@@ -50,7 +50,7 @@ class CeceppaMLWidgetRecentPosts extends WP_Widget {
       $the_args = array('post_status'=>'publish',
 				      'post__in' => $ids,
 				      'orderby' => 'post_date',
-				      'order' => 'ASC',
+				      'order' => 'DESC',
 				      'posts_per_page' => $number);
 
       $the_query = new WP_Query($the_args);
