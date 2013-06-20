@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.9.12
+Version: 0.9.13
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -1090,8 +1090,8 @@ class CeceppaML {
 				  'cml_language_slug' => $_POST['language_slug'][$i],
 				  'cml_language' => $_POST['language'][$i],
 				  'cml_locale' => $_POST['locale'][$i],
-				  'cml_notice_post' => bin2hex(htmlentities($_POST['notice_post'][$i])),
-				  'cml_notice_page' => bin2hex(htmlentities($_POST['notice_page'][$i])),
+				  'cml_notice_post' => bin2hex(htmlentities($_POST['notice_post'][$i], ENT_COMPAT, "UTF-8")),
+				  'cml_notice_page' => bin2hex(htmlentities($_POST['notice_page'][$i], ENT_COMPAT, "UTF-8")),
 				  'cml_notice_category' => '',
 				  'cml_enabled' => 1),
 			     array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d'));
@@ -1103,8 +1103,8 @@ class CeceppaML {
 				  'cml_language_slug' => $_POST['language_slug'][$i],
 				  'cml_language' => $_POST['language'][$i],
 				  'cml_locale' => $_POST['locale'][$i],
-				  'cml_notice_post' => bin2hex(htmlentities($_POST['notice_post'][$i])),
-				  'cml_notice_page' => bin2hex(htmlentities($_POST['notice_page'][$i])),
+				  'cml_notice_post' => bin2hex(htmlentities($_POST['notice_post'][$i], ENT_COMPAT, "UTF-8")),
+				  'cml_notice_page' => bin2hex(htmlentities($_POST['notice_page'][$i], ENT_COMPAT, "UTF-8")),
 				  'cml_notice_category' => '',
 				  'cml_enabled' => 1),
 			     array('id' => $id),

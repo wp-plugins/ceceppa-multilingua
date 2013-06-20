@@ -46,8 +46,12 @@ $row = 0;
     </tr>
 <?php
     global $wpdb;
-    
-    $query = "SELECT * FROM " . CECEPPA_ML_TABLE . " ORDER BY cml_language DESC";
+
+    /*
+     * La funzione hex2bin è disponibile solo da PHP >= 5.4, a quanto sembra non tutti i servizi di hosting hanno php aggiornato -.-".
+     * Quindi utilizzo la funzione HEX di MySQL
+     */
+    $query = "SELECT id, cml_default, cml_flag, cml_language, cml_language_slug, UNHEX(cml_notice_post) as cml_notice_post, UNHEX(cml_notice_page) as cml_notice_page, cml_locale, cml_enabled FROM " . CECEPPA_ML_TABLE . " ORDER BY cml_language DESC";
     $results = $wpdb->get_results($query);
     
     foreach($results as $result) :
@@ -87,8 +91,8 @@ $row = 0;
 				</tr>
 				<tr>
 					<td><input name="language_slug[]" class="_tipsy" id="slug-<?php echo $result->id ?>" value="<?php echo $result->cml_language_slug ?>" type="text" style="margin-left:2%;width:98%" title="<?php _e('Allows you to specify an abbreviation to be used in the URL of the page. <br /> Ex: <br /> www.example.com / en <br /> www.example.com / uk', 'ceceppaml') ?>" /></td>
-					<td><input name="notice_post[]" class="_tipsy" type="text" value="<?php echo hex2bin($result->cml_notice_post); ?>" style="margin-left:2%;width:98%" title="<?php _e('Define the text of the notice to be displayed when the post is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
-					<td><input name="notice_page[]" class="_tipsy" type="text" value="<?php echo hex2bin($result->cml_notice_page); ?>" style="margin-left:2%;width:98%" title="<?php _e('Define the text of the notice to be displayed when the page is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
+					<td><input name="notice_post[]" class="_tipsy" type="text" value="<?php echo $result->cml_notice_post; ?>" style="margin-left:2%;width:98%" title="<?php _e('Define the text of the notice to be displayed when the post is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
+					<td><input name="notice_page[]" class="_tipsy" type="text" value="<?php echo $result->cml_notice_page; ?>" style="margin-left:2%;width:98%" title="<?php _e('Define the text of the notice to be displayed when the page is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
 					<td><input name="locale[]" class="_tipsy" id="locale-<?php echo $result->id ?>" type="text" value="<?php echo $result->cml_locale ?>" title="<?php _e('Helps to link correctly the defined language by the user\'s browser. ') ?>" /></td>
 				</tr>
 			</table>
