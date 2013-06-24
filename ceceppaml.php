@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.9.14
+Version: 0.9.15
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -1648,8 +1648,10 @@ class CeceppaML {
   function save_extra_post_fields($term_id) {
       global $wpdb, $pagenow;
 
-      $post_id = $term_id;
-      $query = "";
+      //Dalla 3.5.2 questa funzione viene richiamata 2 volte :O, la seconda volta $_POST però è vuoto :O
+      if(empty($_POST)) return;
+
+      $post_id = is_object($term_id) ? $term_id->ID : $term_id;
 
       @list($linked_lang, $linked_post) = split("@", $_POST['linked_post']);
 
@@ -1681,12 +1683,10 @@ class CeceppaML {
 	$wpdb->query($query);
 
       if(!isset($post_lang))
-	delete_option("cml_page_lang_$term_id");
+	delete_option("cml_page_lang_$post_id");
 
-      //if(is_object($term_id)) :
-	update_option("cml_page_$term_id", $linked_post);
-	update_option("cml_page_lang_$term_id", $post_lang);
-      //endif;
+      update_option("cml_page_$post_id", $linked_post);
+      update_option("cml_page_lang_$post_id", $post_lang);
   }
 
   function delete_extra_post_fields($id) {
