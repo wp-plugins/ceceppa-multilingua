@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.9.13
+Version: 0.9.14
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -1149,6 +1149,7 @@ class CeceppaML {
       @update_option("cml_option_flags_on_post", intval($_POST['flags-on-posts']));
       @update_option("cml_option_flags_on_page", intval($_POST['flags-on-pages']));
       @update_option("cml_option_flags_on_cats", intval($_POST['flags-on-cats']));
+      @update_option("cml_option_flags_on_pos", $_POST['flags_on_pos']);
 
       //Change locale
       update_option("cml_option_change_locale", intval($_POST['change-locale']));
@@ -1682,8 +1683,10 @@ class CeceppaML {
       if(!isset($post_lang))
 	delete_option("cml_page_lang_$term_id");
 
-      update_option("cml_page_$term_id", $linked_post);
-      update_option("cml_page_lang_$term_id", $post_lang);
+      //if(is_object($term_id)) :
+	update_option("cml_page_$term_id", $linked_post);
+	update_option("cml_page_lang_$term_id", $post_lang);
+      //endif;
   }
 
   function delete_extra_post_fields($id) {
@@ -2247,7 +2250,11 @@ class CeceppaML {
 	  $lang_id = $this->_current_lang_id;
       }
 
-      $slug = strtolower($this->get_language_slug_by_id($lang_id));
+      if(!empty($lang_id)) :
+	$slug = strtolower($this->get_language_slug_by_id($lang_id));
+      else :
+	$slug = $this->_default_language_slug;
+      endif;
 
       $link = add_query_arg(array("lang" => $slug), $link);
       return $link;

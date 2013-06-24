@@ -46,6 +46,13 @@ class CeceppaMLWidgetRecentPosts extends WP_Widget {
       $number = ($instance['number'] > 0) ? $instance['number'] : 10;
       $count = $number + 20;
 
+      /*
+       * :O A cosa mi serve filtrare i post per lingua?
+       * Non è stato fatto a caso.. :D
+       * Mi serve richiamare la funzione in_array per evitare di trovarmi i "post in evidenza" dappertutto :O
+       * Quando l'utente scegli di impostare un articolo come "in evidenza", wordpress fa si che tutte le chiamate tramite
+       * WP_Query includa sempre questi post, quindi me li ritrovato in tutte le lingue con le relative traduzioni :'(...
+       */
       $ids = $wpCeceppaML->get_language_posts();
       $the_args = array('post_status'=>'publish',
 				      'post__in' => $ids,
@@ -62,7 +69,7 @@ class CeceppaMLWidgetRecentPosts extends WP_Widget {
 
 	if(in_array($the_query->post->ID, $ids)) :
 	  echo '<li><a href="' . get_permalink($the_query->post->ID) . '" title="' . get_the_title($the_query->post->ID) . '">' . get_the_title($the_query->post->ID) . '</a></li>';
-	  
+
 	  $i++;
 	  if($i > $number) break;
 	endif;
