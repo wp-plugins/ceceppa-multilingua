@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.9.18
+Version: 0.9.19
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -457,7 +457,7 @@ class CeceppaML {
 ?>
         <div class="form-field">
         <?php
-            $langs = cml_get_languages(1, 0);
+            $langs = cml_get_languages(0, 0);
 
             foreach($langs as $lang) : ?>
                     <label for="cat_name[<?php echo $lang->id ?>]">
@@ -1650,6 +1650,9 @@ class CeceppaML {
     //In wp 3.6 viene richiamata questa funzione anche quando salvo i menu... :O
     if(strpos($pagenow, "nav-menus") !== FALSE) return;
 
+    //In Quickedit non devo fare nulla
+    if(!isset($_POST['cat_name'])) return;
+
     $keys = array_keys($_POST['cat_name']);
     foreach($keys as $key) :
 	update_option("cml_category_" . $term_id . "_lang_$key", $_POST['cat_name'][$key]);
@@ -1975,7 +1978,8 @@ class CeceppaML {
 
       $posts = array();
       foreach($results as $result) :
-	  if($result->cml_fake_id_1 != $result->cml_fake_id_2) :
+	  if(($result->cml_fake_id_1 != $result->cml_fake_id_2) || 
+	     ($result->cml_post_id_2 == 0)) :
 	    if($result->cml_fake_id_1 == $lang) $posts[] = $result->cml_post_id_1;
 	    if($result->cml_fake_id_2 == $lang) $posts[] = $result->cml_post_id_2;
 	  endif;
