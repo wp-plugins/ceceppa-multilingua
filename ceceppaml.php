@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.9.16
+Version: 0.9.17
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -875,17 +875,28 @@ class CeceppaML {
 	    foreach($results as $result) :
                 if($result->cml_post_id_2 > 0 && $result->cml_fake_id_1 == $this->_current_lang_id) $posts[] = $result->cml_post_id_2;
                 if($result->cml_post_id_1 > 0 && $result->cml_fake_id_2 == $this->_current_lang_id) $posts[] = $result->cml_post_id_1;
+                if(($result->cml_post_id_2 > 0 && $result->cml_post_id_1 > 0) &&
+		      $result->cml_fake_id_1 != $this->_current_lang_id && $result->cml_fake_id_2 != $this->_current_lang_id) :
+		      
+		      //Rimuovo il secondo xkè sicuramente è una traduzione
+		      $posts[] = $result->cml_post_id_2;
+		      
+		      //Per il primo controllo se è una traduzione di un articolo in questa lingua
+		      $nid = cml_get_linked_post($result->cml_fake_id_1, null, $result->cml_post_id_1, $this->_current_lang_id);
+		      if(!empty($nid)) $posts[] = $result->cml_post_id_1;
+		endif;
                 if($result->cml_fake_id_1 == $result->cml_fake_id_2 && !empty($posts)) array_pop($posts);
 
                 //Può capitare che ho n (> 2) lingue e alcuni articoli non sono tradotti in queste, allora nascondo gli articoli
                 //per evitare che vengano visualizzati entrambi.
                 if($result->cml_fake_id_1 != $this->_current_lang_id && $result->cml_fake_id_2 != $this->_current_lang_id):
 		  //Nascondo l'id 2 che è sicuramente una traduzione...
-		  $posts[] = $result->cml_fake_id_2;
+		  $posts[] = $result->cml_post_id_2;
 		endif;
             endforeach;
-            
+
 	    $this->_exclude_posts = !empty($posts) ? $posts : array();
+
 	    if(is_tag()) :
 	      /*
 	        Può capitare che l'utente invece di tradurre un tag ne usa uno nuovo per l'articolo. In questo caso
@@ -899,15 +910,16 @@ class CeceppaML {
 	      $tag_name = $wp_query->query_vars['tag'];
 	      $i = 0;
 
-	      $posts = $this->get_language_posts();
 	      foreach($this->_exclude_posts as $id) :
 		$tags = wp_get_post_tags($id);
 		$lang_id = $this->get_language_id_by_post_id($id);
 
 		foreach($tags as $tag) :
 		  if($tag->name == $tag_name && $lang_id != $this->_current_lang_id) :
+
 		    //Controllo che per questa articolo non esista nessuna traduzione nella lingua corrente con la stessa categoria
 		    $nid = cml_get_linked_post($lang_id, null, $id, $this->_current_lang_id);
+		    echo $nid . ", " . $id;
 		    if(!empty($nid)) :
 		      //Verifico le categorie dell'articolo collegato
 		      $_tags = wp_get_post_tags($nid);
@@ -1961,9 +1973,10 @@ class CeceppaML {
 
       $posts = array();
       foreach($results as $result) :
-	  if($result->cml_fake_id_1 == $lang) $posts[] = $result->cml_post_id_1;
-	  if($result->cml_fake_id_2 == $lang) $posts[] = $result->cml_post_id_2;
-	  if($result->cml_fake_id_1 == $result->cml_fake_id_2) array_pop($posts);
+	  if($result->cml_fake_id_1 != $result->cml_fake_id_2) :
+	    if($result->cml_fake_id_1 == $lang) $posts[] = $result->cml_post_id_1;
+	    if($result->cml_fake_id_2 == $lang) $posts[] = $result->cml_post_id_2;
+	  endif;
       endforeach;
 
       //Se ad un posto non ho assegnato nessuna lingua rischio di "escluderlo", quini aggiungo all'elenco tutti i post figli di nessuno :)
