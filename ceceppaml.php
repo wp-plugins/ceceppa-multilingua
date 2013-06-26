@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.9.17
+Version: 0.9.18
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -873,8 +873,11 @@ class CeceppaML {
 	    $results = $wpdb->get_results($query);
 
 	    foreach($results as $result) :
-                if($result->cml_post_id_2 > 0 && $result->cml_fake_id_1 == $this->_current_lang_id) $posts[] = $result->cml_post_id_2;
-                if($result->cml_post_id_1 > 0 && $result->cml_fake_id_2 == $this->_current_lang_id) $posts[] = $result->cml_post_id_1;
+		if($result->cml_fake_id_1 != $result->cml_fake_id_2 && !empty($posts)) :
+		  if($result->cml_post_id_2 > 0 && $result->cml_fake_id_1 == $this->_current_lang_id) $posts[] = $result->cml_post_id_2;
+		  if($result->cml_post_id_1 > 0 && $result->cml_fake_id_2 == $this->_current_lang_id) $posts[] = $result->cml_post_id_1;
+                endif;
+
                 if(($result->cml_post_id_2 > 0 && $result->cml_post_id_1 > 0) &&
 		      $result->cml_fake_id_1 != $this->_current_lang_id && $result->cml_fake_id_2 != $this->_current_lang_id) :
 		      
@@ -885,7 +888,6 @@ class CeceppaML {
 		      $nid = cml_get_linked_post($result->cml_fake_id_1, null, $result->cml_post_id_1, $this->_current_lang_id);
 		      if(!empty($nid)) $posts[] = $result->cml_post_id_1;
 		endif;
-                if($result->cml_fake_id_1 == $result->cml_fake_id_2 && !empty($posts)) array_pop($posts);
 
                 //Può capitare che ho n (> 2) lingue e alcuni articoli non sono tradotti in queste, allora nascondo gli articoli
                 //per evitare che vengano visualizzati entrambi.
