@@ -162,6 +162,20 @@
                         <label for="no-group"><?php _e('Ungroup', 'ceceppaml') ?>&nbsp;<i>(<?php _e('Each post show only own comments', 'ceceppaml');?>)</i></label><br>
                     </td>
                     </tr>
+<!-- Categorie -->
+                    <tr>
+                    <td id="cats-tags"><center>
+                        <strong><?php _e('Categories & Tags', 'ceceppaml'); ?></strong><br /><br />
+                        <img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/category.png" />
+                    </center></td>
+                    <td>
+                        <input type="checkbox" id="categories" name="categories" value="1" <?php checked(get_option('cml_option_translate_categories'), true) ?> />
+                        <label for="categories"><?php _e('Translate the url for categories', 'ceceppaml') ?>&nbsp;<i>(<?php _e('Experimental', 'ceceppaml'); ?>)</i></label><br>
+                    </td>
+                    </tr>
+		  </table>
+		  <br />
+		  <table>
                 <tr>
                     <td colspan="2" style="text-align: center; font-size:110%"><strong><?php _e('Filters', 'ceceppaml') ?></strong></td>
                 </tr>

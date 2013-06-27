@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.9.19
+Version: 0.9.20
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -17,7 +17,7 @@ Tags: multilingual, multi, language, admin, tinymce, qTranslate, Polyglot, bilin
  */
 global $wpdb;
 
-define('CECEPPA_DB_VERSION', 12);
+define('CECEPPA_DB_VERSION', 13);
 
 define('CECEPPA_ML_TABLE', $wpdb->base_prefix . 'ceceppa_ml');
 define('CECEPPA_ML_CATS', $wpdb->base_prefix . 'ceceppa_ml_cats');
@@ -131,11 +131,11 @@ class CeceppaML {
       add_filter('widget_title', array(&$this, 'admin_translate_widget_title'));
       
       /*
-       * Visualizzo alcune informazioni quali:
-       *   Avvisi su categorie e tag non tradotti
+       * Visualizzo alcune informazioni....
        */
+      if(isset($_GET['cml-hide-experimental'])) update_option('cml_experimental_category', 0);
       add_action( 'admin_notices', array(&$this, 'admin_notices'));
-      
+
       if(array_key_exists("cml-hide-notice", $_GET)) update_option('cml_show_admin_notice', 0);
       if(get_option('cml_show_admin_notice', 1))
 	add_action( 'admin_notices', array(&$this, 'show_admin_notice'));
@@ -245,6 +245,9 @@ class CeceppaML {
     add_filter('post_link', array(&$this, 'translate_post_link'), 0, 3);
     add_filter('term_link', array(&$this, 'translate_term_link'), 0);
     add_filter('term_name', array(&$this, 'translate_term_name'), 0, 1);
+
+    //Disabled by default
+    $this->_translate_term_link = get_option("cml_option_translate_categories", 0);
 
     //Aggiungo lo switch delle lingue nella barra dell'amministratore
     add_action( 'admin_bar_menu', array(&$this, 'add_bar_menu'), 1000);
@@ -678,7 +681,7 @@ class CeceppaML {
     endif;
 
     //Fix dovuto alla 0.9.1, tutte le lingue venivano impostate come default se l'utente face click su update :(
-    if(get_option("cml_db_version", CECEPPA_DB_VERSION) != 9) :
+    if(get_option("cml_db_version", CECEPPA_DB_VERSION) < 9) :
       $wpdb->query("UPDATE " . CECEPPA_ML_TABLE . " SET cml_default = 0");
       $wpdb->query("UPDATE " . CECEPPA_ML_TABLE . " SET cml_default = 1 WHERE id = 1");
     endif;
@@ -695,12 +698,44 @@ class CeceppaML {
       endforeach;
     endif;
 
+    //Cancello i post che sono stati cancellati, ma esistono ancora nella mia tabella
     if(get_option("cml_db_version", CECEPPA_DB_VERSION) <= 12) :
       $sql = "DELETE FROM " . CECEPPA_ML_POSTS . " WHERE cml_post_id_1 NOT IN (select ID from $wpdb->posts)";
       $wpdb->query($sql);
 
       $sql = "DELETE FROM " . CECEPPA_ML_POSTS . " WHERE cml_post_id_2 NOT IN (select ID from $wpdb->posts)";
       $wpdb->query($sql);
+    endif;
+
+    //Memorizzo
+    if(get_option("cml_db_version", CECEPPA_DB_VERSION) <= 13) :
+      $wpdb->query("DROP TABLE " . CECEPPA_ML_CATS);
+
+      $table_name = CECEPPA_ML_CATS;
+      $query = "CREATE TABLE  $table_name (
+	`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+	cml_cat_id INT NOT NULL,
+	cml_cat_name TEXT NOT NULL ,
+	`cml_cat_lang_id` INT NOT NULL ,
+	`cml_cat_translation` TEXT) ENGINE=InnoDB CHARACTER SET=utf8;";
+      dbDelta($query);
+
+      $args = array('hide_empty' => 0);
+      $cats = get_categories($args);
+      
+      $langs = cml_get_languages(0);
+      foreach($cats as $cat) :
+	foreach($langs as $lang) :
+	  $name = get_option("cml_category_" . $cat->term_id . "_lang_" . $lang->id, $cat->name);
+
+	  $wpdb->insert(CECEPPA_ML_CATS,
+			array("cml_cat_name" => bin2hex($cat->name),
+			      "cml_cat_lang_id" => $lang->id,
+			      "cml_cat_translation" => bin2hex($name),
+			      "cml_cat_id" => $cat->term_id),
+			array('%s', '%d', '%s', '%d'));
+	endforeach;
+      endforeach;
     endif;
 
     //for updates
@@ -823,9 +858,6 @@ class CeceppaML {
 
     global $wpdb;
 
-    //Categoria base della lingua predefinita
-    //$cat = $wpdb->get_var(sprintf("SELECT cml_category_id FROM %s WHERE cml_default = 1", CECEPPA_ML_TABLE));
-
     if(isset($_GET['lang'])) :
       $lang = $_GET['lang'];
 
@@ -842,8 +874,9 @@ class CeceppaML {
     //Recupero tutti i post associati alla lingua corrente
     $posts = $this->get_language_posts($this->_current_lang_id);
 
-    if(!empty($posts))
-	set_query_var('post__in', $posts);
+    if(!empty($posts)) :
+      set_query_var('post__in', $posts);
+    endif;
   }
 
     /*
@@ -873,7 +906,7 @@ class CeceppaML {
 	    $results = $wpdb->get_results($query);
 
 	    foreach($results as $result) :
-		if($result->cml_fake_id_1 != $result->cml_fake_id_2 && !empty($posts)) :
+		if($result->cml_fake_id_1 != $result->cml_fake_id_2) :
 		  if($result->cml_post_id_2 > 0 && $result->cml_fake_id_1 == $this->_current_lang_id) $posts[] = $result->cml_post_id_2;
 		  if($result->cml_post_id_1 > 0 && $result->cml_fake_id_2 == $this->_current_lang_id) $posts[] = $result->cml_post_id_1;
                 endif;
@@ -1201,6 +1234,9 @@ class CeceppaML {
 
       //Commenti
       @update_option('cml_option_comments', $_POST['comments']);
+      
+      //Traduzione categorie
+      @update_option('cml_option_translate_categories', $_POST['categories']);
     }
 
     include dirname(__FILE__) . '/options.php';
@@ -1656,10 +1692,13 @@ class CeceppaML {
     $keys = array_keys($_POST['cat_name']);
     foreach($keys as $key) :
 	update_option("cml_category_" . $term_id . "_lang_$key", $_POST['cat_name'][$key]);
+	cml_add_category_translation($term_id, $_POST['name'], $key, $_POST['cat_name'][$key]);
     endforeach;
   }
 
   function delete_extra_category_fields($term_id) {
+    global $wpdb;
+
     $langs = cml_get_languages();
     foreach($langs as $lang) :
       delete_option("cml_category" . $term_id . "_lang_" . $lang->id);
@@ -1667,6 +1706,10 @@ class CeceppaML {
 
     delete_option("cml_category_$term_id");
     delete_option("cml_category_lang_$term_id");
+
+    //Cancello la voce dal database
+    $query = sprintf("DELETE FROM %s WHERE cml_cat_id = %d", CECEPPA_ML_CATS, $term_id);
+    $wpdb->query($query);
   }
 
   /* 
@@ -1828,6 +1871,10 @@ class CeceppaML {
       $lang = $this->get_language_id_by_slug($lang);
     }
 
+    if(isset($this->_force_current_language)) :
+      $lang = $this->_force_current_language;
+    endif;
+
     if(!empty($lang)) {
       //Aggiorno le info sulla lingua corrente
       $this->_current_lang = $this->get_language_slug_by_id($lang);
@@ -1843,8 +1890,7 @@ class CeceppaML {
 	  //add_action('wp_enqueue_scripts', array(&$this, 'enqueue_script_search')); //Non funziona :(
 	  $this->enqueue_script_search();
 
-	  $array = array('lang' => $this->_current_lang,
-					'form_class' => $this->_filte_form_class);
+	  $array = array('lang' => $this->_current_lang, 'form_class' => $this->_filte_form_class);
 	  wp_localize_script('ceceppa-search', 'cml_object', $array);
 
 	  //Evito che esegua più di una volta questo if
@@ -2148,7 +2194,7 @@ class CeceppaML {
 
         //Devo aggiungere la lingua al link?
         if(get_option("cml_add_slug_to_link", true))
-                $slug = "/" . strtolower($this->get_language_slug_by_id($lang_id));
+	  $slug = "/" . strtolower($this->get_language_slug_by_id($lang_id));
 
         $homeUrl = home_url();
         //Devo utilizzare url del tipo en.example.com, it.example.com
@@ -2267,16 +2313,20 @@ class CeceppaML {
 	if(!is_admin()) {
 	  if(is_page())
 	    $lang_id = $this->get_language_id_by_page_id(get_the_ID());
-	  else
+	  else if(is_single()) :
 	    $lang_id = $this->get_language_id_by_post_id(get_the_ID());
+	  else :
+	    $lang_id = isset($_GET['lang']) ? ($this->get_language_id_by_slug($_GET['lang'])) : $this->_current_lang_id;
+	  endif;
 	} else {
 	  $lang_id = $this->_current_lang_id;
 	}
       } else {
-	if(!empty($lang))
+	if(!empty($lang)) :
 	  $lang_id = $lang;
-	else
+	else :
 	  $lang_id = $this->_current_lang_id;
+	endif;
       }
 
       if(!empty($lang_id)) :
@@ -2285,7 +2335,40 @@ class CeceppaML {
 	$slug = $this->_default_language_slug;
       endif;
 
-      $link = add_query_arg(array("lang" => $slug), $link);
+      if($this->_translate_term_link && $this->_force_current_language != $this->_default_language_id) :
+	$homeUrl = home_url();
+        $plinks = split("/", str_replace($homeUrl, "", $link));
+
+        //L'ultimo elemento della split è vuoto...
+	array_pop($plinks);
+	
+	//Elimino i primi 2 elementi. 1 vuoto e l'altro è "category"
+	array_shift($plinks);
+	$category = array_shift($plinks);
+	$same = false;
+	foreach($plinks as $plink) :
+	  //Cerco la traduzione della categoria nella lingua del post :)
+	  if(!empty($plink)) :
+	    $id = get_category_by_slug($plink);
+	    $id = $id->term_id;
+	    $cat = strtolower(get_option("cml_category_" . $id . "_lang_" . $lang_id, $plink));
+	    if($cat == $plink) $same = true;
+
+	    $url = str_replace(" ", "-", $cat);
+	    $url = urlencode($url);
+	    $cats[] = $url;
+	  endif;
+	endforeach;
+
+	//Ricreo il permalink con le categorie tradotte... :)
+	if(!empty($cats) && !$same) :
+	  return $homeUrl . "/$category/" . join("/", $cats) . "/";
+	endif;
+      endif;
+
+      if($this->_current_lang_id != $this->_default_language_id)
+	$link = add_query_arg(array("lang" => $slug), $link);
+
       return $link;
     }
     
@@ -2299,8 +2382,7 @@ class CeceppaML {
 	  $post_id = (isset($obj->object_id)) ? $obj->object_id : -1;
 
 	  if($post_id > 1 || $this->_current_lang_id != $this->_default_language_id) :
-	    $lang = ($post_id > 1) ? $this->get_language_id_by_post_id($post_id) : $this->_current_lang_id;
-	    if($lang == $this->_default_language_id) return $obj;	//La lingua del post è la stessa di quella dell'articolo?
+	    $lang = $this->_current_lang_id;
 
 	    $n = get_option("cml_category_" . $term_id . "_lang_" . $lang);
 	    $obj->name = empty($n) ? $obj->name : $n;
@@ -2389,6 +2471,25 @@ class CeceppaML {
 	echo "</div>";
       endif;
 
+      if(get_option("cml_experimental_category", true)) :
+?>
+	<div class="updated">
+	  <p>
+	    <?php _e('Now you can translate also the category link.') ?><br />
+	    <a href="?page=ceceppaml-options-page#cats-tags"><?php _e('Click here to enable the option "Categories & Tags".') ?></a><br /><br />
+	    <?php _e('The support is experimental and may not work :(.') ?><br />
+
+	    <div style="text-align: right;width:100%">
+	      <?php       
+		  $link = add_query_arg('cml-hide-experimental', 1);
+	      ?>
+	      <a href="<?php echo $link ?>"><?php _e('Dismiss') ?></a>
+	    </div>
+	  </p>
+	</div>
+<?php
+      endif;
+
       if($pagenow == 'nav-menus.php') :
 ?>
 	<div class="updated">
@@ -2470,7 +2571,36 @@ class CeceppaML {
   function hide_category_translations($wp_query) {
     if(!is_category()) return;
     
-    return $this->hide_translations($wp_query);
+    /*
+      * Wow, ho trovato un modo per tradurre il link delle categorie :D :D :
+      * Se l'utente sta visualizzando la categoria, verifico se il nome della categoria è una traduzione
+      * nella query di wordpress imposto cambio il nome della categoria in quello non tradotto...
+      * Così nell'url l'utente verdà il percorso alla categoria tradotto :)
+      *
+      * Magari sarà poco etico... ma funziona :)
+      */
+    if(!isset($this->_change_category_applied)) :
+      global $wpdb;
+
+      $cat = get_query_var('category_name');
+
+      //Se la categoria esiste non è una traduzione :)
+      $term = term_exists($cat, 'category');
+      if($term == 0 || $term == null) :
+	$cat = str_replace("-", " ", $cat);
+	$query = sprintf("SELECT cml_cat_lang_id, UNHEX(cml_cat_name) as cml_cat_name FROM %s WHERE cml_cat_translation = '%s'", CECEPPA_ML_CATS, bin2hex($cat));
+	$name = $wpdb->get_row($query);
+
+	$this->_force_current_language = $name->cml_cat_lang_id;
+	set_query_var('category_name', $name->cml_cat_name);
+      endif;
+
+	$this->_change_category_applied = true;
+	
+	unset($this->_exclude_posts);
+    endif;
+
+    $this->hide_translations($wp_query);
   }
   
   //Imposto in automatico la lingua in tutti i post

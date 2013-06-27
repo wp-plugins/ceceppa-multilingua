@@ -225,11 +225,11 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
  *
  *  @return - la frase tradotta se esiste la traduzione, altrimeni la stringa passata
  */
-function cml_translate($string, $id) {
+function cml_translate($string, $id, $type = "") {
   global $wpdb;
 
-  $query = sprintf("SELECT UNHEX(cml_translation) FROM %s WHERE cml_text = '%s' AND cml_lang_id = %d",
-			  CECEPPA_ML_TRANS, bin2hex($string), $id);
+  $query = sprintf("SELECT UNHEX(cml_translation) FROM %s WHERE cml_text = '%s' AND cml_lang_id = %d AND cml_type LIKE '%%s'",
+			  CECEPPA_ML_TRANS, bin2hex($string), $id, $type);
 
   $ret = $wpdb->get_var($query);
 
@@ -323,4 +323,39 @@ function cml_dropdown_langs($name, $default, $link = false, $none = false, $none
   echo "</select>";
 }
 
+function cml_add_translation($text, $lang_id, $translation, $type) {
+  global $wpdb;
+
+  $wpdb->insert(CECEPPA_ML_TRANS,
+		array("cml_text" => bin2hex($text),
+		      "cml_lang_id" => $lang_id,
+		      "cml_translation" => bin2hex($translation),
+		      "cml_type" => $type),
+		array('%s', '%d', '%s', '%s'));
+}
+
+function cml_add_category_translation($id, $name, $lang_id, $translation) {
+  global $wpdb;
+
+  $query = sprintf("SELECT * FROM %s WHERE cml_cat_id = %d AND cml_cat_lang_id = %d", CECEPPA_ML_CATS, $id, $lang_id);
+  $q = $wpdb->get_row($query);
+  if(count($q) > 0) :
+    $r_id = $q->id;
+
+    $wpdb->update(CECEPPA_ML_CATS,
+		  array("cml_cat_name" => bin2hex($text),
+			"cml_cat_lang_id" => $lang_id,
+			"cml_cat_translation" => bin2hex($translation)),
+		  array("id" => $r_id),
+		  array('%s', '%d', '%s'),
+		  array("%d"));
+  else :
+    $wpdb->insert(CECEPPA_ML_CATS,
+		  array("cml_cat_name" => bin2hex($name),
+			"cml_cat_lang_id" => $lang_id,
+			"cml_cat_translation" => bin2hex($translation),
+			"cml_cat_id" => $id),
+		  array('%s', '%d', '%s', '%d'));
+  endif;
+}
 ?>
