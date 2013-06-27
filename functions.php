@@ -260,12 +260,12 @@ function cml_get_language_title($id) {
 function cml_get_notice($lang_slug) {
   global $wpdb, $wpCeceppaML;
 
-  $row = $wpdb->get_row(sprintf("SELECT * FROM %s WHERE cml_language_slug = '%s' OR id = %d",
+  $row = $wpdb->get_row(sprintf("SELECT UNHEX(cml_notice_category) as cml_notice_category, UNHEX(cml_notice_page) as cml_notice_page, UNHEX(cml_notice_post) as cml_notice_post FROM %s WHERE cml_language_slug = '%s' OR id = %d",
 			 	  CECEPPA_ML_TABLE , $lang_slug, intval($lang_slug)));
 
-  if(is_category()) $r = hex2bin($row->cml_notice_category);
-  if(is_page()) $r = hex2bin($row->cml_notice_page);
-  if(is_single()) $r = hex2bin($row->cml_notice_post);
+  if(is_category()) $r = stripslashes($row->cml_notice_category);
+  if(is_page()) $r = stripslashes($row->cml_notice_page);
+  if(is_single()) $r = stripslashes($row->cml_notice_post);
 
   if(!empty($r))
     return $r;
