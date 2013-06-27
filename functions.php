@@ -343,7 +343,7 @@ function cml_add_category_translation($id, $name, $lang_id, $translation) {
     $r_id = $q->id;
 
     $wpdb->update(CECEPPA_ML_CATS,
-		  array("cml_cat_name" => bin2hex($text),
+		  array("cml_cat_name" => bin2hex($name),
 			"cml_cat_lang_id" => $lang_id,
 			"cml_cat_translation" => bin2hex($translation)),
 		  array("id" => $r_id),

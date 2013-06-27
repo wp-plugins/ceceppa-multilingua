@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 0.9.21
+Version: 0.9.22
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -2345,14 +2345,12 @@ class CeceppaML {
 	//Elimino i primi 2 elementi. 1 vuoto e l'altro è "category"
 	array_shift($plinks);
 	$category = array_shift($plinks);
-	$same = false;
 	foreach($plinks as $plink) :
 	  //Cerco la traduzione della categoria nella lingua del post :)
 	  if(!empty($plink)) :
 	    $id = get_category_by_slug($plink);
 	    $id = $id->term_id;
 	    $cat = strtolower(get_option("cml_category_" . $id . "_lang_" . $lang_id, $plink));
-	    if($cat == $plink) $same = true;
 
 	    $url = str_replace(" ", "-", $cat);
 	    $url = urlencode($url);
@@ -2361,6 +2359,7 @@ class CeceppaML {
 	endforeach;
 
 	//Ricreo il permalink con le categorie tradotte... :)
+	$same = (join("/", $plinks) == join("/", $cats));
 	if(!empty($cats) && !$same) :
 	  return $homeUrl . "/$category/" . join("/", $cats) . "/";
 	endif;
@@ -2569,7 +2568,11 @@ class CeceppaML {
   }
   
   function hide_category_translations($wp_query) {
-    if(!is_category()) return;
+    //Se non è una categoria è inutile che viene qui :)
+    if(!is_category()) {
+      remove_action('pre_get_posts', array(&$this, 'hide_category_translations'));
+      return;
+    }
     
     /*
       * Wow, ho trovato un modo per tradurre il link delle categorie :D :D :
@@ -2582,22 +2585,31 @@ class CeceppaML {
     if(!isset($this->_change_category_applied)) :
       global $wpdb;
 
-      $cat = get_query_var('category_name');
+      $cat = $wp_query->query['category_name'];
 
-      //Se la categoria esiste non è una traduzione :)
-      $term = term_exists($cat, 'category');
-      if($term == 0 || $term == null) :
-	$cat = str_replace("-", " ", $cat);
-	$query = sprintf("SELECT cml_cat_lang_id, UNHEX(cml_cat_name) as cml_cat_name FROM %s WHERE cml_cat_translation = '%s'", CECEPPA_ML_CATS, bin2hex($cat));
-	$name = $wpdb->get_row($query);
+      $cats = split("/", $cat);
+      foreach($cats as $cat) :
+	//Se la categoria esiste non è una traduzione :)
+	$term = term_exists($cat, 'category');
+	if($term == 0 || $term == null) :
+	  $cat = str_replace("-", " ", $cat);
+	  $query = sprintf("SELECT cml_cat_lang_id, UNHEX(cml_cat_name) as cml_cat_name FROM %s WHERE cml_cat_translation = '%s'", CECEPPA_ML_CATS, bin2hex($cat));
 
-	$this->_force_current_language = $name->cml_cat_lang_id;
-	set_query_var('category_name', $name->cml_cat_name);
-      endif;
+	  $name = $wpdb->get_row($query);
+	  $this->_force_current_language = $name->cml_cat_lang_id;
+
+	  $name = strtolower($name->cml_cat_name);
+	endif;
+	
+	$new[] = empty($name) ? $cat : $name;
+      endforeach;
+
+      $wp_query->query['category_name'] = join("/", $new);;
+      set_query_var('category_name', end($new));
 
       $this->_change_category_applied = true;
-	
-	unset($this->_exclude_posts);
+
+      unset($this->_exclude_posts);
     endif;
 
     $this->hide_translations($wp_query);
