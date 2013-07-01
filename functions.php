@@ -146,7 +146,7 @@ function cml_is_default_lang($lang = null) {
  *
  * @param $show - indica se visualizzare anche il nome della lingua. I valori possibili sono:
  *			"flag" - visualizza solo la bandiera
- *      "text" - visualizza solo il nome della lingua
+*      			"text" - visualizza solo il nome della lingua
  *			"both" - visualizza sia la bandiera che il nome della lingua
  * @param $size - dimensione della bandierina da visualizzare. I valori possibili sono:
  *			"tiny" - 20x12
@@ -171,7 +171,7 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
       //Se stò nella home vuol dire che ho scelto come metodo di reindirizzamento &lang
     	$link = "?lang=$result->cml_language_slug";
     } else {
-      /* Collego la categoria della lingua attuale con quella della linga della bandierina*/
+      /* Collego la categoria della lingua attuale con quella della linga della bandierina */
       $link = "";
 
       $lang_id = $wpCeceppaML->get_current_lang_id();
@@ -339,6 +339,9 @@ function cml_add_category_translation($id, $name, $lang_id, $translation) {
 
   $query = sprintf("SELECT * FROM %s WHERE cml_cat_id = %d AND cml_cat_lang_id = %d", CECEPPA_ML_CATS, $id, $lang_id);
   $q = $wpdb->get_row($query);
+  
+  $name = strtolower($name);
+  $translation = strtolower($translation);
   if(count($q) > 0) :
     $r_id = $q->id;
 
@@ -357,5 +360,11 @@ function cml_add_category_translation($id, $name, $lang_id, $translation) {
 			"cml_cat_id" => $id),
 		  array('%s', '%d', '%s', '%d'));
   endif;
+}
+
+function cml_get_current_language() {
+  global $wpCeceppaML;
+  
+  return $wpCeceppaML->get_current_language();
 }
 ?>
