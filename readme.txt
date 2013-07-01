@@ -32,6 +32,8 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 - Show only posts of the current language
 - One-Click-Switching between the languages
 - One-Click-Switching between the translations
+- Category link translation
+- Add flags to menu
 
 = Widgets =
 
