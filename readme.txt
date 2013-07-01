@@ -99,6 +99,7 @@ For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide
      <?php cml_show_flags() ?>
      
   2) using the widget "CML Widget: Language Chooser"
+
   3) enabling option in "Ceceppa Multilingua" -> "Settings" page
 
 = What is the function to get current language =
@@ -108,11 +109,17 @@ For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide
      cml_get_current_language();
   
   This function return an object and Its fields are:
+  
     *) id           - id of language
+  
     *) cml_default  - 1 if it is the default language
+  
     *) cml_flag     - name of flag
+  
     *) cml_language - name of the language
+  
     *) cml_language_slug - slug of the language
+  
     *) cml_locale        - wordpress locale
 
 == Screenshots ==
