@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 1.0.2
+Version: 1.0.3
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -1824,7 +1824,7 @@ class CeceppaML {
 	if(is_category()) array_shift($urls);
 
 	$lang = $this->get_language_id_by_slug($urls[0]);
-      elseif(!array_key_exists("lang", $_GET)) :
+      elseif(!array_key_exists("lang", $_GET) && is_category()) :
 	$lang = $this->_default_language_id;
       endif;
     endif;
@@ -2091,21 +2091,21 @@ class CeceppaML {
      * Modifico l'id della query in modo che punti all'articolo tradotto
      */
     function get_static_page($query) {
-        if(isset($this->_static_page) && $this->_static_page) return;
-    
-        //Recupero l'id della lingua
-        $slug = $_GET['lang'];    
-        $lang_id = $this->get_language_id_by_slug($slug);
+      if(isset($this->_static_page)) return;
+  
+      //Recupero l'id della lingua
+      $slug = $_GET['lang'];    
+      $lang_id = $this->get_language_id_by_slug($slug);
 
-        //Id attuale
-        $id = $query->query_vars['page_id'];
-        
-        //Recupero l'id collegato
-        $nid = cml_get_linked_post($this->_default_language_id, null, $id, $lang_id);
-        if(empty($nid)) $nid = $id;
-        $query->query_vars['page_id'] = $nid;
+      //Id attuale
+      $id = $query->query_vars['page_id'];
+      
+      //Recupero l'id collegato
+      $nid = cml_get_linked_post($this->_default_language_id, null, $id, $lang_id);
+      if(empty($nid)) $nid = $id;
+      $query->query_vars['page_id'] = $nid;
 
-        $this->_static_page = true;
+      $this->_static_page = true;
     }
     
     /*
