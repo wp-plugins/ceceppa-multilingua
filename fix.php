@@ -8,6 +8,8 @@ require_once(CECEPPA_PLUGIN_PATH . "functions.php");
 function cml_fix_database() {
   global $wpdb;
 
+  $dbVersion = get_option("cml_db_version", CECEPPA_DB_VERSION);
+
     //Rimuovo le colonne non più necessarie
     if(get_option("cml_db_version", CECEPPA_DB_VERSION) <= 9) :
       $wpdb->query("ALTER table " . CECEPPA_ML_TABLE . " DROP cml_category_name, DROP cml_category_id, DROP cml_category_slug, DROP cml_page_id, DROP cml_page_slug");
@@ -73,7 +75,7 @@ function cml_fix_database() {
       endforeach;
     endif;
     
-    if(get_option("cml_db_version", CECEPPA_DB_VERSION) <= 15) :
+    if($dbVersion <= 15) :
       cml_fix_widget_titles();
     endif;
 }
@@ -135,6 +137,7 @@ function cml_fix_rebuild_posts_info() {
   
   //Recupero tutti gli articoli
   $args = array('numberposts' => -1, 'posts_per_page' => 999999,
+		  'post_type' => array('page', 'post'),
 		  'status' => 'publish,draft,private,future');
 
   $p = new WP_Query($args);

@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 1.0.1
+Version: 1.0.2
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -163,9 +163,10 @@ class CeceppaML {
       endif;
 
       if(isset($_GET['cml_hide_update_posts'])) update_option("cml_need_update_posts", false);
+      if(isset($_GET['cml_need_code_optimization'])) update_option("cml_need_code_optimization", 0);
       
       /* Ottimizzazione codice */
-      if(get_option("cml_code_optimization", true)) add_action( 'init', array(&$this, 'code_optimization'));
+      if(get_option("cml_code_optimization", 1)) add_action( 'init', array(&$this, 'code_optimization'));
     } else {
       /*
       * Filtro gli articoli per lingua
@@ -2422,6 +2423,18 @@ class CeceppaML {
       wp_enqueue_style('ceceppaml-dd');
       wp_enqueue_style('ceceppa-tipsy');
 
+      if(get_option("cml_need_code_optimization", 1)) :
+	echo "<div class=\"updated\">\n";
+	echo "<p>\n";
+
+	  _e('Sorry but due a bug it\'s necessary to fix language of all pages.', 'ceceppaml'); echo "<br />";
+	  "<br />";
+	  _e('Edit a page (or a post) and publish it withouth modify.', 'ceceppaml'); echo "<br />";
+
+	echo "</p>\n";
+	echo "</div>";
+      endif;
+
       if(get_option("cml_need_update_posts", false)) :
 	echo "<div class=\"updated\">\n";
 	echo "<p>\n";
@@ -2616,6 +2629,7 @@ class CeceppaML {
     cml_fix_rebuild_posts_info();
 
     update_option("cml_code_optimization", 0);
+    update_option("cml_need_code_optimization", 0);
   }
   
   /*
