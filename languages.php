@@ -76,12 +76,12 @@ $row = 0;
 			</td>
       <th>
 <!-- Dettagli e cancella -->
-		<a href="#" onclick="javascript: toggleDetails(<?php echo $result->id ?>)"><img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/details.png" width="32" title="<?php _e('Show/Hide advanced options for languages', 'ceceppaml') ?>"></a>
+		<a href="#" onclick="javascript: toggleDetails(<?php echo $result->id ?>)"><img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/details.png" width="32" title="<?php _e('Show/Hide advanced options for languages', 'ceceppaml') ?>"></a><br />
 		<a href="javascript: void(0)" class="_delete" id="_delete-<?php echo $result->id ?>"><img class="delete" src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/delete.png" width="32" title="<?php _e('Delete the selected language', 'ceceppaml') ?>"></a>
 	  </th>
     </tr>
 	<tr>
-		<td colspan="3">
+		<td colspan="4">
 			<table>
 				<tr>
 					<td style="background: none; font-size: 1.1em;width: 100px"><?php _e('Url slug', 'ceceppaml'); ?></td>
@@ -136,7 +136,7 @@ $row = 0;
     </table>
 	<br />
     <div style="text-align:right;padding-right: 10px;">
-        <input type="submit" class="ceceppa-salva" name="action" value="<?php _e('Update', 'ceceppaml') ?>" />
+      <?php submit_button(); ?>
     </div>
 	<br />
 	</div>

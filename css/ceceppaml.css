@@ -10,7 +10,10 @@ table.ceceppaml, table.ceceppaml_posts {
   border-collapse:collapse;
   margin-bottom:0.7em;
 }
-
+table#ceceppaml-table {
+  width: 90% !important;
+  max-width: 90%;
+}
 table.ceceppaml tbody tr th {
 }
 

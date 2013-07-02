@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 1.0.3
+Version: 1.0.4
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -738,6 +738,7 @@ class CeceppaML {
 
       //Css
       wp_register_style('ceceppaml-style', WP_PLUGIN_URL . '/ceceppa-multilingua/css/ceceppaml.css');
+      wp_register_style('ceceppaml-lang', WP_PLUGIN_URL . '/ceceppa-multilingua/css/cmllang.css');
       wp_register_style('ceceppaml-dd', WP_PLUGIN_URL . '/ceceppa-multilingua/css/dd.css');
       wp_register_style('ceceppa-tipsy', WP_PLUGIN_URL . '/ceceppa-multilingua/css/tipsy.css');
       wp_register_style('ceceppaml-widget-style', WP_PLUGIN_URL . '/ceceppa-multilingua/css/widget.css');
@@ -1037,7 +1038,7 @@ class CeceppaML {
     wp_enqueue_script('ceceppa-tipsy');
 
     //Css
-    wp_enqueue_style('ceceppaml-style');
+    wp_enqueue_style('ceceppaml-lang');
     wp_enqueue_style('ceceppaml-dd');
     wp_enqueue_style('ceceppa-tipsy');
 
@@ -1824,6 +1825,7 @@ class CeceppaML {
 	if(is_category()) array_shift($urls);
 
 	$lang = $this->get_language_id_by_slug($urls[0]);
+	$this->_force_current_language = $lang;
       elseif(!array_key_exists("lang", $_GET) && is_category()) :
 	$lang = $this->_default_language_id;
       endif;
@@ -2166,7 +2168,8 @@ class CeceppaML {
     function translate_menu_item($item) {
 	//Se l'utente ha scelto un menu differente per la lingua corrente
 	//non devo applicare nessun tipo di filtro agli elementi del menu, esco :)
-	if($this->_no_translate_menu_item == true) :
+	//Questo è vero solo per le pagine... altrimenti non mi traduce il nome delle categorie
+	if($this->_no_translate_menu_item == true && $item->object == 'page') :
 	  remove_filter('wp_setup_nav_menu_item', array(&$this, 'translate_menu_item'));
 	  return $item;
 	endif;
@@ -2212,7 +2215,7 @@ class CeceppaML {
     
     function translate_term_name($name) {
       if($this->_current_lang_id == $this->_default_language_id) return $name;
-	
+
       $depth = 0;
       $pos = strpos($name, " ");
       $simbolo = html_entity_decode("&#8212;");
@@ -2415,14 +2418,6 @@ class CeceppaML {
     function admin_notices() {
       global $pagenow;
       
-      wp_enqueue_script('ceceppaml-js');
-      wp_enqueue_script('ceceppa-tipsy');
-
-      //Css
-      wp_enqueue_style('ceceppaml-style');
-      wp_enqueue_style('ceceppaml-dd');
-      wp_enqueue_style('ceceppa-tipsy');
-
       if(get_option("cml_need_code_optimization", 1)) :
 	echo "<div class=\"updated\">\n";
 	echo "<p>\n";
@@ -2593,9 +2588,12 @@ class CeceppaML {
 	  $query = sprintf("SELECT cml_cat_lang_id, UNHEX(cml_cat_name) as cml_cat_name FROM %s WHERE cml_cat_translation = '%s'", CECEPPA_ML_CATS, bin2hex($cat));
 
 	  $name = $wpdb->get_row($query);
-	  $this->_force_current_language = $name->cml_cat_lang_id;
+	  if(!empty($name))
+	    $this->_force_current_language = $name->cml_cat_lang_id;
+	  else
+	    $this->_force_current_language = $this->_default_language_id;
 
-	  $name = strtolower($name->cml_cat_name);
+	  $name = (!empty($name)) ? strtolower($name->cml_cat_name) : "";
 	endif;
 	
 	$new[] = empty($name) ? $cat : $name;
