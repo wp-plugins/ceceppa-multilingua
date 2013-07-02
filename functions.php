@@ -228,12 +228,12 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
 function cml_translate($string, $id, $type = "") {
   global $wpdb;
 
-  $query = sprintf("SELECT UNHEX(cml_translation) FROM %s WHERE cml_text = '%s' AND cml_lang_id = %d AND cml_type LIKE '%%s'",
-			  CECEPPA_ML_TRANS, bin2hex($string), $id, $type);
+  $query = sprintf("SELECT UNHEX(cml_translation) FROM %s WHERE cml_text = '%s' AND cml_lang_id = %d AND cml_type LIKE '%s'",
+			  CECEPPA_ML_TRANS, bin2hex($string), $id, "%" . $type . "%");
 
   $ret = $wpdb->get_var($query);
 
-  return (!isset($ret)) ? $string : html_entity_decode(stripslashes($ret));
+  return (empty($ret)) ? $string : html_entity_decode(stripslashes($ret));
 }
 
 /**

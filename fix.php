@@ -72,6 +72,10 @@ function cml_fix_database() {
 	endforeach;
       endforeach;
     endif;
+    
+    if(get_option("cml_db_version", CECEPPA_DB_VERSION) <= 15) :
+      cml_fix_widget_titles();
+    endif;
 }
 
 //Imposto in automatico la lingua in tutti i post
@@ -215,6 +219,18 @@ function cml_fix_rebuild_posts_info() {
 
   foreach($langs as $lang) :
     @update_option("cml_hide_posts_for_lang_" . $lang->id, array_unique($exclude[$lang->id]));
+  endforeach;
+}
+
+function cml_fix_widget_titles() {
+  global $wpdb;
+
+  $sql = "SELECT id, UNHEX(cml_text) as text FROM " . CECEPPA_ML_TRANS . " WHERE cml_type = 'W'";
+  $results = $wpdb->get_results($sql);
+  
+  foreach($results as $result) :
+    $sql = sprintf("UPDATE %s SET cml_text = '%s' WHERE id = %d", CECEPPA_ML_TRANS, bin2hex(strtolower($resul->text)), $resul->id);
+    $wpdb->query($sql);
   endforeach;
 }
 ?>

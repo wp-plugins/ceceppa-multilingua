@@ -3,7 +3,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate
 Requires at least: 3.4.1
 Tested up to: 3.6
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG
@@ -111,7 +111,7 @@ For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide
   This function return an object and Its fields are:
   
     *) id           - id of language
-  
+ 
     *) cml_default  - 1 if it is the default language
   
     *) cml_flag     - name of flag
@@ -133,6 +133,9 @@ For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide
 7. Box for see or add translation to current post/page
 
 == Changelog ==
+
+= 1.0.1 =
+* Fixed fatal error in "CML Widget" Recent posts
 
 = 1.0.0 =
 * Code optimization

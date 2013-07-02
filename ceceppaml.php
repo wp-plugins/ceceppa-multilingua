@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 1.0.0
+Version: 1.0.1
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -17,7 +17,7 @@ Tags: multilingual, multi, language, admin, tinymce, qTranslate, Polyglot, bilin
  */
 global $wpdb;
 
-define('CECEPPA_DB_VERSION', 14);
+define('CECEPPA_DB_VERSION', 15);
 
 define('CECEPPA_ML_TABLE', $wpdb->base_prefix . 'ceceppa_ml');
 define('CECEPPA_ML_CATS', $wpdb->base_prefix . 'ceceppa_ml_cats');
@@ -150,6 +150,7 @@ class CeceppaML {
        * Visualizzo alcune informazioni....
        */
       if(isset($_GET['cml-hide-experimental'])) update_option('cml_experimental_category', 0);
+      if(isset($_GET['cml-hide-major-release'])) update_option('cml_major_release', 0);
       add_action( 'admin_notices', array(&$this, 'admin_notices'));
 
       if(array_key_exists("cml-hide-notice", $_GET)) update_option('cml_show_admin_notice', 0);
@@ -1251,23 +1252,27 @@ class CeceppaML {
       $wpdb->query("DELETE FROM " . CECEPPA_ML_TRANS);
 
       $langs = cml_get_languages(0);
-      for($i = 0; $i < count($_POST['string']); $i++) :
-	  //Per ogni lingua
-	  foreach($langs as $lang) :
-	    $lang = $lang->id;
+      //Per ogni lingua
+      foreach($langs as $lang) :
+	if(!empty($_POST['lang_' . $lang->id])) :
+	  $i = 0;
+	  $titles = $_POST['lang_' . $lang->id];
 
+	  foreach($titles as $text) :
 	    //       if(empty($id)) {
-	    $text = $_POST['lang_' . $lang][$i];
+	    $title = $_POST['string'][$i];
 	    //$text = htmlentities($text);
 
-	    $title = $_POST['string'][$i];
 	    //$title = htmlentities($title);
 	    $query = sprintf("INSERT INTO %s (cml_text, cml_lang_id, cml_translation, cml_type) VALUES (HEX('%s'), '%d', HEX('%s'), 'W')",
-				CECEPPA_ML_TRANS, addslashes($title), $lang, addslashes($text));
+				CECEPPA_ML_TRANS, strtolower(addslashes($title)), $lang->id, addslashes($text));
 
 	    $wpdb->query($query);
+	    
+	    $i++;
 	  endforeach;
-      endfor;
+	endif;
+      endforeach;
     }
 
     //Evito che l'output vada a video
@@ -1771,7 +1776,7 @@ class CeceppaML {
     if(is_admin()) 
       return $title;
 
-    return cml_translate($title, $this->_current_lang_id);
+    return cml_translate(strtolower($title), $this->_current_lang_id, 'W');
   }
 
   function admin_translate_widget_title($title) {
@@ -1805,14 +1810,12 @@ class CeceppaML {
       $lang = $this->get_language_id_by_post_id($the_id);
     else:
       //Se stata abilitata la modalità "pre_domain" recupero la lingua da ##.example
-      if(!array_key_exists("lang", $_GET) && $this->_url_mode == PRE_DOMAIN) {
+      if(!array_key_exists("lang", $_GET) && $this->_url_mode == PRE_DOMAIN) :
 	$urls = explode(".", $_SERVER['HTTP_HOST']);
 
 	$lang = $this->get_language_id_by_slug($urls[0]);
-      }
-
-      //Se stata abilitata la modalità "pre_path" recupero la lingua da www.example.com/##/
-      if(!array_key_exists("lang", $_GET) && $this->_url_mode == PRE_PATH) {
+      elseif(!array_key_exists("lang", $_GET) && $this->_url_mode == PRE_PATH) :
+	//Se stata abilitata la modalità "pre_path" recupero la lingua da www.example.com/##/
 	$url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 	$home = home_url() . "/";
 	$url = str_replace($home, "", $url);
@@ -1820,7 +1823,9 @@ class CeceppaML {
 	if(is_category()) array_shift($urls);
 
 	$lang = $this->get_language_id_by_slug($urls[0]);
-      }
+      elseif(!array_key_exists("lang", $_GET)) :
+	$lang = $this->_default_language_id;
+      endif;
     endif;
 
     if(is_home() || is_search() || array_key_exists("lang", $_GET)) {
@@ -1847,15 +1852,15 @@ class CeceppaML {
       endif;
 
       if($this->_filter_search) {
-	  //For Fix Notice
-	  //add_action('wp_enqueue_scripts', array(&$this, 'enqueue_script_search')); //Non funziona :(
-	  $this->enqueue_script_search();
+	//For Fix Notice
+	//add_action('wp_enqueue_scripts', array(&$this, 'enqueue_script_search')); //Non funziona :(
+	$this->enqueue_script_search();
 
-	  $array = array('lang' => $this->_current_lang, 'form_class' => $this->_filter_form_class);
-	  wp_localize_script('ceceppa-search', 'cml_object', $array);
+	$array = array('lang' => $this->_current_lang, 'form_class' => $this->_filter_form_class);
+	wp_localize_script('ceceppa-search', 'cml_object', $array);
 
-	  //Evito che esegua più di una volta questo if
-	  //$this->_filter_search = false;
+	//Evito che esegua più di una volta questo if
+	//$this->_filter_search = false;
       }
 
       //Recupero il campo "Locale Wordpress"
@@ -2433,13 +2438,31 @@ class CeceppaML {
 	echo "</div>";
       endif;
 
+      if(get_option("cml_major_release", true)) :
+?>
+	<div class="updated">
+	  <p>
+	    <?php _e('Finally version 1.0 released :) :)', 'ceceppaml') ?><br />
+	    <?php _e('Help me to promote my plugin. :)', 'ceceppaml') ?><br />
+	    <?php _e('Tell your friends that you\'re using it on facebook, twitter, google... :)', 'ceceppaml') ?><br />
+
+	    <div style="text-align: right;width:100%">
+	      <?php       
+		  $link = add_query_arg('cml-hide-major-release', 1);
+	      ?>
+	      <a href="<?php echo $link ?>"><?php _e('Dismiss') ?></a>
+	    </div>
+	  </p>
+	</div>
+<?php
+      endif;
+
       if(get_option("cml_experimental_category", true)) :
 ?>
 	<div class="updated">
 	  <p>
 	    <?php _e('Now you can translate also the category link.') ?><br />
 	    <a href="?page=ceceppaml-options-page#cats-tags"><?php _e('Click here to enable the option "Categories & Tags".') ?></a><br /><br />
-	    <?php _e('The support is experimental and may not work :(.') ?><br />
 
 	    <div style="text-align: right;width:100%">
 	      <?php       
