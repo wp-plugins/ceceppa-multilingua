@@ -3,7 +3,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate
 Requires at least: 3.4.1
 Tested up to: 3.6
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG
@@ -134,6 +134,10 @@ For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide
 
 == Changelog ==
 
+= 1.0.5 =
+* Fixed issue with filter "Filter posts"
+* Now you can choose the size of all flags :)
+* 
 = 1.0.4 =
 * Fixed layout in "Ceceppa Multilingua"
 * Fixed minor bugs with category translation

@@ -15,7 +15,13 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
+global $wpCeceppaML;
+
 $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
+
+
+$tiny = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "tiny");
+$small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 ?>
 
 <div class="wrap">
@@ -47,31 +53,53 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 	  <textarea name="custom-css" rows="10" cols="100"><?php echo file_get_contents(CECEPPA_PLUGIN_PATH . "/css/float.css"); ?></textarea>
 	</blockquote>
 	<br /><br />
-	<strong><?php _e('Display items as:', 'ceceppaml') ?></strong>
-	<blockquote>
-	  <ul>
-	    <li>
-	      <label>
-		  <input type="radio" name="float-as" id="float-as" value="1" <?php checked(get_option("cml_show_float_items_as", 1), 1) ?> />
-		  <?php _e('Flag + text.', 'ceceppaml') ?>
-	      </label>
-	    </li>
-	    <li>
-	      <label>
-		  <input type="radio" name="float-as" id="float-as" value="2" <?php checked(get_option("cml_show_float_items_as", 1), 2) ?> />
-		  <?php _e('Text only', 'ceceppaml') ?>
-	      </label>
-	    </li>
-	    <li>
-	      <label>
-		  <input type="radio" name="float-as" id="float-as" value="3" <?php checked(get_option("cml_show_float_items_as", 1), 3) ?> />
-		  <?php _e('Flag only', 'ceceppaml') ?>
-	      </label>
-	    </li>
-	  </ul>
-	</blockquote>
+	<div class="block-left">
+	  <strong><?php _e('Display items as:', 'ceceppaml') ?></strong>
+	  <blockquote>
+	    <ul>
+	      <li>
+		<label>
+		    <input type="radio" name="float-as" id="float-as" value="1" <?php checked(get_option("cml_show_float_items_as", 1), 1) ?> />
+		    <?php _e('Flag + text.', 'ceceppaml') ?>
+		</label>
+	      </li>
+	      <li>
+		<label>
+		    <input type="radio" name="float-as" id="float-as" value="2" <?php checked(get_option("cml_show_float_items_as", 1), 2) ?> />
+		    <?php _e('Text only', 'ceceppaml') ?>
+		</label>
+	      </li>
+	      <li>
+		<label>
+		    <input type="radio" name="float-as" id="float-as" value="3" <?php checked(get_option("cml_show_float_items_as", 1), 3) ?> />
+		    <?php _e('Flag only', 'ceceppaml') ?>
+		</label>
+	      </li>
+	    </ul>
+	  </blockquote>
+	</div>
+	  <div class="block-right">
+	    <strong><?php _e('Flag\'s size:', 'ceceppaml'); ?>:</strong>
+	    <ul>
+	      <li>
+		<label>
+		  <input type="radio" id="float-size" name="float-size" value="small" <?php checked(get_option("cml_show_float_items_size", "small"), "small"); ?> />
+		  <img src="<?php echo $small ?>" />
+		  <?php _e('Small', 'ceceppaml') ?> (32x23)
+		</label>
+	      </li>
+	      <li>
+		<label>
+		  <input type="radio" id="float-size" name="float-size" value="tiny" <?php checked(get_option("cml_show_float_items_size", "small"), "tiny"); ?> />
+		  <img src="<?php echo $tiny ?>" />
+		  <?php _e('Tiny', 'ceceppaml') ?> (16x11)
+		</label>
+	      </li>
+	    </ul>
+	  </div>
 	<br />
-<!-- Append flag -->
+
+<!-- Append flag to element -->
 	<h3>
 	  <label>
 	    <input type="checkbox" id="append-flags" name="append-flags" value="1" <?php checked(get_option('cml_append_flags', false), true) ?> />
@@ -85,30 +113,50 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 	    <input type="text" name="id-class" id="id-class" value="<?php echo get_option("cml_append_flags_to") ?>" />
 	    <br /><i><?php _e('Don\'t forget to add # for id, or . for class', 'ceceppaml') ?></i>
 	    <br /><br />
-	    <strong><?php _e('Display items as:', 'ceceppaml') ?></strong>
-	    <blockquote>
-	      <ul>
-		<li>
-		  <label>
-		      <input type="radio" name="show-items-as" id="show-items-as" value="1" <?php checked(get_option("cml_show_items_as", 1), 1) ?> />
-		      <?php _e('Flag + text.', 'ceceppaml') ?>
-		  </label>
-		</li>
-		<li>
-		  <label>
-		      <input type="radio" name="show-items-as" id="show-items-as" value="2" <?php checked(get_option("cml_show_items_as", 1), 2) ?> />
-		      <?php _e('Text only', 'ceceppaml') ?>
-		  </label>
-		</li>
-		<li>
-		  <label>
-		      <input type="radio" name="show-items-as" id="show-items-as" value="3" <?php checked(get_option("cml_show_items_as", 1), 3) ?> />
-		      <?php _e('Flag only', 'ceceppaml') ?>
-		  </label>
-		</li>
-	      </ul>
-	    </blockquote>
-	    
+	    <div class="block-left">
+	      <strong><?php _e('Display items as:', 'ceceppaml') ?></strong>
+	      <blockquote>
+		<ul>
+		  <li>
+		    <label>
+			<input type="radio" name="show-items-as" id="show-items-as" value="1" <?php checked(get_option("cml_show_items_as", 1), 1) ?> />
+			<?php _e('Flag + text.', 'ceceppaml') ?>
+		    </label>
+		  </li>
+		  <li>
+		    <label>
+			<input type="radio" name="show-items-as" id="show-items-as" value="2" <?php checked(get_option("cml_show_items_as", 1), 2) ?> />
+			<?php _e('Text only', 'ceceppaml') ?>
+		    </label>
+		  </li>
+		  <li>
+		    <label>
+			<input type="radio" name="show-items-as" id="show-items-as" value="3" <?php checked(get_option("cml_show_items_as", 1), 3) ?> />
+			<?php _e('Flag only', 'ceceppaml') ?>
+		    </label>
+		  </li>
+		</ul>
+	      </blockquote>
+	    </div>
+	  <div class="block-right">
+	    <strong><?php _e('Flag\'s size:', 'ceceppaml'); ?>:</strong>
+	    <ul>
+	      <li>
+		<label>
+		  <input type="radio" id="item-as-size" name="item-as-size" value="small" <?php checked(get_option("cml_show_items_size", "small"), "small"); ?> />
+		  <img src="<?php echo $small ?>" />
+		  <?php _e('Small', 'ceceppaml') ?> (32x23)
+		</label>
+	      </li>
+	      <li>
+		<label>
+		  <input type="radio" id="item-as-size" name="item-as-size" value="tiny" <?php checked(get_option("cml_show_items_size", "small"), "tiny"); ?> />
+		  <img src="<?php echo $tiny ?>" />
+		  <?php _e('Tiny', 'ceceppaml') ?> (16x11)
+		</label>
+	      </li>
+	    </ul>
+	  </div>
 	</label>
 	</blockquote>
 
@@ -136,29 +184,50 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 	      </label>
 	    </li>
 	  </ul>
-	  <strong><?php _e('Display items as:', 'ceceppaml') ?></strong>
-	  <blockquote>
+	  <div class="block-left">
+	    <strong><?php _e('Display items as:', 'ceceppaml') ?></strong>
+	    <blockquote>
+	      <ul>
+		<li>
+		  <label>
+		      <input type="radio" name="show-as" id="show-as" value="1" <?php checked(get_option("cml_show_in_menu_as", 1), 1) ?> />
+		      <?php _e('Flag + text.', 'ceceppaml') ?>
+		  </label>
+		</li>
+		<li>
+		  <label>
+		      <input type="radio" name="show-as" id="show-as" value="2" <?php checked(get_option("cml_show_in_menu_as", 1), 2) ?> />
+		      <?php _e('Text only', 'ceceppaml') ?>
+		  </label>
+		</li>
+		<li>
+		  <label>
+		      <input type="radio" name="show-as" id="show-as" value="3" <?php checked(get_option("cml_show_in_menu_as", 1), 3) ?> />
+		      <?php _e('Flag only', 'ceceppaml') ?>
+		  </label>
+		</li>
+	      </ul>
+	    </blockquote>
+	  </div>
+	  <div class="block-right">
+	    <strong><?php _e('Flag\'s size:', 'ceceppaml'); ?>:</strong>
 	    <ul>
 	      <li>
 		<label>
-		    <input type="radio" name="show-as" id="show-as" value="1" <?php checked(get_option("cml_show_in_menu_as", 1), 1) ?> />
-		    <?php _e('Flag + text.', 'ceceppaml') ?>
+		  <input type="radio" id="submenu-size" name="submenu-size" value="small" <?php checked(get_option("cml_show_in_menu_size", "small"), "small"); ?> />
+		  <img src="<?php echo $small ?>" />
+		  <?php _e('Small', 'ceceppaml') ?> (32x23)
 		</label>
 	      </li>
 	      <li>
 		<label>
-		    <input type="radio" name="show-as" id="show-as" value="2" <?php checked(get_option("cml_show_in_menu_as", 1), 2) ?> />
-		    <?php _e('Text only', 'ceceppaml') ?>
-		</label>
-	      </li>
-	      <li>
-		<label>
-		    <input type="radio" name="show-as" id="show-as" value="3" <?php checked(get_option("cml_show_in_menu_as", 1), 3) ?> />
-		    <?php _e('Flag only', 'ceceppaml') ?>
+		  <input type="radio" id="submenu-size" name="submenu-size" value="tiny" <?php checked(get_option("cml_show_in_menu_size", "small"), "tiny"); ?> />
+		  <img src="<?php echo $tiny ?>" />
+		  <?php _e('Tiny', 'ceceppaml') ?> (16x11)
 		</label>
 	      </li>
 	    </ul>
-	  </blockquote>
+	  </div>
 	</blockquote>
 
 <?php elseif($tab == 1) : ?>
@@ -240,6 +309,7 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 		<img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/flags.png" />
 	    </center></td>
 	    <td>
+	      <div class="block-left">
 		<strong><?php _e('Show the list flag of available languages on:', 'ceceppaml') ?></strong>
 		<blockquote>
 		    <input type="checkbox" id="flags-on-posts" name="flags-on-posts" value="1" <?php echo ((get_option('cml_option_flags_on_post', '1') == 1) ? 'checked' : '') ?> />
@@ -256,30 +326,53 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 		    <input type="radio" name="flags_on_pos" value="bottom" id="flags_on_bottom" <?php echo ((get_option('cml_option_flags_on_pos') == 'bottom') ? 'checked' : '') ?> />
 		    <label for="flags_on_bottom"><?php _e('On the bottom of post/page/category', 'ceceppaml') ?></label><br>
 		</blockquote>
+	  </div>
+	  <div class="block-right">
+	    <strong><?php _e('Flag\'s size:', 'ceceppaml'); ?>:</strong>
+	    <ul>
+	      <li>
+		<label>
+		  <input type="radio" id="flag-size" name="flag-size" value="small" <?php checked(get_option("cml_option_flags_on_size", "small"), "small"); ?> />
+		  <img src="<?php echo $small ?>" />
+		  <?php _e('Small', 'ceceppaml') ?> (32x23)
+		</label>
+	      </li>
+	      <li>
+		<label>
+		  <input type="radio" id="flag-size" name="flag-size" value="tiny" <?php checked(get_option("cml_option_flags_on_size", "small"), "tiny"); ?> />
+		  <img src="<?php echo $tiny ?>" />
+		  <?php _e('Tiny', 'ceceppaml') ?> (16x11)
+		</label>
+	      </li>
+	    </ul>
+	  </div>
 	    </td>
 	</tr>
 	<tr>
 <!-- Avviso -->
-	<td rowspan="2"><center>
+	<td rowspan="2">
+	  <center>
 	    <strong><?php _e('Show notice', 'ceceppaml') ?></strong><br /><br />
 	    <img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/notice.png" />
-	</center></td>
-	<td><strong><em><?php _e('When the post/page/category that user is viewing is available, based on the information provided by the browser, in their its language:', 'ceceppaml') ?></em></strong>
+	  </center>
+	</td>
+	<td>
+	    <strong><em><?php _e('When the post/page/category that user is viewing is available, based on the information provided by the browser, in their its language:', 'ceceppaml') ?></em></strong>
 	    <blockquote>
-		<input type="radio" id="show-notice" name="notice" value="notice" <?php echo ((get_option('cml_option_notice', 'notice') == 'notice') ? 'checked' : '') ?> />
-		<label for="show-notice"><?php _e('Add notice to:', 'ceceppaml') ?></label><br>
+	      <input type="radio" id="show-notice" name="notice" value="notice" <?php echo ((get_option('cml_option_notice', 'notice') == 'notice') ? 'checked' : '') ?> />
+	      <label for="show-notice"><?php _e('Add notice to:', 'ceceppaml') ?></label><br>
 	    <blockquote>
-		<input type="checkbox" id="notice-post" name="notice-post" value="1" <?php echo ((get_option('cml_option_notice_post', 'notice-post') == 1) ? 'checked' : '') ?> />
-		    <label for="notice-post"><?php _e('Posts', 'ceceppaml') ?></label> <br />
-		<input type="checkbox" id="notice-page" name="notice-page" value="1" <?php echo ((get_option('cml_option_notice_page', 'notice-page') == 1) ? 'checked' : '') ?> />
-		    <label for="notice-page"><?php _e('Pages', 'ceceppaml') ?></label><br />
+	      <input type="checkbox" id="notice-post" name="notice-post" value="1" <?php echo ((get_option('cml_option_notice_post', 'notice-post') == 1) ? 'checked' : '') ?> />
+	      <label for="notice-post"><?php _e('Posts', 'ceceppaml') ?></label> <br />
+	      <input type="checkbox" id="notice-page" name="notice-page" value="1" <?php echo ((get_option('cml_option_notice_page', 'notice-page') == 1) ? 'checked' : '') ?> />
+	      <label for="notice-page"><?php _e('Pages', 'ceceppaml') ?></label><br />
 	    </blockquote>
-	    <input type="radio" id="no-notice" name="notice" value="nothing" <?php echo ((get_option('cml_option_notice') == 'nothing') ? 'checked' : '') ?>/>
-		    <label for="no-notice"><?php _e('Ignore', 'ceceppaml') ?></label><br />
+	      <input type="radio" id="no-notice" name="notice" value="nothing" <?php echo ((get_option('cml_option_notice') == 'nothing') ? 'checked' : '') ?>/>
+	      <label for="no-notice"><?php _e('Ignore', 'ceceppaml') ?></label><br />
 	    </blockquote>
 	</td>
-	    </tr>
-	    <tr>
+      </tr>
+      <tr>
 	<td>
 <!-- Avviso: dove -->
 	    <strong><em><?php _e('Setting where to show the alert', 'ceceppaml') ?></strong></em>

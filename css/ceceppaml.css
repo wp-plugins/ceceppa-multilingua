@@ -295,6 +295,15 @@ img.delete {
   width: 600px;
 }
 
+div.block-left {
+  display: table-cell;
+  width: 400px;
+}
+
+div.block-right {
+  display: table-cell;
+}
+
 @media only screen and (orientation:landscape) and (min-width:1300px) {
   .cml-content {
     width: 900px !important;
@@ -305,3 +314,4 @@ img.delete {
     max-width: 900px !important;
   }
 }
+

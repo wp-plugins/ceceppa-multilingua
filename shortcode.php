@@ -77,8 +77,8 @@ function cml_do_shortcode($attrs) {
 function cml_show_available_langs($attrs) {
   global $wpdb, $wpCeceppaML;
 
-  //$notice = isset($attrs['notice']) ? $attrs['notice'] : true;
   $class = $attrs['class'];
+  $size = isset($attrs['size']) ? $attrs['size'] : "small";
 
   $langs = cml_get_languages();
   $l_id = $wpCeceppaML->get_current_lang_id();
@@ -94,6 +94,7 @@ function cml_show_available_langs($attrs) {
 		(array_key_exists("sp", $_GET)) || 
 		(get_option("page_for_posts") == get_the_ID());
 		(get_option("page_on_front") == get_the_ID());
+
   foreach($langs as $lang) {
     if(is_category()) $link = $wpCeceppaML->translate_term_link(get_category_link($cat_id), $lang->id);
     if(is_single() || is_page()) $link = cml_get_linked_post($l_id, $lang, get_the_ID(), null);
@@ -107,7 +108,7 @@ function cml_show_available_langs($attrs) {
       }
 
       $title = $lang->cml_language; //($notice && $l_id != $lang->id) ? cml_get_notice_by_lang_id($lang->id) : $lang->cml_language;
-      $r .= "<li><a href=\"$link\"><img src='" . cml_get_flag_by_lang_id($lang->id, 'small') . "' title=\"$title\" class=\"tipsy-me\"/></a></li>";
+      $r .= "<li><a href=\"$link\"><img src='" . cml_get_flag_by_lang_id($lang->id, $size) . "' title=\"$title\" class=\"tipsy-me\"/></a></li>";
     }
   }
 

@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 1.0.4
+Version: 1.0.5
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -284,6 +284,10 @@ class CeceppaML {
     
     //Translate post_link
     add_filter('post_link', array(&$this, 'translate_post_link'), 0, 3);
+    
+//     if($this->_url_mode != PRE_NONE)
+//       add_filter('page_link', array(&$this, 'translate_page_link'), 0, 3);
+
     add_filter('term_link', array(&$this, 'translate_term_link'), 0);
     add_filter('term_name', array(&$this, 'translate_term_name'), 0, 1);
 
@@ -481,7 +485,8 @@ class CeceppaML {
         if(esc_attr($post->post_title) == removesmartquotes($title)) {
 	    $this->_title_applied = true;
 
-	    return $title . cml_show_available_langs(array("class" => "cml_flags_on_top"));
+	    $size = get_option('cml_option_flags_on_size', "small");
+	    return $title . cml_show_available_langs(array("class" => "cml_flags_on_top", "size" => $size));
         } else {
             return $title;
         }
@@ -492,7 +497,8 @@ class CeceppaML {
         if(is_page() && !get_option('cml_option_flags_on_page')) return $title;
         if(is_category() && !get_option('cml_option_flags_on_cats')) return $title;
 
-        return $title . cml_show_available_langs(array("class" => "cml_flags_on_top"));
+        $size = get_option('cml_option_flags_on_size', "small");
+        return $title . cml_show_available_langs(array("class" => "cml_flags_on_top", "size" => $size));
     }
 
   /**
@@ -840,7 +846,7 @@ class CeceppaML {
   */
   function filter_posts_by_language($wp_query) {
     if(!is_search()) {
-      if(is_single() || is_admin() || isCrawler()) return;
+      if(is_single() || is_admin() || isCrawler() || is_page()) return;
     } else {
       if(!$this->_filter_search) return;
 
@@ -1116,7 +1122,10 @@ class CeceppaML {
 	  file_put_contents(CECEPPA_PLUGIN_PATH . "/css/float.css", $css);
 
 	  //Show as...
-	  @update_option("cml_show_float_items_as", intval($_POST['show-items-as']));
+	  @update_option("cml_show_float_items_as", intval($_POST['float-as']));
+
+	  //Flag size...
+	  @update_option("cml_show_float_items_size", $_POST['float-size']);
 
 	//Append
 	@update_option("cml_append_flags", intval($_POST['append-flags']));
@@ -1125,6 +1134,9 @@ class CeceppaML {
 	  //Show as...
 	  @update_option("cml_show_items_as", intval($_POST['show-items-as']));
 	
+	  //Flag size...
+	  @update_option("cml_show_items_size", $_POST['item-as-size']);
+
 	//Menu
 	@update_option("cml_add_flags_to_menu", intval($_POST['to-menu']));
 	
@@ -1133,6 +1145,9 @@ class CeceppaML {
 	  
 	  //Show as...
 	  @update_option("cml_show_in_menu_as", intval($_POST['show-as']));
+
+	  //Flag size...
+	  @update_option("cml_show_in_menu_size", $_POST['submenu-size']);
       endif;
 
       if($tab == 1) :
@@ -1155,6 +1170,9 @@ class CeceppaML {
       @update_option("cml_option_flags_on_page", intval($_POST['flags-on-pages']));
       @update_option("cml_option_flags_on_cats", intval($_POST['flags-on-cats']));
       @update_option("cml_option_flags_on_pos", $_POST['flags_on_pos']);
+
+	//Size
+	@update_option("cml_option_flags_on_size", $_POST['flag-size']);
 
       //Avviso
       @update_option("cml_option_notice", $_POST['notice']);
@@ -2165,6 +2183,25 @@ class CeceppaML {
         return $homeUrl . $slug . join("/", $plinks);
     }
     
+    function translate_page_link($permalink) {
+	$slug = $this->get_language_id_by_post_id($post->ID);
+	$slug = $this->get_language_slug_by_id($slug);
+
+	if($this->_url_mode == PRE_DOMAIN) :
+	  if(strpos($permalink, "http://www.") === FALSE)
+            $permalink = str_replace("http://", "http://$slug.", $permalink);
+	  else
+            $permalink = str_replace("http://www.", "http://$slug.", $permalink);
+            
+	  return $permalink;
+	endif;
+	
+        //Aggiungo il suffisso /%lang%/
+	$homeUrl = home_url();
+        $plinks = explode("/", str_replace($homeUrl, "", $permalink));
+        return $homeUrl . "/" . $slug . join("/", $plinks);
+    }
+
     function translate_menu_item($item) {
 	//Se l'utente ha scelto un menu differente per la lingua corrente
 	//non devo applicare nessun tipo di filtro agli elementi del menu, esco :)
@@ -2649,16 +2686,19 @@ class CeceppaML {
     if(get_option("cml_add_items_as") == 2) return $this->add_flags_in_submenu($items, $args);
 
     $langs = cml_get_languages();
+    $size = get_option("cml_show_in_menu_size", "small");
 
     foreach($langs as $lang) :
-      $items .= $this->add_item_to_menu($lang);
+      $items .= $this->add_item_to_menu($lang, true, $size);
     endforeach;
     return $items;
   }
  
   function add_flags_in_submenu($items, $args) {
+    $size = get_option("cml_show_in_menu_size", "small");
+
     //Lingua corrente
-    $items .= $this->add_item_to_menu($this->get_current_language(), false);
+    $items .= $this->add_item_to_menu($this->get_current_language(), false, $size);
     
     //Submenu
     $items .= '<ul>';
@@ -2667,7 +2707,7 @@ class CeceppaML {
       $langs = cml_get_languages();
       foreach($langs as $lang) :
 	if($lang->id != $this->_current_lang_id) :
-	  $items .= $this->add_item_to_menu($lang);
+	  $items .= $this->add_item_to_menu($lang, true, $size);
 	endif;
       endforeach;
     $items .= '</ul>';
@@ -2677,14 +2717,14 @@ class CeceppaML {
     return $items;
   }
 
-  function add_item_to_menu($lang, $close = true) {
+  function add_item_to_menu($lang, $close = true, $size = "small") {
     $display = get_option("cml_show_in_menu_as", 1);
 
     $item = '<li class="menu-item">';
 
     $item .= '<a href="' . home_url() . '?lang=' . $lang->cml_language_slug . '">';
     if($display != 2) :
-      $item .= "<img src=\"" . cml_get_flag_by_lang_id($lang->id, "small") . "\" title=\"$lang->cml_language\"/>";
+      $item .= "<img src=\"" . cml_get_flag_by_lang_id($lang->id, $size) . "\" title=\"$lang->cml_language\"/>";
     endif;
     
     if($display < 3) :
@@ -2704,21 +2744,23 @@ class CeceppaML {
 
     $show = array("", "both", "text", "flag");
     $as = intval(get_option("cml_show_items_as", 1));
+    $size = get_option("cml_show_items_size", "small");
 
     $this->enqueue_script_append_to();
     wp_localize_script('ceceppa-append', 'cml_append_to', array('element' => $appendTo));
 
     echo '<div class="cml_append_flags" style="display: none">';
-    cml_show_flags($show[$as], "small");
+    cml_show_flags($show[$as], $size);
     echo '</div>';
   }
   
   function add_flying_flags() {
     $show = array("", "both", "text", "flag");
     $as = intval(get_option("cml_show_items_as", 1));
+    $size = get_option("cml_show_float_items_size", "small");
 
     echo '<div id="flying-flags">';
-      cml_show_flags($show[$as], "small");
+      cml_show_flags($show[$as], $size);
     echo '</div>';
   }
 }

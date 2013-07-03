@@ -269,13 +269,13 @@ class CeceppaMLWidgetChooser extends WP_Widget {
       <p>
         <label>
           <input type="radio" id="<?php echo $this->get_field_id('size'); ?>" name="<?php echo $this->get_field_name('size'); ?>" value="small" <?php echo ($size == "small" || empty($size)) ? "checked=\"checked\"" : ""; ?>/>
-          <?php _e('Small (32x23)', 'ceceppaml') ?>
+          <?php _e('Small', 'ceceppaml') ?> (32x23)
         </label>
       </p>
       <p>
         <label>
           <input type="radio" id="<?php echo $this->get_field_id('size'); ?>" name="<?php echo $this->get_field_name('size'); ?>" value="tiny" <?php echo ($size == "tiny") ? "checked=\"checked\"" : ""; ?>/>
-          <?php _e('Tiny (16x11)', 'ceceppaml') ?>
+          <?php _e('Tiny', 'ceceppaml') ?> (16x11)
         </label>
       </p>
       </blockquote>
