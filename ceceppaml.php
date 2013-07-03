@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 1.0.6
+Version: 1.0.7
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -846,7 +846,7 @@ class CeceppaML {
   */
   function filter_posts_by_language($wp_query) {
     if(!is_search()) {
-      if(is_single() || is_admin() || isCrawler() || is_page()) return;
+      if(is_single() || is_admin() || isCrawler() || is_page() || is_preview()) return;
     } else {
       if(!$this->_filter_search) return;
 
@@ -883,6 +883,7 @@ class CeceppaML {
       global $wpdb;
 
       if($wp_query != null && (is_page() || is_single() || isCrawler())) return;
+      if(is_preview() || isset($_GET['preview'])) return;
       if(!is_admin()) $this->update_current_lang();
 
       if(!isset($this->_hide_posts) || empty($this->_hide_posts)) :
@@ -2153,6 +2154,8 @@ class CeceppaML {
      * l'articolo corretto :)
      */
     function translate_post_link($permalink, $post, $leavename, $lang_id = null) {
+	if(is_preview) return $permalink;
+
 	if($this->_url_mode == PRE_DOMAIN) :
 	  $slug = $this->get_language_id_by_post_id($post->ID);
 	  $slug = $this->get_language_slug_by_id($slug);
@@ -2621,7 +2624,7 @@ class CeceppaML {
   function hide_category_translations($wp_query) {
     //Se non è una categoria è inutile che viene qui :)
     if(!is_category()) return;
-    
+
     /*
       * Wow, ho trovato un modo per tradurre il link delle categorie :D :D :
       * Se l'utente sta visualizzando la categoria, verifico se il nome della categoria è una traduzione
