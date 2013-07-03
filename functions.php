@@ -200,7 +200,15 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
 	}
       }
 
-      if(empty($link)) $link = home_url() . "/?lang=$result->cml_language_slug";
+      if(empty($link)) :
+	$sp = "";
+	$use_static= (get_option("page_for_posts") > 0) ||
+		      (get_option("page_on_front") > 0);
+     
+	if($use_static && $result->id != cml_get_default_language_id()) $sp = "&sp=1";
+
+	$link = home_url() . "/?lang=$result->cml_language_slug" . $sp;
+      endif;
     }
 
     $img = "<img class=\"$size $image_class\" src='" . cml_get_flag_by_lang_id($result->id, $size) . "' title='$result->cml_language' width=\"$width\"/>";

@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 1.0.5
+Version: 1.0.6
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -1520,6 +1520,8 @@ class CeceppaML {
      */
     if($this->_redirect_browser == 'nothing' || isCrawler()) return;
     if(is_admin()) return;
+    $url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $home = home_url() . "/";
 
     //Non posso utilizzare la funzione is_home, quindi controllo "manualmente"
     $url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
@@ -1534,7 +1536,7 @@ class CeceppaML {
     global $wpdb;
 
     $lang = $this->get_browser_lang();
-    $lang = (empty($slug)) ? $this->_default_language_slug : $lang;
+    $slug = (empty($lang)) ? $this->_default_language_slug : $this->get_language_slug_by_id($lang);
     //Redirect abilitato?
     if($this->_redirect_browser == 'auto') {
       //Pagina statica?
@@ -1545,9 +1547,14 @@ class CeceppaML {
 	update_option('show_on_front', 'posts');
 	update_option('page_parent', 0);
 
-	$location = home_url() . "/$lang/";
+	$location = home_url() . "/$slug/";
       else:
-	$location = home_url() . "/?lang=$lang";
+	$sp = "";
+	$use_static= (get_option("page_for_posts") > 0) ||
+		      (get_option("page_on_front") > 0);
+     
+	if($use_static && $lang != $this->_default_language_id) $sp = "&sp=1";
+	$location = home_url() . "/?lang=$slug$sp";
       endif;
     }
 
@@ -1610,23 +1617,36 @@ class CeceppaML {
   function get_browser_lang() {
     if(isset($this->_browser_lang)) return $this->_browser_lang;
 
+    global $wpdb;
+
     $browser_langs = explode(";", $_SERVER['HTTP_ACCEPT_LANGUAGE']);
     $lang = null;
 
     //Se la lingua del browser coincide con una di quella attuale della pagina, ignoro tutto
-    foreach($browser_langs as $lang) :
-      @list($code1, $code2) = explode(",", $lang);
+    foreach($browser_langs as $blang) :
+      @list($code1, $code2) = explode(",", $blang);
 
-      if($code1 == $this->_current_lang_locale) return $content;
-      if($code2 == $this->_current_lang_locale) return $content;
-
-      $locale1 = str_replace("-", "_", $code1);
-      $locale2 = str_replace("-", "_", $code2);
+      $locale[] = str_replace("-", "_", $code1);
+      $locale[] = str_replace("-", "_", $code2);
       
       //Per ogni codice che trovo verifico se è gestito, appena ne trovo 1 mi fermo
       //Perché il mio browser mi restituisce sia it-IT, che en-EN, quindi mi devo fermare appena trovo un riscontro
       //Senno mi ritrovo sempre la lingua en-EN come $browser_langs;
-      $lang = $this->get_language_id_by_locale(array($locale1, $locale2));
+      $i = 0;
+      while(empty($lang) && $i < count($locale)) :
+	$l = $locale[$i];
+
+	if(strlen($l) > 2) :
+	  $lang = $this->get_language_id_by_locale($l);
+	else:
+	  //Se ho solo 2 caratteri, cerco negli "slug"
+	  $query = sprintf("SELECT id FROM %s WHERE cml_language_slug = '%s'", CECEPPA_ML_TABLE, $l);
+	  $lang = $wpdb->get_var($query);
+	endif;
+
+	$i++;
+      endwhile;
+
       if(!empty($lang)) {
 	break;
       }
@@ -2613,40 +2633,47 @@ class CeceppaML {
     if(!isset($this->_change_category_applied)) :
       global $wpdb;
 
-      $cat = $wp_query->query['category_name'];
 
-      $cats = explode("/", $cat);
-      if(!is_array($cats)) $cats = array($cat);
-      foreach($cats as $cat) :
-	//Se la categoria esiste non è una traduzione :)
-	$term = term_exists($cat, 'category');
-	if($term == 0 || $term == null) :
-	  $cat = strtolower(str_replace("-", " ", $cat));
-	  $query = sprintf("SELECT cml_cat_lang_id, UNHEX(cml_cat_name) as cml_cat_name FROM %s WHERE cml_cat_translation = '%s'", CECEPPA_ML_CATS, bin2hex($cat));
+      //Se ho attivato la modalità PRE_PATH recupero lo slug dopo /category/, è quello che farà fede :)
+      if($this->_url_mode != PRE_PATH) :
+	$cat = $wp_query->query['category_name'];
 
-	  $name = $wpdb->get_row($query);
-	  if(!empty($name))
-	    $this->_force_current_language = $name->cml_cat_lang_id;
-	  else
-	    $this->_force_current_language = $this->_default_language_id;
+	$cats = explode("/", $cat);
+	if(!is_array($cats)) $cats = array($cat);
+	foreach($cats as $cat) :
+	  //Se la categoria esiste non è una traduzione :)
+	  $term = term_exists($cat, 'category');
+	  if($term == 0 || $term == null) :
+	    $cat = strtolower(str_replace("-", " ", $cat));
+	    $query = sprintf("SELECT cml_cat_lang_id, UNHEX(cml_cat_name) as cml_cat_name FROM %s WHERE cml_cat_translation = '%s'", CECEPPA_ML_CATS, bin2hex($cat));
 
-	  $name = (!empty($name)) ? strtolower($name->cml_cat_name) : "";
-	endif;
+	    $name = $wpdb->get_row($query);
+	    if(!empty($name))
+	      $this->_force_current_language = $name->cml_cat_lang_id;
+	    else
+	      $this->_force_current_language = $this->_default_language_id;
+
+	    $name = (!empty($name)) ? strtolower($name->cml_cat_name) : "";
+	  endif;
+	  
+	  $new[] = empty($name) ? $cat : $name;
+	endforeach;
+
+	$wp_query->query['category_name'] = join("/", $new);
+	$wp_query->query_vars['category_name'] = end($new);
 	
-	$new[] = empty($name) ? $cat : $name;
-      endforeach;
+	$taxquery = array("taxonomy" => "category",
+			    "terms" => array(join("/", $new)),
+			    "include_children" => 1,
+			    "field" => "slug",
+			    "operator" => "IN");
 
-      $wp_query->query['category_name'] = join("/", $new);
-      $wp_query->query_vars['category_name'] = end($new);
-      
-      $taxquery = array("taxonomy" => "category",
-			  "terms" => array(join("/", $new)),
-			  "include_children" => 1,
-			  "field" => "slug",
-			  "operator" => "IN");
-
-      $wp_query->tax_query->queries[0] = $taxquery;
-      $this->_change_category_applied = true;
+	$wp_query->tax_query->queries[0] = $taxquery;
+	$this->_change_category_applied = true;
+      else:
+	unset($this->_force_current_language);
+	$this->_change_category_applied = true;
+      endif;
 
       unset($this->_hide_posts);
     endif;
