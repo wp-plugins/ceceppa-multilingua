@@ -111,16 +111,19 @@ For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide
   This function return an object and Its fields are:
   
     *) id           - id of language
- 
     *) cml_default  - 1 if it is the default language
-  
     *) cml_flag     - name of flag
-  
     *) cml_language - name of the language
-  
     *) cml_language_slug - slug of the language
-  
     *) cml_locale        - wordpress locale
+
+= Can I show flags on my website without using widget? =
+
+Yes. You can:
+
+  1) Add float div to website and customize look via css
+  2) Append flag to html element
+  3) Add flags to menu
 
 == Screenshots ==
 
@@ -161,7 +164,7 @@ For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide
 * If you choose pre-path mode add language slug also for category link istead of "?lang=##"
 * Fixed "Translate the url for categories", now work correctly. This option is disabled by default, enable it on settings page.
 * Fixed Catalan and Spanish flag
-* Can show flag in your website withouth edit your template and withouth use widget. The options are available in "Settings" page
+* Can show flag in your website withouth edit your template and without use widget. The options are available in "Settings" page
 
 = 0.9.21 =
 * Replaced hex2bin with UNHEX, now plugin is compatible also with Php < 5.4
