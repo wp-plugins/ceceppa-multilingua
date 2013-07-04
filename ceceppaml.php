@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 1.0.7
+Version: 1.0.8
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -1012,7 +1012,8 @@ class CeceppaML {
     if(empty($this->_current_lang_id)) $this->update_current_lang();
 
     //Cerco prima nella lingua corrente
-    if(in_array($post_id, $this->_posts_of_lang[$this->_current_lang_id])) 
+    $array = $this->_posts_of_lang[$this->_current_lang_id];
+    if(is_array($array) && in_array($post_id, $array)) 
       return $this->_current_lang_id;
 
     //Evito di cercare 2 volte nello stesso posto :)
@@ -2490,21 +2491,6 @@ class CeceppaML {
 	echo "</div>";
       endif;
 
-      if(get_option("cml_need_update_posts", false)) :
-	echo "<div class=\"updated\">\n";
-	echo "<p>\n";
-
-	  _e('It is necessary assign default language to existing posts. ', 'ceceppaml'); echo "<br />";
-	  echo "<a href='edit.php?&cml_update_posts=1'>" . sprintf(__('<strong>If your default language is "%s"</strong> click here for automatically assign this language to all existing posts.', 'ceceppaml'), $this->_default_language) . "</a>"; 
-	    echo "<br />";
-	  _e('Otherwhise add correct default language first', 'ceceppaml'); echo "<br />";
-	  echo "<br />";
-
-	  $link = add_query_arg('cml_hide_update_posts', 1);
-	  echo '<a href="' . $link . '">' . __('Hide this message.', 'ceceppaml') . '</a>';
-	echo "</p>\n";
-	echo "</div>";
-      endif;
 
       if(get_option("cml_major_release", true)) :
 ?>
@@ -2525,22 +2511,20 @@ class CeceppaML {
 <?php
       endif;
 
-      if(get_option("cml_experimental_category", true)) :
-?>
-	<div class="updated">
-	  <p>
-	    <?php _e('Now you can translate also the category link.') ?><br />
-	    <a href="?page=ceceppaml-options-page#cats-tags"><?php _e('Click here to enable the option "Categories & Tags".') ?></a><br /><br />
+      if(get_option("cml_need_update_posts", false)) :
+	echo "<div class=\"updated\">\n";
+	echo "<p>\n";
 
-	    <div style="text-align: right;width:100%">
-	      <?php       
-		  $link = add_query_arg('cml-hide-experimental', 1);
-	      ?>
-	      <a href="<?php echo $link ?>"><?php _e('Dismiss') ?></a>
-	    </div>
-	  </p>
-	</div>
-<?php
+	  _e('It is necessary assign default language to existing posts. ', 'ceceppaml'); echo "<br />";
+	  echo "<a href='edit.php?&cml_update_posts=1'>" . sprintf(__('<strong>If your default language is "%s"</strong> click here for automatically assign this language to all existing posts.', 'ceceppaml'), $this->_default_language) . "</a>"; 
+	    echo "<br />";
+	  _e('Otherwhise add correct default language first', 'ceceppaml'); echo "<br />";
+	  echo "<br />";
+
+	  $link = add_query_arg('cml_hide_update_posts', 1);
+	  echo '<a href="' . $link . '">' . __('Hide this message.', 'ceceppaml') . '</a>';
+	echo "</p>\n";
+	echo "</div>";
       endif;
 
       if($pagenow == 'nav-menus.php') :
