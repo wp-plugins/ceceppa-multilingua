@@ -176,6 +176,7 @@ function cml_deprecated_hide_translations_for_tags($wp_query) {
   $tag_name = $wp_query->query_vars['tag'];
   $i = 0;
 
+  if(!is_object($wpCeceppaML) || !is_array($wpCeceppaML->_hide_posts)) return;
   foreach($wpCeceppaML->_hide_posts as $id) :
     $tags = wp_get_post_tags($id);
     $lang_id = $wpCeceppaML->get_language_id_by_post_id($id);
