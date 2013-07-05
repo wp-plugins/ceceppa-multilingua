@@ -131,10 +131,8 @@ function cml_update_all_posts_language() {
 function cml_fix_rebuild_posts_info() {
   global $wpCeceppaML, $wpdb;
 
-
   //Indici degli articoli
   //$posts = array();
-  
   //Recupero tutti gli articoli
   $args = array('numberposts' => -1, 'posts_per_page' => 999999,
 		  'post_type' => array('page', 'post'),

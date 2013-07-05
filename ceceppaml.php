@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 1.0.11
+Version: 1.0.12
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -158,8 +158,7 @@ class CeceppaML {
 	add_action( 'admin_notices', array(&$this, 'show_admin_notice'));
 
       if(isset($_GET['cml_update_posts'])) :
-	require_once(CECEPPA_PLUGIN_PATH . "fix.php");
-	cml_update_all_posts_language();
+	add_action('plugins_loaded', array(&$this, 'update_all_posts_language'));
       endif;
 
       if(isset($_GET['cml_hide_update_posts'])) update_option("cml_need_update_posts", false);
@@ -247,6 +246,9 @@ class CeceppaML {
       if(array_key_exists("sp", $_GET))
 	add_filter('pre_get_posts', array(&$this, 'get_static_page'));
 
+      //Filtro il link degli archivi :)
+      add_filter('get_archives_link', array(&$this, 'translate_archives_link'));
+
       //Translate menu items    
       add_filter('wp_setup_nav_menu_item', array(&$this, 'translate_menu_item'));
 
@@ -284,7 +286,7 @@ class CeceppaML {
     
     //Translate post_link
     add_filter('post_link', array(&$this, 'translate_post_link'), 0, 3);
-    
+
 //     if($this->_url_mode != PRE_NONE)
 //       add_filter('page_link', array(&$this, 'translate_page_link'), 0, 3);
 
@@ -799,7 +801,7 @@ class CeceppaML {
     $posts = $this->get_posts_of_language();
 
     $where = " AND id IN (" . implode(", ", $posts) . ") ";
-    
+
     //Aggiungo il $where prima della clausula ORDER
     $query = substr($query, 0, $pos) . $where . substr($query, $pos);
     return $query;
@@ -1522,8 +1524,6 @@ class CeceppaML {
      */
     if($this->_redirect_browser == 'nothing' || isCrawler()) return;
     if(is_admin()) return;
-    $url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-    $home = home_url() . "/";
 
     //Non posso utilizzare la funzione is_home, quindi controllo "manualmente"
     $url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
@@ -1851,23 +1851,27 @@ class CeceppaML {
     if(is_single() || is_page()) :
       $lang = $this->get_language_id_by_post_id($the_id);
     else:
-      //Se stata abilitata la modalità "pre_domain" recupero la lingua da ##.example
-      if(!array_key_exists("lang", $_GET) && $this->_url_mode == PRE_DOMAIN) :
-	$urls = explode(".", $_SERVER['HTTP_HOST']);
+      if(!array_key_exists("lang", $_GET)) :
+	//Se stata abilitata la modalità "pre_domain" recupero la lingua da ##.example
+	if($this->_url_mode == PRE_DOMAIN) :
+	  $urls = explode(".", $_SERVER['HTTP_HOST']);
 
-	$lang = $this->get_language_id_by_slug($urls[0]);
-      elseif(!array_key_exists("lang", $_GET) && $this->_url_mode == PRE_PATH) :
-	//Se stata abilitata la modalità "pre_path" recupero la lingua da www.example.com/##/
-	$url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-	$home = home_url() . "/";
-	$url = str_replace($home, "", $url);
-	$urls = explode("/", $url);
-	if(is_category()) array_shift($urls);
+	  $lang = $this->get_language_id_by_slug($urls[0]);
+	elseif($this->_url_mode == PRE_PATH) :
+	  //Se stata abilitata la modalità "pre_path" recupero la lingua da www.example.com/##/
+	  $url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+	  $home = home_url() . "/";
+	  $url = str_replace($home, "", $url);
 
-	$lang = $this->get_language_id_by_slug($urls[0]);
-	$this->_force_current_language = $lang;
-      elseif(!array_key_exists("lang", $_GET) && is_category()) :
-	$lang = $this->_default_language_id;
+	  $parts = parse_url($url);
+	  $path = explode("/", $parts['path']);
+	  if(is_category() || $path[0] == 'category') array_shift($path);
+
+	  $lang = $this->get_language_id_by_slug($path[0]);
+	  $this->_force_current_language = $lang;
+	else :
+	  $lang = $this->_default_language_id;
+	endif;
       endif;
     endif;
 
@@ -2171,7 +2175,8 @@ class CeceppaML {
         if(empty($s) || strrpos($s, "%category%") === false) return $permalink;
 
         if($lang_id == null) $lang_id = $this->get_language_id_by_post_id($post->ID);
-        if($lang_id <= 0) return $permalink;
+        if($lang_id == 0) $lang_id = $this->_current_lang_id;
+//         if($lang_id <= 0) return $permalink;
 
         //Devo aggiungere la lingua al link?
         if(get_option("cml_add_slug_to_link", true))
@@ -2324,13 +2329,17 @@ class CeceppaML {
 	endif;
       }
 
+      if($lang_id == 0) $lang_id = $this->_current_lang_id;
       if(!empty($lang_id)) :
 	$slug = strtolower($this->get_language_slug_by_id($lang_id));
       else :
 	$slug = $this->_default_language_slug;
       endif;
 
-      if($this->_translate_term_link && isset($this->_force_current_language) && $this->_force_current_language != $this->_default_language_id) :
+      if(($this->_translate_term_link && isset($this->_force_current_language) && $this->_force_current_language != $this->_default_language_id) 
+	  || isset($this->_force_category_lang)) :
+	if(isset($this->_force_category_lang)) $lang_id = $this->_force_category_lang;
+
 	$homeUrl = home_url();
         $plinks = explode("/", str_replace($homeUrl, "", $link));
 
@@ -2344,8 +2353,17 @@ class CeceppaML {
 	  //Cerco la traduzione della categoria nella lingua del post :)
 	  if(!empty($plink)) :
 	    $id = get_category_by_slug($plink);
-	    $id = $id->term_id;
-	    $cat = strtolower(get_option("cml_category_" . $id . "_lang_" . $lang_id, $plink));
+	    if(is_object($id)) :
+	      $id = $id->term_id;
+	      $cat = strtolower(get_option("cml_category_" . $id . "_lang_" . $lang_id, $plink));
+	    else:
+	      /* Controllo se l'elemento è uno "slug" */
+	      $tmp = $this->get_language_id_by_slug($plink);
+	      if(empty($tmp) || !isset($this->_force_category_lang))
+		$cat = $plink;
+	      else
+		$cat = $this->get_language_slug_by_id($this->_force_category_lang);
+	    endif;
 
 	    $url = str_replace(" ", "-", $cat);
 	    $url = urlencode($url);
@@ -2776,6 +2794,39 @@ class CeceppaML {
     echo '<div id="flying-flags">';
       cml_show_flags($show[$as], $size);
     echo '</div>';
+  }
+  
+  /*
+   * Questa funzione mi serve per poter passare tra le varie lingue della stessa 
+   * categoria, perché la funzione get_category_link mi restituisce il link
+   * rispetto alla lingua corrente, mentre a me serve il link per una 
+   * lingua specifica.
+   */
+  function force_category_lang($lang) {
+    $this->_force_category_lang = $lang;
+  }
+  
+  function unset_category_lang() {
+    unset($this->_force_category_lang);
+  }
+  
+  function translate_archives_link($link) {
+    $url = preg_match('/href=\'(.+)\' /', $link, $match);
+    $href = $match[0];
+    $url = substr($href, 0, strlen($href) - 2);
+    $url .= "?lang=$this->_current_lang'";
+    
+    $link = str_replace($href, $url, $link);
+    return $link;
+  }
+
+  /*
+   * Devo richiamare questa funzione solo dopo aver completato il caricamento
+   * del plugin
+   */
+  function update_all_posts_language() {
+    require_once(CECEPPA_PLUGIN_PATH . "fix.php");
+    cml_update_all_posts_language();
   }
 }
 

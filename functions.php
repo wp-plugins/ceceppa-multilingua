@@ -168,7 +168,7 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
     $lang = ($show == "flag") ? "" : $result->cml_language;
 
     if(is_home()) {
-      //Se stò nella home vuol dire che ho scelto come metodo di reindirizzamento &lang
+        //Se stò nella home vuol dire che ho scelto come metodo di reindirizzamento &lang
     	$link = "?lang=$result->cml_language_slug";
     } else {
       /* Collego la categoria della lingua attuale con quella della linga della bandierina */
@@ -184,7 +184,7 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
 	  if(!empty($link)) $link = get_permalink($link);
 	}
 	
-	if(is_archive()) {
+	if(is_archive() && !is_category()) {
 	  global $wp;
 
 	  $link = home_url($wp->request) . "/";
@@ -193,18 +193,30 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
 
 	//Collego le categorie delle varie lingue
 	if(is_category()) {
-	  $cat_id = $wpCeceppaML->get_category_id(single_cat_title("", false)); //Id della categoria
-	  $link = get_category_link($cat_id);
+	  $cat = get_the_category();
 
-	  $link = $wpCeceppaML->translate_term_link($link, $result->id);
+	  if(is_array($cat)) :
+	    $cat_id = $cat[count($cat) - 1]->term_id;
+	    
+	    $wpCeceppaML->force_category_lang($result->id);
+	    $link = get_category_link($cat_id);
+	  endif;
+	  
+	  $wpCeceppaML->unset_category_lang();
 	}
       }
-
-      if(empty($link)) :
+      
+      /* Controllo se è stata impostata una pagina statica,
+         perché così invece di restituire il link dell'articolo collegato
+         aggiungo il più "bello" ?lang=## alla fine della home.
+         
+         Se non ho trovato nesuna traduzione per l'articolo, la bandiera punterà alla homepage
+      */
+      if(cml_is_homepage() || empty($link)) :
 	$sp = "";
 	$use_static= (get_option("page_for_posts") > 0) ||
 		      (get_option("page_on_front") > 0);
-     
+
 	if($use_static && $result->id != cml_get_default_language_id()) $sp = "&sp=1";
 
 	$link = home_url() . "/?lang=$result->cml_language_slug" . $sp;
@@ -268,7 +280,7 @@ function cml_get_language_title($id) {
 function cml_get_notice($lang_slug) {
   global $wpdb, $wpCeceppaML;
 
-  $row = $wpdb->get_row(sprintf("SELECT UNHEX(cml_notice_category) as cml_notice_category, UNHEX(cml_notice_page) as cml_notice_page, UNHEX(cml_notice_post) as cml_notice_post FROM %s WHERE cml_language_slug = '%s' OR id = %d",
+  $row = $wpdb->get_row(sprintf("SELECT cml_language, UNHEX(cml_notice_category) as cml_notice_category, UNHEX(cml_notice_page) as cml_notice_page, UNHEX(cml_notice_post) as cml_notice_post FROM %s WHERE cml_language_slug = '%s' OR id = %d",
 			 	  CECEPPA_ML_TABLE , $lang_slug, intval($lang_slug)));
 
   if(is_category()) $r = stripslashes($row->cml_notice_category);
@@ -374,5 +386,26 @@ function cml_get_current_language() {
   global $wpCeceppaML;
   
   return $wpCeceppaML->get_current_language();
+}
+
+/* Controllo se sto nella homepage */
+function cml_is_homepage() {
+  //Non posso utilizzare la funzione is_home, quindi controllo "manualmente"
+  $url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+  $home = home_url() . "/";
+
+  $url_parts = parse_url($url);
+  $constructed_url = $url_parts['scheme'] . '://' . $url_parts['host'] . (isset($url_parts['path'])?$url_parts['path']:'');
+
+  return $constructed_url  == $home;
+}
+
+function cml_debug_print($string) {
+  if(!is_user_logged_in()) return;
+
+  if(is_string($string))
+    echo $string;
+  else
+    print_r($string);
 }
 ?>
