@@ -146,7 +146,7 @@ function cml_is_default_lang($lang = null) {
  *
  * @param $show - indica se visualizzare anche il nome della lingua. I valori possibili sono:
  *			"flag" - visualizza solo la bandiera
- *      "text" - visualizza solo il nome della lingua
+*      			"text" - visualizza solo il nome della lingua
  *			"both" - visualizza sia la bandiera che il nome della lingua
  * @param $size - dimensione della bandierina da visualizzare. I valori possibili sono:
  *			"tiny" - 20x12
@@ -168,10 +168,10 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
     $lang = ($show == "flag") ? "" : $result->cml_language;
 
     if(is_home()) {
-      //Se stò nella home vuol dire che ho scelto come metodo di reindirizzamento &lang
+        //Se stò nella home vuol dire che ho scelto come metodo di reindirizzamento &lang
     	$link = "?lang=$result->cml_language_slug";
     } else {
-      /* Collego la categoria della lingua attuale con quella della linga della bandierina*/
+      /* Collego la categoria della lingua attuale con quella della linga della bandierina */
       $link = "";
 
       $lang_id = $wpCeceppaML->get_current_lang_id();
@@ -184,7 +184,7 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
 	  if(!empty($link)) $link = get_permalink($link);
 	}
 	
-	if(is_archive()) {
+	if(is_archive() && !is_category()) {
 	  global $wp;
 
 	  $link = home_url($wp->request) . "/";
@@ -193,14 +193,28 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
 
 	//Collego le categorie delle varie lingue
 	if(is_category()) {
-	  $cat_id = $wpCeceppaML->get_category_id(single_cat_title("", false)); //Id della categoria
-	  $link = get_category_link($cat_id);
+	  $cat = get_the_category();
 
-	  $link = $wpCeceppaML->translate_term_link($link, $result->id);
+	  if(is_array($cat)) :
+	    $cat_id = $cat[count($cat) - 1]->term_id;
+	    
+	    $wpCeceppaML->force_category_lang($result->id);
+	    $link = get_category_link($cat_id);
+	  endif;
+
+	  $wpCeceppaML->unset_category_lang();
 	}
       }
-
-      if(empty($link)) $link = home_url() . "/?lang=$result->cml_language_slug";
+      
+      /* Controllo se è stata impostata una pagina statica,
+         perché così invece di restituire il link dell'articolo collegato
+         aggiungo il più "bello" ?lang=## alla fine della home.
+         
+         Se non ho trovato nesuna traduzione per l'articolo, la bandiera punterà alla homepage
+      */
+      if(cml_is_homepage() || empty($link)) :
+	$link = home_url() . "/?lang=$result->cml_language_slug";
+      endif;
     }
 
     $img = "<img class=\"$size $image_class\" src='" . cml_get_flag_by_lang_id($result->id, $size) . "' title='$result->cml_language' width=\"$width\"/>";
@@ -225,15 +239,15 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
  *
  *  @return - la frase tradotta se esiste la traduzione, altrimeni la stringa passata
  */
-function cml_translate($string, $id) {
+function cml_translate($string, $id, $type = "") {
   global $wpdb;
 
-  $query = sprintf("SELECT UNHEX(cml_translation) FROM %s WHERE cml_text = '%s' AND cml_lang_id = %d",
-			  CECEPPA_ML_TRANS, bin2hex($string), $id);
+  $query = sprintf("SELECT UNHEX(cml_translation) FROM %s WHERE cml_text = '%s' AND cml_lang_id = %d AND cml_type LIKE '%s'",
+			  CECEPPA_ML_TRANS, bin2hex($string), $id, "%" . $type . "%");
 
   $ret = $wpdb->get_var($query);
 
-  return (!isset($ret)) ? $string : html_entity_decode(stripslashes($ret));
+  return (empty($ret)) ? $string : html_entity_decode(stripslashes($ret));
 }
 
 /**
@@ -260,12 +274,12 @@ function cml_get_language_title($id) {
 function cml_get_notice($lang_slug) {
   global $wpdb, $wpCeceppaML;
 
-  $row = $wpdb->get_row(sprintf("SELECT * FROM %s WHERE cml_language_slug = '%s' OR id = %d",
+  $row = $wpdb->get_row(sprintf("SELECT cml_language, UNHEX(cml_notice_category) as cml_notice_category, UNHEX(cml_notice_page) as cml_notice_page, UNHEX(cml_notice_post) as cml_notice_post FROM %s WHERE cml_language_slug = '%s' OR id = %d",
 			 	  CECEPPA_ML_TABLE , $lang_slug, intval($lang_slug)));
 
-  if(is_category()) $r = hex2bin($row->cml_notice_category);
-  if(is_page()) $r = hex2bin($row->cml_notice_page);
-  if(is_single()) $r = hex2bin($row->cml_notice_post);
+  if(is_category()) $r = stripslashes($row->cml_notice_category);
+  if(is_page()) $r = stripslashes($row->cml_notice_page);
+  if(is_single()) $r = stripslashes($row->cml_notice_post);
 
   if(!empty($r))
     return $r;
@@ -323,4 +337,74 @@ function cml_dropdown_langs($name, $default, $link = false, $none = false, $none
   echo "</select>";
 }
 
+function cml_add_translation($text, $lang_id, $translation, $type) {
+  global $wpdb;
+
+  $wpdb->insert(CECEPPA_ML_TRANS,
+		array("cml_text" => bin2hex($text),
+		      "cml_lang_id" => $lang_id,
+		      "cml_translation" => bin2hex($translation),
+		      "cml_type" => $type),
+		array('%s', '%d', '%s', '%s'));
+}
+
+function cml_add_category_translation($id, $name, $lang_id, $translation) {
+  global $wpdb;
+
+  $query = sprintf("SELECT * FROM %s WHERE cml_cat_id = %d AND cml_cat_lang_id = %d", CECEPPA_ML_CATS, $id, $lang_id);
+  $q = $wpdb->get_row($query);
+  
+  $name = strtolower($name);
+  $translation = strtolower($translation);
+  if(count($q) > 0) :
+    $r_id = $q->id;
+
+    $wpdb->update(CECEPPA_ML_CATS,
+		  array("cml_cat_name" => bin2hex($name),
+			"cml_cat_lang_id" => $lang_id,
+			"cml_cat_translation" => bin2hex($translation)),
+		  array("id" => $r_id),
+		  array('%s', '%d', '%s'),
+		  array("%d"));
+  else :
+    $wpdb->insert(CECEPPA_ML_CATS,
+		  array("cml_cat_name" => bin2hex($name),
+			"cml_cat_lang_id" => $lang_id,
+			"cml_cat_translation" => bin2hex($translation),
+			"cml_cat_id" => $id),
+		  array('%s', '%d', '%s', '%d'));
+  endif;
+}
+
+function cml_get_current_language() {
+  global $wpCeceppaML;
+  
+  return $wpCeceppaML->get_current_language();
+}
+
+/* Controllo se sto nella homepage */
+function cml_is_homepage() {
+  //Non posso utilizzare la funzione is_home, quindi controllo "manualmente"
+  $url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+  $home = home_url() . "/";
+
+  $url_parts = parse_url($url);
+  $constructed_url = $url_parts['scheme'] . '://' . $url_parts['host'] . (isset($url_parts['path'])?$url_parts['path']:'');
+
+  return $constructed_url  == $home;
+}
+
+function cml_debug_print($string) {
+  if(!is_user_logged_in()) return;
+
+  if(is_string($string))
+    echo $string;
+  else
+    print_r($string);
+}
+
+function cml_use_static_page() {
+  return (get_option("page_for_posts") > 0) ||
+	  (get_option("page_on_front") > 0);
+}
 ?>

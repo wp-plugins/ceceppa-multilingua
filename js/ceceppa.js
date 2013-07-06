@@ -67,14 +67,14 @@ jQuery(document).ready(function(e) {
 
 	//Delete language
 	jQuery('a._delete').click(function() {
-		if(!confirm('Cancella la lingua selezionata?'))
+		if(!confirm('Cancellare la lingua selezionata?'))
 			return false;
 		else {
-			var id = jQuery(this).attr('id');
-			var ids = id.split("-");
+		  var id = jQuery(this).attr('id');
+		  var ids = id.split("-");
 
-			jQuery('input#delete').attr('value', ids[1]);
-			jQuery('form.ceceppa-form').submit();
+		  jQuery('input#delete').attr('value', ids[1]);
+		  jQuery('form input#submit').click();
 		}
 	});
 
