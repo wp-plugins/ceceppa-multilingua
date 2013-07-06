@@ -628,7 +628,7 @@ class CeceppaML {
     $query = "UPDATE " . CECEPPA_ML_TABLE . " SET cml_enabled = 1 WHERE cml_enabled IS NULL";
     $wpdb->query($query);
 
-    if(!$first_time) :
+    if($first_time) :
       update_option("cml_need_update_posts", true);
 
       /* Per comodità  creo nel database un record con la lingua corrente */
