@@ -15,6 +15,10 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
+global $wpCeceppaML;
+
+//Non posso richiamare lo script direttamente dal browser :)
+if(!is_object($wpCeceppaML)) die("Access denied");
 
 /**
 * LANGUAGE SETTINGS
@@ -31,8 +35,8 @@ $row = 0;
     <form class="ceceppa-form" name="wrap" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>?page=ceceppaml-language-page">
     <input type="hidden" name="form" value="languages" />
     <input type="hidden" name="action" value="add" />
-	<input type="hidden" name="delete" id="delete" value="" />
-	<div class="CSSTableGenerator">
+    <?php wp_nonce_field('cml_edit_language','cml_nonce_edit_language'); ?>
+    <input type="hidden" name="delete" id="delete" value="" />
     <table id="ceceppaml-table" class="ceceppaml">
     <tbody>
     <tr>
@@ -41,8 +45,8 @@ $row = 0;
       <td style="width:65%"><?php _e('Name of the language ', 'ceceppaml') ?></td>
       <td style="width:5%"><?php _e('Enabled', 'ceceppaml') ?></td>
       <td style="width: 5%">
-	  	<a href="#" onclick="javascript: toggleDetails(-1)"><img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/details.png" width="32" title="<?php _e('Show/Hide advanced options for languages.') ?>"></a>
-	  </td>
+	<a href="#" onclick="javascript: toggleDetails(-1)"><img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/details.png" width="32" title="<?php _e('Show/Hide advanced options for languages.') ?>"></a>
+      </td>
     </tr>
 <?php
     global $wpdb;
@@ -81,22 +85,22 @@ $row = 0;
 	  </th>
     </tr>
 	<tr>
-		<td colspan="4">
-			<table>
-				<tr>
-					<td style="background: none; font-size: 1.1em;width: 100px"><?php _e('Url slug', 'ceceppaml'); ?></td>
-					<td style="background: none; font-size: 1.1em;"><?php _e('Post notice', 'ceceppaml'); ?></td>
-					<td style="background: none; font-size: 1.1em;"><?php _e('Page notice', 'ceceppaml'); ?></td>
-					<td style="background: none; font-size: 1.1em;width: 100px"><?php _e('Locale Wordpress', 'ceceppaml') ?></td>
-				</tr>
-				<tr>
-					<td><input name="language_slug[]" class="_tipsy" id="slug-<?php echo $result->id ?>" value="<?php echo $result->cml_language_slug ?>" type="text" style="margin-left:2%;width:98%" title="<?php _e('Allows you to specify an abbreviation to be used in the URL of the page. <br /> Ex: <br /> www.example.com / en <br /> www.example.com / uk', 'ceceppaml') ?>" /></td>
-					<td><input name="notice_post[]" class="_tipsy" type="text" value="<?php echo $result->cml_notice_post; ?>" style="margin-left:2%;width:98%" title="<?php _e('Define the text of the notice to be displayed when the post is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
-					<td><input name="notice_page[]" class="_tipsy" type="text" value="<?php echo $result->cml_notice_page; ?>" style="margin-left:2%;width:98%" title="<?php _e('Define the text of the notice to be displayed when the page is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
-					<td><input name="locale[]" class="_tipsy" id="locale-<?php echo $result->id ?>" type="text" value="<?php echo $result->cml_locale ?>" title="<?php _e('Helps to link correctly the defined language by the user\'s browser. ') ?>" /></td>
-				</tr>
-			</table>
-		</td>
+	  <td colspan="4">
+	    <table class="ceceppaml">
+	      <tr>
+		<td style="background: none; font-size: 1.1em;;width:100px"><?php _e('Url slug', 'ceceppaml'); ?></td>
+		<td style="background: none; font-size: 1.1em;"><?php _e('Post notice', 'ceceppaml'); ?></td>
+		<td style="background: none; font-size: 1.1em;"><?php _e('Page notice', 'ceceppaml'); ?></td>
+		<td style="background: none; font-size: 1.1em;width:100px"><?php _e('Locale Wordpress', 'ceceppaml') ?></td>
+	      </tr>
+	      <tr>
+		<td><input name="language_slug[]" class="_tipsy" id="slug-<?php echo $result->id ?>" value="<?php echo $result->cml_language_slug ?>" type="text" style="margin-left:2%;" title="<?php _e('Allows you to specify an abbreviation to be used in the URL of the page. <br /> Ex: <br /> www.example.com / en <br /> www.example.com / uk', 'ceceppaml') ?>" /></td>
+		<td><input name="notice_post[]" class="_tipsy" type="text" value="<?php echo $result->cml_notice_post; ?>" style="margin-left:2%;" title="<?php _e('Define the text of the notice to be displayed when the post is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
+		<td><input name="notice_page[]" class="_tipsy" type="text" value="<?php echo $result->cml_notice_page; ?>" style="margin-left:2%;" title="<?php _e('Define the text of the notice to be displayed when the page is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
+		<td><input name="locale[]" class="_tipsy" id="locale-<?php echo $result->id ?>" type="text" value="<?php echo $result->cml_locale ?>" title="<?php _e('Helps to link correctly the defined language by the user\'s browser. ', 'ceceppaml') ?>" /></td>
+	      </tr>
+	    </table>
+	  </td>
 	</tr>
 <?php
     endforeach;
@@ -115,32 +119,36 @@ $row = 0;
 	  </td>
     </tr>
 	<tr>
-		<td colspan="5">
-			<table>
-				<tr>
-					<td style="background: none; font-size: 1.1em;width: 100px"><?php _e('Url slug', 'ceceppaml'); ?></td>
-					<td style="background: none; font-size: 1.1em;"><?php _e('Post notice', 'ceceppaml'); ?></td>
-					<td style="background: none; font-size: 1.1em;"><?php _e('Page notice', 'ceceppaml'); ?></td>
-					<td style="background: none; font-size: 1.1em;width: 100px"><?php _e('Locale Wordpress', 'ceceppaml') ?></td>
-				</tr>
-				<tr>
-					<td><input name="language_slug[]" class="_tipsy" id="slug-x" type="text" style="margin-left:2%;width:98%" title="<?php _e('Allows you to specify an abbreviation to be used in the URL of the page. <br /> Ex: <br /> www.example.com / en <br /> www.example.com / uk', 'ceceppaml') ?>" /></td>
-					<td><input name="notice_post[]" class="_tipsy" type="text" style="margin-left:2%;width:98%" title="<?php _e('Define the text of the notice to be displayed when the post is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
-					<td><input name="notice_page[]" class="_tipsy" type="text" style="margin-left:2%;width:98%" title="<?php _e('Define the text of the notice to be displayed when the page is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
-					<td><input name="locale[]" class="_tipsy" id="locale-x" type="text" title="<?php _e('Helps to link correctly the defined language by the user\'s browser. ') ?>" /></td>
-				</tr>
-			</table>
-		</td>
+	  <td colspan="5">
+	    <table>
+	      <tr>
+		<td style="background: none; font-size: 1.1em;width:100px"><?php _e('Url slug', 'ceceppaml'); ?></td>
+		<td style="background: none; font-size: 1.1em;"><?php _e('Post notice', 'ceceppaml'); ?></td>
+		<td style="background: none; font-size: 1.1em;"><?php _e('Page notice', 'ceceppaml'); ?></td>
+		<td style="background: none; font-size: 1.1em;width:100px"><?php _e('Locale Wordpress', 'ceceppaml') ?></td>
+	      </tr>
+	      <tr>
+		<td><input name="language_slug[]" class="_tipsy" id="slug-x" type="text" style="margin-left:2%" title="<?php _e('Allows you to specify an abbreviation to be used in the URL of the page. <br /> Ex: <br /> www.example.com / en <br /> www.example.com / uk', 'ceceppaml') ?>" /></td>
+		<td><input name="notice_post[]" class="_tipsy" type="text" style="margin-left:2%" title="<?php _e('Define the text of the notice to be displayed when the post is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
+		<td><input name="notice_page[]" class="_tipsy" type="text" style="margin-left:2%" title="<?php _e('Define the text of the notice to be displayed when the page is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
+		<td><input name="locale[]" class="_tipsy" id="locale-x" type="text" title="<?php _e('Helps to link correctly the defined language by the user\'s browser. ', 'ceceppaml') ?>" /></td>
+	      </tr>
+	    </table>
+	  </td>
 	</tr>
     </tbody>
     </table>
-	<br />
+      <br />
     <div style="text-align:right;padding-right: 10px;">
       <?php submit_button(); ?>
     </div>
-	<br />
-	</div>
+    <br />
     </form>
+
+    <!-- DONATE   -->
+    <div id="donate" class="cml-donate">
+      <?php do_meta_boxes('cml_donate_box','advanced',null); ?>
+    </div>
 
     <br />
 </div>

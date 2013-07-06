@@ -2,8 +2,8 @@
 /*
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
-Description: Come rendere il tuo sito wordpress multilingua :).How make your wordpress site multilanguage.
-Version: 1.0.13
+Description: Adds userfriendly multilingual content management and translation support into WordPress.
+Version: 1.0.14
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -97,6 +97,8 @@ class CeceppaML {
      *   *) gestione campi extra nelle categorie
      */
     if(is_admin()) {
+      require_once(CECEPPA_PLUGIN_PATH . 'includes/quickedit.php');
+
       add_action('admin_enqueue_scripts', array(&$this, 'register_scripts'));
 
       /* 
@@ -128,6 +130,8 @@ class CeceppaML {
       add_action('add_meta_boxes', array(&$this, 'add_meta_boxes'));
       add_action('edit_post', array(&$this, 'save_extra_post_fields'));
       add_action('delete_post', array(&$this, 'delete_extra_post_fields'));
+      add_action('trash_post', array(&$this, 'delete_extra_post_fields'));
+      add_action('untrash_post', array(&$this, 'code_optimization'));
       add_action('edit_page_form', array(&$this, 'save_extra_post_fields'));
       add_action('delete_page', array(&$this, 'delete_extra_post_fields'));
 
@@ -136,6 +140,10 @@ class CeceppaML {
       add_filter('manage_pages_columns' , array(&$this, 'add_flags_columns'));
       add_action('manage_posts_custom_column', array(&$this, 'add_flag_column'), 10, 2);
       add_filter('manage_posts_columns' , array(&$this, 'add_flags_columns'));
+
+      //Quickedit
+      add_action('quick_edit_custom_box',  array(&$this, 'quick_edit_box'), 10, 2);
+
 
       //Filtri
       add_filter('parse_query', array(&$this, 'filter_all_posts_query'));
@@ -243,7 +251,7 @@ class CeceppaML {
       add_filter('pre_get_posts', array(&$this, 'update_current_lang'));
 
       //E' stata utilizzata una pagina statica come homepage?
-      if(array_key_exists("sp", $_GET))
+      if(cml_is_homepage() && cml_use_static_page())
 	add_filter('pre_get_posts', array(&$this, 'get_static_page'));
 
       //Filtro il link degli archivi :)
@@ -465,6 +473,22 @@ class CeceppaML {
                 echo '</a>';
             }
         endforeach;
+    }
+
+    /*
+     * Permetto di modificare lingua e articolo collegato nella finestra quickedit
+     */
+    function quick_edit_box($column_name, $post_type) {
+      if($column_name != 'cml_flags') return;
+      ?>
+      <fieldset class="inline-edit-col-left">
+      <div class="inline-edit-col">
+	  <span class="title">Language:</span>
+	  <?php wp_nonce_field('cml_edit_post','cml_nonce_edit_field'); ?>
+	  <?php cml_dropdown_langs("post_lang", 0, false, true, null, "", 0); ?>
+      </div>
+      </fieldset>
+      <?php
     }
 
     /*
@@ -770,7 +794,7 @@ class CeceppaML {
    */
   function filter_least_read_post($query, $pos) {
     //Recupero tutti i post collegati alla lingua corrente
-    $posts = $this->get_posts_of_language();
+    $posts = $this->get_posts_for_language();
     $where = " AND post_id IN (" . implode(", ", $posts) . ") ";
 
     //Aggiungo il $where prima della clausula ORDER
@@ -785,7 +809,7 @@ class CeceppaML {
    */
   function filter_most_commented($query, $pos) {
     //Recupero tutti i post collegati alla lingua corrente
-    $posts = $this->get_posts_of_language();
+    $posts = $this->get_posts_for_language();
     $where = " AND id IN (" . implode(", ", $posts) . ") ";
     
     //Aggiungo il $where prima della clausula ORDER
@@ -798,7 +822,7 @@ class CeceppaML {
    */
   function filter_archives($query, $pos) {
     //Recupero tutti i post collegati alla lingua corrente
-    $posts = $this->get_posts_of_language();
+    $posts = $this->get_posts_for_language();
 
     $where = " AND id IN (" . implode(", ", $posts) . ") ";
 
@@ -812,7 +836,10 @@ class CeceppaML {
      * posso filtrare l'elenco a solo gli articoli della lingua che mi interessa
      */
     function filter_all_posts_page() {
-        $d = isset($_GET['cml_language']) ? $_GET['cml_language'] : $this->_default_language_id;
+        //Se sto nel cestino di default visualizzo tutti gli articoli :)
+	$d = $this->_default_language_id;
+	if(isset($_GET['post_status']) && in_array($_GET['post_status'], array("draft", "trash"))) $d = 0;
+        $d = isset($_GET['cml_language']) ? $_GET['cml_language'] : $d;
 
         //All languages
         cml_dropdown_langs("cml_language", $d, false, true, __('Show all languages', 'ceceppaml'), -1);
@@ -830,10 +857,13 @@ class CeceppaML {
         else
             $post_type = $_GET['post_type'];
 
-        $id = array_key_exists('cml_language', $_GET) ? intval($_GET['cml_language']) : $this->_default_language_id;
+        //Se sto nel cestino di default visualizzo tutti gli articoli :)
+	$d = $this->_default_language_id;
+	if(isset($_GET['post_status']) && in_array($_GET['post_status'], array("draft", "trash"))) $d = 0;
+        $id = array_key_exists('cml_language', $_GET) ? intval($_GET['cml_language']) : $d;
         if(is_admin() && $pagenow == "edit.php") :
 	  if($id > 0) :
-	    $posts = $this->get_posts_of_language($id);;
+	    $posts = $this->get_posts_for_language($id);;
 
 	    $query->query_vars['post__in'] = $posts;
 	  endif;
@@ -871,7 +901,7 @@ class CeceppaML {
     endif;
 
     //Recupero tutti i post associati alla lingua corrente
-    $posts = $this->get_posts_of_language($this->_current_lang_id);
+    $posts = $this->get_posts_for_language($this->_current_lang_id);
 
     if(!empty($posts)) :
       set_query_var('post__in', $posts);
@@ -902,7 +932,7 @@ class CeceppaML {
 
 	return $this->_hide_posts;
       endif;
-      
+
       return $this->_hide_posts;
     }
 
@@ -1044,219 +1074,24 @@ class CeceppaML {
    * Form per la gestione delle lingue
    */
   function form_languages() {
-    wp_enqueue_script('ceceppaml-js');
-    wp_enqueue_script('ceceppa-tipsy');
+    require_once(CECEPPA_PLUGIN_PATH . 'includes/languages.php');
 
-    //Css
-    wp_enqueue_style('ceceppaml-lang');
-    wp_enqueue_style('ceceppaml-dd');
-    wp_enqueue_style('ceceppa-tipsy');
-
-    //$this->create_table();
-
-    if(isset($_POST['form'])) :
-      global $wpdb;
-
-      $form = $_POST['form'];
-
-      for($i = 0; $i < count($_POST['id']); $i++) :
-          $id = $_POST['id'][$i];
-          @list($lang, $lang_slug) = explode("@", $_POST['flags'][$i]);
-          $default = (array_key_exists('default', $_POST) && $_POST['default'] == $id) ? 1 : 0;
-
-          //Se è vuoto, è una "nuova lingua"
-          if(empty($id)) {
-            if(!empty($_POST['language'][$i])) :
-	      $wpdb->insert(CECEPPA_ML_TABLE,
-			    array('cml_default' => $default,
-				  'cml_flag' => $lang,
-				  'cml_language_slug' => $_POST['language_slug'][$i],
-				  'cml_language' => $_POST['language'][$i],
-				  'cml_locale' => $_POST['locale'][$i],
-				  'cml_notice_post' => bin2hex(htmlentities($_POST['notice_post'][$i], ENT_COMPAT, "UTF-8")),
-				  'cml_notice_page' => bin2hex(htmlentities($_POST['notice_page'][$i], ENT_COMPAT, "UTF-8")),
-				  'cml_notice_category' => '',
-				  'cml_enabled' => 1),
-			     array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d'));
-            endif;
-          } else {
-	      $wpdb->update(CECEPPA_ML_TABLE,
-			    array('cml_default' => $default,
-				  'cml_flag' => $lang,
-				  'cml_language_slug' => $_POST['language_slug'][$i],
-				  'cml_language' => $_POST['language'][$i],
-				  'cml_locale' => $_POST['locale'][$i],
-				  'cml_notice_post' => bin2hex(htmlentities($_POST['notice_post'][$i], ENT_COMPAT, "UTF-8")),
-				  'cml_notice_page' => bin2hex(htmlentities($_POST['notice_page'][$i], ENT_COMPAT, "UTF-8")),
-				  'cml_notice_category' => '',
-				  'cml_enabled' => $_POST['lang-enabled'][$i]),
-			     array('id' => $id),
-			     array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d'),
-			     array('%d'));
-	  }
-      endfor;
-
-      //Delete
-      if(!empty($_POST['delete'])) :
-        $delete = intval($_POST['delete']);
-
-        $wpdb->query("DELETE FROM " . CECEPPA_ML_TABLE . " WHERE id = " . $delete);
-        $wpdb->query(sprintf("DELETE FROM " . CECEPPA_ML_POSTS . " WHERE cml_post_lang_1 = %d OR cml_post_lang_2 = %d", $delete, $delete));
-      endif;
-    endif;
-
-    include dirname( __FILE__  ).'/languages.php';
+    new CeceppaMLLanguages();
   }
 
   /**
    * Form per le impostazioni del plugin
    */
   function form_options() {
-    //Css
-    wp_enqueue_style('ceceppaml-style');
-    wp_enqueue_style('ceceppaml-dd');
+    require_once(CECEPPA_PLUGIN_PATH . "includes/options.php");
 
-    if(array_key_exists("options", $_POST)) {
-      $tab = $_POST['tab'];
-
-      if($tab == 0) :
-	//Float
-	@update_option("cml_add_float_div", intval($_POST['float-div']));
-	  $css = addslashes($_POST['custom-css']);
-	  file_put_contents(CECEPPA_PLUGIN_PATH . "/css/float.css", $css);
-
-	  //Show as...
-	  @update_option("cml_show_float_items_as", intval($_POST['float-as']));
-
-	  //Flag size...
-	  @update_option("cml_show_float_items_size", $_POST['float-size']);
-
-	//Append
-	@update_option("cml_append_flags", intval($_POST['append-flags']));
-	update_option("cml_append_flags_to", $_POST['id-class']);
-
-	  //Show as...
-	  @update_option("cml_show_items_as", intval($_POST['show-items-as']));
-	
-	  //Flag size...
-	  @update_option("cml_show_items_size", $_POST['item-as-size']);
-
-	//Menu
-	@update_option("cml_add_flags_to_menu", intval($_POST['to-menu']));
-	
-	  //Add items as...
-	  @update_option("cml_add_items_as", intval($_POST['add-as']));
-	  
-	  //Show as...
-	  @update_option("cml_show_in_menu_as", intval($_POST['show-as']));
-
-	  //Flag size...
-	  @update_option("cml_show_in_menu_size", $_POST['submenu-size']);
-      endif;
-
-      if($tab == 1) :
-      //Add slug & url mode
-      update_option("cml_add_slug_to_link", $_POST['add-slug']);
-      update_option("cml_modification_mode", $_POST['url-mode']);
-      
-      //Traduzione categorie
-      @update_option('cml_option_translate_categories', $_POST['categories']);
-
-      //Redirect
-      update_option("cml_option_redirect", $_POST['redirect']);
-      update_option("cml_option_redirect_type", $_POST['redirect-type']);
-
-      if(array_key_exists("posts", $_POST))
-	update_option("cml_option_post_redirect", $_POST['posts']);
-
-      //Flags
-      @update_option("cml_option_flags_on_post", intval($_POST['flags-on-posts']));
-      @update_option("cml_option_flags_on_page", intval($_POST['flags-on-pages']));
-      @update_option("cml_option_flags_on_cats", intval($_POST['flags-on-cats']));
-      @update_option("cml_option_flags_on_pos", $_POST['flags_on_pos']);
-
-	//Size
-	@update_option("cml_option_flags_on_size", $_POST['flag-size']);
-
-      //Avviso
-      @update_option("cml_option_notice", $_POST['notice']);
-      @update_option("cml_option_notice_pos", $_POST['notice_pos']);
-      @update_option("cml_option_notice_after", $_POST['notice_after']);
-      @update_option("cml_option_notice_before", $_POST['notice_before']);
-      @update_option("cml_option_notice_post", intval($_POST['notice-post']));
-      @update_option("cml_option_notice_page", intval($_POST['notice-page']));
-
-      //Commenti
-      @update_option('cml_option_comments', $_POST['comments']);
-    endif;
-
-    if($tab == 2) :
-      //Change locale
-      update_option("cml_option_change_locale", intval($_POST['change-locale']));
-
-      //Filter posts
-      @update_option("cml_option_filter_posts", intval($_POST['filter-posts']));
-
-      //Filter translations
-      @update_option("cml_option_filter_translations", intval($_POST['filter-translations']));
-            
-      //Filter query
-      @update_option("cml_option_filter_query", intval($_POST['filter-query']));
-            
-      //Filter search
-      @update_option("cml_option_filter_search", intval($_POST['filter-search']));
-      @update_option("cml_option_filter_form_class", $_POST['filter-form']);
-    endif;
-    }
-
-    include dirname(__FILE__) . '/options.php';
+    new CeceppaMLOptions();
   }
 
   function form_translations() {
-    global $wpdb;
-
-    wp_enqueue_script('ceceppaml-js');
-    wp_enqueue_style('ceceppaml-style');
-
-    $langs = cml_get_languages(0);
-    for($i = 0; $i < count($langs); $i++) :
-      if($langs[$i]->cml_default == 1) :
-	unset($langs[$i]);
-	break;
-      endif;
-    endfor;
-
-    if(array_key_exists("form", $_POST) && array_key_exists("id", $_POST)) :
-      $query = "DELETE FROM " . CECEPPA_ML_TRANS . " WHERE cml_type = 'S'";
-      $wpdb->query($query);
-
-      $ids = $_POST['id'];
-      $delete = (array_key_exists('remove', $_POST)) ? $_POST['remove'] : array();
-
-      for($i = 0; $i < count($_POST['string']); $i++) :
-	$string = $_POST['string'][$i];
-
-	$id = $ids[$i];
-	if(!empty($delete) && (@isset($delete[$id]) || @$delete[$id] == 1)) continue;
-
-	for($j = 0; $j < count($_POST['value'][$i]); $j++) :
-	  $value = $_POST['value'][$i][$j];
-	  $lang_id = $_POST['lang_id'][$i][$j];
-
-	  if(!empty($string)) :
-	    $wpdb->insert(CECEPPA_ML_TRANS, 
-			  array('cml_text' => bin2hex($string),
-				'cml_lang_id' => $lang_id,
-				'cml_translation' => bin2hex($value),
-				'cml_type' => 'S'),
-			  array('%s', '%d', '%s', '%s'));
-	  endif;
-	endfor;
-
-      endfor;
-    endif;
-
-    require_once(CECEPPA_PLUGIN_PATH . "translations.php");
+    require_once(CECEPPA_PLUGIN_PATH . "includes/translations.php");
+    
+    new CeceppaMLTranslations();
   }
 
   /*
@@ -1323,7 +1158,7 @@ class CeceppaML {
     ob_end_clean();
 
     //Stampo a video i titoli
-    include dirname(__FILE__) . '/titles.php';
+    require_once(CECEPPA_PLUGIN_PATH . 'includes/widgettitles.php');
     cml_widgets_title($this->_titles);
 
     $this->_titles = "";
@@ -1551,12 +1386,7 @@ class CeceppaML {
 
 	$location = home_url() . "/$slug/";
       else:
-	$sp = "";
-	$use_static= (get_option("page_for_posts") > 0) ||
-		      (get_option("page_on_front") > 0);
-     
-	if($use_static && $lang != $this->_default_language_id) $sp = "&sp=1";
-	$location = home_url() . "/?lang=$slug$sp";
+	$location = home_url() . "/?lang=$slug";
       endif;
     }
 
@@ -1749,6 +1579,11 @@ class CeceppaML {
 
     $wpdb->query($sql);
     
+    if(get_post_status($id) != "trash") {
+      delete_option("cml_page_lang_$id");
+      delete_option("cml_page_$id");
+    }
+
     //Ricreo la struttura degli articoli, questo metodo rallenterà soltanto chi scrive l'articolo... tollerabile :D
     $this->code_optimization();
   }
@@ -2016,7 +1851,7 @@ class CeceppaML {
    *
    * @return gli id dei post associati alla lingua richiesta
    */
-  function get_posts_of_language($lang = null) {
+  function get_posts_for_language($lang = null) {
     if(empty($lang)) $lang = $this->_current_lang_id;
   
    //Gli articoli senza lingua sono "figli di tutti"
@@ -2031,7 +1866,7 @@ class CeceppaML {
     * @param lang_id - lingua da ricercare
     */
   function get_pages_of_language($lang) {
-    return $this->get_posts_of_language($lang);
+    return $this->get_posts_for_language($lang);
   }
 
   /**
@@ -2336,7 +2171,7 @@ class CeceppaML {
 	$slug = $this->_default_language_slug;
       endif;
 
-      if(($this->_translate_term_link && isset($this->_force_current_language) && $this->_force_current_language != $this->_default_language_id) 
+      if((isset($this->_force_current_language) && $this->_force_current_language != $this->_default_language_id) 
 	  || isset($this->_force_category_lang)) :
 	if(isset($this->_force_category_lang)) $lang_id = $this->_force_category_lang;
 
@@ -2355,7 +2190,7 @@ class CeceppaML {
 	    $id = get_category_by_slug($plink);
 	    if(is_object($id)) :
 	      $id = $id->term_id;
-	      $cat = strtolower(get_option("cml_category_" . $id . "_lang_" . $lang_id, $plink));
+	      $cat = ($this->_translate_term_link) ? strtolower(get_option("cml_category_" . $id . "_lang_" . $lang_id, $plink)) : $plink;
 	    else:
 	      /* Controllo se l'elemento è uno "slug" */
 	      $tmp = $this->get_language_id_by_slug($plink);
@@ -2413,6 +2248,8 @@ class CeceppaML {
       else:
 	$slug = $this->_current_lang;
       endif;
+      
+      if(empty($slug)) $slug = $this->_current_lang;
 
       $plinks[0] = $plinks[1];
       $plinks[1] = $slug;
@@ -2687,7 +2524,7 @@ class CeceppaML {
   }
   
   function shortcode_page() {
-    require_once(CECEPPA_PLUGIN_PATH . "shortcode_page.php");
+    require_once(CECEPPA_PLUGIN_PATH . "includes/shortcode_page.php");
   }
   
   function code_optimization() {
@@ -2733,7 +2570,7 @@ class CeceppaML {
     $items .= $this->add_item_to_menu($this->get_current_language(), false, $size);
     
     //Submenu
-    $items .= '<ul>';
+    $items .= '<ul class="sub-menu">';
       
       //Altre lingue
       $langs = cml_get_languages();
@@ -2841,4 +2678,5 @@ function removesmartquotes($content) {
 
 $wpCeceppaML = new CeceppaML();
 
+require_once(CECEPPA_PLUGIN_PATH . "test.php");
 ?>

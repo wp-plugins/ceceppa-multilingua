@@ -171,7 +171,7 @@ function cml_fix_rebuild_posts_info() {
   endwhile;
 
   foreach($langs as $lang) :
-    update_option("cml_posts_of_lang_" . $lang->id, array_unique($posts[$lang->id]));
+    @update_option("cml_posts_of_lang_" . $lang->id, array_unique($posts[$lang->id]));
   endforeach;
 
   //Articoli da escludere
@@ -234,4 +234,5 @@ function cml_fix_widget_titles() {
     $wpdb->query($sql);
   endforeach;
 }
+
 ?>

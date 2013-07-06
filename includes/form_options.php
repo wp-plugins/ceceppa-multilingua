@@ -17,11 +17,10 @@
 */
 global $wpCeceppaML;
 
+//Non posso richiamare lo script direttamente dal browser :)
+if(!is_object($wpCeceppaML)) die("Access denied");
+
 $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
-
-
-$tiny = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "tiny");
-$small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 ?>
 
 <div class="wrap">
@@ -34,203 +33,27 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
     <a class="nav-tab <?php echo $tab == 2 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-options-page&tab=2"><?php _e('Filters', 'ceceppaml') ?></a>
   </h2>
 
-<!-- Reindirizzamento -->
-  <div class="cml-content">
+  <div class="CSSTableGenerator cml-content">
     <form class="ceceppa-form" name="wrap" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>?page=ceceppaml-options-page">
+    <?php wp_nonce_field('cml_edit_settings','cml_nonce_edit_settings'); ?>
     <input type="hidden" name="options" value="1"  />
     <input type="hidden" name="tab" value="<?php echo $tab ?>"  />
-	<div class="CSSTableGenerator cml-options">
-<?php if($tab == 0) : ?>
-<!-- Float css -->
-	<h3>
-	  <label>
-	    <input type="checkbox" id="float-div" name="float-div" value="1" <?php checked(get_option('cml_add_float_div', false), true) ?> />
-	    <?php _e('Add float div to website:', 'ceceppaml') ?>
-	  </label>
-	</h3>
-	<blockquote>
-	  <strong><?php _e('Customize css:', 'ceceppaml') ?></strong><br />
-	  <textarea name="custom-css" rows="10" cols="100"><?php echo file_get_contents(CECEPPA_PLUGIN_PATH . "/css/float.css"); ?></textarea>
-	</blockquote>
-	<br /><br />
-	<div class="block-left">
-	  <strong><?php _e('Display items as:', 'ceceppaml') ?></strong>
-	  <blockquote>
-	    <ul>
-	      <li>
-		<label>
-		    <input type="radio" name="float-as" id="float-as" value="1" <?php checked(get_option("cml_show_float_items_as", 1), 1) ?> />
-		    <?php _e('Flag + text.', 'ceceppaml') ?>
-		</label>
-	      </li>
-	      <li>
-		<label>
-		    <input type="radio" name="float-as" id="float-as" value="2" <?php checked(get_option("cml_show_float_items_as", 1), 2) ?> />
-		    <?php _e('Text only', 'ceceppaml') ?>
-		</label>
-	      </li>
-	      <li>
-		<label>
-		    <input type="radio" name="float-as" id="float-as" value="3" <?php checked(get_option("cml_show_float_items_as", 1), 3) ?> />
-		    <?php _e('Flag only', 'ceceppaml') ?>
-		</label>
-	      </li>
-	    </ul>
-	  </blockquote>
-	</div>
-	  <div class="block-right">
-	    <strong><?php _e('Flag\'s size:', 'ceceppaml'); ?>:</strong>
-	    <ul>
-	      <li>
-		<label>
-		  <input type="radio" id="float-size" name="float-size" value="small" <?php checked(get_option("cml_show_float_items_size", "small"), "small"); ?> />
-		  <img src="<?php echo $small ?>" />
-		  <?php _e('Small', 'ceceppaml') ?> (32x23)
-		</label>
-	      </li>
-	      <li>
-		<label>
-		  <input type="radio" id="float-size" name="float-size" value="tiny" <?php checked(get_option("cml_show_float_items_size", "small"), "tiny"); ?> />
-		  <img src="<?php echo $tiny ?>" />
-		  <?php _e('Tiny', 'ceceppaml') ?> (16x11)
-		</label>
-	      </li>
-	    </ul>
-	  </div>
+	<div class="cml-options">
+
 	<br />
+	<?php 
+	
+	  if($tab == 0) : 
+	    require_once('forms/form_options_flags.php');
 
-<!-- Append flag to element -->
-	<h3>
-	  <label>
-	    <input type="checkbox" id="append-flags" name="append-flags" value="1" <?php checked(get_option('cml_append_flags', false), true) ?> />
-	    <?php _e('Append flag to html element:', 'ceceppaml') ?>
-	  </label>
-	</h3>
-	<br />
-	<blockquote>
-	<label>
-	    <?php _e('Id or class of element to add flags:', 'ceceppaml') ?>.
-	    <input type="text" name="id-class" id="id-class" value="<?php echo get_option("cml_append_flags_to") ?>" />
-	    <br /><i><?php _e('Don\'t forget to add # for id, or . for class', 'ceceppaml') ?></i>
-	    <br /><br />
-	    <div class="block-left">
-	      <strong><?php _e('Display items as:', 'ceceppaml') ?></strong>
-	      <blockquote>
-		<ul>
-		  <li>
-		    <label>
-			<input type="radio" name="show-items-as" id="show-items-as" value="1" <?php checked(get_option("cml_show_items_as", 1), 1) ?> />
-			<?php _e('Flag + text.', 'ceceppaml') ?>
-		    </label>
-		  </li>
-		  <li>
-		    <label>
-			<input type="radio" name="show-items-as" id="show-items-as" value="2" <?php checked(get_option("cml_show_items_as", 1), 2) ?> />
-			<?php _e('Text only', 'ceceppaml') ?>
-		    </label>
-		  </li>
-		  <li>
-		    <label>
-			<input type="radio" name="show-items-as" id="show-items-as" value="3" <?php checked(get_option("cml_show_items_as", 1), 3) ?> />
-			<?php _e('Flag only', 'ceceppaml') ?>
-		    </label>
-		  </li>
-		</ul>
-	      </blockquote>
-	    </div>
-	  <div class="block-right">
-	    <strong><?php _e('Flag\'s size:', 'ceceppaml'); ?>:</strong>
-	    <ul>
-	      <li>
-		<label>
-		  <input type="radio" id="item-as-size" name="item-as-size" value="small" <?php checked(get_option("cml_show_items_size", "small"), "small"); ?> />
-		  <img src="<?php echo $small ?>" />
-		  <?php _e('Small', 'ceceppaml') ?> (32x23)
-		</label>
-	      </li>
-	      <li>
-		<label>
-		  <input type="radio" id="item-as-size" name="item-as-size" value="tiny" <?php checked(get_option("cml_show_items_size", "small"), "tiny"); ?> />
-		  <img src="<?php echo $tiny ?>" />
-		  <?php _e('Tiny', 'ceceppaml') ?> (16x11)
-		</label>
-	      </li>
-	    </ul>
-	  </div>
-	</label>
-	</blockquote>
+	    do_meta_boxes('cml_options_page_flags','advanced',null);
+	  endif;
+	?>
 
-<!-- Add to menu -->
-	<br /><br />
-	<h3>
-	  <label>
-	    <input type="checkbox" id="to-menu" name="to-menu" value="1" <?php checked(get_option('cml_add_flags_to_menu', false), true) ?> />
-	    <?php _e('Add flags to menu:', 'ceceppaml') ?>
-	  </label>
-	</h3>
-	<blockquote>
-	  <strong><?php _e('Style:', 'ceceppaml') ?></strong>
-	  <ul>
-	    <li>
-	      <label>
-		  <input type="radio" name="add-as" id="add-as" value="1" <?php checked(get_option("cml_add_items_as", 1), 1) ?> />
-		  <?php _e('Add an element for each language', 'ceceppaml') ?>
-	      </label>
-	    </li>
-	    <li>
-	      <label>
-		  <input type="radio" name="add-as" id="add-as" value="2" <?php checked(get_option("cml_add_items_as", 1), 2) ?> />
-		  <?php _e('Add elements in a submenu:', 'ceceppaml') ?>
-	      </label>
-	    </li>
-	  </ul>
-	  <div class="block-left">
-	    <strong><?php _e('Display items as:', 'ceceppaml') ?></strong>
-	    <blockquote>
-	      <ul>
-		<li>
-		  <label>
-		      <input type="radio" name="show-as" id="show-as" value="1" <?php checked(get_option("cml_show_in_menu_as", 1), 1) ?> />
-		      <?php _e('Flag + text.', 'ceceppaml') ?>
-		  </label>
-		</li>
-		<li>
-		  <label>
-		      <input type="radio" name="show-as" id="show-as" value="2" <?php checked(get_option("cml_show_in_menu_as", 1), 2) ?> />
-		      <?php _e('Text only', 'ceceppaml') ?>
-		  </label>
-		</li>
-		<li>
-		  <label>
-		      <input type="radio" name="show-as" id="show-as" value="3" <?php checked(get_option("cml_show_in_menu_as", 1), 3) ?> />
-		      <?php _e('Flag only', 'ceceppaml') ?>
-		  </label>
-		</li>
-	      </ul>
-	    </blockquote>
-	  </div>
-	  <div class="block-right">
-	    <strong><?php _e('Flag\'s size:', 'ceceppaml'); ?>:</strong>
-	    <ul>
-	      <li>
-		<label>
-		  <input type="radio" id="submenu-size" name="submenu-size" value="small" <?php checked(get_option("cml_show_in_menu_size", "small"), "small"); ?> />
-		  <img src="<?php echo $small ?>" />
-		  <?php _e('Small', 'ceceppaml') ?> (32x23)
-		</label>
-	      </li>
-	      <li>
-		<label>
-		  <input type="radio" id="submenu-size" name="submenu-size" value="tiny" <?php checked(get_option("cml_show_in_menu_size", "small"), "tiny"); ?> />
-		  <img src="<?php echo $tiny ?>" />
-		  <?php _e('Tiny', 'ceceppaml') ?> (16x11)
-		</label>
-	      </li>
-	    </ul>
-	  </div>
-	</blockquote>
-
-<?php elseif($tab == 1) : ?>
+<!--  -->
+<!-- AZIONI -->
+<!--  -->
+<?php if($tab == 1) : ?>
 	<table id="ceceppaml-table">
 	    <tbody>
 <!-- Url -->
@@ -494,12 +317,6 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
   
 <!-- DONATE   -->
   <div id="donate" class="cml-donate">
-    <h3><?php _e('Donate') ?></h3>
-    <div class="content">
-	<?php _e('If you like this plugin, please donate to support development and maintenance :)', 'ceceppaml') ?>
-	<a target="_blank" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG">
-	  <img src="https://www.paypalobjects.com/it_IT/IT/i/btn/btn_donateCC_LG.gif" alt="PayPal - Il metodo rapido, affidabile e innovativo per pagare e farsi pagare.">
-	</a>
-    </div>
+    <?php do_meta_boxes('cml_donate_box','advanced',null); ?>
   </div>
 </div>

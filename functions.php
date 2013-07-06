@@ -201,7 +201,7 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
 	    $wpCeceppaML->force_category_lang($result->id);
 	    $link = get_category_link($cat_id);
 	  endif;
-	  
+
 	  $wpCeceppaML->unset_category_lang();
 	}
       }
@@ -213,13 +213,7 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
          Se non ho trovato nesuna traduzione per l'articolo, la bandiera punterà alla homepage
       */
       if(cml_is_homepage() || empty($link)) :
-	$sp = "";
-	$use_static= (get_option("page_for_posts") > 0) ||
-		      (get_option("page_on_front") > 0);
-
-	if($use_static && $result->id != cml_get_default_language_id()) $sp = "&sp=1";
-
-	$link = home_url() . "/?lang=$result->cml_language_slug" . $sp;
+	$link = home_url() . "/?lang=$result->cml_language_slug";
       endif;
     }
 
@@ -407,5 +401,10 @@ function cml_debug_print($string) {
     echo $string;
   else
     print_r($string);
+}
+
+function cml_use_static_page() {
+  return (get_option("page_for_posts") > 0) ||
+	  (get_option("page_on_front") > 0);
 }
 ?>
