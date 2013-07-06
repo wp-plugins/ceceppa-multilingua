@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.0.16
+Version: 1.0.17
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -628,14 +628,14 @@ class CeceppaML {
     $query = "UPDATE " . CECEPPA_ML_TABLE . " SET cml_enabled = 1 WHERE cml_enabled IS NULL";
     $wpdb->query($query);
 
-    if($first_time) :
+    if(!$first_time) :
       update_option("cml_need_update_posts", true);
 
       /* Per comodità  creo nel database un record con la lingua corrente */
       $locale = get_locale();
       $language = __("Default language");
 
-      require_once(CECEPPA_PLUGIN_PATH . "locales_codes.php");
+      require_once(CECEPPA_PLUGIN_PATH . "includes/locales_codes.php");
       $keys = array_keys($_langs);
       foreach($keys as $key) {
 	  if($_langs[$key] == $locale) {
@@ -652,12 +652,12 @@ class CeceppaML {
 			    'cml_enabled' => 1,
 			    'cml_flag' => $locale),
 		      array('%d', '%s', '%s', '%s', '%d', '%s'));
-
 	  
 	$this->_installed_language = $language;
 	$this->_installed_language_id = $wpdb->get_var("SELECT id FROM " . CECEPPA_ML_TABLE);
 
 	add_action( 'admin_notices', array(&$this, 'successfully_installed'));
+	
     endif;
 
     /**
