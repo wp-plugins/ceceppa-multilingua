@@ -77,8 +77,8 @@ function cml_do_shortcode($attrs) {
 function cml_show_available_langs($attrs) {
   global $wpdb, $wpCeceppaML;
 
-  //$notice = isset($attrs['notice']) ? $attrs['notice'] : true;
   $class = $attrs['class'];
+  $size = isset($attrs['size']) ? $attrs['size'] : "small";
 
   $langs = cml_get_languages();
   $l_id = $wpCeceppaML->get_current_lang_id();
@@ -90,21 +90,21 @@ function cml_show_available_langs($attrs) {
    * Se è stata impostata una pagina statica come home
    * aggiungo solo il suffisso ?lang=##
    */
-  $is_static = (is_front_page() && is_page()) || (array_key_exists("sp", $_GET));
+  $is_static = cml_is_homepage() && cml_use_static_page();
+
   foreach($langs as $lang) {
     if(is_category()) $link = $wpCeceppaML->translate_term_link(get_category_link($cat_id), $lang->id);
     if(is_single() || is_page()) $link = cml_get_linked_post($l_id, $lang, get_the_ID(), null);
-    //if(is_page()) $link = cml_get_linked_post($l_id, $lang, get_the_ID(), null);
 
     if(!empty($link)) {
       if(!$is_static) {
         $link = (is_category()) ? $link : get_permalink($link);
       } else {
-        $link = add_query_arg(array("lang" => $lang->cml_language_slug, "sp" => 1), get_site_url());
+        $link = add_query_arg(array("lang" => $lang->cml_language_slug), get_site_url());
       }
 
       $title = $lang->cml_language; //($notice && $l_id != $lang->id) ? cml_get_notice_by_lang_id($lang->id) : $lang->cml_language;
-      $r .= "<li><a href=\"$link\"><img src='" . cml_get_flag_by_lang_id($lang->id, 'small') . "' title=\"$title\" class=\"tipsy-me\"/></a></li>";
+      $r .= "<li><a href=\"$link\"><img src='" . cml_get_flag_by_lang_id($lang->id, $size) . "' title=\"$title\" class=\"tipsy-me\"/></a></li>";
     }
   }
 
