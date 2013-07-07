@@ -129,11 +129,10 @@ Yes. You can:
 
 1. Language configuration
 2. List of all posts with their translations
-3. Translate widget's title
+3. Translate widget titles
 4. Plugin configuration
-5. Link to the article
+5. Advanced box where you can: assign the language, link to other article, easily add translation or switch between them.
 6. Menus configuration
-7. Box for see or add translation to current post/page
 
 == Changelog ==
 
