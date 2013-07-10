@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.0.18
+Version: 1.1.0
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -110,40 +110,22 @@ class CeceppaML {
       add_action('admin_menu', array(&$this, 'add_menu_flags'));
 
       /*
-      * IT: Campi extra nelle categorie
-      * EN: Category extra fields
-      * EPO: 
-      */
-      add_action('edit_category_form_fields', array(&$this, 'category_edit_form_fields'));
-      add_action('category_add_form_fields', array(&$this, 'category_add_form_fields'));
-      add_action('edited_category', array(&$this, 'save_extra_category_fileds'));
-      add_action('created_category', array(&$this, 'save_extra_category_fileds'));
-      add_action('deleted_term_taxonomy', array(&$this, 'delete_extra_category_fields'));
-      add_action('edit_tag_form_fields', array(&$this, 'category_edit_form_fields'));
-      add_action('edited_term', array(&$this, 'save_extra_category_fileds'));
-      add_action('add_tag_form_fields', array(&$this, 'category_add_form_fields'));
-      add_action('created_term', array(&$this, 'save_extra_category_fileds'));
-
-      /*
 	* Aggiungo il box di collegamento nei post e nelle pagine 
 	*/
-      add_action('add_meta_boxes', array(&$this, 'add_meta_boxes'));
+      add_action('admin_init', array(&$this, 'add_meta_boxes'));
       add_action('edit_post', array(&$this, 'save_extra_post_fields'));
       add_action('delete_post', array(&$this, 'delete_extra_post_fields'));
       add_action('trash_post', array(&$this, 'delete_extra_post_fields'));
       add_action('untrash_post', array(&$this, 'code_optimization'));
       add_action('edit_page_form', array(&$this, 'save_extra_post_fields'));
       add_action('delete_page', array(&$this, 'delete_extra_post_fields'));
+      add_action('publish_my_custom_post_type', array(&$this, 'save_extra_post_fields'));
 
-      //Aggiungo le banidere all'elenco dei post
-      add_action('manage_pages_custom_column', array(&$this, 'add_flag_column'), 10, 2);
-      add_filter('manage_pages_columns' , array(&$this, 'add_flags_columns'));
-      add_action('manage_posts_custom_column', array(&$this, 'add_flag_column'), 10, 2);
-      add_filter('manage_posts_columns' , array(&$this, 'add_flags_columns'));
+      //Aggiungo le banidere all'elenco dei post, anche costum :)
+      add_action('admin_init', array(&$this, 'add_flags_to_post_types'), 0);
 
       //Quickedit
       add_action('quick_edit_custom_box',  array(&$this, 'quick_edit_box'), 10, 2);
-
 
       //Filtri
       add_filter('parse_query', array(&$this, 'filter_all_posts_query'));
@@ -174,6 +156,21 @@ class CeceppaML {
       
       /* Ottimizzazione codice */
       if(get_option("cml_code_optimization", 1)) add_action( 'init', array(&$this, 'code_optimization'));
+
+      /*
+      * IT: Campi extra nelle categorie
+      * EN: Category extra fields
+      * EPO: 
+      */
+      add_action('edit_category_form_fields', array(&$this, 'category_edit_form_fields'));
+      add_action('category_add_form_fields', array(&$this, 'category_add_form_fields'));
+      add_action('edited_category', array(&$this, 'save_extra_category_fileds'));
+      add_action('created_category', array(&$this, 'save_extra_category_fileds'));
+      add_action('deleted_term_taxonomy', array(&$this, 'delete_extra_category_fields'));
+      add_action('edit_tag_form_fields', array(&$this, 'category_edit_form_fields'));
+      add_action('edited_term', array(&$this, 'save_extra_category_fileds'));
+      add_action('add_tag_form_fields', array(&$this, 'category_add_form_fields'));
+      add_action('created_term', array(&$this, 'save_extra_category_fileds'));
     } else {
       /*
       * Filtro gli articoli per lingua
@@ -189,10 +186,10 @@ class CeceppaML {
       */
       if(get_option("cml_option_filter_translations", true) || array_key_exists("ht", $_GET)) {
 	add_action('pre_get_posts', array(&$this, 'hide_translations'));
-      }
 
-      //Per le categorie forzo l'opzione 'hide_translations' così evito di passare il "poco estetico" parametro "ht=1"
-      add_action('pre_get_posts', array(&$this, 'hide_category_translations'));
+	//Se l'utente non vuole nascondere le traduzioni non vedo perché lo devo "forzare"? :)
+	add_action('pre_get_posts', array(&$this, 'hide_category_translations'));
+      }
 
       /*
       * Filtro i risultati della ricerca in modo da visualizzare solo gli articoli inerenti
@@ -225,7 +222,7 @@ class CeceppaML {
       */
       if(get_option('cml_option_flags_on_post', true) ||
 	  get_option('cml_option_flags_on_page', true) ||
-	  get_option('cml_option_flags_on_cats')) :
+	  get_option('cml_option_flags_on_custom_type', 0)) :
 	
 	if(get_option('cml_option_flags_on_pos', 'top') == "bottom") {
 	    add_filter("the_content", array(&$this, 'add_flags_on_bottom'));
@@ -294,9 +291,6 @@ class CeceppaML {
     
     //Translate post_link
     add_filter('post_link', array(&$this, 'translate_post_link'), 0, 3);
-
-//     if($this->_url_mode != PRE_NONE)
-//       add_filter('page_link', array(&$this, 'translate_page_link'), 0, 3);
 
     add_filter('term_link', array(&$this, 'translate_term_link'), 0);
     add_filter('term_name', array(&$this, 'translate_term_name'), 0, 1);
@@ -406,7 +400,18 @@ class CeceppaML {
   function add_meta_boxes() {
     add_meta_box('ceceppaml-meta-box', __('Post data', 'ceceppaml'), array(&$this, 'post_meta_box'), 'post', 'side', 'high');
     add_meta_box('ceceppaml-meta-box', __('Page data', 'ceceppaml'), array(&$this, 'page_meta_box'), 'page', 'side', 'high');
-    }
+    
+//     add_meta_box('ceceppaml-menu-box', __('Flags', 'ceceppaml'), array(&$this, 'menu_meta_box'), 'nav-menus', 'side', 'default');
+
+    //Aggiungo il box a tutti i tipi di post non "predefiniti"
+    $post_types = get_post_types( array( '_builtin' => FALSE ), 'names'); 
+    $posts = array("post", "page");
+    foreach ($post_types as $post_type ) :
+      if(!in_array($post_type, $posts)) :
+	add_meta_box('ceceppaml-meta-box', __('Post data', 'ceceppaml'), array(&$this, 'post_meta_box'), $post_type, 'side', 'high');
+      endif;
+    endforeach;
+  }
   
   /**
    * Aggiungo la pagina delle opzioni nella barra laterale di Wordpress
@@ -418,6 +423,24 @@ class CeceppaML {
     add_submenu_page('ceceppaml-language-page', __('My translations', 'ceceppaml'), __('My translations', 'ceceppaml'), 'manage_options', 'ceceppaml-translations-page', array(&$this, 'form_translations'));
     add_submenu_page('ceceppaml-language-page', __('Settings', 'ceceppaml'), __('Settings', 'ceceppaml'), 'manage_options', 'ceceppaml-options-page', array(&$this, 'form_options'));
     add_submenu_page('ceceppaml-language-page', __('Shortcode', 'ceceppaml'), __('Shortcode', 'ceceppaml'), 'manage_options', 'ceceppaml-shortcode-page', array(&$this, 'shortcode_page'));
+  }
+
+  /*
+   * Devo richiamare questa funzione sull'evento "admin_init" sennò mi "perdo" alcuni tipi di post :(
+   */
+  function add_flags_to_post_types() {
+    $post_types=get_post_types('','names');
+    foreach ($post_types as $type ) :
+      add_action("manage_${type}_posts_custom_column", array(&$this, 'add_flag_column'), 10, 2);
+      add_filter("manage_${type}_posts_columns" , array(&$this, 'add_flags_columns'));
+    endforeach;
+
+    //Aggiungo i campi extra alle "custom taxonomies"
+    $taxonomies=get_taxonomies();
+    foreach($taxonomies as $taxonomy) :
+      add_action("${taxonomy}_edit_form_fields", array( &$this, 'category_edit_form_fields' ) ); 
+      add_action("${taxonomy}_add_form_fields", array( &$this, 'category_add_form_fields' ) );
+    endforeach;
   }
 
   /**
@@ -499,7 +522,7 @@ class CeceppaML {
         if($id < 0) return $title;
         if(is_single() && !get_option('cml_option_flags_on_post')) return $title;
         if(is_page() && !get_option('cml_option_flags_on_page')) return $title;
-        if(is_category() && !get_option('cml_option_flags_on_cats')) return $title;
+        if(cml_is_custom_post_type() && !get_option('cml_option_flags_on_custom_type')) return $title;
         if(!in_the_loop()) return $title;
 
         global $post;
@@ -511,7 +534,6 @@ class CeceppaML {
         if(esc_attr($post->post_title) == removesmartquotes($title)) {
 	    $this->_title_applied = true;
 
-	    $size = get_option('cml_option_flags_on_size', "small");
 	    return $title . cml_show_available_langs(array("class" => "cml_flags_on_top", "size" => $size));
         } else {
             return $title;
@@ -521,7 +543,7 @@ class CeceppaML {
     function add_flags_on_bottom($title) {
         if(is_single() && !get_option('cml_option_flags_on_post')) return $title;
         if(is_page() && !get_option('cml_option_flags_on_page')) return $title;
-        if(is_category() && !get_option('cml_option_flags_on_cats')) return $title;
+        if(cml_is_custom_post_type() && !get_option('cml_option_flags_on_custom_type')) return $title;
 
         $size = get_option('cml_option_flags_on_size', "small");
         return $title . cml_show_available_langs(array("class" => "cml_flags_on_top", "size" => $size));
@@ -836,13 +858,13 @@ class CeceppaML {
      * posso filtrare l'elenco a solo gli articoli della lingua che mi interessa
      */
     function filter_all_posts_page() {
-        //Se sto nel cestino di default visualizzo tutti gli articoli :)
-	$d = $this->_default_language_id;
-	if(isset($_GET['post_status']) && in_array($_GET['post_status'], array("draft", "trash"))) $d = 0;
-        $d = isset($_GET['cml_language']) ? $_GET['cml_language'] : $d;
+      //Se sto nel cestino di default visualizzo tutti gli articoli :)
+      $d = $this->_default_language_id;
+      if(isset($_GET['post_status']) && in_array($_GET['post_status'], array("draft", "trash"))) $d = 0;
+      $d = isset($_GET['cml_language']) ? $_GET['cml_language'] : $d;
 
-        //All languages
-        cml_dropdown_langs("cml_language", $d, false, true, __('Show all languages', 'ceceppaml'), -1);
+      //All languages
+      cml_dropdown_langs("cml_language", $d, false, true, __('Show all languages', 'ceceppaml'), -1);
     }
 
     /**
@@ -1206,7 +1228,9 @@ class CeceppaML {
 
     //Elenco degli articoli
     $args = array('numberposts' => -1, 'order' => 'ASC', 'orderby' => 'title', 'posts_per_page' => 9999,
-		    'status' => 'publish,inherit,pending,private,future,draft');
+		  //Mi serve per farlo funzionare con i custom posts :)
+		  'post_type' => get_post_type(),
+		  'status' => 'publish,inherit,pending,private,future,draft');
 
     $posts = new WP_Query($args);
 
@@ -1239,7 +1263,9 @@ class CeceppaML {
 	  if($lang->id != $id && $lang->id != $post_lang) :
 
 	  $link = cml_get_linked_post($id, null, $t_id, $lang->id);
-	  $href = empty($link) ? (get_bloginfo("url") . "/wp-admin/post-new.php?link-to=$t_id&post-lang=$lang->id") : get_edit_post_link($link);
+	  $post_type = get_post_type();
+	  $href = empty($link) ? (get_bloginfo("url") . "/wp-admin/post-new.php?link-to=$t_id&post-lang=$lang->id&post_type=${post_type}") : get_edit_post_link($link);
+	  
 	  $icon = empty($link) ? "add" : "go";
 	  $title = empty($link) ? __('Translate post', 'ceceppaml') : __('Edit post', 'ceceppaml');
 	  $msg = empty($link) ? __('Add translation', 'ceceppaml') : __('Switch to post/page', 'ceceppaml');
@@ -1248,10 +1274,13 @@ class CeceppaML {
 	      <a href="<?php echo $href ?>">
 		  <img src="<?php echo cml_get_flag_by_lang_id($lang->id, "small") ?>" title="<?php echo $lang->cml_language ?>" />
 		  <?php if(!empty($link)) { ?>
+		  
+<!-- Esiste la traduzione -->
 		  <span class="cml_add_text"><?php echo  get_the_title($link) ?></span>
 		  <?php } ?>
+<!-- Non esiste-->
 		  <span class="cml_add_button">
-			  <!-- <img class="add" src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/<?php echo $icon ?>.png" title="<?php echo $title ?>" width="12" /> -->
+			  <!-- <img class="add" src="<?php echo CECEPPA_PLUGIN_URL ?>/images/<?php echo $icon ?>.png" title="<?php echo $title ?>" width="12" /> -->
 		  </span>
 	      </a>
 	  </li>
@@ -1350,6 +1379,24 @@ class CeceppaML {
 	  </ul>
       </div>
       <?php
+  }
+
+  function menu_meta_box() {
+    $langs = cml_get_languages();
+    ?>
+        <p id="menu-item-custom-box">
+	  <?php foreach($langs as $lang) : ?>
+            <label>
+                <input id="cml-menu-item" name="menu-item[<?php echo $_nav_menu_placeholder; ?>][cml-menu-item]" type="checkbox" class="menu-item-checkbox" value="1" />
+                <span><?php echo $lang->cml_language ?></span>
+            </label>
+            <br />
+	  <?php endforeach; ?>
+        </p>
+      <span class="add-to-menu">
+	<input type="submit" class="button-secondary submit-add-to-menu right" value="<?php _e('Add to Menu') ?>" name="add-post-type-menu-item" id="submit-posttype-wl-login">
+      <span class="spinner"></span>
+    <?php
   }
 
   function redirect_browser() {
@@ -1565,8 +1612,8 @@ class CeceppaML {
       if(!isset($post_lang))
 	delete_option("cml_page_lang_$post_id");
 
-      update_option("cml_page_$post_id", $linked_post);
-      update_option("cml_page_lang_$post_id", $post_lang);
+      update_option("cml_page_${post_id}", $linked_post);
+      update_option("cml_page_lang_${post_id}", $post_lang);
 
       //Ricreo la struttura degli articoli, questo metodo rallenterà soltanto chi scrive l'articolo... tollerabile :D
       $this->code_optimization();
@@ -1666,12 +1713,14 @@ class CeceppaML {
   function update_current_lang() {
     global $wpdb;
 
-    $lang = ""; //$_COOKIE['cml_current_lang'];
-        
+//     if(!empty($this->_current_lang_id)) return;
+
+    $lang = "";
+
     //Serve a far sì che "il cambio menu" funzioni correttamente anche
     //con il permalink di default: ?p=#
-    $post = get_post();
     if(is_page() || is_single()) :
+      $post = get_post();
       if(empty($post)) return;
 
       $the_id = get_the_ID();

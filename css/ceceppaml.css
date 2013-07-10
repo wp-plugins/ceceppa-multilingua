@@ -269,11 +269,11 @@ img.delete {
   display: inline-block;
   overflow: hidden;
   padding-left: 5px;
-  height: 25px;
-  max-height: 25px;
+  height: 33px;
+  max-height: 33px;
   width: 190px; max-width: 190px;
   position: relative;
-  top: -8px;
+  top: -5px;
 }
 
 .cml-box-translations li img.add {

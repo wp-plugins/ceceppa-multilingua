@@ -135,7 +135,7 @@ function cml_fix_rebuild_posts_info() {
   //$posts = array();
   //Recupero tutti gli articoli
   $args = array('numberposts' => -1, 'posts_per_page' => 999999,
-		  'post_type' => array('page', 'post'),
+		  'post_type' => get_post_types('','names'),
 		  'status' => 'publish,draft,private,future');
 
   $p = new WP_Query($args);

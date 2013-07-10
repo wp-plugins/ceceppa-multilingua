@@ -21,6 +21,9 @@ global $wpCeceppaML;
 if(!is_object($wpCeceppaML)) die("Access denied");
 
 $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
+
+$tiny = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "tiny");
+$small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 ?>
 
 <div class="wrap">
@@ -44,7 +47,7 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 	<?php 
 	
 	  if($tab == 0) : 
-	    require_once('forms/form_options_flags.php');
+	    require_once('form_options_flags.php');
 
 	    do_meta_boxes('cml_options_page_flags','advanced',null);
 	  endif;
@@ -139,8 +142,8 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 		    <label for="flags-on-posts"><?php _e('Posts', 'ceceppaml') ?></label> <br />
 		    <input type="checkbox" id="flags-on-pages" name="flags-on-pages" value="1" <?php echo ((get_option('cml_option_flags_on_page', '1') == 1) ? 'checked' : '') ?> />
 		    <label for="flags-on-pages"><?php _e('Pages', 'ceceppaml') ?></label><br />
-		    <input type="checkbox" id="flags-on-cats" name="flags-on-cats" value="1" <?php echo ((get_option('cml_option_flags_on_cats', '0') == 1) ? 'checked' : '') ?> />
-		    <label for="flags-on-cats"><?php _e('Categories', 'ceceppaml') ?></label><br />
+		    <input type="checkbox" id="flags-on-custom" name="flags-on-custom" value="1" <?php echo ((get_option('cml_option_flags_on_custom_type', '0') == 1) ? 'checked' : '') ?> />
+		    <label for="flags-on-custom"><?php _e('Custom posts type', 'ceceppaml') ?></label><br />
 		</blockquote>
 		<strong><?php _e('Where:', 'ceceppaml') ?></strong>
 		<blockquote>
@@ -151,7 +154,7 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 		</blockquote>
 	  </div>
 	  <div class="block-right">
-	    <strong><?php _e('Flag\'s size:', 'ceceppaml'); ?>:</strong>
+	    <strong><?php _e('Flags size:', 'ceceppaml'); ?>:</strong>
 	    <ul>
 	      <li>
 		<label>

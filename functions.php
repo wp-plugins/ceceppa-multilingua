@@ -407,4 +407,14 @@ function cml_use_static_page() {
   return (get_option("page_for_posts") > 0) ||
 	  (get_option("page_on_front") > 0);
 }
+
+/* Mi serve ad individuare i custom posts, e a visualizzare le bandiere su di essi :) */
+function cml_is_custom_post_type() {
+  $types = get_post_types( array ( '_builtin' => FALSE ), 'names' );
+  
+  if( empty( $types) ) return FALSE;
+
+  $name = get_post_type();
+  return in_array( $name, $types );
+}
 ?>

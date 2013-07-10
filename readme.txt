@@ -3,7 +3,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate
 Requires at least: 3.4.1
 Tested up to: 3.6
-Stable tag: 1.0.18
+Stable tag: 1.1.0
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG
@@ -34,6 +34,7 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 - One-Click-Switching between the translations
 - Category link translation
 - Add flags to menu
+- Plugin works also custom post types :)
 
 = Widgets =
 
@@ -136,6 +137,13 @@ Yes. You can:
 7. Box for see or add translation to current post/page
 
 == Changelog ==
+
+= 1.1.0 =
+* Plugin works also custom post types :)
+* Added "Language data" box for custom post type, now you can choose language, and link translations
+* Added extra fields to custom taxonomies
+* Now you can show flags also on custom post types
+* Added flags for filter the list custom post types (doesn't appears with all plugins)
 
 = 1.0.17 =
 * Fixed fatal error on new install :(

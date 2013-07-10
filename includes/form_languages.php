@@ -27,11 +27,19 @@ if(!is_object($wpCeceppaML)) die("Access denied");
 require_once "locales_codes.php";
 
 $row = 0;
+$tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 ?>
 
     <div class="wrap">
 <!-- Lingue -->
-    <h2><?php _e('Languages settings:', 'ceceppaml') ?></h2>
+  <div class="icon32">
+    <img src="<?php echo CECEPPA_PLUGIN_URL ?>images/logo.png" height="32"/>
+  </div>
+  <h2 class="nav-tab-wrapper">
+    <a class="nav-tab <?php echo $tab == 0 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-language-page&tab=0"><?php _e('Languages', 'ceceppaml') ?></a>
+<!--     <a class="nav-tab <?php echo $tab == 1 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-language-page&tab=1"><?php _e('Language files', 'ceceppaml') ?></a> -->
+  </h2>
+  <br />
     <form class="ceceppa-form" name="wrap" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>?page=ceceppaml-language-page">
     <input type="hidden" name="form" value="languages" />
     <input type="hidden" name="action" value="add" />
@@ -40,10 +48,10 @@ $row = 0;
     <table id="ceceppaml-table" class="ceceppaml">
     <tbody>
     <tr>
-      <td style="width: 1%;"><?php _e('Default', 'ceceppaml') ?></td>
+      <td style="width: 1%;padding: 0 5px 0 5px;"><img src="<?php echo CECEPPA_PLUGIN_URL ?>images/default.png" title="<?php _e('Default language', 'ceceppaml') ?>" class="tipsy-me"></td>
       <td style="width: 5%;"><?php _e('Flag', 'ceceppaml') ?></td>
       <td style="width:65%"><?php _e('Name of the language ', 'ceceppaml') ?></td>
-      <td style="width:5%"><?php _e('Enabled', 'ceceppaml') ?></td>
+      <td style="width:5%"><img src="<?php echo CECEPPA_PLUGIN_URL ?>images/enabled.png" title="<?php _e('Enabled', 'ceceppaml') ?>?" class="tipsy-me" height="24"></td>
       <td style="width: 5%">
 	<a href="#" onclick="javascript: toggleDetails(-1)"><img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/details.png" width="32" title="<?php _e('Show/Hide advanced options for languages.') ?>"></a>
       </td>

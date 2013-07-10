@@ -17,7 +17,7 @@
 */
 ?>
 <div class="wrap">
-   <h2><?php _e('Widget\'s titles', 'ceceppaml'); ?></h2>
+   <h2><?php _e('Widget titles', 'ceceppaml'); ?></h2>
 <?php
 function cml_widgets_title($wtitles) {
   global $wpdb;

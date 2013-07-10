@@ -103,7 +103,7 @@ class CeceppaMLOptions {
     //Flags
     @update_option("cml_option_flags_on_post", intval($_POST['flags-on-posts']));
     @update_option("cml_option_flags_on_page", intval($_POST['flags-on-pages']));
-    @update_option("cml_option_flags_on_cats", intval($_POST['flags-on-cats']));
+    @update_option("cml_option_flags_on_custom_type", intval($_POST['flags-on-custom']));
     @update_option("cml_option_flags_on_pos", $_POST['flags_on_pos']);
 
       //Size
