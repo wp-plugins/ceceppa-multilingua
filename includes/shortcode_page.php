@@ -1,3 +1,10 @@
+<?php 
+  global $wpCeceppaML;
+
+  //Non posso richiamare lo script direttamente dal browser :)
+  if(!is_object($wpCeceppaML)) die("Access denied");
+  
+?>
 <h2><?php _e('Shortcode & Functions', 'ceceppaml') ?></h2>
 <h2 class="nav-tab-wrapper">
     <a href="#" class="nav-tab nav-tab-active"><?php _e('Shortcode') ?></a>

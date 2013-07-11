@@ -57,9 +57,10 @@ class CeceppaMLLanguages {
 				'cml_notice_post' => bin2hex(htmlentities($_POST['notice_post'][$i], ENT_COMPAT, "UTF-8")),
 				'cml_notice_page' => bin2hex(htmlentities($_POST['notice_page'][$i], ENT_COMPAT, "UTF-8")),
 				'cml_notice_category' => '',
-				'cml_enabled' => $_POST['lang-enabled'][$i]),
+				'cml_enabled' => $_POST['lang-enabled'][$i],
+				'cml_sort_id' => $_POST['sort-id'][$i]),
 			    array('id' => $id),
-			    array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d'),
+			    array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d'),
 			    array('%d'));
 	}
     endfor;

@@ -45,7 +45,7 @@ function cml_get_default_language_id() {
 function cml_get_languages($enabled = 1, $default = 1) {
   global $wpdb;
 
-  return $wpdb->get_results(sprintf("SELECT * FROM %s WHERE cml_enabled >= %d AND cml_default <= %d",
+  return $wpdb->get_results(sprintf("SELECT * FROM %s WHERE cml_enabled >= %d AND cml_default <= %d ORDER BY cml_sort_id ",
     					CECEPPA_ML_TABLE, $enabled, $default));
 }
 
@@ -55,7 +55,7 @@ function cml_get_languages($enabled = 1, $default = 1) {
 function cml_get_languages_list() {
   global $wpdb;
 
-  $results = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE);
+  $results = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " ORDER BY cml_sort_id");
   
   $array = array();
   foreach($results as $result) {
@@ -160,7 +160,7 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
   global $wpdb, $wpCeceppaML;
 
   $redirect = get_option('cml_option_redirect');
-  $results = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " WHERE cml_enabled = 1 ORDER BY cml_language");  
+  $results = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " WHERE cml_enabled = 1 ORDER BY cml_sort_id");  
   $width = ($size == "tiny") ? 16 : 32;
 
   $r = "<ul class='$class_name'>";

@@ -15,6 +15,12 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
+
+global $wpCeceppaML;
+
+//Non posso richiamare lo script direttamente dal browser :)
+if(!is_object($wpCeceppaML)) die("Access denied");
+
 ?>
 <div class="wrap">
    <h2><?php _e('Widget titles', 'ceceppaml'); ?></h2>

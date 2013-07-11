@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.1.0
+Version: 1.1.1
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -15,9 +15,15 @@ Tags: multilingual, multi, language, admin, tinymce, qTranslate, Polyglot, bilin
  * Most of flags are downloaded from http://blog.worldofemotions.com/danilka/
  * 
  */
+// Make sure we don't expose any info if called directly
+if ( !function_exists( 'add_action' ) ) {
+	echo 'Hi there!  I\'m just a plugin, not much I can do when called directly.';
+	exit;
+}
+
 global $wpdb;
 
-define('CECEPPA_DB_VERSION', 15);
+define('CECEPPA_DB_VERSION', 16);
 
 define('CECEPPA_ML_TABLE', $wpdb->base_prefix . 'ceceppa_ml');
 define('CECEPPA_ML_CATS', $wpdb->base_prefix . 'ceceppa_ml_cats');
@@ -322,7 +328,7 @@ class CeceppaML {
 
     $r = load_plugin_textdomain('ceceppaml', false, dirname( plugin_basename( __FILE__ ) ) . '/po/');
 
-    $results = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " ORDER BY cml_language"); //WHERE cml_default = 1 
+    $results = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " ORDER BY cml_sort_id"); //WHERE cml_default = 1 
     foreach($results as $result) :
         register_nav_menus(array("cml_menu_$result->cml_language_slug" => $result->cml_language));
     endforeach;
@@ -362,7 +368,7 @@ class CeceppaML {
   function add_menu_flags() {
     global $wpdb;
 
-    $query = "SELECT * FROM " . CECEPPA_ML_TABLE . " order by cml_language";
+    $query = "SELECT * FROM " . CECEPPA_ML_TABLE . " order by cml_sort_id";
     $results = $wpdb->get_results($query);
     
     foreach($results as $result) :
@@ -2638,7 +2644,7 @@ class CeceppaML {
   function add_item_to_menu($lang, $close = true, $size = "small") {
     $display = get_option("cml_show_in_menu_as", 1);
 
-    $item = '<li class="menu-item">';
+    $item = '<li class="menu-item menu-cml-flag">';
 
     $item .= '<a href="' . home_url() . '?lang=' . $lang->cml_language_slug . '">';
     if($display != 2) :
@@ -2671,7 +2677,7 @@ class CeceppaML {
     cml_show_flags($show[$as], $size);
     echo '</div>';
   }
-  
+
   function add_flying_flags() {
     $show = array("", "both", "text", "flag");
     $as = intval(get_option("cml_show_items_as", 1));

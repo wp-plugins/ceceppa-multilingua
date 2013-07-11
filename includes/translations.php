@@ -1,5 +1,6 @@
 <?php
 global $wpCeceppaML;
+
 if(!is_object($wpCeceppaML)) die("Access denied");
 
 class CeceppaMLTranslations {

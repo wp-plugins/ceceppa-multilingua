@@ -74,7 +74,15 @@ function cml_fix_database() {
 	endforeach;
       endforeach;
     endif;
-    
+ 
+    if($dbVersion <= 16) :
+      $sql = "ALTER TABLE  " . CECEPPA_ML_TABLE . " ADD  `cml_sort_id` INT NOT NULL ;";
+      $wpdb->query($sql);
+
+      $sql = "UPDATE " . CECEPPA_ML_TABLE . " SET cml_sort_id = id";
+      $wpdb->query($sql);
+    endif;
+
     if($dbVersion <= 15) :
       cml_fix_widget_titles();
     endif;
