@@ -15,9 +15,15 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
+
+global $wpCeceppaML;
+
+//Non posso richiamare lo script direttamente dal browser :)
+if(!is_object($wpCeceppaML)) die("Access denied");
+
 ?>
 <div class="wrap">
-   <h2><?php _e('Widget\'s titles', 'ceceppaml'); ?></h2>
+   <h2><?php _e('Widget titles', 'ceceppaml'); ?></h2>
 <?php
 function cml_widgets_title($wtitles) {
   global $wpdb;
@@ -50,7 +56,7 @@ function cml_widgets_title($wtitles) {
       $i = 0;
 
       foreach($langs as $lang) :
-	$d = cml_translate($title, $lang->id);
+	$d = cml_translate(strtolower($title), $lang->id, 'W');
 	$d = str_replace("\"", "&quot;", $d);
 	echo "<td>\n";
 	echo "<input type=\"text\" name=\"lang_" . $lang->id . "[]\" value=\"$d\" /></td>\n";

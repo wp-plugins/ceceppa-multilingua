@@ -15,6 +15,13 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
+
+global $wpCeceppaML;
+
+//Non posso richiamare lo script direttamente dal browser :)
+if(!is_object($wpCeceppaML)) die("Access denied");
+
+global $wpdb;
 ?>
 
 <div class="wrap">
@@ -46,19 +53,19 @@
   foreach($results as $result) :
       $title = html_entity_decode($result->cml_text);
 	//Non posso utilizzare htmlentities perché sennò su un sito in lingua russa mi ritrovo tutti simboli strani :'(
-      $title = str_replace("\"", "&quot;", $title);
+      $title = str_replace("\"", "&quot;", stripslashes($title));
 
       echo "<tr>";
 
       echo "<td style=\"height:2.5em\">\n";
       echo "\t<input type=\"hidden\" name=\"id[]\" value=\"$result->id\" />\n";
       echo "\t<input type=\"hidden\" name=\"string[]\" value=\"$title\" />\n";
-      echo "$title</td>";
+      echo stripslashes($title) . "</td>";
       $i = 0;
 
       foreach($langs as $lang) :
 	$d = cml_translate($title, $lang->id);
-	$d = str_replace("\"", "&quot;", $d);
+	$d = str_replace("\"", "&quot;", stripslashes($d));
 	echo "<td>\n";
 	echo "<input type=\"hidden\" name=\"lang_id[$c][$i]\" value=\"$lang->id\" />\n";
 	echo "<input type=\"text\" name=\"value[$c][$i]\" value=\"$d\" /></td>\n";
