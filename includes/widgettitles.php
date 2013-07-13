@@ -56,7 +56,7 @@ function cml_widgets_title($wtitles) {
       $i = 0;
 
       foreach($langs as $lang) :
-	$d = cml_translate(strtolower($title), $lang->id, 'W');
+	$d = cml_translate($title, $lang->id, 'W');
 	$d = str_replace("\"", "&quot;", $d);
 	echo "<td>\n";
 	echo "<input type=\"text\" name=\"lang_" . $lang->id . "[]\" value=\"$d\" /></td>\n";
@@ -71,6 +71,7 @@ function cml_widgets_title($wtitles) {
      </tbody>
     </table>
     <div style="text-align:right">
+      <input type="submit" class="ceceppa-salva" name="action" value="<?php _e('Reset titles', 'ceceppaml') ?>" />
       <input type="submit" class="ceceppa-salva" name="action" value="<?php _e('Update', 'ceceppaml') ?>" />
     </div>
     </form>

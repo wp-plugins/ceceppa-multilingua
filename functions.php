@@ -240,14 +240,15 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
  *  @return - la frase tradotta se esiste la traduzione, altrimeni la stringa passata
  */
 function cml_translate($string, $id, $type = "") {
-  global $wpdb;
+  global $wpdb, $wpCeceppaML;
 
+  $s = strtolower($string);
   $query = sprintf("SELECT UNHEX(cml_translation) FROM %s WHERE cml_text = '%s' AND cml_lang_id = %d AND cml_type LIKE '%s'",
-			  CECEPPA_ML_TRANS, bin2hex($string), $id, "%" . $type . "%");
+			  CECEPPA_ML_TRANS, bin2hex($s), $id, "%" . $type . "%");
 
   $ret = $wpdb->get_var($query);
 
-  return (empty($ret)) ? $string : html_entity_decode(stripslashes($ret));
+  return (empty($ret)) ?  $string : html_entity_decode(stripslashes($ret));
 }
 
 /**
@@ -416,5 +417,13 @@ function cml_is_custom_post_type() {
 
   $name = get_post_type();
   return in_array( $name, $types );
+}
+
+function cml_get_language($lang_id) {
+  global $wpdb;
+
+  $query = sprintf("SELECT * FROM %s WHERE id = %d", CECEPPA_ML_TABLE, $lang_id);
+  
+  return $wpdb->get_row($query);
 }
 ?>

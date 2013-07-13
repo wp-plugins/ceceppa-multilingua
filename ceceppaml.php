@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.1.1
+Version: 1.1.2
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -168,14 +168,14 @@ class CeceppaML {
       * EN: Category extra fields
       * EPO: 
       */
-      add_action('edit_category_form_fields', array(&$this, 'category_edit_form_fields'));
+//       add_action('edit_category_form_fields', array(&$this, 'category_edit_form_fields'));
       add_action('category_add_form_fields', array(&$this, 'category_add_form_fields'));
       add_action('edited_category', array(&$this, 'save_extra_category_fileds'));
       add_action('created_category', array(&$this, 'save_extra_category_fileds'));
       add_action('deleted_term_taxonomy', array(&$this, 'delete_extra_category_fields'));
-      add_action('edit_tag_form_fields', array(&$this, 'category_edit_form_fields'));
+//       add_action('edit_tag_form_fields', array(&$this, 'category_edit_form_fields'));
       add_action('edited_term', array(&$this, 'save_extra_category_fileds'));
-      add_action('add_tag_form_fields', array(&$this, 'category_add_form_fields'));
+//       add_action('add_tag_form_fields', array(&$this, 'category_add_form_fields'));
       add_action('created_term', array(&$this, 'save_extra_category_fileds'));
     } else {
       /*
@@ -562,7 +562,7 @@ class CeceppaML {
   function category_add_form_fields($tag) {
         wp_enqueue_script('ceceppaml-cat');
 ?>
-        <div class="form-field">
+        <div class="form-field cml-form-field">
         <?php
             $langs = cml_get_languages(0, 0);
 
@@ -584,6 +584,8 @@ class CeceppaML {
    * Campi necessari per modifica l'abbinamento della categoria con quella della lingua di default.
    */
   function category_edit_form_fields($tag) {
+    wp_enqueue_script('ceceppaml-cat');
+
     $t_id = $tag->term_id;
     $linked_cat = get_option("cml_category_$t_id");
     $cat_lang = get_option("cml_category_lang_$t_id");
@@ -595,7 +597,7 @@ class CeceppaML {
 	  if(!$lang->cml_default) :
 	      $id = $lang->id;
     ?>
-    <tr class="form-field">
+    <tr class="form-field cml-form-field">
 	<td>
 	    <img src="<?php echo cml_get_flag($lang->cml_flag); ?>" />
 	    <?php echo $lang->cml_language ?>
@@ -794,6 +796,7 @@ class CeceppaML {
       wp_register_script('ceceppaml-js', WP_PLUGIN_URL . '/ceceppa-multilingua/js/ceceppa.js', array('ceceppa-dd'));
       wp_register_script('ceceppa-tipsy', WP_PLUGIN_URL . '/ceceppa-multilingua/js/jquery.tipsy.js');
       wp_register_script('ceceppaml-cat', WP_PLUGIN_URL . '/ceceppa-multilingua/js/ceceppa-cat.js');
+      wp_register_script('ceceppaml-tag', WP_PLUGIN_URL . '/ceceppa-multilingua/js/ceceppa-tag.js');
       //    wp_enqueue_script('ceceppa-search', WP_PLUGIN_URL . '/ceceppa-multilingua/js/ceceppa.search.js', array('jquery'));
 
       //Css
@@ -1718,8 +1721,6 @@ class CeceppaML {
    */
   function update_current_lang() {
     global $wpdb;
-
-//     if(!empty($this->_current_lang_id)) return;
 
     $lang = "";
 
