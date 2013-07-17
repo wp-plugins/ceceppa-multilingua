@@ -116,15 +116,26 @@ function cml_get_flags_count() {
  * Restituisco il menù da utilizzare in base alla lingua "attuale"
  */
 function cml_get_menu() {
-  global $wpCeceppaML;
-
   //Restituisco il nome del menù da utilizzare a seconda della lingua
-  $lang = $wpCeceppaML->get_current_lang();
+  $lang = cml_get_current_language();
 
-  if(cml_is_default_lang())
-    return "primary-menu";
-  else
-    return "cml_menu_$lang";
+  return "cml_menu_" . $lang->cml_language_slug;
+}
+
+function cml_get_menu_name($name) {
+  $menus = wp_get_nav_menus();
+  $locations = get_nav_menu_locations();
+  $menu = cml_get_menu();
+
+  if(is_array($locations)) :
+    $loc = $locations[$menu];
+
+    foreach($menus as $menu) :
+      if($menu->term_id == $loc) return $menu->slug;
+    endforeach;
+  endif;
+  
+  return $name;
 }
 
 /**
@@ -236,17 +247,41 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
  *
  *  @param string - stringa da cercare
  *  @param id - id della lingua in cui tradurre la frase
- *
+ *  @param - wpgettext - utilizza la funzione __ per cercare la traduzione della parola
+ *  @param - gettext - indica se utilizzare la funzione "gettext" di "Danilo"
  *  @return - la frase tradotta se esiste la traduzione, altrimeni la stringa passata
  */
-function cml_translate($string, $id, $type = "") {
+function cml_translate($string, $id, $type = "", $wpgettext = false, $gettext = false) {
   global $wpdb, $wpCeceppaML;
 
-  $s = strtolower($string);
+  $s = ($type == "W") ? strtolower($string) : $string;
   $query = sprintf("SELECT UNHEX(cml_translation) FROM %s WHERE cml_text = '%s' AND cml_lang_id = %d AND cml_type LIKE '%s'",
 			  CECEPPA_ML_TRANS, bin2hex($s), $id, "%" . $type . "%");
 
   $ret = $wpdb->get_var($query);
+
+  if(empty($ret) && $wpgettext) :
+    $ret = __($string);
+  endif;
+
+  if(empty($ret) && $gettext) :
+    //Recupero la traduzione dalle frasi di wordpress ;)
+    require_once("gettext/gettext.inc");
+    
+    $lang = cml_get_language_info($id);
+    $locale = $lang->cml_locale;
+
+    // gettext setup
+    T_setlocale(LC_MESSAGES, $locale);
+    // Set the text domain as 'messages'
+
+    $domain = $locale;
+    T_bindtextdomain($domain, LOCALE_DIR);
+    T_bind_textdomain_codeset($domain, 'UTF-8');
+    T_textdomain($domain);
+
+    $ret = T_gettext($string);
+  endif;
 
   return (empty($ret)) ?  $string : html_entity_decode(stripslashes($ret));
 }
@@ -258,11 +293,21 @@ function cml_translate($string, $id, $type = "") {
  *
  * @return - il titolo della lingua
  */
-function cml_get_language_title($id) {
+function cml_get_language_title($id = null) {
   global $wpdb;
+
+  if($id == null) $id = cml_get_current_language_id();
 
   return $wpdb->get_var(sprintf("SELECT cml_language FROM %s WHERE id = %d",
 				CECEPPA_ML_TABLE , $id));
+}
+
+function cml_get_language_info($id = null) {
+  global $wpdb;
+  
+  if($id == null) $id = cml_get_current_language_id();
+
+  return $wpdb->get_row(sprintf("SELECT * FROM %s WHERE id = %d", CECEPPA_ML_TABLE, $id));
 }
 
 /**
@@ -383,6 +428,12 @@ function cml_get_current_language() {
   return $wpCeceppaML->get_current_language();
 }
 
+function cml_get_current_language_id() {
+  $lang = cml_get_current_language();
+
+  return is_object($lang) ? $lang->id : -1;
+}
+
 /* Controllo se sto nella homepage */
 function cml_is_homepage() {
   //Non posso utilizzare la funzione is_home, quindi controllo "manualmente"
@@ -417,13 +468,5 @@ function cml_is_custom_post_type() {
 
   $name = get_post_type();
   return in_array( $name, $types );
-}
-
-function cml_get_language($lang_id) {
-  global $wpdb;
-
-  $query = sprintf("SELECT * FROM %s WHERE id = %d", CECEPPA_ML_TABLE, $lang_id);
-  
-  return $wpdb->get_row($query);
 }
 ?>

@@ -3,7 +3,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate
 Requires at least: 3.4.1
 Tested up to: 3.6
-Stable tag: 1.1.2
+Stable tag: 1.2.0
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG
@@ -135,8 +135,19 @@ Yes. You can:
 5. Link to the article
 6. Menus configuration
 7. Box for see or add translation to current post/page
+7. Box for manage language files
 
 == Changelog ==
+
+= 1.2.0 =
+* Plugin automatically try to download language file when you add new language.
+* Locale is detected correctly
+* Plugin use wordpress localization for widget titles.
+* Improved documetation: Added "Functions" tab in "Shortcode & Functions" page.
+* Now title of category will also be translate in "/category/" page
+* Fixed comments count when choose to group them
+* Improved ui: Now the plugin use wordpress style for tables
+* Now you can download language file for wordpress directly from "Ceceppa Multilingua" page.
 
 = 1.1.2 =
 * Fixed duplicated items in "edit taxonomies form"

@@ -27,6 +27,9 @@ class CeceppaMLLanguages {
 
     $form = $_POST['form'];
 
+    require_once("mo-downloader.php");
+    $d = new CMLMoDownloader();
+
     for($i = 0; $i < count($_POST['id']); $i++) :
 	$id = $_POST['id'][$i];
 	@list($lang, $lang_slug) = explode("@", $_POST['flags'][$i]);
@@ -44,8 +47,10 @@ class CeceppaMLLanguages {
 				'cml_notice_post' => bin2hex(htmlentities($_POST['notice_post'][$i], ENT_COMPAT, "UTF-8")),
 				'cml_notice_page' => bin2hex(htmlentities($_POST['notice_page'][$i], ENT_COMPAT, "UTF-8")),
 				'cml_notice_category' => '',
-				'cml_enabled' => 1),
-			    array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d'));
+				'cml_enabled' => 1,
+				'cml_sort_id' => $_POST['sort-id'][$i]),
+			    array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d'));
+	    $d->download_language($wpdb->insert_id, $_POST['language'][$i]);
 	  endif;
 	} else {
 	    $wpdb->update(CECEPPA_ML_TABLE,
@@ -63,6 +68,9 @@ class CeceppaMLLanguages {
 			    array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d'),
 			    array('%d'));
 	}
+	
+	//Se ho fatto un'operazione sulle lingue "forzo" il controllo sull'esistenza dei file .mo
+	update_option("cml_check_language_file_exists", 1);
     endfor;
 
     //Delete

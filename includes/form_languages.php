@@ -37,26 +37,31 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
   </div>
   <h2 class="nav-tab-wrapper">
     <a class="nav-tab <?php echo $tab == 0 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-language-page&tab=0"><?php _e('Languages', 'ceceppaml') ?></a>
-<!--     <a class="nav-tab <?php echo $tab == 1 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-language-page&tab=1"><?php _e('Language files', 'ceceppaml') ?></a> -->
+    <a class="nav-tab <?php echo $tab == 1 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-language-page&tab=1"><?php _e('Language files', 'ceceppaml') ?></a>
   </h2>
-  <br />
+  <div id="poststuff">
+  <div id="post-body" class="metabox-holder columns-2">
+  <?php if($tab == 0) : ?>
+    <div id="post-body-content">
     <form class="ceceppa-form" name="wrap" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>?page=ceceppaml-language-page">
     <input type="hidden" name="form" value="languages" />
     <input type="hidden" name="action" value="add" />
     <?php wp_nonce_field('cml_edit_language','cml_nonce_edit_language'); ?>
     <input type="hidden" name="delete" id="delete" value="" />
-    <table id="ceceppaml-table" class="ceceppaml">
+    <table id="ceceppaml-table" class="wp-ceceppaml widefat">
     <tbody>
+    <thead>
     <tr>
-      <td style="width: 1%;padding: 0 5px 0 5px;"><img src="<?php echo CECEPPA_PLUGIN_URL ?>images/default.png" title="<?php _e('Default language', 'ceceppaml') ?>" class="tipsy-me"></td>
-      <td style="width: 1%;padding: 0 5px 0 5px;"><img src="<?php echo CECEPPA_PLUGIN_URL ?>images/sort.png" title="<?php _e('Choose language order', 'ceceppaml') ?>" class="tipsy-me"></td>
-      <td style="width: 5%;"><?php _e('Flag', 'ceceppaml') ?></td>
-      <td style="width:65%"><?php _e('Name of the language ', 'ceceppaml') ?></td>
-      <td style="width:5%"><img src="<?php echo CECEPPA_PLUGIN_URL ?>images/enabled.png" title="<?php _e('Enabled', 'ceceppaml') ?>?" class="tipsy-me" height="24"></td>
-      <td style="width: 5%">
+      <th style="width: 1%;padding: 0 5px 0 5px;"><img src="<?php echo CECEPPA_PLUGIN_URL ?>images/default.png" title="<?php _e('Default language', 'ceceppaml') ?>" class="tipsy-me"></th>
+      <th style="width: 1%;padding: 0 5px 0 5px;"><img src="<?php echo CECEPPA_PLUGIN_URL ?>images/sort.png" title="<?php _e('Choose language order', 'ceceppaml') ?>" class="tipsy-me"></th>
+      <th style="width: 230px;"><?php _e('Flag', 'ceceppaml') ?></th>
+      <th style="width:73%"><?php _e('Name of the language ', 'ceceppaml') ?></th>
+      <th style="width:5%"><img src="<?php echo CECEPPA_PLUGIN_URL ?>images/enabled.png" title="<?php _e('Enabled', 'ceceppaml') ?>?" class="tipsy-me" height="24"></th>
+      <th style="width: 5%">
 	<a href="#" onclick="javascript: toggleDetails(-1)"><img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/details.png" width="32" title="<?php _e('Show/Hide advanced options for languages.') ?>"></a>
-      </td>
+      </th>
     </tr>
+    </thead>
 <?php
     global $wpdb;
 
@@ -69,8 +74,9 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
     
     foreach($results as $result) :
 ?>
-    <tr id="lang-<?php echo $result->id ?>" class="lang-row">
-      <td rowspan="2">
+    <?php $alternate = @empty($alternate) ? "alternate" : ""; ?>
+    <tr id="lang-<?php echo $result->id ?>" class="lang-row <?php echo $alternate ?>">
+      <td rowspan="2" align="center">
 	  <input type="hidden" name="id[]" value="<?php echo $result->id ?>" />
 <!-- Default (radio) -->
 	  <input type="radio" name="default" value="<?php echo $result->id ?>" <?php echo ($result->cml_default == 1) ? "checked" : "" ?> />
@@ -85,7 +91,7 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 	  </td>
 <!-- nome della lingua -->
 	  <td>
-	    <input name="language[]" type="text" id="language-<?php echo $result->id ?>" value="<?php echo $result->cml_language; ?>">
+	    <input name="language[]" type="text" id="language-<?php echo $result->id ?>" value="<?php echo $result->cml_language; ?>" style="width: 100%">
 	  </td>
 <!-- Attiva lingua-->
 			<td>
@@ -94,22 +100,24 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
       <th>
 <!-- Dettagli e cancella -->
 		<a href="#" onclick="javascript: toggleDetails(<?php echo $result->id ?>)"><img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/details.png" width="32" title="<?php _e('Show/Hide advanced options for languages', 'ceceppaml') ?>"></a><br />
-		<a href="javascript: void(0)" class="_delete" id="_delete-<?php echo $result->id ?>"><img class="delete" src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/delete.png" width="32" title="<?php _e('Delete the selected language', 'ceceppaml') ?>"></a>
+		<a href="javascript: void(0)" class="_delete" id="_delete-<?php echo $result->id ?>" style="padding-left: 8px"><img class="delete" src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/delete.png" width="16" title="<?php _e('Delete current language', 'ceceppaml') ?>"></a>
 	  </th>
     </tr>
 	<tr>
-	  <td colspan="4">
-	    <table class="ceceppaml">
+	  <td colspan="5">
+	    <table class="wp-list-table widefat">
+	      <thead>
 	      <tr>
-		<td style="background: none; font-size: 1.1em;;width:100px"><?php _e('Url slug', 'ceceppaml'); ?></td>
-		<td style="background: none; font-size: 1.1em;"><?php _e('Post notice', 'ceceppaml'); ?></td>
-		<td style="background: none; font-size: 1.1em;"><?php _e('Page notice', 'ceceppaml'); ?></td>
-		<td style="background: none; font-size: 1.1em;width:100px"><?php _e('Locale Wordpress', 'ceceppaml') ?></td>
+		<th style="width:100px"><?php _e('Url slug', 'ceceppaml'); ?></th>
+		<th><?php _e('Post notice', 'ceceppaml'); ?></th>
+		<th><?php _e('Page notice', 'ceceppaml'); ?></th>
+		<th style="width:100px"><?php _e('Locale Wordpress', 'ceceppaml') ?></th>
 	      </tr>
+	      </thead>
 	      <tr>
 		<td><input name="language_slug[]" class="_tipsy" id="slug-<?php echo $result->id ?>" value="<?php echo $result->cml_language_slug ?>" type="text" style="margin-left:2%;" title="<?php _e('Allows you to specify an abbreviation to be used in the URL of the page. <br /> Ex: <br /> www.example.com / en <br /> www.example.com / uk', 'ceceppaml') ?>" /></td>
-		<td><input name="notice_post[]" class="_tipsy" type="text" value="<?php echo $result->cml_notice_post; ?>" style="margin-left:2%;" title="<?php _e('Define the text of the notice to be displayed when the post is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
-		<td><input name="notice_page[]" class="_tipsy" type="text" value="<?php echo $result->cml_notice_page; ?>" style="margin-left:2%;" title="<?php _e('Define the text of the notice to be displayed when the page is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
+		<td><input name="notice_post[]" class="_tipsy" type="text" value="<?php echo stripslashes($result->cml_notice_post); ?>" style="margin-left:2%;" title="<?php _e('Define the text of the notice to be displayed when the post is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
+		<td><input name="notice_page[]" class="_tipsy" type="text" value="<?php echo stripslashes($result->cml_notice_page); ?>" style="margin-left:2%;" title="<?php _e('Define the text of the notice to be displayed when the page is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
 		<td><input name="locale[]" class="_tipsy" id="locale-<?php echo $result->id ?>" type="text" value="<?php echo $result->cml_locale ?>" title="<?php _e('Helps to link correctly the defined language by the user\'s browser. ', 'ceceppaml') ?>" /></td>
 	      </tr>
 	    </table>
@@ -118,7 +126,7 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 <?php
     endforeach;
 ?>
-    <tr>
+    <tr class="<?php echo @empty($alternate) ? "alternate" : ""; ?>">
 <!-- Nuovo record -->
       <td rowspan="2">
 		<input type="hidden" name="id[]" value="" />
@@ -126,7 +134,8 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
       </td>
 <!--  Order  -->
       <td rowspan="2">
-	  <input type="text" name="sort-id[]" value="<?php echo $result->sort_id ?>" size="3" style="width: 30px" />
+	  <?php $max = $wpdb->get_var("SELECT max(cml_sort_id) + 1 FROM " . CECEPPA_ML_TABLE); ?>
+	  <input type="text" name="sort-id[]" value="<?php echo $max ?>" size="3" style="width: 30px" />
       </td>
       <td><?php ceceppa_show_flags($_langs, "x", null) ?></td>
       <td><input name="language[]" id="language-x" type="text"></td>
@@ -137,13 +146,15 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
     </tr>
 	<tr>
 	  <td colspan="5">
-	    <table>
+	    <table class="wp-list-table widefat">
+	      <thead>
 	      <tr>
-		<td style="background: none; font-size: 1.1em;width:100px"><?php _e('Url slug', 'ceceppaml'); ?></td>
-		<td style="background: none; font-size: 1.1em;"><?php _e('Post notice', 'ceceppaml'); ?></td>
-		<td style="background: none; font-size: 1.1em;"><?php _e('Page notice', 'ceceppaml'); ?></td>
-		<td style="background: none; font-size: 1.1em;width:100px"><?php _e('Locale Wordpress', 'ceceppaml') ?></td>
+		<th style="width:100px"><?php _e('Url slug', 'ceceppaml'); ?></th>
+		<th><?php _e('Post notice', 'ceceppaml'); ?></th>
+		<th><?php _e('Page notice', 'ceceppaml'); ?></th>
+		<th style="width:100px"><?php _e('Locale Wordpress', 'ceceppaml') ?></th>
 	      </tr>
+	      </thead>
 	      <tr>
 		<td><input name="language_slug[]" class="_tipsy" id="slug-x" type="text" style="margin-left:2%" title="<?php _e('Allows you to specify an abbreviation to be used in the URL of the page. <br /> Ex: <br /> www.example.com / en <br /> www.example.com / uk', 'ceceppaml') ?>" /></td>
 		<td><input name="notice_post[]" class="_tipsy" type="text" style="margin-left:2%" title="<?php _e('Define the text of the notice to be displayed when the post is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
@@ -161,12 +172,24 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
     </div>
     <br />
     </form>
+    </div>
+    <?php else:
+      require_once("mo-downloader.php");
+
+      echo '<div class="ceceppa-form">';
+      $d = new CMLMoDownloader();
+      $d->init();
+      echo '</div>';
+
+      endif; ?>
 
     <!-- DONATE   -->
-    <div id="donate" class="cml-donate">
+    <div id="postbox-container-1" class="postbox-container cml-donate">
       <?php do_meta_boxes('cml_donate_box','advanced',null); ?>
     </div>
 
+    </div>
+    </div>
     <br />
 </div>
 <?php

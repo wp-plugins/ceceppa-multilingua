@@ -36,14 +36,14 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
     <a class="nav-tab <?php echo $tab == 2 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-options-page&tab=2"><?php _e('Filters', 'ceceppaml') ?></a>
   </h2>
 
-  <div class="CSSTableGenerator cml-content">
-    <form class="ceceppa-form" name="wrap" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>?page=ceceppaml-options-page">
+  <div id="poststuff">
+    <div id="post-body" class="metabox-holder columns-2">
+    <div id="post-body-content">
+    <form class="ceceppa-form-options" name="wrap" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>?page=ceceppaml-options-page">
     <?php wp_nonce_field('cml_edit_settings','cml_nonce_edit_settings'); ?>
     <input type="hidden" name="options" value="1"  />
     <input type="hidden" name="tab" value="<?php echo $tab ?>"  />
 	<div class="cml-options">
-
-	<br />
 	<?php 
 	
 	  if($tab == 0) : 
@@ -57,7 +57,7 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 <!-- AZIONI -->
 <!--  -->
 <?php if($tab == 1) : ?>
-	<table id="ceceppaml-table">
+	<table id="ceceppaml-table" class="widefat">
 	    <tbody>
 <!-- Url -->
 	    <tr>
@@ -82,8 +82,8 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 	    </td>
 	    </tr>
 <!-- Categorie -->
-	    <tr>
-	    <td id="cats-tags"><center>
+	    <tr class="alternate">
+	    <td id="cats-tags" ><center>
 		<strong><?php _e('Categories & Tags', 'ceceppaml'); ?></strong><br /><br />
 		<img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/category.png" />
 	    </center></td>
@@ -129,7 +129,7 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 		</blockquote>
 	    </td>
 	    </tr>
-	<tr>
+	    <tr class="alternate">
 	    <td><center>
 		<strong><?php _e('Show language\'s flag:', 'ceceppaml') ?></strong><br /><br />
 		<img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/flags.png" />
@@ -216,7 +216,7 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 	</td>
 	<tr>
 <!-- Commenti -->
-	    <tr>
+	    <tr class="alternate">
 	    <td><center>
 		<strong><?php _e('Comments', 'ceceppaml'); ?></strong><br /><br />
 		<img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/comments.png" />
@@ -230,7 +230,7 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 	    </tr>
 	  </table>
 <? elseif($tab == 2) : ?>
-	  <table id="ceceppaml-table">
+	  <table id="ceceppaml-table" class="widefat">
 <!-- Applica locale wordpress in base alla bandierina -->
 	<tr>
 	<td><center>
@@ -246,7 +246,7 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 	</td>
 	</tr>
 <!-- Filtra Post in base alla lingua -->
-	<tr>
+	<tr class="alternate">
 	<td><center>
 	    <strong><?php _e('Filter posts', 'ceceppaml') ?></strong><br /><br /><br />
 	    <img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/posts.png" />
@@ -274,7 +274,7 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 	</td>
 	</tr>
 <!-- Filtra query -->
-	<tr>
+	<tr class="alternate">
 	<td><center>
 	    <strong><?php _e('Filter query', 'ceceppaml') ?></strong><br /><br /><br />
 	    <img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/filter.png" />
@@ -319,7 +319,9 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
   </div>
   
 <!-- DONATE   -->
-  <div id="donate" class="cml-donate">
+  <div id="postbox-container-1" class="postbox-container cml-donate">
     <?php do_meta_boxes('cml_donate_box','advanced',null); ?>
+  </div>
+  </div>
   </div>
 </div>
