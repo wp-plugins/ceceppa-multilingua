@@ -128,6 +128,8 @@ function bwp_url_to_postid($url)
     }
  
     // Check to see if we are using rewrite rules
+    if(!is_object($rewrite)) return;
+
     $rewrite = $wp_rewrite->wp_rewrite_rules();
 
     // Not using rewrite rules, and 'p=N' and 'page_id=N' methods failed, so we're out of options
