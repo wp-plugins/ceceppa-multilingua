@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.2.2
+Version: 1.2.3
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -394,7 +394,6 @@ class CeceppaML {
       
       $language = $result->cml_language_slug;
 
-      //From qTranslate
       $link = (strpos($link, "wp-admin/") === false) ? preg_replace('#[^?&]*/#i', '', $link) : preg_replace('#[^?&]*wp-admin/#i', '', $link);
       if(strpos($link, "?")===0||strpos($link, "index.php?")===0) {
           if(current_user_can('manage_options')) 
@@ -1684,7 +1683,7 @@ class CeceppaML {
    * Cambio il locale in base alla lingua selezionata
    */  
   function setlocale($locale) {
-    global $wpdb, $wp_rewrite, $pagenow;
+    global $wpdb, $pagenow;
 
     if($pagenow == "wp-login.php") return $locale;
 
@@ -1895,7 +1894,7 @@ class CeceppaML {
     $mods = get_theme_mods();
     $locations = get_theme_mod('nav_menu_locations');
 
-    //Se non inizia per cml_ allora sarà quella definita dal tema :)
+    //Se non inizia per cml_ allora sarà quella definito dal tema :)
     if(is_array($locations)) :
 	$keys = array_keys($locations);
 	foreach($keys as $key) :
@@ -1903,10 +1902,11 @@ class CeceppaML {
 	    $menu = $this->_current_lang;
 
 	    if(!empty($locations["cml_menu_$menu"])) {
-		$locations[$key] = $locations["cml_menu_$menu"];
+	      //Se ho scelto un menu diverso per la lingua corrente, non devo "tradurre" le etichette
+	      $this->_no_translate_menu_item = ($locations[$key] != $locations["cml_menu_$menu"]);
 
-		$this->_no_translate_menu_item = true;
-		set_theme_mod('nav_menu_locations', $locations);
+	      $locations[$key] = $locations["cml_menu_$menu"];
+	      set_theme_mod('nav_menu_locations', $locations);
 	    }
 
 	    //Esco dal ciclo
@@ -2252,7 +2252,7 @@ class CeceppaML {
 
 	      break;
 	    case 'category':
-	      $id = get_cat_ID($item->title);
+	      $id = $item->object_id;
 	      if(!empty($id)) :
 		  $lang = $this->_current_lang_id;
 
@@ -2628,7 +2628,7 @@ class CeceppaML {
     $langs = cml_get_languages(0);
     foreach($langs as $lang) :
       $language = $lang->cml_language_slug;
-      $link = add_query_arg( array('lang', $language) );
+      $link = add_query_arg( array('lang' => $language) );
 
       $title = '<img src="' . cml_get_flag($lang->cml_flag) . '">&nbsp;' . $lang->cml_language;
       $wp_admin_bar->add_menu( array( 'id' => 'cml_lang' . $lang->id, 'title' => $title, 'href' => $link) );

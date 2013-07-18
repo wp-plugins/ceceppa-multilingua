@@ -128,7 +128,7 @@ function bwp_url_to_postid($url)
     }
  
     // Check to see if we are using rewrite rules
-    if(!is_object($rewrite)) return;
+    if(!is_object($wp_rewrite)) return;
 
     $rewrite = $wp_rewrite->wp_rewrite_rules();
 
