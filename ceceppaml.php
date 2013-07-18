@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.2.3
+Version: 1.2.4
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -1697,7 +1697,7 @@ class CeceppaML {
 
     $is_category = explode("/", $this->_clean_url);
     $is_category = $is_category[0] == "category";
-    if(isset($_GET['lang']) || $this->_url_mode == PRE_DOMAIN || $is_category) :
+    if(isset($_GET['lang']) || (($this->_url_mode == PRE_DOMAIN || $is_category) && !is_admin())) :
       //Questo metodo funziona correttamente solamente quando è abilitata
       //la modalità PRE_DOMAIN, oppure nell'url viene passato il parametro ?lang
       $this->update_current_lang();
@@ -1714,8 +1714,6 @@ class CeceppaML {
 
 	$this->_force_current_language = $this->get_language_id_by_locale($locale);
       else:
-	$url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-
 	//Funzione con alcuni tipi di permalink, quali ?p=##, archives/ e non nel pannello di admin (almeno in alcuni casi)
 	$the_id = 0;
 	if(!is_admin()) 
@@ -1810,7 +1808,7 @@ class CeceppaML {
     $permalink = get_option("permalink_structure");
     if(!is_admin() && empty($permalink) && empty($the_id)) {
 	$url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-	$the_id  = url_to_postid($url);
+	$the_id  = bwp_url_to_postid($url);
     }
 
     if(is_single() || is_page()) :
