@@ -3,7 +3,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate
 Requires at least: 3.4.1
 Tested up to: 3.6
-Stable tag: 1.2.4
+Stable tag: 1.2.5
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG
@@ -45,19 +45,25 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 Ceceppa Multilingua supports infinite language, which can be easily added/modified/deleted via the comfortable Configuration Page.
 All you need to do is activate the plugin, configure categories and start writing the content!
 
+= About =
 For more Information visit the [Plugin Homepage](http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/)
 
-Video demo: [Plugin demo](http://www.youtube.com/watch?v=fAPIQonud-E).
+= Demo =
+[Plugin demo](http://www.youtube.com/watch?v=fAPIQonud-E).
 
+= Flags =
 Flags directory are downloaded from [Flags](http://blog.worldofemotions.com/danilka/)
 
+= Icons =
 Some icons from [Icons](http://www.iconfinder.com/)
-
 Directions icon from [Deviantart](http://emey87.deviantart.com/)
 
+= jQuery plugins =
 Tooltip plugin for Jquery [Tipsy](http://onehackoranother.com/projects/jquery/tipsy/)
-
 jQuery image dropdown [DD](http://www.marghoobsuleman.com/jquery-image-dropdown)
+
+= Php gettext =
+Php-gettext by Danilo Shegan [php-gettext] https://launchpad.net/php-gettext/
 
 == Installation ==
 
