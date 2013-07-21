@@ -178,7 +178,7 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
   foreach($results as $result) :
     $lang = ($show == "flag") ? "" : $result->cml_language;
 
-    if(is_home()) {
+    if(cml_is_homepage()) {
         //Se stò nella home vuol dire che ho scelto come metodo di reindirizzamento &lang
     	$link = "?lang=$result->cml_language_slug";
     } else {
@@ -436,6 +436,18 @@ function cml_get_current_language_id() {
 
 /* Controllo se sto nella homepage */
 function cml_is_homepage() {
+  //Controllo se è stata impostata una pagina "statica" se l'id di questa è = a quello della statica
+  if(cml_use_static_page()) :
+    $static_id = get_option("page_for_posts") + get_option("page_on_front");
+    
+    $url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $homeUrl = home_url() . "/";
+    $cleanUrl = str_replace($homeUrl, "", $url);
+    $the_id = cml_get_page_id_by_path( $cleanUrl, array('page') );
+
+    return $the_id == $static_id;
+  endif;
+
   //Non posso utilizzare la funzione is_home, quindi controllo "manualmente"
   $url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
   $home = home_url() . "/";
@@ -444,6 +456,20 @@ function cml_is_homepage() {
   $constructed_url = $url_parts['scheme'] . '://' . $url_parts['host'] . (isset($url_parts['path'])?$url_parts['path']:'');
 
   return $constructed_url  == $home;
+}
+
+function cml_get_page_id_by_path($url, $types = null) {
+  $plinks = explode("/", $url);
+
+  //Se l'ultimo elemento è vuoto, lo cancello ;)
+  if(substr($url, -1) == "/") array_pop($plinks);
+  $title = array_pop($plinks);
+
+  if($types == null) $types = array_keys(get_post_types()); 
+  $p = cml_get_page_by_path( $title, OBJECT, $types );
+  $the_id = is_object($p) ? $p->ID : 0;
+  
+  return $the_id;
 }
 
 function cml_debug_print($string) {

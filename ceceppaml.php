@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.2.4
+Version: 1.2.5
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -93,6 +93,7 @@ class CeceppaML {
     $this->_default_language = $wpdb->get_var("SELECT cml_language FROM " . CECEPPA_ML_TABLE . " WHERE cml_default = 1");
     $this->_default_language_id = $wpdb->get_var("SELECT id FROM " . CECEPPA_ML_TABLE . " WHERE cml_default = 1");
     $this->_default_language_slug = $wpdb->get_var("SELECT cml_language_slug FROM " . CECEPPA_ML_TABLE . " WHERE cml_default = 1");
+    $this->_default_language_locale = $wpdb->get_var("SELECT cml_locale FROM " . CECEPPA_ML_TABLE . " WHERE cml_default = 1");
     $this->_url_mode = (get_option("cml_add_slug_to_link", true)) ? get_option("cml_modification_mode") : 1;
     /* Il permalink di default ?p=## e la struttura /en/ non vanno per nulla d'accordo */
     $permalink = get_option("permalink_structure");
@@ -189,6 +190,7 @@ class CeceppaML {
       if(get_option("cml_option_filter_posts", false)) {
 	add_action('pre_get_posts', array(&$this, 'filter_posts_by_language'));
       }
+
 
       /*
       * Nascondo i post "collegati", quindi tra quelli collegati visualizzo solo quelli
@@ -296,7 +298,7 @@ class CeceppaML {
     //Update current language
     add_action( 'init', array(&$this, 'update_current_lang'));
     add_filter('wp_head', array(&$this, 'update_current_lang'));
-    add_filter('wp_title', array(&$this, 'update_current_lang'));
+//     add_filter('wp_title', array(&$this, 'update_current_lang'));
 
     /*
     * Nella pagina "menu", aggiungo una lista per ogni lingua
@@ -1720,15 +1722,7 @@ class CeceppaML {
 	  $the_id = bwp_url_to_postid($this->_url);
 
 	if(empty($the_id)) :
-	  $plinks = explode("/", $this->_clean_url);
-
-	  //Se l'ultimo elemento è vuoto, lo cancello ;)
-	  if(substr($this->_clean_url, -1) == "/") array_pop($plinks);
-	  $title = array_pop($plinks);
-
-	  $types = array_keys(get_post_types()); 
-	  $p = cml_get_page_by_path( $title, OBJECT, array('post') );
-	  $the_id = is_object($p) ? $p->ID : 0;
+	  $the_id = cml_get_page_id_by_path($this->_clean_url);
 	endif;
 
 	//Qualcosa è andato storto, non modifico il "locale"
@@ -1767,6 +1761,14 @@ class CeceppaML {
     //Il locale posso modificarlo solo se ho inviato alcun output, quindi è inutile che wp
     //richiami questa funzione varie volte... ;)
     remove_filter('locale', array(&$this, 'setlocale'));
+
+    if(empty($locale)) :
+      $this->_current_lang = $this->_default_language;
+      $this->_current_lang_id = $this->_default_language_id;
+      $this->_current_lang_locale = $this->_default_language_locale;
+      
+      $locale = $this->_current_lang_locale;
+    endif;
 
     return $locale;
   }
@@ -2048,6 +2050,8 @@ class CeceppaML {
    */
   function get_current_language() {
     global $wpdb;
+
+    if(empty($this->_current_lang_id)) $this->update_current_lang();
 
     $query = sprintf("SELECT * FROM %s WHERE id = %d", CECEPPA_ML_TABLE, $this->_current_lang_id);
     $info = $wpdb->get_row($query);
@@ -2625,11 +2629,17 @@ class CeceppaML {
 
     $langs = cml_get_languages(0);
     foreach($langs as $lang) :
-      $language = $lang->cml_language_slug;
-      $link = add_query_arg( array('lang' => $language) );
+      $id = get_the_ID();
+      $linked = cml_get_linked_post($this->_current_lang, $lang, $id, $lang->id);
+      
+      if(empty($linked)) :
+	$url = home_url() . '?lang=' . $lang->cml_language_slug;
+      else:
+	$url = get_permalink($linked);
+      endif;
 
       $title = '<img src="' . cml_get_flag($lang->cml_flag) . '">&nbsp;' . $lang->cml_language;
-      $wp_admin_bar->add_menu( array( 'id' => 'cml_lang' . $lang->id, 'title' => $title, 'href' => $link) );
+      $wp_admin_bar->add_menu( array( 'id' => 'cml_lang' . $lang->id, 'title' => $title, 'href' => $url) );
     endforeach;
   }
   
@@ -2771,7 +2781,16 @@ class CeceppaML {
 
     $item = '<li class="menu-item menu-cml-flag">';
 
-    $item .= '<a href="' . home_url() . '?lang=' . $lang->cml_language_slug . '">';
+    $id = get_the_ID();
+    $linked = cml_get_linked_post($this->_current_lang, $lang, $id, $lang->id);
+    
+    if(empty($linked)) :
+      $url = home_url() . '?lang=' . $lang->cml_language_slug;
+    else:
+      $url = get_permalink($linked);
+    endif;
+
+    $item .= '<a href="' . $url . '">';
     if($display != 2) :
       $item .= "<img src=\"" . cml_get_flag_by_lang_id($lang->id, $size) . "\" title=\"$lang->cml_language\"/>";
     endif;

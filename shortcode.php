@@ -100,7 +100,7 @@ function cml_show_available_langs($attrs) {
       if(!$is_static) {
         $link = (is_category()) ? $link : get_permalink($link);
       } else {
-        $link = add_query_arg(array("lang" => $lang->cml_language_slug), get_site_url());
+        $link = add_query_arg( array("lang" => $lang->cml_language_slug), get_site_url() );
       }
 
       $title = $lang->cml_language; //($notice && $l_id != $lang->id) ? cml_get_notice_by_lang_id($lang->id) : $lang->cml_language;
