@@ -71,7 +71,7 @@ function cml_widgets_title($wtitles) {
 	$d = cml_translate($title, $lang->id, 'W', false, true);
 	$d = str_replace("\"", "&quot;", $d);
 	echo "<td>\n";
-	echo "<input type=\"text\" name=\"lang_" . $lang->id . "[]\" value=\"$d\" /></td>\n";
+	echo "<input type=\"text\" name=\"lang_" . $lang->id . "[]\" value=\"$d\"  style=\"width: 100%\" /></td>\n";
 
 	$i++;
       endforeach;

@@ -93,7 +93,6 @@ class CMLMoDownloader {
     global $wpdb, $wp_version;
 
     $version = substr($wp_version, 0, 3);
-    $version = "3.5";
     $exists = false;
 
     $locale = $wpdb->get_var("SELECT cml_locale FROM " . CECEPPA_ML_TABLE . " WHERE id = " . intval($id));

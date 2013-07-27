@@ -116,8 +116,8 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 	      </thead>
 	      <tr>
 		<td><input name="language_slug[]" class="_tipsy" id="slug-<?php echo $result->id ?>" value="<?php echo $result->cml_language_slug ?>" type="text" style="margin-left:2%;" title="<?php _e('Allows you to specify an abbreviation to be used in the URL of the page. <br /> Ex: <br /> www.example.com / en <br /> www.example.com / uk', 'ceceppaml') ?>" /></td>
-		<td><input name="notice_post[]" class="_tipsy" type="text" value="<?php echo stripslashes($result->cml_notice_post); ?>" style="margin-left:2%;" title="<?php _e('Define the text of the notice to be displayed when the post is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
-		<td><input name="notice_page[]" class="_tipsy" type="text" value="<?php echo stripslashes($result->cml_notice_page); ?>" style="margin-left:2%;" title="<?php _e('Define the text of the notice to be displayed when the page is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
+		<td><input name="notice_post[]" class="_tipsy" type="text" value="<?php echo stripslashes($result->cml_notice_post); ?>" style="margin-left:2%; width: 100%" title="<?php _e('Define the text of the notice to be displayed when the post is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
+		<td><input name="notice_page[]" class="_tipsy" type="text" value="<?php echo stripslashes($result->cml_notice_page); ?>" style="margin-left:2%; width: 100%" title="<?php _e('Define the text of the notice to be displayed when the page is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
 		<td><input name="locale[]" class="_tipsy" id="locale-<?php echo $result->id ?>" type="text" value="<?php echo $result->cml_locale ?>" title="<?php _e('Helps to link correctly the defined language by the user\'s browser. ', 'ceceppaml') ?>" /></td>
 	      </tr>
 	    </table>
@@ -133,12 +133,12 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 		<input type="radio" name="default[]" />
       </td>
 <!--  Order  -->
-      <td rowspan="2">
+      <td>
 	  <?php $max = $wpdb->get_var("SELECT max(cml_sort_id) + 1 FROM " . CECEPPA_ML_TABLE); ?>
 	  <input type="text" name="sort-id[]" value="<?php echo $max ?>" size="3" style="width: 30px" />
       </td>
       <td><?php ceceppa_show_flags($_langs, "x", null) ?></td>
-      <td><input name="language[]" id="language-x" type="text"></td>
+      <td><input name="language[]" id="language-x" type="text" style="width: 100%"></td>
       <td></td>
       <td style="text-align: center">
 	<img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/addlang.png" width="32" />
@@ -157,8 +157,8 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 	      </thead>
 	      <tr>
 		<td><input name="language_slug[]" class="_tipsy" id="slug-x" type="text" style="margin-left:2%" title="<?php _e('Allows you to specify an abbreviation to be used in the URL of the page. <br /> Ex: <br /> www.example.com / en <br /> www.example.com / uk', 'ceceppaml') ?>" /></td>
-		<td><input name="notice_post[]" class="_tipsy" type="text" style="margin-left:2%" title="<?php _e('Define the text of the notice to be displayed when the post is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
-		<td><input name="notice_page[]" class="_tipsy" type="text" style="margin-left:2%" title="<?php _e('Define the text of the notice to be displayed when the page is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
+		<td><input name="notice_post[]" class="_tipsy" type="text" style="margin-left:2%; width: 100%" title="<?php _e('Define the text of the notice to be displayed when the post is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
+		<td><input name="notice_page[]" class="_tipsy" type="text" style="margin-left:2%; width: 100%" title="<?php _e('Define the text of the notice to be displayed when the page is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
 		<td><input name="locale[]" class="_tipsy" id="locale-x" type="text" title="<?php _e('Helps to link correctly the defined language by the user\'s browser. ', 'ceceppaml') ?>" /></td>
 	      </tr>
 	    </table>

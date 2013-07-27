@@ -50,7 +50,9 @@ class CeceppaMLLanguages {
 				'cml_enabled' => 1,
 				'cml_sort_id' => $_POST['sort-id'][$i]),
 			    array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d'));
-	    $d->download_language($wpdb->insert_id, $_POST['language'][$i]);
+
+	    if(substr($lang, 2) != "en")
+	      $d->download_language($wpdb->insert_id, $_POST['language'][$i]);
 	  endif;
 	} else {
 	    $wpdb->update(CECEPPA_ML_TABLE,

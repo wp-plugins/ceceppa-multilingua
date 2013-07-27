@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.2.5
+Version: 1.2.6
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -23,7 +23,7 @@ if ( !function_exists( 'add_action' ) ) {
 
 global $wpdb;
 
-define('CECEPPA_DB_VERSION', 16);
+define('CECEPPA_DB_VERSION', 17);
 
 define('CECEPPA_ML_TABLE', $wpdb->base_prefix . 'ceceppa_ml');
 define('CECEPPA_ML_CATS', $wpdb->base_prefix . 'ceceppa_ml_cats');
@@ -67,16 +67,20 @@ class CeceppaML {
   protected $_filter_search = true;
   protected $_filter_form_class = "searchform";
   protected $_no_translate_menu_item = false;
-  protected $_url_mode = 1;
+  protected $_url_mode = PRE_PATH;
   protected $_posts_of_lang = array();	//Al fine di evitare chiamate continue al db precarico nella variabile i post associati ad ogni lingua
   protected $_translations_by_lang = array();  //Memorizzo gli id di tutte le traduzioni per ogni lingua
 
   public function __construct() {
     global $wpdb;
 
+    $this->_domain = $matches[0][0];
     $this->_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
     $this->_homeUrl = home_url() . "/";
-    $this->_clean_url = str_replace($this->_homeUrl, "", $this->_url);
+    $this->_base_url = str_replace("http://" . $_SERVER['HTTP_HOST'], "", get_option('home'));
+    $this->_request_url = str_replace($this->_homeUrl, "", $this->_url);
+    $this->_permalink_structure = get_option( "permalink_structure" );
+
     /*
     * Se utilizzo add_action per caricare gli script quando richiesto,
     * non mi vengono "caricati" nelle verie funzioni a disposizione :(
@@ -94,10 +98,10 @@ class CeceppaML {
     $this->_default_language_id = $wpdb->get_var("SELECT id FROM " . CECEPPA_ML_TABLE . " WHERE cml_default = 1");
     $this->_default_language_slug = $wpdb->get_var("SELECT cml_language_slug FROM " . CECEPPA_ML_TABLE . " WHERE cml_default = 1");
     $this->_default_language_locale = $wpdb->get_var("SELECT cml_locale FROM " . CECEPPA_ML_TABLE . " WHERE cml_default = 1");
-    $this->_url_mode = (get_option("cml_add_slug_to_link", true)) ? get_option("cml_modification_mode") : 1;
+    $this->_url_mode = get_option( "cml_modification_mode", 1 );
+
     /* Il permalink di default ?p=## e la struttura /en/ non vanno per nulla d'accordo */
-    $permalink = get_option("permalink_structure");
-    if(empty($permalink) && $this->_url_mode == PRE_PATH) $this->_url_mode = PRE_NONE;
+    if( empty( $this->_permalink_structure ) && $this->_url_mode == PRE_PATH ) $this->_url_mode = PRE_NONE;
 
     //Wow
     $this->preload_posts();
@@ -188,7 +192,7 @@ class CeceppaML {
       * Filter posts by language
       */
       if(get_option("cml_option_filter_posts", false)) {
-	add_action('pre_get_posts', array(&$this, 'filter_posts_by_language'));
+	add_action('pre_get_posts', array( &$this, 'filter_posts_by_language' ), 0);
       }
 
 
@@ -261,12 +265,15 @@ class CeceppaML {
 	add_filter('get_comments_number', array(&$this, 'get_comments_number'));
       endif;
 
-      //Aggiorno la lingua corrente quando sto per visualizzare un post
-      add_filter('pre_get_posts', array(&$this, 'update_current_lang'));
-
       //E' stata utilizzata una pagina statica come homepage?
-      if(cml_is_homepage() && cml_use_static_page())
-	add_filter('pre_get_posts', array(&$this, 'get_static_page'));
+      if( cml_use_static_page() && $this->is_homepage() ) :
+	//is_home a questo "punto" non funziona :(
+	$this->update_current_lang();
+
+	//Se è una lingua valida controllo...
+	if( $this->_current_lang_id != $this->_default_language_id )
+	  add_filter( 'pre_get_posts', array( &$this, 'get_static_page' ), 0 );
+      endif;
 
       //Filtro il link degli archivi :)
       add_filter('get_archives_link', array(&$this, 'translate_archives_link'));
@@ -293,12 +300,14 @@ class CeceppaML {
       if(get_option("cml_add_float_div", false) == true) :
 	add_action('wp_head', array(&$this, 'add_flying_flags'));
       endif;
+    
+      //La funzione clean_url si occupa di eliminare lo slug della lingua dal link,
+      //affinché wp processi il link correttamente
+      add_filter( 'pre_get_posts', array(&$this, 'clean_url') );
     }
     
     //Update current language
-    add_action( 'init', array(&$this, 'update_current_lang'));
-    add_filter('wp_head', array(&$this, 'update_current_lang'));
-//     add_filter('wp_title', array(&$this, 'update_current_lang'));
+    add_action( 'init', array(&$this, 'update_current_lang') );
 
     /*
     * Nella pagina "menu", aggiungo una lista per ogni lingua
@@ -306,18 +315,20 @@ class CeceppaML {
     add_action('init', array(&$this, 'add_menus'));
     add_action('wp_footer', array(&$this, 'restore_default_menu'));
     
-    //Translate post_link
-    add_filter('post_link', array(&$this, 'translate_post_link'), 0, 3);
+    //Translate post_link e page_link
+    add_filter('post_link', array( &$this, 'translate_post_link' ), 0, 3);
+    add_filter('page_link', array( &$this, 'translate_page_link' ), 0);
 
-    add_filter('term_link', array(&$this, 'translate_term_link'), 0);
-    add_filter('term_name', array(&$this, 'translate_term_name'), 0, 1);
-    add_filter('single_cat_title', array(&$this, 'translate_term_name'));
+    add_filter('term_link', array( &$this, 'translate_term_link' ), 0);
+    add_filter('term_name', array( &$this, 'translate_term_name' ), 0, 1);
+    add_filter('single_cat_title', array( &$this, 'translate_term_name' ) );
 
     //Disabled by default
     $this->_translate_term_link = get_option("cml_option_translate_categories", 0);
 
     //Non posso tradurre il link delle categorie per il permalink di default :D
     if($this->_url_mode == PRE_PATH) :
+      add_filter('tag_link', array( &$this, 'translate_category_url' ), 0 );
       add_filter('category_link', array(&$this, 'translate_category_url'));
     endif;
     
@@ -329,6 +340,10 @@ class CeceppaML {
 
     //Aggiungo lo switch delle lingue nella barra dell'amministratore
     add_action( 'admin_bar_menu', array(&$this, 'add_bar_menu'), 1000);
+
+    //Next and Prev post
+    add_filter( 'get_previous_post_where', array( &$this, 'get_previous_post_where' ) );
+    add_filter( 'get_next_post_where', array( &$this, 'get_previous_post_where' ) );
 
     /*
     * Locale
@@ -442,9 +457,9 @@ class CeceppaML {
    */
   function add_option_page() {
     add_menu_page('Ceceppa ML Options', __('Ceceppa Multilingua', 'ceceppaml'), 'administrator', 'ceceppaml-language-page', array(&$this, 'form_languages'), CECEPPA_PLUGIN_URL . '/images/logo_mini.png');
-    //add_submenu_page('ceceppaml-language-page', __('Elenco articoli', 'ceceppaml'), __('Elenco articoli', 'ceceppaml'), 'manage_options', 'ceceppaml-posts-page', array(&$this, 'get_posts'));
     add_submenu_page('ceceppaml-language-page', __('Widget titles', 'ceceppaml'), __('Widget titles', 'ceceppaml'), 'manage_options', 'ceceppaml-widgettitles-page', array(&$this, 'form_widgettitles'));
     add_submenu_page('ceceppaml-language-page', __('My translations', 'ceceppaml'), __('My translations', 'ceceppaml'), 'manage_options', 'ceceppaml-translations-page', array(&$this, 'form_translations'));
+    add_submenu_page('ceceppaml-language-page', __('Flags', 'ceceppaml'), __('Flags', 'ceceppaml'), 'manage_options', 'ceceppaml-flags-page', array( &$this, 'form_options' ) );
     add_submenu_page('ceceppaml-language-page', __('Settings', 'ceceppaml'), __('Settings', 'ceceppaml'), 'manage_options', 'ceceppaml-options-page', array(&$this, 'form_options'));
     add_submenu_page('ceceppaml-language-page', __('Shortcode & Functions', 'ceceppaml'), __('Shortcode & Functions', 'ceceppaml'), 'manage_options', 'ceceppaml-shortcode-page', array(&$this, 'shortcode_page'));
   }
@@ -683,6 +698,7 @@ class CeceppaML {
 
     if($first_time) :
       update_option("cml_need_update_posts", true);
+      update_option("cml_first_install", true);
 
       /* Per comodità  creo nel database un record con la lingua corrente */
       $locale = get_locale();
@@ -708,9 +724,6 @@ class CeceppaML {
 	  
 	$this->_installed_language = $language;
 	$this->_installed_language_id = $wpdb->get_var("SELECT id FROM " . CECEPPA_ML_TABLE);
-
-	add_action( 'admin_notices', array(&$this, 'successfully_installed'));
-	
     endif;
 
     /**
@@ -934,9 +947,7 @@ class CeceppaML {
     if(!is_search()) {
       if(is_single() || is_admin() || isCrawler() || is_page() || is_preview()) return;
     } else {
-      if(!$this->_filter_search) return;
-
-      $this->update_current_lang();
+      if( !$this->_filter_search ) return;
     }
 
     global $wpdb;
@@ -979,7 +990,7 @@ class CeceppaML {
       endif;
 
       //Al momento utilizzo la vecchia funzione non ottimizzata per la visualizzazione dei tag
-      if(is_tag()) cml_deprecated_hide_translations_for_tags($wp_query);
+      if( is_tag() ) cml_deprecated_hide_translations_for_tags($wp_query);
 
       if($wp_query != null && is_object($wp_query) && is_array($this->_hide_posts)) :
 	$wp_query->query_vars['post__not_in'] = $this->_hide_posts;
@@ -1444,37 +1455,25 @@ class CeceppaML {
      * Se  non è abilitato il redirect del browser nella homepage
      * devo filtrare i contenuti in base alla lingua corrente
      */
+    //L'untente non è interessato al redirect
     if($this->_redirect_browser == 'nothing' || isCrawler()) return;
     if(is_admin()) return;
 
-    //Non posso utilizzare la funzione is_home, quindi controllo "manualmente"
-    $url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-    $home = home_url() . "/";
 
+    //Non posso utilizzare la funzione is_home, quindi controllo "manualmente"
     //Sto nell'home?
-    if($url != $home || isset($_GET['lang'])) {
-      return;
+    if($this->_url != $this->_homeUrl || isset($_GET['lang'])) {
+	return;
     }
 
     //Recupero info sulla disponibilità della lingua del browser
     global $wpdb;
 
     $lang = $this->get_browser_lang();
-    $slug = (empty($lang)) ? $this->_default_language_slug : $this->get_language_slug_by_id($lang);
+    $slug = ( empty( $lang ) ) ? $this->_default_language_slug : $this->get_language_slug_by_id($lang);
     //Redirect abilitato?
     if($this->_redirect_browser == 'auto') {
-      //Pagina statica?
-      $type = get_option("cml_option_redirect_type");
-      $permalink = get_option("permalink_structure");
-      if($type == 'slug' && !empty($permalink)) :
-	//Devo azzerare le opzioni sennò vado in loop :(
-	update_option('show_on_front', 'posts');
-	update_option('page_parent', 0);
-
-	$location = home_url() . "/$slug/";
-      else:
-	$location = home_url() . "/?lang=$slug";
-      endif;
+      $location = $this->get_home_url( $slug );
     }
 
     if(!empty($location)) {
@@ -1483,6 +1482,32 @@ class CeceppaML {
       wp_redirect($location, $status);
       exit;
     }
+  }
+
+ function clean_url() {
+    if( $this->_url_mode != PRE_PATH || isset($this->_clean_applied) ) return;
+
+    //Se è un articolo non rimuovo lo slug della lingua, altrimenti scompare anche dall'url :O
+    $id = cml_get_page_id_by_path( $this->_url, array('post') );
+    if( strpos( $this->_permalink_structure, "%category%" ) !== false && !empty( $id ) ) return;
+
+    $url = $this->_request_url;
+
+    if(preg_match("#^([a-z]{2})(/.*)?$#i", $url, $match)) :
+      $this->_force_current_language = $this->get_language_id_by_slug( $match[1] );
+
+      $url = substr($url, 3);
+
+      $this->_clean_request = $this->_base_url . "/" . $url;
+      $this->_clean_url = $this->_homeUrl . $url;
+      
+      //Inganno wordpress :D
+      $_SERVER['REQUEST_URI'] = $this->_clean_request;
+      
+      $this->_clean_applied = true;
+      
+      return $this->_clean_request;
+    endif;
   }
 
   /**
@@ -1689,86 +1714,30 @@ class CeceppaML {
 
     if($pagenow == "wp-login.php") return $locale;
 
-    //Mettiamo caso che l'applicazione del "locale" per qualche motivo "fallisce"
-    //faccio in modo che venga richiamata correttamente la funzione update_current_lang
-    //così da visualizzare il contenuto del sito nella lingua corretta...
-    $apply = true;
-
-    //Per qualche motivo non sempre sta funzione è disponibile quando viene richiamato setlocale :O
-    $logged_in = function_exists('is_user_logged_in') && is_user_logged_in();
-
-    $is_category = explode("/", $this->_clean_url);
-    $is_category = $is_category[0] == "category";
-    if(isset($_GET['lang']) || (($this->_url_mode == PRE_DOMAIN || $is_category) && !is_admin())) :
-      //Questo metodo funziona correttamente solamente quando è abilitata
-      //la modalità PRE_DOMAIN, oppure nell'url viene passato il parametro ?lang
-      $this->update_current_lang();
-      
-      $locale = $this->_current_lang_locale;
-    else:
-      if(is_admin() && $logged_in) : // && empty($l)) :
-	//Recupero l'info dalle opzioni
-	global $current_user;
-	get_currentuserinfo();
-
-	$user = $current_user->user_login;
-	$locale = get_option("cml_${user}_locale", $locale);
-
-	$this->_force_current_language = $this->get_language_id_by_locale($locale);
-      else:
-	//Funzione con alcuni tipi di permalink, quali ?p=##, archives/ e non nel pannello di admin (almeno in alcuni casi)
-	$the_id = 0;
-	if(!is_admin()) 
-	  $the_id = bwp_url_to_postid($this->_url);
-
-	if(empty($the_id)) :
-	  $the_id = cml_get_page_id_by_path($this->_clean_url);
-	endif;
-
-	//Qualcosa è andato storto, non modifico il "locale"
-	if(empty($the_id)) :
-	  $apply = false;
-	else:
-	  $id = $this->get_language_id_by_page_id($the_id);
-	  $locale = $this->get_language_locale_by_id($id);
-	endif;
-      endif;
-    endif;
-
-    //Per gli utenti "loggati" memorizzo la lingua selezionata
+    //Per gli utenti "loggati" memorizzo la lingua selezionata, nel pannello di amministrazione
     if(is_admin() && $logged_in) :
       global $current_user;
       get_currentuserinfo();
 
       $user = $current_user->user_login;
-      update_option("cml_${user}_locale", $locale);
+      update_option( "cml_${user}_locale", $locale );
+    else:
+      $this->update_current_lang();
     endif;
+
 
     //Nella pagina dei widget devo forzare il locale in "en_US"
     //per evitare che i titoli dei widget nella colonna a sx cambino al cambiare
     //della lingua...
     if(isset($_GET['page']) && $_GET['page'] == 'ceceppaml-widgettitles-page') :
       $locale = "en_US";
+    else :
+      $locale = $this->_current_lang_locale;
     endif;
-
-    //Imposto le info sulla lingua corrente
-    $this->_current_lang_id = $this->get_language_id_by_locale($locale);
-    $this->_current_lang = cml_get_language_title($this->_current_lang_id);
-    $this->_current_lang_locale = $locale;
-
-    $this->_locale_applied = true;
 
     //Il locale posso modificarlo solo se ho inviato alcun output, quindi è inutile che wp
     //richiami questa funzione varie volte... ;)
-    remove_filter('locale', array(&$this, 'setlocale'));
-
-    if(empty($locale)) :
-      $this->_current_lang = $this->_default_language;
-      $this->_current_lang_id = $this->_default_language_id;
-      $this->_current_lang_locale = $this->_default_language_locale;
-      
-      $locale = $this->_current_lang_locale;
-    endif;
+    remove_filter( 'locale', array( &$this, 'setlocale' ) );
 
     return $locale;
   }
@@ -1794,76 +1763,33 @@ class CeceppaML {
     global $wpdb;
 
     $lang = "";
-    
+
     //Ho già identificato la lingua corretta, è inutile fare ulteriori elaborazioni ;)
-    if(isset($this->_locale_applied)) return $this->_current_lang_id;
+    if( isset( $this->_language_detected ) ) return $this->_current_lang_id;
 
-    //Serve a far sì che "il cambio menu" funzioni correttamente anche
-    //con il permalink di default: ?p=#
-    if(is_page() || is_single()) :
-      $post = get_post();
-      if(empty($post)) return;
-
-      $the_id = get_the_ID();
-    endif;
-
-    $permalink = get_option("permalink_structure");
-    if(!is_admin() && empty($permalink) && empty($the_id)) {
-	$url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-	$the_id  = bwp_url_to_postid($url);
-    }
-
-    if(is_single() || is_page()) :
-      $lang = $this->get_language_id_by_post_id($the_id);
-    else:
-      if(!array_key_exists("lang", $_GET)) :
-	//Se stata abilitata la modalità "pre_domain" recupero la lingua da ##.example
-	if($this->_url_mode == PRE_DOMAIN) :
-	  $urls = explode(".", $_SERVER['HTTP_HOST']);
-
-	  $lang = $this->get_language_id_by_slug($urls[0]);
-	elseif($this->_url_mode == PRE_PATH) :
-	  //Se stata abilitata la modalità "pre_path" recupero la lingua da www.example.com/##/
-	  $url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-	  $home = home_url() . "/";
-	  $url = str_replace($home, "", $url);
-
-	  $parts = parse_url($url);
-	  $path = @explode("/", $parts['path']);
-	  if(is_category() || $path[0] == 'category') array_shift($path);
-
-	  $lang = $this->get_language_id_by_slug($path[0]);
-	  $this->_force_current_language = $lang;
-	else :
-	  $lang = $this->_default_language_id;
-	endif;
-      endif;
-    endif;
-
-    if(is_home() || is_search() || array_key_exists("lang", $_GET)) {
-      if(isset($_GET['lang'])) {
-        $lang = $_GET['lang'];
-      } else
-        $lang = $this->get_default_language_slug();
+    if( array_key_exists( "lang", $_GET ) ) :
+      $lang = $_GET['lang'];
 
       $lang = $this->get_language_id_by_slug($lang);
-    }
+    else :
+      $lang = $this->get_language_by_url();
+    endif;
 
-    if(isset($this->_force_current_language)) :
+    if( isset( $this->_force_current_language ) ) :
       $lang = $this->_force_current_language;
     endif;
 
-    if(!empty($lang)) {
+    if( !empty( $lang ) ) {
       //Aggiorno le info sulla lingua corrente
       $this->_current_lang = $this->get_language_slug_by_id($lang);
       $this->_current_lang_id = $lang;
 
       //Aggiorno il menu del tema :)
-      if(!isset($this->_menu_changed)) :
+      if( !isset( $this->_menu_changed ) ) :
 	$this->change_menu();
       endif;
 
-      if($this->_filter_search) {
+      if( $this->_filter_search ) {
 	//For Fix Notice
 	//add_action('wp_enqueue_scripts', array(&$this, 'enqueue_script_search')); //Non funziona :(
 	$this->enqueue_script_search();
@@ -1876,16 +1802,97 @@ class CeceppaML {
       }
 
       //Recupero il campo "Locale Wordpress"
-      $query = sprintf("SELECT cml_locale FROM %s WHERE id = %d", CECEPPA_ML_TABLE, $lang);
-      $this->_current_lang_locale = $wpdb->get_var($query);
+      $query = sprintf("SELECT * FROM %s WHERE id = %d", CECEPPA_ML_TABLE, $lang);
+      $row = $wpdb->get_row( $query );
 
+      $this->_current_lang_id = $lang;
+      $this->_current_lang  = $row->cml_language;
+      $this->_current_lang_locale = $row->cml_locale;
+      $this->_current_lang_slug = $row->cml_language_slug;
     } else {
       //Se per qualche ragione non riesco a determinare la lingua corrente, prendo quella predefinita
       $this->_current_lang_id = $this->_default_language_id;
       $this->_current_lang = $this->_default_language_slug;
+      $this->_current_lang_slug = $this->_default_language_slug;
+      $this->_current_lang_locale = $this->_default_language_locale;
     }
+    
+    $this->_language_detected = true;
   }
 
+  function get_language_by_url() {
+    $lang = "";
+
+    if( $this->_url_mode == PRE_DOMAIN  && !is_admin() ) :
+      preg_match( "/^([a-z]{2})/", $this->_url, $matches );
+      
+      if( !empty($matches) ) :
+	$lang = $matches[0];
+      endif;
+    endif;
+
+    if( empty( $lang ) ) :
+      //get_currentuserinfo non esiste quando viene chiamato "set_locale"
+      $logged_in = function_exists('is_user_logged_in') && is_user_logged_in();
+
+      if( is_admin() && $logged_in ) :
+	//Recupero l'info dalle opzioni
+	global $current_user;
+	get_currentuserinfo();
+
+	$user = $current_user->user_login;
+	$locale = get_option("cml_${user}_locale", $locale);
+
+	$lang = $this->get_language_id_by_locale( $locale );
+
+	$this->_force_current_language = $this->get_language_id_by_locale($locale);
+      else:
+	$this->clean_url();
+
+	if( !empty( $this->_force_current_language ) ) :
+	  return $this->_force_current_language;
+	else:
+	  //Se non sono riuscito a recuperare la lingua dal link, recupero l'info dall'articolo
+
+	  //Funzione con alcuni tipi di permalink, quali ?p=##, archives/ e non nel pannello di admin (almeno in alcuni casi)
+	  $the_id = 0;
+
+	  //Posso recuperare l'info dal numero dell'articolo?
+	  $the_id = $this->get_post_id_by_url( $this->_url );
+	  
+	  if( empty( $the_id ) ) :
+	    $the_id = cml_get_page_id_by_path($this->_request_url);
+	  endif;
+
+	  //Qualcosa è andato storto, non modifico il "locale"
+	  if( empty( $the_id ) ) :
+	    return $this->_default_language_id;
+	  else:
+	    $lang= $this->get_language_id_by_page_id( $the_id );
+	  endif;
+
+	endif; //!empty
+      endif;
+    endif;
+
+    return $lang;
+  }
+
+  /*
+   * Recupero l'id del post per i link di tipo "?p=##" oppure "/##"
+   */
+  function get_post_id_by_url( $url ) {
+    $structure = explode( "/", $this->_permalink_structure );
+
+    if( empty( $this->_permalink_structure ) || end( $structure ) == "%post_id%" ) :
+      preg_match('/([0-9]+)$/', $url, $matches );
+
+      if( !empty( $matches ) )
+	return end( $matches );
+    endif;
+    
+    return null;
+  }
 
   /*
    * Cambio il menu predefinito del tema, in accordo con quello della lingua corrente
@@ -2040,8 +2047,6 @@ class CeceppaML {
    * restituisco lo slug della lingua "in uso"
    */
   function get_current_lang() {
-    $this->update_current_lang();
-
     return $this->_current_lang;
   }
 
@@ -2051,7 +2056,7 @@ class CeceppaML {
   function get_current_language() {
     global $wpdb;
 
-    if(empty($this->_current_lang_id)) $this->update_current_lang();
+    if( empty( $this->_current_lang_id ) ) $this->update_current_lang();
 
     $query = sprintf("SELECT * FROM %s WHERE id = %d", CECEPPA_ML_TABLE, $this->_current_lang_id);
     $info = $wpdb->get_row($query);
@@ -2107,16 +2112,16 @@ class CeceppaML {
 
     $id = get_the_ID();
     $lang_id = $this->get_language_id_by_post_id($id);
-    $ids = array();
+    $ids = array($id);
     foreach($langs as $lang) :
-      $ids[] = cml_get_linked_post($lang_id, $lang, $id, $lang->id);
+      $linked = cml_get_linked_post($lang_id, $lang, $id, $lang->id);
+      if(!empty($linked)) $ids[] = $linked;
     endforeach;
 
     //Eseguo la query
     if(!empty($ids)) :
       global $wpdb;
 
-      $ids = array_filter($ids);
       asort($ids);
       $ids = @implode(",", $ids);
       $query = "SELECT count(*) FROM $wpdb->comments WHERE comment_approved = 1 AND comment_post_ID IN ($ids)";
@@ -2130,11 +2135,10 @@ class CeceppaML {
      * Modifico l'id della query in modo che punti all'articolo tradotto
      */
     function get_static_page($query) {
-      if(isset($this->_static_page)) return;
-  
+      if( isset( $this->_static_page ) ) return;
+
       //Recupero l'id della lingua
-      $slug = $_GET['lang'];    
-      $lang_id = $this->get_language_id_by_slug($slug);
+      $lang_id = $this->_current_lang_id;
 
       //Id attuale
       $id = $query->query_vars['page_id'];
@@ -2152,76 +2156,62 @@ class CeceppaML {
      * l'articolo corretto :)
      */
     function translate_post_link($permalink, $post, $leavename, $lang_id = null) {
-      if(is_preview()) return $permalink;
-
-      if($this->_url_mode == PRE_DOMAIN) :
-	$slug = $this->get_language_id_by_post_id($post->ID);
-	$slug = $this->get_language_slug_by_id($slug);
-
-	if(strpos($permalink, "http://www.") === FALSE)
-	  $permalink = str_replace("http://", "http://$slug.", $permalink);
-	else
-	  $permalink = str_replace("http://www.", "http://$slug.", $permalink);
-      endif;
-
-      $s = get_option("permalink_structure");
-      if(empty($s) || strrpos($s, "%category%") === false) return $permalink;
+      if( is_preview() ) return $permalink;
 
       if($lang_id == null) $lang_id = $this->get_language_id_by_post_id($post->ID);
       if($lang_id == 0) $lang_id = $this->_current_lang_id;
 
-      //Devo aggiungere la lingua al link?
-      if(get_option("cml_add_slug_to_link", true))
-	$slug = "/" . strtolower($this->get_language_slug_by_id($lang_id));
+      $slug = $this->get_language_slug_by_id( $lang_id );
+
+      if( empty( $this->_permalink_structure ) || strrpos( $this->_permalink_structure, "%category%" ) === false) return $this->convert_url ( $slug,  $permalink );
+
 
       $homeUrl = home_url();
       $plinks = explode("/", str_replace($homeUrl, "", $permalink));
-      if(substr($s, -1) == "/") array_pop($plinks);
+      if(substr( $this->_permalink_structure , -1 ) == "/") array_pop($plinks);
       $title = array_pop($plinks);
 
       //Non traduco le categorie per la lingua di default
       if($lang_id != $this->_default_language_id) :
-	foreach($plinks as $plink) :
+	foreach( $plinks as $plink ) :
 	  //Cerco la traduzione della categoria nella lingua del post :)
 	  $_cat = get_category_by_slug($plink);
 	  if(is_object($_cat)) :
 	    $id = $_cat->term_id;
 
-	    if(!empty($plink)) :
+	    if( !empty( $plink ) ) :
 	      $cat = strtolower(get_option("cml_category_" . $id . "_lang_" . $lang_id, $plink));
 	      $url = str_replace(" ", "-", $cat);
-	      $url = urlencode($url);
-	      $cats[] = $url;
+	      $plink = urlencode($url);
 	    endif;
 	  endif;
+
+	  $cats[] = $plink;
 	endforeach;
       endif;
 
-	//Ricreo il permalink con le categorie tradotte... :)
-	if(!empty($cats))
-	  return $homeUrl . "$slug/" . join("/", $cats) . "/$title/";
+      //Ricreo il permalink con le categorie tradotte... :)
+      if( empty( $cats ) ) $cats = $plinks;
+      $url = home_url() . join( "/", $cats ) . "/$title/";
 
-      //Aggiungo il suffisso /%lang%/
-      return $homeUrl . $slug . join("/", $plinks) . "/$title/";
+      return $this->convert_url( $slug, $url );
     }
     
     function translate_page_link($permalink) {
-	$slug = $this->get_language_id_by_post_id($post->ID);
-	$slug = $this->get_language_slug_by_id($slug);
+      if( is_admin() ) return $permalink;
+    
+      if( empty( $this->_permalink_structure ) ) :
+	$page_id = $this->get_post_id_by_url( $permalink );
+      else:
+	$page_id = cml_get_page_id_by_path( $permalink, array('page') );
+      endif;
 
-	if($this->_url_mode == PRE_DOMAIN) :
-	  if(strpos($permalink, "http://www.") === FALSE)
-            $permalink = str_replace("http://", "http://$slug.", $permalink);
-	  else
-            $permalink = str_replace("http://www.", "http://$slug.", $permalink);
-            
-	  return $permalink;
-	endif;
-	
-        //Aggiungo il suffisso /%lang%/
-	$homeUrl = home_url();
-        $plinks = explode("/", str_replace($homeUrl, "", $permalink));
-        return $homeUrl . "/" . $slug . join("/", $plinks);
+      $slug = $this->get_language_id_by_post_id($page_id);
+      if( empty( $slug) ) $slug = $this->_current_lang_id;
+
+      $slug = $this->get_language_slug_by_id($slug);
+
+      return $this->convert_url( $slug, $permalink );
     }
 
     function translate_menu_item($item) {
@@ -2234,7 +2224,7 @@ class CeceppaML {
 	endif;
 
         if($this->_current_lang_id != $this->_default_language_id) :
-	    switch($item->object) : 
+	    switch($item->object) :
 	    case 'page':
 	      $page_id = cml_get_linked_post($this->_default_language_id, null, $item->object_id, $this->_current_lang_id);
 
@@ -2305,103 +2295,78 @@ class CeceppaML {
     }
     
     function translate_term_link($link, $lang = null) {
-      if(!is_category()) {
-	//Lingua dell'articolo
-	if(!is_admin()) {
-	  if(is_page())
-	    $lang_id = $this->get_language_id_by_page_id(get_the_ID());
-	  else if(is_single()) :
-	    $lang_id = $this->get_language_id_by_post_id(get_the_ID());
-	  else :
-	    $lang_id = isset($_GET['lang']) ? ($this->get_language_id_by_slug($_GET['lang'])) : $this->_current_lang_id;
-	  endif;
-	} else {
-	  $lang_id = $this->_current_lang_id;
-	}
-      } else {
-	if(!empty($lang)) :
-	  $lang_id = $lang;
-	else :
-	  $lang_id = $this->_current_lang_id;
-	endif;
-      }
-
-      if($lang_id == 0) $lang_id = $this->_current_lang_id;
-      if(!empty($lang_id)) :
-	$slug = strtolower($this->get_language_slug_by_id($lang_id));
-      else :
-	$slug = $this->_default_language_slug;
-      endif;
+      $slug = $this->_current_lang_slug;
+      $lang_id = $this->_current_lang_id;
 
       //L'utente ha scelto di tradurre il path delle categorie?
       if((isset($this->_force_current_language) && $this->_force_current_language != $this->_default_language_id) 
 	  || isset($this->_force_category_lang) || $this->_translate_term_link == 1) :
-	if(isset($this->_force_category_lang)) $lang_id = $this->_force_category_lang;
 
-	$homeUrl = home_url();
+	  $id = get_the_ID();
+	  if( !empty( $id ) )
+	    $lang_id = $this->get_language_id_by_page_id( get_the_ID() );
+
+	  //I tag mi arrivano con il parametro della lingua, lo tolgo sennò faccio casino :D
+	  $link = remove_query_arg( "lang", $link );
+	  return $this->translate_term_url( $link, $lang_id );
+      endif;
+
+      if($this->_current_lang_id != $this->_default_language_id) :
+	$link = $this->convert_url( $slug, $link );
+      endif;
+
+      return $link;
+    }
+
+    function translate_term_url( $link, $lang_id ) {
+	if( isset( $this->_force_category_lang ) ) $lang_id = $this->_force_category_lang;
+
+	$homeUrl = $this->_homeUrl;
         $plinks = explode("/", str_replace($homeUrl, "", $link));
 
         //L'ultimo elemento della split è vuoto...
-	array_pop($plinks);
+
+        $last = end( $plinks );
+        if( empty( $last ) )
+	  array_pop($plinks);
 	
-	//Elimino i primi 2 elementi. 1 vuoto e l'altro è "category"
-	array_shift($plinks);
-	$category = array_shift($plinks);
-	foreach($plinks as $plink) :
+	//Elimino i primi 2 elementi. 1 e la lingua e l'altro è "category"
+	if( $this->_url_mode == PRE_PATH ) $cats[] = array_shift($plinks);
+	$cats[] = array_shift($plinks);
+
+	foreach( $plinks as $plink ) :
 	  //Cerco la traduzione della categoria nella lingua del post :)
-	  if(!empty($plink)) :
-	    $id = get_category_by_slug($plink);
-	    if(is_object($id)) :
+	  if( !empty( $plink ) ) :
+	    $id = get_category_by_slug( $plink );
+
+	    if( is_object( $id ) ) :
 	      $id = $id->term_id;
-	      $cat = ($this->_translate_term_link) ? strtolower(get_option("cml_category_" . $id . "_lang_" . $lang_id, $plink)) : $plink;
-	    else:
-	      /* Controllo se l'elemento è uno "slug" */
-	      $tmp = $this->get_language_id_by_slug($plink);
-	      if(empty($tmp) || !isset($this->_force_category_lang))
-		$cat = $plink;
-	      else
-		$cat = $this->get_language_slug_by_id($this->_force_category_lang);
+	      
+	      $cat_name = strtolower( get_option( "cml_category_" . $id . "_lang_" . $lang_id, $plink ) );
+	      if( $this->_translate_term_link ) $plink = $cat_name;
 	    endif;
 
-	    $url = str_replace(" ", "-", $cat);
+	    $url = str_replace( " ", "-", $plink );
 	    $url = urlencode($url);
 	    $cats[] = $url;
 	  endif;
 	endforeach;
+
+	$slug = $this->get_language_slug_by_id( $lang_id );
 
 	//Quale modalità è stata scelta?
         if($this->_url_mode == PRE_DOMAIN) :
             $homeUrl = str_replace("http://", "http://$slug.", $homeUrl);
         endif;
 
+        $lang_arg = ( $this->_url_mode == PRE_NONE ) ? ("?lang=" . $slug) : "";
 	//Ricreo il permalink con le categorie tradotte... :)
-	if(!empty($cats)) :
-	  $same = (join("/", $plinks) == join("/", $cats));
-	  if(!empty($cats) && !$same) :
-	    return $homeUrl . "/$category/" . join("/", $cats) . "/";
-	  endif;
+	if( !empty( $cats )) :
+	  return $homeUrl . join( "/", $cats ) . "/" . $lang_arg;
+
 	endif; //!empty
-      endif;
-
-      if($this->_current_lang_id != $this->_default_language_id) :
-	$homeUrl = home_url() . "/";
-        $plinks = explode("/", str_replace($homeUrl, "", $link));
-
-        $isTag = strtolower($plinks[0]) == 'tag';
-	if($this->_url_mode == PRE_NONE || $isTag)
-	  $link = add_query_arg(array("lang" => $slug), $link);
-	
-	if($this->_url_mode == PRE_DOMAIN) :
-	  if(strpos($link, "http://www.") === FALSE)
-            $link = str_replace("http://", "http://$slug.", $link);
-	  else
-            $link = str_replace("http://www.", "http://$slug.", $link);
-	endif;
-      endif;
-
-      return $link;
     }
-    
+
     function translate_category_url($url) {
       $homeUrl = home_url();
       $plinks = explode("/", str_replace($homeUrl, "", $url));
@@ -2416,10 +2381,7 @@ class CeceppaML {
       
       if(empty($slug)) $slug = $this->get_language_slug_by_id($this->_current_lang_id);
 
-      $plinks[0] = $plinks[1];
-      $plinks[1] = $slug;
-
-      return $homeUrl . "/" . join("/", $plinks);
+      return $this->convert_url( $slug, $url );
     }
 
     function translate_object_terms($obj) {
@@ -2456,6 +2418,32 @@ class CeceppaML {
       return $this->translate_term_name($name);
     }
 
+    /*
+     * Converto l'url a seconda della modalità _url_mode selezionata
+     */
+    function convert_url( $slug, $permalink ) {
+      if( isset( $this->_force_category_lang ) ) $slug = $this->get_language_slug_by_id( $this->_force_category_lang );
+
+      switch( $this->_url_mode ):
+      case PRE_DOMAIN :
+	if( strpos( $permalink, "http://www." ) === FALSE ) :
+	  $permalink = $this->add_slug_to_url( $slug );
+	else:
+	  $permalink = str_replace( "http://www.", "http://$slug.", $permalink );
+	endif;
+
+	return $permalink;
+	break;
+      case PRE_PATH: 
+	//Aggiungo il suffisso /%lang%/
+	$plinks = explode("/", str_replace( $this->_homeUrl, "", $permalink ));
+
+	return $this->_homeUrl . $slug . "/" . join( "/", $plinks );
+	break;
+      default:
+	return add_query_arg( array( "lang" => $slug ), $permalink );
+      endswitch;
+    }
     function show_admin_notice() {
 ?>
 	<div class="updated">
@@ -2530,6 +2518,24 @@ class CeceppaML {
 	echo "</div>";
       endif;
 
+      if( get_option( "cml_need_use_static_page", false ) ) :
+	if( $this->_url_mode != PRE_PATH || cml_use_static_page() ) {
+	  update_option( 'cml_need_use_static_page', 0 );
+	} else {
+	  echo '<div id="message" class="error">';
+	  echo "<p>\n";
+
+	    _e('You must assign your default homepage as static page.', 'ceceppaml'); echo "<br />";
+	  echo "</div>";
+	}
+      endif;
+
+      if( get_option("cml_first_install", false) ) :
+	$this->successfully_installed();
+	
+	update_option("cml_first_install", 0);
+      endif;
+
       if($pagenow == 'nav-menus.php') :
 ?>
 	<div class="updated">
@@ -2558,7 +2564,7 @@ class CeceppaML {
 	</div>
 <?php
       endif;
-
+      
     }
     
     /*
@@ -2628,14 +2634,22 @@ class CeceppaML {
     if(is_admin()) return;
 
     $langs = cml_get_languages(0);
-    foreach($langs as $lang) :
-      $id = get_the_ID();
-      $linked = cml_get_linked_post($this->_current_lang, $lang, $id, $lang->id);
-      
-      if(empty($linked)) :
-	$url = home_url() . '?lang=' . $lang->cml_language_slug;
+    $id = get_the_ID();
+    foreach( $langs as $lang ) :
+      if( !cml_is_homepage() ) :
+	if( is_single() || is_page() ) :
+	  $linked = cml_get_linked_post( $this->_current_lang, $lang, $id, $lang->id );
+	
+	  if(empty($linked)) :
+	    $url = $this->get_home_url( $lang->cml_language_slug );
+	  else:
+	    $url = get_permalink($linked);
+	  endif;
+	else:
+	  $url = $this->convert_url( $lang->cml_language_slug, $this->_clean_url );	  
+	endif;
       else:
-	$url = get_permalink($linked);
+	$url = $this->get_home_url( $lang->cml_language_slug );
       endif;
 
       $title = '<img src="' . cml_get_flag($lang->cml_flag) . '">&nbsp;' . $lang->cml_language;
@@ -2663,31 +2677,36 @@ class CeceppaML {
       if($this->_translate_term_link) :
 	$cat = $wp_query->query['category_name'];
 
-	$cats = explode("/", $cat);
-	if(!is_array($cats)) $cats = array($cat);
+	$cats = explode( "/", $cat );
+	if( !is_array( $cats ) ) $cats = array( $cat );
+
 	foreach($cats as $cat) :
 	  //Se la categoria esiste non è una traduzione :)
 	  $term = term_exists($cat, 'category');
 	  if($term == 0 || $term == null) :
-	    $cat = strtolower(str_replace("-", " ", $cat));
-	    $query = sprintf("SELECT cml_cat_lang_id, UNHEX(cml_cat_name) as cml_cat_name FROM %s WHERE cml_cat_translation = '%s'", CECEPPA_ML_CATS, bin2hex($cat));
+	    $cat = strtolower( str_replace("-", " ", $cat) );
+	    $query = sprintf("SELECT *, UNHEX(cml_cat_name) as cml_cat_name FROM %s WHERE cml_cat_translation = '%s'", CECEPPA_ML_CATS, bin2hex($cat));
 
 	    $name = $wpdb->get_row($query);
 	    
 	    //Se ho scelto la modalità PRE_PATH l'id della lingua lo "rivelo" dallo "slug" della lingua
-	    if($this->_url_mode != PRE_PATH) :
-	      if(!empty($name))
+	    if($this->_url_mode == PRE_PATH) :
+	      $this->clean_url();
+	    endif;
+
+	    if( !isset( $this->_force_current_language ) || empty( $this->_force_current_language) ) :
+	      if( !empty( $name ) )
 		$this->_force_current_language = $name->cml_cat_lang_id;
 	      else
 		$this->_force_current_language = $this->_default_language_id;
-	    endif;
+	      endif;
 
 	    $name = (!empty($name)) ? strtolower($name->cml_cat_name) : "";
 	  endif;
 	  
 	  $new[] = empty($name) ? $cat : $name;
 	endforeach;
-
+	
 	$wp_query->query['category_name'] = join("/", $new);
 	$wp_query->query_vars['category_name'] = end($new);
 	
@@ -2698,11 +2717,12 @@ class CeceppaML {
 			    "operator" => "IN");
 
 	$wp_query->tax_query->queries[0] = $taxquery;
-	$this->_change_category_applied = true;
-      else:
-	unset($this->_force_current_language);
+
 	$this->_change_category_applied = true;
       endif;
+
+      unset($this->_force_current_language);
+      $this->_change_category_applied = true;
 
       unset($this->_hide_posts);
     endif;
@@ -2846,11 +2866,11 @@ class CeceppaML {
     unset($this->_force_category_lang);
   }
   
-  function translate_archives_link($link) {
+  function translate_archives_link( $link ) {
     $url = preg_match('/href=\'(.+)\' /', $link, $match);
     $href = $match[0];
     $url = substr($href, 0, strlen($href) - 2);
-    $url .= "?lang=$this->_current_lang'";
+    $url .= "?lang=$this->_current_lang_slug'";
     
     $link = str_replace($href, $url, $link);
     return $link;
@@ -2864,6 +2884,54 @@ class CeceppaML {
     require_once(CECEPPA_PLUGIN_PATH . "fix.php");
     cml_update_all_posts_language();
   }
+  
+  //Restituisco l'url della homepage in base alle impostazioni de "url_mode"
+  function get_home_url( $slug ) {
+    if( empty( $slug) ) $slug = $this->_default_language_slug;
+
+    switch( $this->_url_mode ) :
+    case PRE_PATH:
+      $link = $this->_homeUrl . $slug;
+      break;
+    case PRE_DOMAIN:
+      $link = $this->add_slug_to_url( $slug );
+      break;
+    default:
+      $link = "?lang=$slug";
+    endswitch;
+
+    return $link;
+  }
+  
+  function add_slug_to_url( $slug ) {
+    $url = explode( ".", $this->_url );
+    $url[0] = $slug;
+
+    return "http://" . join( ".", $url );
+  }
+  
+  function is_homepage() {
+    switch( $this->_url_mode ) :
+    case PRE_PATH:
+      return ( strlen( $this->_request_url ) <= 3 );
+      break;
+    case PRE_DOMAIN:
+      break;
+    case PRE_NONE:
+//       $url = preg_replace('/\?.*/', "", $this->_url);
+      $url = remove_query_arg( "lang", $this->_url );
+      return $url == $this->_homeUrl;
+      break;
+    endswitch;
+  }
+  
+  function get_previous_post_where( $where ) {
+    $posts = $this->get_posts_for_language();
+    $where .= " AND p.id IN (" . implode(", ", $posts) . ") ";
+    
+    return $where;
+  }
+
 }
 
 function removesmartquotes($content) {

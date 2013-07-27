@@ -178,53 +178,56 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
   foreach($results as $result) :
     $lang = ($show == "flag") ? "" : $result->cml_language;
 
-    if(cml_is_homepage()) {
-        //Se stò nella home vuol dire che ho scelto come metodo di reindirizzamento &lang
-    	$link = "?lang=$result->cml_language_slug";
+    if( cml_is_homepage() ) {
+      //Se stò nella home vuol dire che ho scelto come metodo di reindirizzamento &lang
+      $link = $wpCeceppaML->get_home_url( $result->cml_language_slug );
     } else {
       /* Collego la categoria della lingua attuale con quella della linga della bandierina */
       $link = "";
 
       $lang_id = $wpCeceppaML->get_current_lang_id();
 
-      if($linked) {
+      if( (is_single() || is_page() ) &&  $linked ) :
 	//Collego gli articoli delle varie pagine
 	if(is_single() || is_page()) {
 	  $link = cml_get_linked_post($lang_id, $result, get_the_ID());
 
 	  if(!empty($link)) $link = get_permalink($link);
 	}
-	
-	if(is_archive() && !is_category()) {
-	  global $wp;
+      endif;
 
-	  $link = home_url($wp->request) . "/";
-	  $link = add_query_arg(array("lang" => $result->cml_language_slug), $link);
-	}
+      if(is_archive() && !is_category()) :
+	global $wp;
 
-	//Collego le categorie delle varie lingue
-	if(is_category()) {
-	  $cat = get_the_category();
+	$link = home_url($wp->request) . "/";
+	$link = add_query_arg( array( "lang" => $result->cml_language_slug ), $link );
+      endif;
 
-	  if(is_array($cat)) :
-	    $cat_id = $cat[count($cat) - 1]->term_id;
-	    
-	    $wpCeceppaML->force_category_lang($result->id);
-	    $link = get_category_link($cat_id);
-	  endif;
+      //Collego le categorie delle varie lingue
+      if( is_category() ) :
+	$cat = get_the_category();
 
-	  $wpCeceppaML->unset_category_lang();
-	}
-      }
+	if(is_array($cat)) :
+	  $cat_id = $cat[count($cat) - 1]->term_id;
+	  
+	  //Mi serve a "forzare" lo slug corretto nel link
+	  $wpCeceppaML->force_category_lang( $result->id );
+	  
+	  //Mi recupererà il link tradotto dal mio plugin ;)
+	  $link = get_category_link( $cat_id );
+	endif;
+
+	$wpCeceppaML->unset_category_lang();
+      endif;
       
       /* Controllo se è stata impostata una pagina statica,
          perché così invece di restituire il link dell'articolo collegato
          aggiungo il più "bello" ?lang=## alla fine della home.
-         
+
          Se non ho trovato nesuna traduzione per l'articolo, la bandiera punterà alla homepage
       */
-      if(cml_is_homepage() || empty($link)) :
-	$link = home_url() . "/?lang=$result->cml_language_slug";
+      if( cml_is_homepage() || empty($link) ) :
+	$link = $wpCeceppaML->get_home_url( $result->cml_language_slug );
       endif;
     }
 
@@ -437,15 +440,19 @@ function cml_get_current_language_id() {
 /* Controllo se sto nella homepage */
 function cml_is_homepage() {
   //Controllo se è stata impostata una pagina "statica" se l'id di questa è = a quello della statica
-  if(cml_use_static_page()) :
+  if( cml_use_static_page() ) :
     $static_id = get_option("page_for_posts") + get_option("page_on_front");
-    
-    $url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-    $homeUrl = home_url() . "/";
-    $cleanUrl = str_replace($homeUrl, "", $url);
-    $the_id = cml_get_page_id_by_path( $cleanUrl, array('page') );
 
-    return $the_id == $static_id;
+    $lang_id = cml_get_current_language_id();
+    $the_id = get_the_ID();
+    if( !empty( $the_id ) ) :
+      if( $the_id == $static_id ) return true;	//E' proprio lei...
+      
+      //Mica è una traduzione?
+      $linked = cml_get_linked_post( $lang_id, null, $the_id , cml_get_default_language_id() );
+      if( !empty($linked) ) return $linked == $static_id;
+    endif;
+    
   endif;
 
   //Non posso utilizzare la funzione is_home, quindi controllo "manualmente"
@@ -453,7 +460,7 @@ function cml_is_homepage() {
   $home = home_url() . "/";
 
   $url_parts = parse_url($url);
-  $constructed_url = $url_parts['scheme'] . '://' . $url_parts['host'] . (isset($url_parts['path'])?$url_parts['path']:'');
+  $constructed_url = $url_parts['scheme'] . '://' . $url_parts['host'] . ( isset($url_parts['path'] ) ? $url_parts['path'] : '' );
 
   return $constructed_url  == $home;
 }

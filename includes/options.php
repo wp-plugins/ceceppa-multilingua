@@ -23,7 +23,7 @@ class CeceppaMLOptions {
   function add_meta_box() {
     /* Tab 0: Flags */
     $input = '<label><input type="checkbox" id="to-menu" name="float-div" value="1" ' . checked(get_option('cml_add_float_div', false), true, false) . ' />&nbsp;';
-    add_meta_box("cml_options_float_flags", $input .__('Add float div to website:', 'ceceppaml') . '</input></label>', "cml_option_flags_float", "cml_options_page_flags");
+    add_meta_box("cml_options_float_flags", $input .__('Add float div to website:', 'ceceppaml') . '</input></label>', "cml_option_flags_float", "cml_flags_page_flags");
     
     $input = '<label><input type="checkbox" id="to-menu" name="append-flags" value="1" ' . checked(get_option('cml_append_flags', false), true, false) . ' />&nbsp;';
     add_meta_box("cml_options_append_flags", $input . __('Append flag to html element:', 'ceceppaml') . '</input></label>', "cml_options_flags_to_element", "cml_options_page_flags");

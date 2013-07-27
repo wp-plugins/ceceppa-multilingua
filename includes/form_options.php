@@ -31,9 +31,13 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
     <img src="<?php echo CECEPPA_PLUGIN_URL ?>images/logo.png" height="24"/>
   </div>
   <h2 class="nav-tab-wrapper">
+    <?php if( isset($_GET['page']) && $_GET['page'] == "ceceppaml-flags-page" ) : ?>
     <a class="nav-tab <?php echo $tab == 0 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-options-page&tab=0"><?php _e('Flags', 'ceceppaml') ?></a>
+    <?php else: 
+      if( $tab < 1 ) $tab = 1 ?>
     <a class="nav-tab <?php echo $tab == 1 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-options-page&tab=1"><?php _e('Actions', 'ceceppaml') ?></a>
     <a class="nav-tab <?php echo $tab == 2 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-options-page&tab=2"><?php _e('Filters', 'ceceppaml') ?></a>
+    <?php endif; ?>
   </h2>
 
   <div id="poststuff">
@@ -59,39 +63,6 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 <?php if($tab == 1) : ?>
 	<table id="ceceppaml-table" class="widefat">
 	    <tbody>
-<!-- Url -->
-	    <tr>
-	    <td><center>
-		<strong><?php _e('Url Modification mode:', 'ceceppaml') ?></strong><br /><br />
-		<img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/flags.png" />
-	    </center></td>
-	    <td>
-		<label for="url-mode-path">
-		    <input type="radio" name="url-mode" id="url-mode-path" value="2" <?php checked(get_option("cml_modification_mode", 2), 2) ?> />
-		    <?php _e('Use Pre-Path Mode (Default, puts /en/ in front of URL)', 'ceceppaml') ?><i>(www.example.com/en/)</i>
-		</label>
-		<br />
-		<br />
-		<label for="url-mode-domain">
-		    <input type="radio" name="url-mode" id="url-mode-domain" value="3" <?php checked(get_option("cml_modification_mode"), 3) ?> />
-		    <?php _e('Use Pre-Domain Mode', 'ceceppaml') ?><i>(en.example.com)</i>
-		</label>
-		<br /><br />
-		<input type="checkbox" id="add-slug" name="add-slug" value="1" <?php checked(get_option('cml_add_slug_to_link', true), true) ?> />
-		<label for="add-slug"><?php _e('Enabled', 'ceceppaml') ?></label><br />
-	    </td>
-	    </tr>
-<!-- Categorie -->
-	    <tr class="alternate">
-	    <td id="cats-tags" ><center>
-		<strong><?php _e('Categories & Tags', 'ceceppaml'); ?></strong><br /><br />
-		<img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/category.png" />
-	    </center></td>
-	    <td>
-		<input type="checkbox" id="categories" name="categories" value="1" <?php checked(get_option('cml_option_translate_categories'), true) ?> />
-		<label for="categories"><?php _e('Translate the url for categories', 'ceceppaml') ?>&nbsp;</label><br>
-	    </td>
-	    </tr>
 <!-- Detect -->
 	    <tr>
 	    <td><center>
@@ -105,28 +76,49 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 		    <label for="redirect">
 		      <?php _e('Automatically redirects the browser depending on the user\'s language.', 'ceceppaml'); ?>
 		    </label>
-			  <ul style="list-style: square; padding-left: 20px;">
-			<li style="display: block;">
-			  <label>
-			    <input type="radio" id="redirect-type" name="redirect-type" value="suffix" <?php checked(get_option('cml_option_redirect_type', 'suffix'), 'suffix'); ?> /><?php _e('Append the suffix <strong>&amp;lang=</strong> to the home page', 'ceceppaml') ?>
-			  </label>
-			</li>
-			<li style="display: block;">
-			  <label>
-			    <input type="radio" id="redirect-type" name="redirect-type" value="slug" <?php checked(get_option('cml_option_redirect_type', 'suffix'), 'slug'); ?>/>
-			      <?php _e('Append language slug to home url. <br />Example www.example.com/en/', 'ceceppaml'); ?><br />
-			      <div  style="margin-left: 20px;">
-			      <strong><?php _e('This options doesn\'t work with "Default permalink" (?p=##)', 'ceceppaml'); ?></strong>
-			      <em><?php _e('Enable this options only if you want to use a static page as homepage.', 'ceceppaml'); ?><br />
-			      <?php _e('You must edit the permalink for you homepage and their translations, using the language slug as permalink.', 'ceceppaml') ?><br />
-			      <?php _e('Example: the permalink of your homepage must be "en".', 'ceceppaml') ?></em>
-			      </div>
-			  </label>
-			</li>
-			  </ul>
-		    <input type="radio" id="no-redirect" name="redirect" value="nothing" <?php echo ((get_option('cml_option_redirect') == 'nothing') ? 'checked' : '') ?>/>
-		    <label for="no-redirect"><?php _e('Do nothing', 'ceceppaml') ?></label><br />
+		    <br /><br />
+		    <label>
+		      <input type="radio" id="no-redirect" name="redirect" value="nothing" <?php echo ((get_option('cml_option_redirect') == 'nothing') ? 'checked' : '') ?>/>
+		      <?php _e('Do nothing', 'ceceppaml') ?>
+		    </label>
+		    <br />
 		</blockquote>
+	    </td>
+	    </tr>
+<!-- Url -->
+	    <tr class="alternate">
+	    <td><center>
+		<strong><?php _e('Url Modification mode:', 'ceceppaml') ?></strong><br /><br />
+		<img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/flags.png" />
+	    </center></td>
+	    <td>
+		<label for="url-mode-path">
+		    <input type="radio" name="url-mode" id="url-mode-path" value="2" <?php checked(get_option("cml_modification_mode", 2), 2) ?> />
+		    <?php _e('Use Pre-Path Mode (Default, puts /en/ in front of URL)', 'ceceppaml') ?><i>(www.example.com/en/)</i><br />
+		    <b style="padding-left:20px"><?php _e('This mode doesn\'t work with default permalink!!!', 'ceceppaml'); ?></b> (?p=##)
+		</label>
+		<br /><br />
+		<label for="url-mode-domain">
+		    <input type="radio" name="url-mode" id="url-mode-domain" value="3" <?php checked(get_option("cml_modification_mode"), 3) ?> />
+		    <?php _e('Use Pre-Domain Mode', 'ceceppaml') ?><i>(en.example.com)</i>
+		</label>
+		<br /><br />
+		<label>
+		  <input type="radio" id="url-mode" name="url-mode" value="1" <?php checked( get_option('cml_modification_mode', 1) ); ?> />&nbsp;<?php _e('Append the suffix <strong>&amp;lang=</strong> to the home page', 'ceceppaml') ?>
+		</label>
+		<br /><br />
+	    </td>
+	    </tr>
+<!-- Categorie -->
+	    <tr>
+	    <td id="cats-tags" ><center>
+		<strong><?php _e('Categories & Tags', 'ceceppaml'); ?></strong><br /><br />
+		<img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/category.png" />
+	    </center></td>
+	    <td>
+		<br />
+		<input type="checkbox" id="categories" name="categories" value="1" <?php checked(get_option('cml_option_translate_categories'), true) ?> />
+		<label for="categories"><?php _e('Translate the url for categories', 'ceceppaml') ?>&nbsp;</label><br>
 	    </td>
 	    </tr>
 	    <tr class="alternate">

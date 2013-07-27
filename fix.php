@@ -86,6 +86,20 @@ function cml_fix_database() {
     if($dbVersion <= 15) :
       cml_fix_widget_titles();
     endif;
+    
+    //Controllo se esiste una pagina con lo slug "/##/", perché nelle versioni < 1.2.6
+    //per avere la pagina iniziale in stile www.example.com/it dovevo modificare lo slug della
+    //pagina in "it", dalla 1.2.6 basta mettere una pagina statica come iniziale, il plugin
+    //si occuperà del resto...
+    if($dbVersion <= 16) :
+      $id = cml_get_default_language_id();
+      $info = cml_get_language_info( $id );
+      
+      $slug = $info->cml_language_slug;
+      $the_id = cml_get_page_id_by_path ( $slug, array('page') );
+      
+      if( $the_id ) update_option( 'cml_need_use_static_page', 1 );
+    endif;
 }
 
 //Imposto in automatico la lingua in tutti i post
