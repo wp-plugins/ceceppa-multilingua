@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.2.6
+Version: 1.2.7
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -2299,17 +2299,19 @@ class CeceppaML {
       $lang_id = $this->_current_lang_id;
 
       //L'utente ha scelto di tradurre il path delle categorie?
-      if((isset($this->_force_current_language) && $this->_force_current_language != $this->_default_language_id) 
-	  || isset($this->_force_category_lang) || $this->_translate_term_link == 1) :
+      if ( !empty ( $this->_permalink_structure ) ) :
+	if( ( isset( $this->_force_current_language ) && $this->_force_current_language != $this->_default_language_id ) 
+	    || isset($this->_force_category_lang) || $this->_translate_term_link == 1) :
 
-	  $id = get_the_ID();
-	  if( !empty( $id ) )
-	    $lang_id = $this->get_language_id_by_page_id( get_the_ID() );
+	    $id = get_the_ID();
+	    if( !empty( $id ) )
+	      $lang_id = $this->get_language_id_by_page_id( get_the_ID() );
 
-	  //I tag mi arrivano con il parametro della lingua, lo tolgo sennò faccio casino :D
-	  $link = remove_query_arg( "lang", $link );
-	  return $this->translate_term_url( $link, $lang_id );
-      endif;
+	    //I tag mi arrivano con il parametro della lingua, lo tolgo sennò faccio casino :D
+	    $link = remove_query_arg( "lang", $link );
+	    return $this->translate_term_url( $link, $lang_id );
+	endif;
+      endif; //!empty
 
       if($this->_current_lang_id != $this->_default_language_id) :
 	$link = $this->convert_url( $slug, $link );
@@ -2525,7 +2527,7 @@ class CeceppaML {
 	  echo '<div id="message" class="error">';
 	  echo "<p>\n";
 
-	    _e('You must assign your default homepage as static page.', 'ceceppaml'); echo "<br />";
+	    _e('If you want to use an page as homepage, you must set it as static page', 'ceceppaml'); echo "<br />";
 	  echo "</div>";
 	}
       endif;
