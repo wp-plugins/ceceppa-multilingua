@@ -1,5 +1,10 @@
 <?php
 
+gloabl $wpCeceppaML;
+
+//Non posso richiamare lo script direttamente dal browser :)
+if(!is_object($wpCeceppaML)) die("Access denied");
+
 //Genero il file locales_code.php
 $handle  = fopen(WP_PLUGIN_DIR . "/ceceppa-multilingua/locales_list.txt", 'r');
 $out = fopen(WP_PLUGIN_DIR . "/ceceppa-multilingua/locales_codes.php", 'w');
