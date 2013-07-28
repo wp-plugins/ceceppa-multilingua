@@ -220,6 +220,10 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
 	$wpCeceppaML->unset_category_lang();
       endif;
       
+      if( is_paged() ) :
+	$link = add_query_arg( array( "lang" => $result->cml_language_slug ) );
+      endif;
+
       /* Controllo se è stata impostata una pagina statica,
          perché così invece di restituire il link dell'articolo collegato
          aggiungo il più "bello" ?lang=## alla fine della home.

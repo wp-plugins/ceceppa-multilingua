@@ -74,7 +74,6 @@ class CeceppaML {
   public function __construct() {
     global $wpdb;
 
-    $this->_domain = $matches[0][0];
     $this->_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
     $this->_homeUrl = home_url() . "/";
     $this->_base_url = str_replace("http://" . $_SERVER['HTTP_HOST'], "", get_option('home'));
@@ -200,7 +199,7 @@ class CeceppaML {
       * Nascondo i post "collegati", quindi tra quelli collegati visualizzo solo quelli
       * della lingua corrente
       */
-      if(get_option("cml_option_filter_translations", true) || array_key_exists("ht", $_GET)) {
+      if( get_option("cml_option_filter_translations", true) || array_key_exists("ht", $_GET) ) {
 	add_action('pre_get_posts', array(&$this, 'hide_translations'));
       }
 
@@ -342,8 +341,9 @@ class CeceppaML {
     add_action( 'admin_bar_menu', array(&$this, 'add_bar_menu'), 1000);
 
     //Next and Prev post
-    add_filter( 'get_previous_post_where', array( &$this, 'get_previous_post_where' ) );
-    add_filter( 'get_next_post_where', array( &$this, 'get_previous_post_where' ) );
+    add_filter( 'get_previous_post_where', array( &$this, 'get_previous_next_post_where' ) );
+    add_filter( 'get_next_post_where', array( &$this, 'get_previous_next_post_where' ) );
+    add_filter( 'get_pagenum_link', array( &$this, 'get_pagenum_link'), 0 );
 
     /*
     * Locale
@@ -1715,6 +1715,7 @@ class CeceppaML {
     if($pagenow == "wp-login.php") return $locale;
 
     //Per gli utenti "loggati" memorizzo la lingua selezionata, nel pannello di amministrazione
+    $logged_in = function_exists('is_user_logged_in') && is_user_logged_in();
     if(is_admin() && $logged_in) :
       global $current_user;
       get_currentuserinfo();
@@ -1841,7 +1842,7 @@ class CeceppaML {
 	get_currentuserinfo();
 
 	$user = $current_user->user_login;
-	$locale = get_option("cml_${user}_locale", $locale);
+	$locale = get_option( "cml_${user}_locale", $this->_default_language_locale );
 
 	$lang = $this->get_language_id_by_locale( $locale );
 
@@ -2070,6 +2071,10 @@ class CeceppaML {
     return $this->_current_lang_id;
   }
   
+  function get_current_language_slug() {
+    return $this->_current_lang_slug;
+  }
+
   function get_comments($query) {
     if(FALSE === strpos($query, 'comment_post_ID = '))
     {
@@ -2299,7 +2304,7 @@ class CeceppaML {
       $lang_id = $this->_current_lang_id;
 
       //L'utente ha scelto di tradurre il path delle categorie?
-      if ( !empty ( $this->_permalink_structure ) ) :
+      if ( !empty ( $this->_permalink_structure ) && !is_admin() ) :
 	if( ( isset( $this->_force_current_language ) && $this->_force_current_language != $this->_default_language_id ) 
 	    || isset($this->_force_category_lang) || $this->_translate_term_link == 1) :
 
@@ -2927,13 +2932,16 @@ class CeceppaML {
     endswitch;
   }
   
-  function get_previous_post_where( $where ) {
+  function get_previous_next_post_where( $where ) {
     $posts = $this->get_posts_for_language();
     $where .= " AND p.id IN (" . implode(", ", $posts) . ") ";
     
     return $where;
   }
 
+  function get_pagenum_link( $link ) {
+    return add_query_arg( array( "lang" => $this->_current_lang_slug ) , $link );
+  }
 }
 
 function removesmartquotes($content) {
