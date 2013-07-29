@@ -20,8 +20,8 @@ class CeceppaMLWidgetRecentPosts extends WP_Widget {
   public function __construct() {
     parent::__construct(
       'cececepml-recent-posts', // Base ID
-      'CML: Recent Posts', // Name
-      array( 'description' => __('The most recent posts on your site', 'ceceppaml'), ) // Args
+      __('CML: Recent Posts', 'ceceppaml'), // Name
+      array( 'description' => __('The most recent posts on your site'), ) // Args
     );
   }
 
@@ -53,7 +53,7 @@ class CeceppaMLWidgetRecentPosts extends WP_Widget {
        * Quando l'utente scegli di impostare un articolo come "in evidenza", wordpress fa si che tutte le chiamate tramite
        * WP_Query includa sempre questi post, quindi me li ritrovato in tutte le lingue con le relative traduzioni :'(...
        */
-      $ids = $wpCeceppaML->get_language_posts();
+      $ids = $wpCeceppaML->get_posts_for_language();
       $the_args = array('post_status'=>'publish',
 				      'post__in' => $ids,
 				      'orderby' => 'post_date',
@@ -125,7 +125,7 @@ class CeceppaMLWidgetChooser extends WP_Widget {
   public function __construct() {
     parent::__construct(
       'cececepml-chooser', // Base ID
-      'CML: Language Chooser', // Name
+      __('CML: Language Chooser', 'ceceppaml'), // Name
       array( 'description' => __( 'Show the list of available languages', 'ceceppaml' ), ) // Args
     );
   }
@@ -205,8 +205,8 @@ class CeceppaMLWidgetChooser extends WP_Widget {
     }
 
     $dd = array_key_exists('msdropdown', $instance) ? $instance['msdropdown'] : null;
-    $display = $instance['display'];
-    $size = $instance['size'];
+    $display = isset($instance['display']) ? $instance['display'] : "";
+    $size = isset($instance['size']) ? $instance['size'] : "small";
     $hide_title = array_key_exists('hide-title', $instance) ? $instance['hide-title'] : 0;
     $classname = array_key_exists('classname', $instance) ? $instance['classname'] : 'cml_widget_flag';
 ?>
@@ -269,13 +269,13 @@ class CeceppaMLWidgetChooser extends WP_Widget {
       <p>
         <label>
           <input type="radio" id="<?php echo $this->get_field_id('size'); ?>" name="<?php echo $this->get_field_name('size'); ?>" value="small" <?php echo ($size == "small" || empty($size)) ? "checked=\"checked\"" : ""; ?>/>
-          <?php _e('Small (32x23)', 'ceceppaml') ?>
+          <?php _e('Small', 'ceceppaml') ?> (32x23)
         </label>
       </p>
       <p>
         <label>
           <input type="radio" id="<?php echo $this->get_field_id('size'); ?>" name="<?php echo $this->get_field_name('size'); ?>" value="tiny" <?php echo ($size == "tiny") ? "checked=\"checked\"" : ""; ?>/>
-          <?php _e('Tiny (16x11)', 'ceceppaml') ?>
+          <?php _e('Tiny', 'ceceppaml') ?> (16x11)
         </label>
       </p>
       </blockquote>
@@ -304,7 +304,7 @@ class CeceppaMLWidgetText extends WP_Widget {
   public function __construct() {
     parent::__construct(
       'cececepml-widget-text', // Base ID
-      'CML: Text', // Name
+      __('CML: Text', 'ceceppaml'), // Name
       array( 'description' => __('You can write arbitrary text or HTML separately for each language', 'ceceppaml'), ) // Args
     );
   }
@@ -387,6 +387,12 @@ class CeceppaMLWidgetText extends WP_Widget {
 function unichr($u) {
     return mb_convert_encoding('&#' . intval($u) . ';', 'UTF-8', 'HTML-ENTITIES');
 }
+
+function cml_load_textdomain() {
+  load_plugin_textdomain('ceceppaml', false, dirname( plugin_basename( __FILE__ ) ) . '/po/');
+}
+
+add_action( 'widgets_init', 'cml_load_textdomain');
 add_action( 'widgets_init', create_function( '', 'register_widget( "CeceppaMLWidgetChooser" );' ) );
 add_action( 'widgets_init', create_function( '', 'register_widget( "CeceppaMLWidgetRecentPosts" );' ) );
 add_action( 'widgets_init', create_function( '', 'register_widget( "CeceppaMLWidgetText" );' ) );
