@@ -144,8 +144,8 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 	<img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/addlang.png" width="32" />
       </td>
     </tr>
-	<tr>
-	  <td colspan="5">
+    <tr class="<?php echo @empty($alternate) ? "alternate" : ""; ?>">
+	<td colspan="5">
 	    <table class="wp-list-table widefat">
 	      <thead>
 	      <tr>

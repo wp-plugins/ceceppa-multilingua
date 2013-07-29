@@ -51,7 +51,7 @@ class CeceppaMLLanguages {
 				'cml_sort_id' => $_POST['sort-id'][$i]),
 			    array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d'));
 
-	    if(substr($lang, 2) != "en")
+	    if( substr( $lang, 0, 2 ) != "en" )
 	      $d->download_language($wpdb->insert_id, $_POST['language'][$i]);
 	  endif;
 	} else {
