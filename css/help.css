@@ -1,0 +1,27 @@
+span.parameters {
+  font-weight: bold;
+  color: #f00;
+  font-size: 1.2em;
+}
+span.return {
+  font-weight: bold;
+  color: #00f;
+  font-size: 1.2em;
+}
+span.example {
+  font-weight: bold;
+  color: #008C00;
+  font-size: 1.2em;
+}
+
+.column-3 {
+}
+.column-3 div.postbox  {
+  display: inline-block;
+  width: 30%;
+  margin-right: 20px;
+  vertical-align: top;
+}
+pre.code {
+  color: #00f;
+}
