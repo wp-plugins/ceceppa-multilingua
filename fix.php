@@ -75,7 +75,7 @@ function cml_fix_database() {
       endforeach;
     endif;
  
-    if($dbVersion <= 16) :
+    if($dbVersion <= 17) :
       $sql = "ALTER TABLE  " . CECEPPA_ML_TABLE . " ADD  `cml_sort_id` INT NOT NULL ;";
       $wpdb->query($sql);
 
