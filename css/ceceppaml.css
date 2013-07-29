@@ -106,3 +106,19 @@ table.mo-table {
 .align-bottom {
   vertical-align: bottom;
 }
+
+.cml-filter-label {
+  display: block;
+  line-height: 28px;
+  float: left;
+}
+
+.cml-filter-current {
+  border-bottom:2px solid #BF0000;
+  padding: 2px;
+  width: 10px;
+}
+  .cml-filter-current img {
+    padding: 0 !important;
+    margin: 0 5px 0!important;
+  }

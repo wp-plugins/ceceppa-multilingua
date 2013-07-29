@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.2.10
+Version: 1.2.11
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -350,7 +350,7 @@ class CeceppaML {
     */
     //add_filter('query_vars', array(&$this, 'add_lang_query_vars'));
     if(get_option("cml_option_change_locale", 1) == 1 || is_admin()) :
-      add_filter('locale', array(&$this, 'setlocale'), 0, 1);
+      add_filter( 'locale', array(&$this, 'setlocale'), 0 );
     endif;
   }
 
@@ -488,6 +488,7 @@ class CeceppaML {
   function add_flags_columns($columns) {
     wp_enqueue_script("ceceppa-tipsy");
     wp_enqueue_script("ceceppaml-js");
+    wp_enqueue_style('ceceppaml-style');
     wp_enqueue_style('ceceppa-tipsy');
 
     $langs = cml_get_languages(0);
@@ -495,9 +496,12 @@ class CeceppaML {
     //Non sono riuscito a trovare un altro modo per ridimensionare la larghezza del th...
     wp_enqueue_style('ceceppaml-style-all-posts', WP_PLUGIN_URL . '/ceceppa-multilingua/css/all_posts.php?langs=' . count($langs));
 
+    $clang = isset( $_GET['cml_language'] ) ? intval ( $_GET['cml_language'] ) : $this->_default_language_id;
     foreach($langs as $lang) :
-      $a = add_query_arg(array("cml_language" => $lang->id));
-      $img .= "<a href=\"$a\" title=\"" . __('Show only posts/pages in: ', 'ceceppaml') . "<b>$lang->cml_language</b>\"><img src=\"" . cml_get_flag_by_lang_id($lang->id, "small") . "\" width=\"20\" /></a>";
+      $class = ( $lang->id == $clang ) ? "cml-filter-current" : "";
+
+      $a = add_query_arg( array( "cml_language" => $lang->id ) );
+      $img .= "<a class=\"$class\" href=\"$a\" title=\"" . __('Show only posts/pages in: ', 'ceceppaml') . "<b>$lang->cml_language</b>\"><img src=\"" . cml_get_flag_by_lang_id($lang->id, "small") . "\" width=\"20\" /></a>";
     endforeach;
 
     $cols = array_merge(array_slice($columns, 0, 2),
@@ -910,7 +914,13 @@ class CeceppaML {
       $d = isset($_GET['cml_language']) ? $_GET['cml_language'] : $d;
 
       //All languages
+      echo '<label class="cml-filter-label">&nbsp;' . __( 'Show only posts/page in:', 'ceceppaml' ) . '</label>';
       cml_dropdown_langs("cml_language", $d, false, true, __('Show all languages', 'ceceppaml'), -1);
+      
+      $checked = isset ( $_GET['cml_no_translation'] ) ? 1 : 0;
+      if( empty($_GET) ) $checked = 1;
+
+      echo '<input class="_tipsy" name="cml_no_translation" type="checkbox" title="' . __( 'Show also posts withouth translation', 'ceceppaml' ) . ' " value="1" ' . checked( $checked, 1, false ) . '/>&nbsp;&nbsp;&nbsp;';
     }
 
     /**
@@ -929,11 +939,17 @@ class CeceppaML {
 	$d = $this->_default_language_id;
 	if(isset($_GET['post_status']) && in_array($_GET['post_status'], array("draft", "trash"))) $d = 0;
         $id = array_key_exists('cml_language', $_GET) ? intval($_GET['cml_language']) : $d;
+
         if(is_admin() && $pagenow == "edit.php") :
 	  if($id > 0) :
 	    $posts = $this->get_posts_for_language($id);;
 
-	    $query->query_vars['post__in'] = $posts;
+	    //non devo visualizzare i post senza traduzione
+	    if( isset( $_GET['cml_no_translation'] ) || empty( $_GET ) ) :
+	      $query->query_vars['post__not_in'] = get_option( "cml_hide_posts_for_lang_" . $d );
+	    else:
+	      $query->query_vars['post__in'] = $posts;
+	    endif;
 	  endif;
 	endif;
 
@@ -984,7 +1000,7 @@ class CeceppaML {
       if(is_preview() || isset($_GET['preview'])) return;
       if(!is_admin()) $this->update_current_lang();
 
-      if(!isset($this->_hide_posts) || empty($this->_hide_posts)) :
+      if( !isset( $this->_hide_posts ) || empty( $this->_hide_posts ) ) :
 	$this->_hide_posts = array();
 
 	$this->_hide_posts = get_option("cml_hide_posts_for_lang_" . $this->_current_lang_id);
@@ -1710,21 +1726,21 @@ class CeceppaML {
   /*
    * Cambio il locale in base alla lingua selezionata
    */  
-  function setlocale($locale) {
+  function setlocale( $locale ) {
     global $wpdb, $pagenow;
 
     if($pagenow == "wp-login.php") return $locale;
 
     //Per gli utenti "loggati" memorizzo la lingua selezionata, nel pannello di amministrazione
+    $this->update_current_lang();
+
     $logged_in = function_exists('is_user_logged_in') && is_user_logged_in();
-    if(is_admin() && $logged_in) :
+    if( is_admin() && $logged_in ) :
       global $current_user;
       get_currentuserinfo();
 
       $user = $current_user->user_login;
       update_option( "cml_${user}_locale", $locale );
-    else:
-      $this->update_current_lang();
     endif;
 
 
@@ -2550,6 +2566,7 @@ class CeceppaML {
 	    <p>
 	      Ceceppa Multilingua: <strong><?php _e('Tip', 'ceceppaml') ?></strong><br /><br />
 	      <?php _e('All items will be automatically translated when user switch between languages.', 'ceceppaml') ?><br />
+	      <font style="color: #f00"><?php _e('Add only pages existing in your default language, not their translation.', 'ceceppaml') ?></font><br />
 	      <?php _e('If you add an custom item ("Links"), you must add translation of navigation label in "Ceceppa Multilingua" -> "My translations"', 'ceceppaml') ?>
 	      <br /><br />
 	      <?php _e('If you want to have different items for each languages, create a menu for each language', 'ceceppaml') ?>
