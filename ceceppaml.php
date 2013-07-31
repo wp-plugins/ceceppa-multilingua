@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.2.11
+Version: 1.2.12
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -2869,11 +2869,11 @@ class CeceppaML {
 
   function add_flying_flags() {
     $show = array("", "both", "text", "flag");
-    $as = intval(get_option("cml_show_items_as", 1));
+    $as = intval( get_option("cml_show_float_items_as", 1) );
     $size = get_option("cml_show_float_items_size", "small");
 
     echo '<div id="flying-flags">';
-      cml_show_flags($show[$as], $size);
+      cml_show_flags( $show[$as], $size );
     echo '</div>';
   }
   

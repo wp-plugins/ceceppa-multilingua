@@ -43,7 +43,7 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
   <div id="poststuff">
     <div id="post-body" class="metabox-holder columns-2">
     <div id="post-body-content">
-    <form class="ceceppa-form-options" name="wrap" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>?page=ceceppaml-options-page">
+    <form class="ceceppa-form-options" name="wrap" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>?page=<?php echo $_GET['page'] ?>">
     <?php wp_nonce_field('cml_edit_settings','cml_nonce_edit_settings'); ?>
     <input type="hidden" name="options" value="1"  />
     <input type="hidden" name="tab" value="<?php echo $tab ?>"  />
