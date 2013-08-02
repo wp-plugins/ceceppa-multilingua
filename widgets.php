@@ -322,15 +322,12 @@ class CeceppaMLWidgetText extends WP_Widget {
 
     extract($args);
 
-    $lang_id = $wpCeceppaML->get_current_lang_id();
-
-    $title = isset( $instance['title'] ) ? $instance['title'] : "";
-    if( isset( $instance['title-' . $lang_id] ) ) $title = $instance['title-' . $lang_id]; 
-    $title = apply_filters( 'widget_title', $title );
+    $title = apply_filters('widget_title', $instance['title'] );
 
     echo $before_widget;
       echo $before_title . $title . $after_title;
 
+      $lang_id = $wpCeceppaML->get_current_lang_id();
       if(isset($instance['text-' . $lang_id]))
 	echo $instance['text-' . $lang_id];
 
@@ -361,32 +358,24 @@ class CeceppaMLWidgetText extends WP_Widget {
     * @param array $instance Previously saved values from database.
     */
   public function form($instance) {
-    $title = isset( $instance['title'] ) ? $instance['title'] : "";
-    $langs = cml_get_languages(0);
+    $title = isset($instance['title']) ? $instance['title'] : "";
 ?>
     <p>
-    <?php foreach($langs as $lang) : ?>
-    <?php 
-      //per compatibilità con versioni precedenti, dove non permettevo l'inserimento di "titoli" multipli
-      if( isset( $instance['title-' . $lang->id] ) ) $title = $instance['title-' . $lang->id]; 
-    ?>
-    <label>
-      <?php _e('Title:'); ?>&nbsp;&nbsp;&nbsp;<img src="<?php echo cml_get_flag($lang->cml_flag) ?>" />&nbsp;<?php echo $lang->cml_language ?>
-      <input class="widefat" id="<?php echo $this->get_field_id( 'title-' . $lang->id ); ?>" name="<?php echo $this->get_field_name( 'title-' . $lang->id ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" />
+    <label for="<?php echo $this->get_field_id('title'); ?>">
+      <?php _e('Title:'); ?>
     </label> 
-    <?php endforeach; ?>
+    <input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" />
     <br />
 
     <!-- Testo per ogni lingua -->
-    <br />
-    <?php _e('Text:'); ?>
 <?php
+    $langs = cml_get_languages(0);
     foreach($langs as $lang) :
       $text = isset($instance['text-' . $lang->id]) ? $instance['text-' . $lang->id] : "";
 ?>
     <br />
     <label for="<?php echo $this->get_field_id('text-' . $lang->id); ?>">
-      <strong><img src="<?php echo cml_get_flag($lang->cml_flag) ?>" />&nbsp;<?php echo $lang->cml_language ?>:</strong><br />
+      <?php echo $lang->cml_default ? "<strong>" : "" ?><img src="<?php echo cml_get_flag($lang->cml_flag) ?>" />&nbsp;<?php echo $lang->cml_language ?>:<?php echo $lang->cml_default ? "</strong>" : "" ?><br />
       <textarea id="<?php echo $this->get_field_id( 'text-' . $lang->id ); ?>" name="<?php echo $this->get_field_name('text-' . $lang->id); ?>" type="text" style="width: 100%; min-height: 80px"><?php echo $text; ?></textarea>
     </label> 
 <?php endforeach; ?>
