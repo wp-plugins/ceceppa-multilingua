@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ceceppa Multilingua\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-07-29 23:49+0100\n"
-"PO-Revision-Date: 2013-07-29 23:49+0100\n"
+"POT-Creation-Date: 2013-08-03 12:01+0100\n"
+"PO-Revision-Date: 2013-08-03 12:02+0100\n"
 "Last-Translator: Alessandro Senese <senesealessandro@gmail.com>\n"
 "Language-Team: \n"
 "Language: it_IT\n"
@@ -17,180 +17,192 @@ msgstr ""
 "X-Poedit-SearchPath-0: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/"
 "ceceppa-multilingua\n"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:440
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:450
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:443
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:453
 msgid "Post data"
 msgstr "Dati pagina"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:441
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:444
 msgid "Page data"
 msgstr "Dati pagina"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:459
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:462
 msgid "Ceceppa Multilingua"
 msgstr "Ceceppa Multilingua"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:460
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:463
 #: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/includes/widgettitles.php:26
 msgid "Widget titles"
 msgstr "Titoli dei widgets"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:461
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/includes/form_translations.php:28
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:464
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/includes/form_translations.php:34
 msgid "My translations"
 msgstr "Le mie traduzioni"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:462
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:465
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/includes/form_translations.php:35
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/includes/form_translations.php:123
+msgid "Site Title"
+msgstr "Titolo sito"
+
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:465
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/includes/form_translations.php:35
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/includes/form_translations.php:124
+msgid "Tagline"
+msgstr "Motto"
+
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:466
 #: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/includes/form_options.php:35
 #: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/includes/functions_page.php:8
 msgid "Flags"
 msgstr "Bandiere"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:463
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:467
 msgid "Settings"
 msgstr "Impostazioni"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:464
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:468
 msgid "Shortcode & Functions"
 msgstr "Shortcode & Funzioni"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:504
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:508
 msgid "Show only posts/pages in: "
 msgstr "Visualizza solo pagine/articoli in:"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:531
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:535
 msgid "Edit post: "
 msgstr "Modifica articolo"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:542
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:546
 msgid "Translate"
 msgstr "Traduci"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:710
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:714
 #: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/includes/form_languages.php:55
 msgid "Default language"
 msgstr "Lingua predefinita"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:917
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:921
 msgid "Show only posts/page in:"
 msgstr "Visualizza solo pagine/articoli in:"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:918
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:922
 msgid "Show all languages"
 msgstr "Visualizza tutte le lingue"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:921
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:927
 msgid "Show also posts withouth translation"
 msgstr "Visualizza anche gli articoli senza traduzione"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1273
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1279
 msgid "Language of this post"
 msgstr "Lingua di questa pagina"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1277
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1382
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1283
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1388
 msgid "This is a translation of"
 msgstr "Questo è una traduzione di:"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1279
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1285
 msgid "This post is not a translation"
 msgstr "Questo articolo non è una traduzione"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1321
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1418
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1327
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1424
 msgid "Translations:"
 msgstr "Traduzioni:"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1335
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1429
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1341
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1435
 msgid "Translate post"
 msgstr "Traduci articolo"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1335
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1429
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1341
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1435
 msgid "Edit post"
 msgstr "Modifica articolo"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1336
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1430
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1342
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1436
 msgid "Add translation"
 msgstr "Aggiungi traduzione"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1336
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1342
 msgid "Switch to:"
 msgstr "Passa a"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1378
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1384
 msgid "Language of this page"
 msgstr "Lingua di questa pagina"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1384
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1390
 msgid "This page is not a translation"
 msgstr "Questa pagina non è una traduzione"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1430
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1436
 msgid "Switch to post/page"
 msgstr "Passa all'articolo/pagina"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1463
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:1469
 msgid "Add to Menu"
 msgstr "Aggiungi al menu"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2472
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2478
 msgid "If you like this plugin, you can:"
 msgstr "Se ti piace il mio pluign puoi:"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2476
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2482
 msgid "Add your own review here"
 msgstr "Aggiungere la tua recensione"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2479
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2485
 msgid "Promote the plugin on your blog or via twitter, facebook, google +"
 msgstr ""
 "Promuovere il plugin sul tuo blog oppure via twitter, facebook, google +"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2482
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2488
 msgid "Translate the plugin in your own language."
 msgstr "Tradurre il plugin nella tua lingua."
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2484
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2490
 msgid "Contact me if you don't know how to do."
 msgstr "Contattami se non sai come fare :)."
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2489
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2495
 msgid "Donate to support development and maintenance."
 msgstr "Sostieni con una donazione il suo sviluppo e il suo mantenimento :)"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2495
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2501
 msgid "If you have any question or you need new features contact me :)"
 msgstr ""
 "Per qualsiasi domanda oppure se hai bisogno di nuove caratteristiche, "
 "contattami :)"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2502
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2622
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2508
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2647
 msgid "Dismiss"
 msgstr "Rimuovi"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2519
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2526
 msgid "Sorry but due a bug it's necessary to fix language of all pages."
 msgstr ""
 "Sono dispiaciuto, a causa di un bug è necessario correggere la lingua di "
 "tutte le pagine."
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2521
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2528
 msgid "Edit a page (or a post) and publish it withouth modify."
 msgstr ""
 "Modifica una pagina (o un articolo) e pubblicala senza apportare alcuna "
 "modifica."
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2531
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2539
 msgid "It is necessary assign default language to existing posts. "
 msgstr ""
 "E' necessario assegnare la lingua di default a tutti gli articoli/pagine "
 "presenti sul sito."
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2532
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2540
 #, php-format
 msgid ""
 "<strong>If your default language is \"%s\"</strong> click here for "
@@ -199,26 +211,27 @@ msgstr ""
 "<strong>Se la tua lingua predefinita è \"%s\"</strong> clicca qui per "
 "assegnarla automaticamente a tutti gli articoli/pagine."
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2534
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2542
 msgid "Otherwhise add correct default language first"
 msgstr "Altrimenti aggiungi prima la tua lingua di default."
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2538
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2546
 msgid "Hide this message."
 msgstr "Nascondi questo messaggio"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2550
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2559
 msgid "If you want to use an page as homepage, you must set it as static page"
 msgstr ""
 "Se vuoi utilizzare una pagina come homepage, devi impostarla come pagina "
 "statica"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2565
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2583
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2576
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2595
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2609
 msgid "Tip"
 msgstr "Consiglio"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2566
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2577
 msgid ""
 "All items will be automatically translated when user switch between "
 "languages."
@@ -226,14 +239,14 @@ msgstr ""
 "Tutti gli elementi verranno tradotti automaticamente quando l'utente passa "
 "da una lingua ad un'altra."
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2567
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2578
 msgid ""
 "Add only pages existing in your default language, not their translation."
 msgstr ""
 "Aggiungi solamente le pagine disponibili nella lingua di default, non la "
 "loro traduzione"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2568
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2579
 msgid ""
 "If you add an custom item (\"Links\"), you must add translation of "
 "navigation label in \"Ceceppa Multilingua\" -> \"My translations\""
@@ -242,7 +255,7 @@ msgstr ""
 "dell'etichetta scelta nella pagina \"Ceceppa Multilingua\" -> \"Le mie "
 "traduzioni\""
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2570
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2581
 msgid ""
 "If you want to have different items for each languages, create a menu for "
 "each language"
@@ -250,7 +263,7 @@ msgstr ""
 "Se hai la necessita di personalizzare le etichette dei menu, oppure se vuoi "
 "avere menù differenti per ogni lingua, creane uno per ognuna di esse"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2571
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2582
 msgid ""
 "and assigns it to the corresponding menu, otherwise assign it only to the "
 "primary menu"
@@ -258,7 +271,7 @@ msgstr ""
 "e assegnalo alla lingua corrispondente. <br />Altrimenti basta che assegni "
 "solo il menu primario del tema"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2573
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2584
 msgid ""
 "In same cases is displayed a blank menu for non default language. If that "
 "happens you must create different menu for each language. :("
@@ -267,11 +280,11 @@ msgstr ""
 "predefinite. Se accada è necessario creare un menu differente per ogni "
 "lingua gestita :("
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2584
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2596
 msgid "You can to use a static page as homepage for your site/blog."
 msgstr "Puoi utilizzare una pagina statica come homepage per il tuo blog."
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2585
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2597
 msgid ""
 "Select a desided page for front and post page and translate them in all "
 "languages."
@@ -279,23 +292,39 @@ msgstr ""
 "Seleziona la pagina desiderata per \"Pagina iniziale\" e/o \"Pagina articoli"
 "\" e traducila in tutte le lingue."
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2616
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2610
+msgid ""
+"Clicke here for translate the \"Site Title\" and \"Tagline\" in other "
+"languages"
+msgstr ""
+"Clicca qui per tradurre il \"Titolo del sito\" e il \"Motto\" nelle altre "
+"lingue."
+
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2611
+msgid ""
+"N.B.: If you have translated the title of the website you have to upgrade it "
+"if you make changes"
+msgstr ""
+"N.B.: Se hai tradotto il titolo del sito, devi ritradurlo se modifichi il "
+"titolo originale"
+
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2641
 msgid "Some language file was not found."
 msgstr "Alcuni pacchetti di lingua non sono stati trovati."
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2618
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2643
 msgid "Click here for check and install them."
 msgstr "Clicca qui per controllare e installarli."
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2636
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2661
 msgid "Plugin successfully installed"
 msgstr "Il plugin è stato installato correttamente"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2638
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2663
 msgid "Language detected:"
 msgstr "Lingua individuata:"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2646
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/ceceppaml.php:2671
 msgid "Click here for advanced settings or for add another language"
 msgstr ""
 "Clicca qui per le opzioni avanzate oppure per aggiungere un'altra lingua"
@@ -776,11 +805,12 @@ msgstr "Aggiungi un elemento per ogni lingua"
 msgid "Add elements in a submenu:"
 msgstr "Aggiungi gli elementi in un sottomenu"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/includes/form_translations.php:94
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/includes/form_translations.php:103
 msgid "Add"
 msgstr "Aggiungi"
 
-#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/includes/form_translations.php:94
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/includes/form_translations.php:104
+#: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/includes/form_translations.php:129
 #: /home/ceceppa/Progetti/www/wp_beta/wp-content/plugins/ceceppa-multilingua/includes/widgettitles.php:88
 msgid "Update"
 msgstr "Aggiorna"

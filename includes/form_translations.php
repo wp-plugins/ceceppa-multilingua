@@ -22,12 +22,21 @@ global $wpCeceppaML;
 if(!is_object($wpCeceppaML)) die("Access denied");
 
 global $wpdb;
+
+$tab = ( isset( $_GET['page'] ) && $_GET['page'] == 'ceceppaml-translations-title' ) ? 1 : 0;
 ?>
 
 <div class="wrap">
-   <h2><?php _e('My translations', 'ceceppaml'); ?></h2>
-   <br />
-    <form class="ceceppa-form" name="wrap" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>?page=ceceppaml-translations-page">
+  <div class="icon32">
+    <img src="<?php echo CECEPPA_PLUGIN_URL ?>images/logo.png" height="32"/>
+  </div>
+  <h2 class="nav-tab-wrapper">
+    <a class="nav-tab <?php echo $tab == 0 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-translations-page"><?php _e('My translations', 'ceceppaml') ?></a>
+    <a class="nav-tab <?php echo $tab == 1 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-translations-title"><?php _e('Site Title') ?>/<?php _e('Tagline') ?></a>
+    </h2>
+    <br />
+    <form class="ceceppa-form" name="wrap" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>?page=<?php echo $_GET['page'] ?>">
+<?php if ( $tab == 0) : ?>
     <input type="hidden" name="form" value="1" />
     <table class="wp-list-table widefat wp-ceceppaml">
       <thead>
@@ -91,8 +100,33 @@ global $wpdb;
     </table>
     <div style="text-align:right">
       <p class="submit">
-	<input type="button" class="button button-secondaty" name="add" value="<?php _e('Add', 'ceceppaml') ?>" onclick="addRow(<?php echo count($langs) . ", '" . join(",", $lid) ?>')" />	<?php submit_button( __('Update', 'ceceppaml', 'ceceppaml'), "button-primary", "action", false, 'class="button button-primary"' ); ?>
+	<input type="button" class="button button-secondaty" name="add" value="<?php _e('Add', 'ceceppaml') ?>" onclick="addRow(<?php echo count($langs) . ", '" . join(",", $lid) ?>')" />
+	<?php submit_button( __('Update', 'ceceppaml', 'ceceppaml'), "button-primary", "action", false, 'class="button button-primary"' ); ?>
       </p>
     </div>
+<?php 
+else: 
+  echo '<input type="hidden" name="form" value="2" />';
+  
+  $langs = cml_get_languages( 0, 0 );
+  
+  $blog_title = get_bloginfo('name');
+  $blog_tagline = get_bloginfo('description');
+
+  echo '<dl class="site-title">';
+  foreach ( $langs as $lang ) :
+    $title = cml_translate ( $blog_title, $lang->id, 'M' );
+    $tagline = cml_translate ( $blog_tagline, $lang->id, 'M' );
+
+    echo '<dt><h3><img src="' . cml_get_flag_by_lang_id( $lang->id ) . '" />&nbsp;' . cml_get_language_title( $lang->id ) . '</h3>';
+    echo '<input type="hidden" name="id[]" value="' . $lang->id . '" /></dt>';
+    echo '<dd><span>' . __('Site Title') . ':</span><input class="regular-text" type="text" name="title[]" value="' . $title . '" /></dd>';
+    echo '<dd><span>' . __('Tagline') . ':</span><input class="regular-text" type="text" name="tagline[]" value="' . $tagline . '" /></dd>';
+  endforeach;
+
+  echo "</dl>";
+  
+  submit_button( __('Update', 'ceceppaml', 'ceceppaml'), "button-primary", "action", false, 'class="button button-primary"' );endif; 
+?>
     </form>
 </div>

@@ -3,7 +3,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate
 Requires at least: 3.4.1
 Tested up to: 3.6
-Stable tag: 1.2.14
+Stable tag: 1.2.15
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG
@@ -21,6 +21,7 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 - URLs pretty and SEO-friendly. ?lang=en, /en/foo/ or en.yoursite.com
 - Different menu for each language.
 - Translate widget's title.
+- Translate Site Title / Tagline
 - Group/Ungroup comments for each post's languages.
 - Show notice when the post/page/category that user is viewing is available, based on the information provided by the browser, in their its language
 - Redirects the browser depending on the user's language. Append the suffix &lang= to the home url-
@@ -34,7 +35,7 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 - One-Click-Switching between the translations
 - Category link translation
 - Add flags to menu
-- Plugin works also custom post types :)
+- Plugin works also with custom post types :)
 
 = Widgets =
 
@@ -144,9 +145,6 @@ Yes. You can:
 7. Box for manage language files
 
 == Changelog ==
-
-= 1.2.13 =
-* Fixed "CML Text Widget", now you can insert title for each language
 
 = 1.2.11 =
 * Added border to the active language on the "all posts" page 

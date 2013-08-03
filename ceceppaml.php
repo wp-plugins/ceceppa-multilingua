@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.2.14
+Version: 1.2.15
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -303,8 +303,11 @@ class CeceppaML {
       //La funzione clean_url si occupa di eliminare lo slug della lingua dal link,
       //affinché wp processi il link correttamente
       add_filter( 'pre_get_posts', array(&$this, 'clean_url') );
+
+      //Titolo del blog/sito
+      add_filter( 'bloginfo', array( &$this, 'bloginfo' ), 0 );
+      add_filter( 'wp_title', array( &$this, 'wp_title' ), 0 );
     }
-    
     //Update current language
     add_action( 'init', array(&$this, 'update_current_lang') );
 
@@ -459,6 +462,7 @@ class CeceppaML {
     add_menu_page('Ceceppa ML Options', __('Ceceppa Multilingua', 'ceceppaml'), 'administrator', 'ceceppaml-language-page', array(&$this, 'form_languages'), CECEPPA_PLUGIN_URL . '/images/logo_mini.png');
     add_submenu_page('ceceppaml-language-page', __('Widget titles', 'ceceppaml'), __('Widget titles', 'ceceppaml'), 'manage_options', 'ceceppaml-widgettitles-page', array(&$this, 'form_widgettitles'));
     add_submenu_page('ceceppaml-language-page', __('My translations', 'ceceppaml'), __('My translations', 'ceceppaml'), 'manage_options', 'ceceppaml-translations-page', array(&$this, 'form_translations'));
+    add_submenu_page('ceceppaml-language-page', __('Site Title'), __( 'Site Title' ) . "/" . __( 'Tagline' ), 'manage_options', 'ceceppaml-translations-title', array(&$this, 'form_translations'));
     add_submenu_page('ceceppaml-language-page', __('Flags', 'ceceppaml'), __('Flags', 'ceceppaml'), 'manage_options', 'ceceppaml-flags-page', array( &$this, 'form_options' ) );
     add_submenu_page('ceceppaml-language-page', __('Settings', 'ceceppaml'), __('Settings', 'ceceppaml'), 'manage_options', 'ceceppaml-options-page', array(&$this, 'form_options'));
     add_submenu_page('ceceppaml-language-page', __('Shortcode & Functions', 'ceceppaml'), __('Shortcode & Functions', 'ceceppaml'), 'manage_options', 'ceceppaml-shortcode-page', array(&$this, 'shortcode_page'));
@@ -2514,6 +2518,7 @@ class CeceppaML {
       if(get_option("cml_check_language_file_exists", 1))
 	$this->check_language_file_exists();
 
+//OPTIMIZATION
       if(get_option("cml_need_code_optimization", 1)) :
 	echo "<div class=\"updated\">\n";
 	echo "<p>\n";
@@ -2526,6 +2531,7 @@ class CeceppaML {
 	echo "</div>";
       endif;
 
+// UPDATE POSTS
       if(get_option("cml_need_update_posts", false)) :
 	echo "<div class=\"updated\">\n";
 	echo "<p>\n";
@@ -2542,6 +2548,7 @@ class CeceppaML {
 	echo "</div>";
       endif;
 
+//USE STATIC PAGE
       if( get_option( "cml_need_use_static_page", false ) ) :
 	if( $this->_url_mode != PRE_PATH || cml_use_static_page() ) {
 	  update_option( 'cml_need_use_static_page', 0 );
@@ -2554,12 +2561,14 @@ class CeceppaML {
 	}
       endif;
 
+//FIRST INSTALL
       if( get_option("cml_first_install", false) ) :
 	$this->successfully_installed();
 	
 	update_option("cml_first_install", 0);
       endif;
 
+//MENU page
       if($pagenow == 'nav-menus.php') :
 ?>
 	<div class="updated">
@@ -2578,6 +2587,7 @@ class CeceppaML {
 <?php
       endif;
       
+//SETTINGS -> READING page
       if($pagenow == 'options-reading.php') :
 ?>
 	<div class="updated">
@@ -2589,7 +2599,20 @@ class CeceppaML {
 	</div>
 <?php
       endif;
-      
+     
+// SETTINGS -> General page (Site Title / Tagline)     
+      if( $pagenow == 'options-general.php' ) :
+	  $link = home_url('wp-admin') . "/admin.php?page=ceceppaml-translations-title";
+?>
+	<div class="updated">
+	    <p>
+	      Ceceppa Multilingua: <strong><?php _e('Tip', 'ceceppaml') ?></strong><br /><br />
+	      <a href="<?php echo $link ?>"><?php _e('Clicke here for translate the "Site Title" and "Tagline" in other languages', 'ceceppaml') ?></a><br /><br />
+	      <span style="color: red"><strongs><?php _e('N.B.: If you have translated the title of the website you have to upgrade it if you make changes', 'ceceppaml') ?><br />
+	    </p>
+	</div>
+<?php
+      endif;
     }
     
     /*
@@ -2961,6 +2984,14 @@ class CeceppaML {
     if( is_category() ) return $this->convert_url( $this->_current_lang_slug, $link );
 
     return add_query_arg( array( "lang" => $this->_current_lang_slug ) , $link );
+  }
+
+  function wp_title( $title ) {
+    return get_option( "cml_site_title_" . $this->_current_lang_id, $title );
+  }
+
+  function bloginfo ( $info ) {
+    return cml_translate( $info, $this->_current_lang_id, 'M' );
   }
 }
 

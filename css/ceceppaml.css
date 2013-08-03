@@ -122,3 +122,8 @@ table.mo-table {
     padding: 0 !important;
     margin: 0 5px 0!important;
   }
+  
+dl.site-title dd > span {
+  display: inline-block;
+  width: 100px;
+}
