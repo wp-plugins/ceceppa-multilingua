@@ -432,13 +432,13 @@ function cml_add_category_translation($id, $name, $lang_id, $translation) {
 function cml_get_current_language() {
   global $wpCeceppaML;
   
-  return $wpCeceppaML->get_current_language();
+  return is_object( $wpCeceppaML ) ? $wpCeceppaML->get_current_language() : null;
 }
 
 function cml_get_current_language_id() {
   $lang = cml_get_current_language();
 
-  return is_object($lang) ? $lang->id : -1;
+  return is_object( $lang ) ? $lang->id : -1;
 }
 
 /* Controllo se sto nella homepage */
