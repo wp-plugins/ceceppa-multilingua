@@ -1,8 +1,30 @@
-<h2><?php _e('Shortcode & Functions', 'ceceppaml') ?></h2>
+<?php 
+  global $wpCeceppaML;
+
+  //Non posso richiamare lo script direttamente dal browser :)
+  if(!is_object($wpCeceppaML)) die("Access denied");
+  
+$tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
+?>
+<div class="wrap ceceppaml">
+<div class="icon32">
+  <img src="<?php echo CECEPPA_PLUGIN_URL ?>images/help.png" height="32"/>
+</div>
 <h2 class="nav-tab-wrapper">
-    <a href="#" class="nav-tab nav-tab-active"><?php _e('Shortcode') ?></a>
+    <a class="nav-tab <?php echo $tab == 0 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-shortcode-page&tab=0"><?php _e('Shortcodes', 'ceceppaml') ?></a>
+    <a class="nav-tab <?php echo $tab == 1 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-shortcode-page&tab=1"><?php _e('Functions', 'ceceppaml') ?></a>
 </h2>
-<h3>Translate strings in different languages</h3>
+<?php if($tab == 0): ?>
+<h3>Index</h3>
+<ul class="cml_list">
+  <li><a href="#strings"><?php _e('Translate strings in different languages', 'ceceppaml') ?></a></li>
+  <li><a href="#translations"><?php _e('How to use the translations saved in "My Translations" page', 'ceceppaml') ?></a></li>
+  <li><a href="#shortcode"><?php _e('Execute another shortcode and pass parameters in according to current language', 'ceceppaml') ?></a></li>
+  <li><a href="#alllangs"><?php _e('How to show all available languages', 'ceceppaml') ?></a></li>
+  <li><a href="#availables"><?php _e('How to show in which language is available current page/post', 'ceceppaml') ?></a></li>
+</ul>
+<div id="strings"><br />
+<h3><?php _e('Translate strings in different languages', 'ceceppaml') ?></h3>
 <blockquote>
   <span style="color: #00f;">
     <strong>[cml_text]</strong>
@@ -24,8 +46,9 @@
 	<i>[cml_text it="Stringa in italiano" en="String in English" epo="Teksto en Esperanto"]</i>
       </p>
     </blockquote>
-</blockquote>
-<br />
+  </blockquote>
+</div>
+<div id="translations"><br />
 <h3><?php _e('How to use the translations saved in "My Translations" page', 'ceceppaml') ?></h3>
 <blockquote>
   <span style="color: #00f;">
@@ -54,7 +77,8 @@
       </p>
     </blockquote>
 </blockquote>
-<br />
+</div>
+<div id="shortcode"><br />
 <h3><?php _e('Execute another shortcode and pass parameters in according to current language', 'ceceppaml') ?></h3>
 <blockquote>
   <span style="color: #00f;">
@@ -80,7 +104,8 @@
       </p>
     </blockquote>
 </blockquote>
-<br />
+</div>
+<div id="alllangs"><br />
 <h3><?php _e('How to show all available languages', 'ceceppaml') ?></h3>
 <blockquote>
   <span style="color: #00f;">
@@ -121,8 +146,9 @@
       <br />
     </blockquote>
 </blockquote>
-<br />
-<h3><?php _e('How to show in which language is available current page/post/category.', 'ceceppaml') ?></h3>
+</div>
+<div id="availables"><br />
+<h3><?php _e('How to show in which language is available current page/post', 'ceceppaml') ?></h3>
 <blockquote>
   <span style="color: #00f;">
     <strong>[cml_show_available_langs]</strong><br />
@@ -145,4 +171,9 @@
       </p>
     </blockquote>
 </blockquote>
-<br />
+</div>
+<?php else : 
+	require_once("functions_page.php");
+      endif;
+?>
+</div>
