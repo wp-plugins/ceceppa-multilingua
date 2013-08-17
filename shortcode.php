@@ -74,7 +74,7 @@ function cml_do_shortcode($attrs) {
   return do_shortcode("[$shortcode $params $lang]");
 }
 
-function cml_show_available_langs($attrs) {
+function cml_show_available_langs( $attrs ) {
   global $wpdb, $wpCeceppaML;
 
   $class = $attrs['class'];

@@ -3,6 +3,8 @@ global $wpCeceppaML;
 
 if(!is_object($wpCeceppaML)) die("Access denied");
 
+require_once "mo-convert.php";
+
 class CeceppaMLTranslations {
   public function __construct() {
 
@@ -27,6 +29,8 @@ class CeceppaMLTranslations {
       endif;
 
     endif;
+
+    writePo ( CECEPPA_PLUGIN_PATH . 'includes/ceceppaml-it_IT.po', '', '',  CECEPPA_PLUGIN_PATH . 'includes/ceceppaml-it_IT.mo' );
 
     require_once('form_translations.php');
   }

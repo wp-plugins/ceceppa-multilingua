@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.2.17
+Version: 1.2.18
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -23,7 +23,7 @@ if ( !function_exists( 'add_action' ) ) {
 
 global $wpdb;
 
-define('CECEPPA_DB_VERSION', 17);
+define('CECEPPA_DB_VERSION', 18);
 
 define('CECEPPA_ML_TABLE', $wpdb->base_prefix . 'ceceppa_ml');
 define('CECEPPA_ML_CATS', $wpdb->base_prefix . 'ceceppa_ml_cats');
@@ -586,7 +586,7 @@ class CeceppaML {
 	    $this->_title_applied = true;
 
 	    $size = get_option('cml_option_flags_on_size', "small");
-	    return $title . cml_show_available_langs(array("class" => "cml_flags_on_top", "size" => $size));
+	    return $title . cml_show_available_langs( array("class" => "cml_flags_on_top", "size" => $size ) );
         endif;
 
 	return $title;
@@ -997,7 +997,7 @@ class CeceppaML {
     /*
      * Nascondo i post tradotti
      */
-    function hide_translations($wp_query) {
+    function hide_translations( $wp_query ) {
       global $wpdb;
 
       if($wp_query != null && (is_page() || is_single() || isCrawler())) return;
@@ -1007,7 +1007,7 @@ class CeceppaML {
       if( !isset( $this->_hide_posts ) || empty( $this->_hide_posts ) ) :
 	$this->_hide_posts = array();
 
-	$this->_hide_posts = get_option("cml_hide_posts_for_lang_" . $this->_current_lang_id);
+	$this->_hide_posts = get_option( "cml_hide_posts_for_lang_" . $this->_current_lang_id );
       endif;
 
       //Al momento utilizzo la vecchia funzione non ottimizzata per la visualizzazione dei tag
@@ -1277,7 +1277,7 @@ class CeceppaML {
 
     //Lingua dell'articolo
     echo "<h4>" . __('Language of this post', 'ceceppaml') . "</h4>";
-    $lang_id = empty($post_lang) ? $this->get_language_id_by_post_id($tag->ID) : $post_lang;
+    $lang_id = empty( $post_lang ) ? $this->get_language_id_by_post_id( $tag->ID) : $post_lang;
     cml_dropdown_langs("post_lang", $lang_id, false, true, null, "", 0);
 
     echo "<h4>" . __('This is a translation of', 'ceceppaml') . "</h4>";
@@ -1295,12 +1295,24 @@ class CeceppaML {
 		    CECEPPA_ML_POSTS, $t_id));
     $linked_to = empty($linked_post) ? $linked_to : $linked_post;
 
+    if( empty( $lang_id ) ) $lang_id = $this->_default_language_id;
+    $not = ( get_option( "cml_hide_posts_for_lang_" . $lang_id ) );
+    $not = array_merge ( $not, $this->_posts_of_lang[ $lang_id ] );
+    $untranslated = array_merge( array( $linked_to ), get_option( "cml_posts_of_lang_" . 0 ) );
+
+    //Cancello dai post da escludere quello collegato 
+    foreach ( $untranslated as $v ) :
+      if( ( $key = array_search( $v, $not ) ) !== false ) {
+	  unset( $not[ $key ] );
+      }
+    endforeach;
+
     //Elenco degli articoli
     $args = array('numberposts' => -1, 'order' => 'ASC', 'orderby' => 'title', 'posts_per_page' => 9999,
 		  //Mi serve per farlo funzionare con i custom posts :)
 		  'post_type' => get_post_type(),
 		  //Escludo gli articoli "collegati" dall'elenco
-		  'post__not_in' => get_option("cml_hide_posts_for_lang_" . $this->_default_language_id),
+		  'post__not_in' => $not,
 		  'status' => 'publish,inherit,pending,private,future,draft');
 
     $posts = new WP_Query($args);
@@ -2171,6 +2183,7 @@ class CeceppaML {
       
       //Recupero l'id collegato
       $nid = cml_get_linked_post($this->_default_language_id, null, $id, $lang_id);
+
       if(empty($nid)) $nid = $id;
       $query->query_vars['page_id'] = $nid;
 
@@ -2245,13 +2258,14 @@ class CeceppaML {
 	//non devo applicare nessun tipo di filtro agli elementi del menu, esco :)
 	//Questo è vero solo per le pagine... altrimenti non mi traduce il nome delle categorie
 	if($this->_no_translate_menu_item == true && $item->object == 'page') :
-	  remove_filter('wp_setup_nav_menu_item', array(&$this, 'translate_menu_item'));
+	  remove_filter( 'wp_setup_nav_menu_item', array(&$this, 'translate_menu_item') );
 	  return $item;
 	endif;
 
         if($this->_current_lang_id != $this->_default_language_id) :
 	    switch($item->object) :
 	    case 'page':
+	    case 'post':
 	      $page_id = cml_get_linked_post($this->_default_language_id, null, $item->object_id, $this->_current_lang_id);
 
 	      if(!empty($page_id)) :
@@ -2292,7 +2306,7 @@ class CeceppaML {
         return $item;
     }
     
-    function translate_term_name($name) {
+    function translate_term_name( $name ) {
       if($this->_current_lang_id == $this->_default_language_id) return $name;
 
       $depth = 0;
@@ -2801,11 +2815,11 @@ class CeceppaML {
     if(!is_admin()) :
       $langs = cml_get_languages();
     else:
-      $langs = cml_get_languages(0);
+      $langs = cml_get_languages( 0 );
     endif;
     
     foreach($langs as $lang) :
-      $this->_posts_of_lang[$lang->id] = get_option("cml_posts_of_lang_" . $lang->id);
+      $this->_posts_of_lang[ $lang->id ] = get_option("cml_posts_of_lang_" . $lang->id);
     endforeach;
   }
   
@@ -2930,6 +2944,7 @@ class CeceppaML {
    */
   function update_all_posts_language() {
     require_once(CECEPPA_PLUGIN_PATH . "fix.php");
+
     cml_update_all_posts_language();
   }
   

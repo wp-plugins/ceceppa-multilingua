@@ -100,6 +100,10 @@ function cml_fix_database() {
       
       if( $the_id ) update_option( 'cml_need_use_static_page', 1 );
     endif;
+    
+    if( $dbVersion <= 17 ) :
+	add_action( 'plugins_loaded', 'cml_fix_rebuild_posts_info' );
+    endif;
 }
 
 //Imposto in automatico la lingua in tutti i post
@@ -186,15 +190,19 @@ function cml_fix_rebuild_posts_info() {
 	endif;
       endforeach;
       
-      continue;
-    else:
-      $posts[$lang][] = $pid;
+//       $posts[$lang] = $pid;
+//       continue;
+//     else:
     endif;
+    $posts[$lang][] = $pid;
+//     endif;
   endwhile;
 
-  foreach($langs as $lang) :
+  foreach( $langs as $lang ) :
     @update_option("cml_posts_of_lang_" . $lang->id, array_unique($posts[$lang->id]));
   endforeach;
+
+  @update_option( "cml_posts_of_lang_" . 0, array_unique( $posts[0] ) );
 
   //Articoli da escludere
   //Recupero tutte le traduzioni...
