@@ -329,7 +329,7 @@ class CeceppaMLWidgetText extends WP_Widget {
 
       $lang_id = $wpCeceppaML->get_current_lang_id();
       if(isset($instance['text-' . $lang_id]))
-	echo $instance['text-' . $lang_id];
+	echo do_shortcode( $instance['text-' . $lang_id] );
 
     echo $after_widget;
   }
