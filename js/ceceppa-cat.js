@@ -21,3 +21,18 @@ function refreshCat($elements) {
   } else
     setTimeout(function() { refreshCat($elements) }, 100);
 }
+
+jQuery(document).ready(function() {
+  var $tag = jQuery("#addtag").find("div")[0];
+  var isEdit = jQuery(jQuery("#edittag").find("tr")[0]).length > 0;
+  var $titles = jQuery(".cml-form-field");
+  
+  if(!isEdit) 
+    jQuery($tag).append($titles);
+  else {
+    $titles.each(function(index) {
+      $tag = jQuery("#edittag").find("table tbody tr")[index];
+      jQuery(this).insertAfter($tag);
+    });
+  }
+});
