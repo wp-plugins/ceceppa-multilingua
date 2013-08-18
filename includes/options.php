@@ -119,6 +119,9 @@ class CeceppaMLOptions {
 
     //Commenti
     @update_option('cml_option_comments', $_POST['comments']);
+
+    //Translate menu items?
+    @update_option( "cml_option_action_menu", intval( $_POST['action-menu'] ) );
   }
 
   function update_filters() {
@@ -130,7 +133,7 @@ class CeceppaMLOptions {
 
     //Filter translations
     @update_option("cml_option_filter_translations", intval($_POST['filter-translations']));
-	  
+
     //Filter query
     @update_option("cml_option_filter_query", intval($_POST['filter-query']));
 	  

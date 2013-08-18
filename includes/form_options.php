@@ -121,6 +121,20 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 		<label for="categories"><?php _e('Translate the url for categories', 'ceceppaml') ?>&nbsp;</label><br>
 	    </td>
 	    </tr>
+<!-- Translate menu -->
+	    <tr>
+	    <td id="cats-tags" style="vertical-align: middle">
+		<div id="icon-themes" class="icon32" style=""></div>
+		<strong style="line-height: 50px;"><?php _e( 'Translate menu', 'ceceppaml' ); ?></strong>
+		</td>
+	    <td>
+		<br />
+		<input type="checkbox" id="action-menu" name="action-menu" value="1" <?php checked(get_option('cml_option_action_menu', true), true) ?> />
+		<label for="action-menu"><?php _e( 'Translate menu items', 'ceceppaml' ) ?>&nbsp;</label><br>
+	    </td>
+	    </tr>
+
+<!-- 	     -->
 	    <tr class="alternate">
 	    <td><center>
 		<strong><?php _e('Show language\'s flag:', 'ceceppaml') ?></strong><br /><br />
