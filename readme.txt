@@ -1,9 +1,9 @@
 === Ceceppa Multilingua ===
 Contributors: ceceppa
-Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate
+Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate, international, .mo file, .po file, localization, widget, post
 Requires at least: 3.4.1
 Tested up to: 3.6
-Stable tag: 0.9.17
+Stable tag: 1.2.21
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG
@@ -21,6 +21,7 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 - URLs pretty and SEO-friendly. ?lang=en, /en/foo/ or en.yoursite.com
 - Different menu for each language.
 - Translate widget's title.
+- Translate Site Title / Tagline
 - Group/Ungroup comments for each post's languages.
 - Show notice when the post/page/category that user is viewing is available, based on the information provided by the browser, in their its language
 - Redirects the browser depending on the user's language. Append the suffix &lang= to the home url-
@@ -32,6 +33,9 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 - Show only posts of the current language
 - One-Click-Switching between the languages
 - One-Click-Switching between the translations
+- Category link translation
+- Add flags to menu
+- Plugin works also with custom post types :)
 
 = Widgets =
 
@@ -42,19 +46,25 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 Ceceppa Multilingua supports infinite language, which can be easily added/modified/deleted via the comfortable Configuration Page.
 All you need to do is activate the plugin, configure categories and start writing the content!
 
+= About =
 For more Information visit the [Plugin Homepage](http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/)
 
-Video demo: [Plugin demo](http://www.youtube.com/watch?v=fAPIQonud-E).
+= Demo =
+[Plugin demo](http://www.youtube.com/watch?v=fAPIQonud-E).
 
+= Flags =
 Flags directory are downloaded from [Flags](http://blog.worldofemotions.com/danilka/)
 
+= Icons =
 Some icons from [Icons](http://www.iconfinder.com/)
-
 Directions icon from [Deviantart](http://emey87.deviantart.com/)
 
+= jQuery plugins =
 Tooltip plugin for Jquery [Tipsy](http://onehackoranother.com/projects/jquery/tipsy/)
-
 jQuery image dropdown [DD](http://www.marghoobsuleman.com/jquery-image-dropdown)
+
+= Php gettext =
+Php-gettext by Danilo Shegan [php-gettext] https://launchpad.net/php-gettext/
 
 == Installation ==
 
@@ -69,6 +79,9 @@ Installation of this plugin is fairly easy:
 1. Manage desidered languages
 
 == Frequently Asked Questions ==
+
+= Where can I find full shortcode list =
+After instlling the plugin you can find full shortcode list in "Ceceppa Multilingua" -> "Shortcode" page.
 
 = Can I translate also the Widget Text =
 
@@ -87,6 +100,39 @@ The FAQ is available at the [Plugin Homepage](http://www.ceceppa.eu/it/pillole/w
 
 For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide/ceceppa-multilingua-configurare-e-utilizzare-il-plugin/)
 
+= How can I show flags for switch between languages =
+
+  1) editing your theme file and use the function:
+  
+     <?php cml_show_flags() ?>
+     
+  2) using the widget "CML Widget: Language Chooser"
+
+  3) enabling option in "Ceceppa Multilingua" -> "Settings" page
+
+= What is the function to get current language =
+
+  The function is:
+ 
+     cml_get_current_language();
+  
+  This function return an object and Its fields are:
+  
+    *) id           - id of language
+    *) cml_default  - 1 if it is the default language
+    *) cml_flag     - name of flag
+    *) cml_language - name of the language
+    *) cml_language_slug - slug of the language
+    *) cml_locale        - wordpress locale
+
+= Can I show flags on my website without using widget? =
+
+Yes. You can:
+
+  1) Add float div to website and customize look via css
+  2) Append flag to html element
+  3) Add flags to menu
+
 == Screenshots ==
 
 1. Language configuration
@@ -96,8 +142,128 @@ For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide
 5. Link to the article
 6. Menus configuration
 7. Box for see or add translation to current post/page
+7. Box for manage language files
 
 == Changelog ==
+
+= 1.2.21 =
+* Fixed "redirect loop"
+
+= 1.2.20 =
+* Now you can disable the translations of menu items
+
+= 1.2.19 =
+* CML: Text Widget now support also shortcodes
+
+= 1.2.18 =
+* Translate post link in menu
+
+= 1.2.16 =
+* Translate Site Title / Tagline
+
+= 1.2.11 =
+* Added border to the active language on the "all posts" page 
+* Added checkbox for show also posts withouth translations in "all posts"
+
+= 1.2.8 =
+* Fixed pagination link
+* Fixed same warnings
+
+= 1.2.5 =
+* Fixed PRE_PATH mode.
+* Code optimization
+* Fixed problem with next and previous post
+
+= 1.2.4 =
+* Fixed fatal error "wp_rewrite_rules()"
+
+= 1.2.1 =
+* Fixed setlocale
+
+= 1.2.0 =
+* Plugin automatically try to download language file when you add new language.
+* Locale is detected correctly
+* Plugin use wordpress localization for widget titles.
+* Improved documetation: Added "Functions" tab in "Shortcode & Functions" page.
+* Now title of category will also be translate in "/category/" page
+* Fixed comments count when choose to group them
+* Improved ui: Now the plugin use wordpress style for tables
+* Now you can download language file for wordpress directly from "Ceceppa Multilingua" page.
+
+= 1.1.2 =
+* Fixed duplicated items in "edit taxonomies form"
+
+= 1.1.1 =
+* Now you can choose the order of the flags :)
+
+= 1.1.0 =
+* Plugin works also custom post types :)
+* Added "Language data" box for custom post type, now you can choose language, and link translations
+* Added extra fields to custom taxonomies
+* Now you can show flags also on custom post types
+* Added flags for filter the list custom post types (doesn't appears with all plugins)
+
+= 1.0.17 =
+* Fixed fatal error on new install :(
+
+= 1.0.14 =
+* Now you can change language in "Quick edit" box
+* Fixed minor bugs
+
+= 1.0.13 =
+* Fixed warning on tags
+
+= 1.0.12 =
+* Fixed home redirect with static page
+* Fixed switch between categories
+* Fixed Archives link
+
+= 1.0.10 =
+* Fixed Warning: implode() 
+
+= 1.0.8 =
+* Fixed error "Wrong datatype for second argument"
+
+= 1.0.7 =
+* Fixed "not found" when try to preview post
+
+= 1.0.6 =
+* Fixed browser redirect
+* Fixed language detection for categories
+
+= 1.0.5 =
+* Fixed issue with filter "Filter posts"
+* Now you can choose the size of all flags :)
+
+= 1.0.4 =
+* Fixed layout in "Ceceppa Multilingua"
+* Fixed minor bugs with category translation
+
+= 1.0.3 =
+* Fixed language detection
+
+= 1.0.2 =
+* Fixed issue with pages
+
+= 1.0.1 =
+* Fixed fatal error in "CML Widget" Recent posts
+
+= 1.0.0 =
+* Code optimization
+* Fixed "Url Modification mode", now Pre-path and Pre-domain works correctly.
+* If you choose pre-path mode add language slug also for category link istead of "?lang=##"
+* Fixed "Translate the url for categories", now work correctly. This option is disabled by default, enable it on settings page.
+* Fixed Catalan and Spanish flag
+* Can show flag in your website withouth edit your template and without use widget. The options are available in "Settings" page
+
+= 0.9.21 =
+* Replaced hex2bin with UNHEX, now plugin is compatible also with Php < 5.4
+
+= 0.9.20 =
+* Now you can choose to translate link also for categories. The option is available in "Settings" page and support is experimental.
+
+= 0.9.19 =
+* Fixed filter in "All posts"
 
 = 0.9.16 =
 * Minor bug fixed

@@ -42,10 +42,13 @@ function cml_get_linked_post($lang_id, $result, $post_id, $browser_lang = null) 
 
   $link = null;
 
-  if(empty($result)) $result = $wpdb->get_row(sprintf("SELECT * FROM %s WHERE id = %d", CECEPPA_ML_TABLE, $browser_lang));
+  if(empty($result)) :
+    if(empty($browser_lang)) $browser_lang = cml_get_current_language_id();
+    $result = $wpdb->get_row(sprintf("SELECT * FROM %s WHERE id = %d", CECEPPA_ML_TABLE, $browser_lang));
+  endif;
 
   //Non confronto la lingua con se stessa :D
-  if($result->id != $lang_id) {
+  if(is_object($result) && $result->id != $lang_id) {
       /*
 	* Devo cercare sia in cml_post_id_1 che in cml_post_id_2, xkè posso avere
 	* degli articoli collegati tra di loro, ma non a quella predefinita, e considerando
@@ -110,4 +113,74 @@ function isCrawler()
     return true;
 }
 
+/**
+ * Retrieves a page given its path.
+ *
+ * @since 2.1.0
+ * @uses $wpdb
+ *
+ * @param string $page_path Page path
+ * @param string $output Optional. Output type. OBJECT, ARRAY_N, or ARRAY_A. Default OBJECT.
+ * @param array $post_type Optional. Post type. Default page.
+ * @return WP_Post|null WP_Post on success or null on failure
+ */
+function cml_get_page_by_path($page_path, $output = OBJECT, $post_type = array('page')) {
+    global $wpdb;
+
+    $page_path = rawurlencode(urldecode($page_path));
+    $page_path = str_replace('%2F', '/', $page_path);
+    $page_path = str_replace('%20', ' ', $page_path);
+    $parts = explode( '/', trim( $page_path, '/' ) );
+    $parts = array_map( 'esc_sql', $parts );
+    $parts = array_map( 'sanitize_title_for_query', $parts );
+
+    $in_string = "'". implode( "','", $parts ) . "'";
+    $post_type_sql = implode( "','", $post_type );
+//     $wpdb->escape_by_ref( $post_type_sql );
+    $pages = $wpdb->get_results("SELECT ID, post_name, post_parent, post_type FROM $wpdb->posts WHERE post_name IN ($in_string) AND (post_type IN ('$post_type_sql'))", OBJECT_K );
+    $revparts = array_reverse( $parts );
+
+    $foundid = 0;
+    foreach ( (array) $pages as $page ) {
+	    if ( $page->post_name == $revparts[0] ) {
+		    $count = 0;
+		    $p = $page;
+		    while ( $p->post_parent != 0 && isset( $pages[ $p->post_parent ] ) ) {
+			    $count++;
+			    $parent = $pages[ $p->post_parent ];
+			    if ( ! isset( $revparts[ $count ] ) || $parent->post_name != $revparts[ $count ] )
+				    break;
+			    $p = $parent;
+		    }
+
+		    if ( $p->post_parent == 0 && $count+1 == count( $revparts ) && $p->post_name == $revparts[ $count ] ) {
+			    $foundid = $page->ID;
+			    if ( $page->post_type == $post_type )
+				    break;
+		    }
+	    }
+    }
+
+    if ( $foundid )
+	    return get_post( $foundid, $output );
+
+    return null;
+}
+
+//http://php.net/manual/en/function.hex2bin.php
+function hextobin( $hexstr ) { 
+    $n = strlen($hexstr); 
+    $sbin="";   
+    $i=0; 
+
+    while($i<$n) 
+    {       
+	$a =substr($hexstr,$i,2);           
+	$c = pack("H*",$a); 
+	if ($i==0){$sbin=$c;} 
+	else {$sbin.=$c;} 
+	$i+=2; 
+    } 
+    return $sbin; 
+} 
 ?>
