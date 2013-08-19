@@ -3,7 +3,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate, international, .mo file, .po file, localization, widget, post
 Requires at least: 3.4.1
 Tested up to: 3.6
-Stable tag: 1.2.20
+Stable tag: 1.2.21
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG
@@ -145,6 +145,9 @@ Yes. You can:
 7. Box for manage language files
 
 == Changelog ==
+
+= 1.2.21 =
+* Fixed "redirect loop"
 
 = 1.2.20 =
 * Now you can disable the translations of menu items

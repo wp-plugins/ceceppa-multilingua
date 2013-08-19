@@ -23,7 +23,12 @@ if(!is_object($wpCeceppaML)) die("Access denied");
 
 ?>
 <div class="wrap">
-   <h2><?php _e('Widget titles', 'ceceppaml'); ?></h2>
+  <div class="icon32">
+    <img src="<?php echo CECEPPA_PLUGIN_URL ?>images/logo.png" height="32"/>
+  </div>
+  <h2 class="nav-tab-wrapper">
+    <a class="nav-tab nav-tab-active" href="#"><?php _e('Widget titles', 'ceceppaml'); ?></a>
+  </h2>
 <?php
 function cml_widgets_title($wtitles) {
   global $wpdb;

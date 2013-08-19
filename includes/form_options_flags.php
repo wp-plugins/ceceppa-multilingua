@@ -8,7 +8,7 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 <!-- Float css -->
 	<blockquote>
 	  <strong><?php _e('Customize css:', 'ceceppaml') ?></strong><br />
-	  <textarea name="custom-css" rows="10" cols="100"><?php echo file_get_contents(CECEPPA_PLUGIN_PATH . "/css/float.css"); ?></textarea>
+	  <textarea name="custom-css" rows="10" cols="100"><?php echo get_option( 'cml_float_css', file_get_contents( CECEPPA_PLUGIN_PATH . "/css/float.css" ) ); ?></textarea>
 	</blockquote>
 	<br /><br />
 	<div class="block-left">

@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.2.20
+Version: 1.2.21
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -303,14 +303,15 @@ class CeceppaML {
     
       //La funzione clean_url si occupa di eliminare lo slug della lingua dal link,
       //affinché wp processi il link correttamente
-      add_filter( 'pre_get_posts', array(&$this, 'clean_url') );
+      add_filter( 'pre_get_posts', array(&$this, 'clear_url') );
 
       //Titolo del blog/sito
       add_filter( 'bloginfo', array( &$this, 'bloginfo' ), 0 );
 //       add_filter( 'wp_title', array( &$this, 'wp_title' ), 0 );
     }
+
     //Update current language
-    add_action( 'init', array(&$this, 'update_current_lang') );
+    add_action( 'init', array( &$this, 'update_current_lang' ) );
 
     /*
     * Nella pagina "menu", aggiungo una lista per ogni lingua
@@ -1003,7 +1004,6 @@ class CeceppaML {
 
       if($wp_query != null && (is_page() || is_single() || isCrawler())) return;
       if(is_preview() || isset($_GET['preview'])) return;
-      if(!is_admin()) $this->update_current_lang();
 
       if( !isset( $this->_hide_posts ) || empty( $this->_hide_posts ) ) :
 	$this->_hide_posts = array();
@@ -1128,7 +1128,7 @@ class CeceppaML {
     $lang = get_option("cml_page_lang_$post_id");
     if(!empty($lang) || $lang == 0) return $lang;
 
-    if(empty($this->_current_lang_id)) $this->update_current_lang();
+    if( !isset( $this->_language_detected ) ) $this->update_current_lang();
 
     //Cerco prima nella lingua corrente
     $array = $this->_posts_of_lang[$this->_current_lang_id];
@@ -1518,8 +1518,8 @@ class CeceppaML {
     }
   }
 
- function clean_url() {
-    if( $this->_url_mode != PRE_PATH || isset($this->_clean_applied) ) return;
+ function clear_url() {
+    if( $this->_url_mode != PRE_PATH || isset( $this->_clean_applied ) ) return;
 
     //Se è un articolo non rimuovo lo slug della lingua, altrimenti scompare anche dall'url :O
     $id = cml_get_page_id_by_path( $this->_url, array('post') );
@@ -1530,16 +1530,16 @@ class CeceppaML {
     if(preg_match("#^([a-z]{2})(/.*)?$#i", $url, $match)) :
       $this->_force_current_language = $this->get_language_id_by_slug( $match[1] );
 
-      $url = substr($url, 3);
+      $url = substr( $url, 3 );
 
       $this->_clean_request = $this->_base_url . "/" . $url;
       $this->_clean_url = $this->_homeUrl . $url;
-      
+
       //Inganno wordpress :D
       $_SERVER['REQUEST_URI'] = $this->_clean_request;
       
       $this->_clean_applied = true;
-      
+
       return $this->_clean_request;
     endif;
   }
@@ -1882,7 +1882,7 @@ class CeceppaML {
 
 	$this->_force_current_language = $this->get_language_id_by_locale($locale);
       else:
-	$this->clean_url();
+	$this->clear_url();
 
 	if( !empty( $this->_force_current_language ) ) :
 	  return $this->_force_current_language;
@@ -2091,7 +2091,7 @@ class CeceppaML {
   function get_current_language() {
     global $wpdb;
 
-    if( empty( $this->_current_lang_id ) ) $this->update_current_lang();
+    if( !isset( $this->_language_detected ) ) $this->update_current_lang();
 
     $query = sprintf("SELECT * FROM %s WHERE id = %d", CECEPPA_ML_TABLE, $this->_current_lang_id);
     $info = $wpdb->get_row($query);
@@ -2099,8 +2099,8 @@ class CeceppaML {
     return $info;
   }
 
-  function get_current_lang_id($update = true) {
-    if($update) $this->update_current_lang();
+  function get_current_lang_id( $update = false ) {
+    if( $update || !isset( $this->_language_detected ) ) $this->update_current_lang();
 
     return $this->_current_lang_id;
   }
@@ -2196,6 +2196,9 @@ class CeceppaML {
      * l'articolo corretto :)
      */
     function translate_post_link($permalink, $post, $leavename, $lang_id = null) {
+      global $page;
+      
+      if( $page >= 2 ) return $permalink;   //Fix: "La pagina web ha generato un loop di reindirizzamento"
       if( is_preview() ) return $permalink;
 
       if($lang_id == null) $lang_id = $this->get_language_id_by_post_id($post->ID);
@@ -2204,7 +2207,6 @@ class CeceppaML {
       $slug = $this->get_language_slug_by_id( $lang_id );
 
       if( empty( $this->_permalink_structure ) || strrpos( $this->_permalink_structure, "%category%" ) === false) return $this->convert_url ( $slug,  $permalink );
-
 
       $homeUrl = home_url();
       $plinks = explode("/", str_replace($homeUrl, "", $permalink));
@@ -2237,7 +2239,10 @@ class CeceppaML {
       return $this->convert_url( $slug, $url );
     }
     
-    function translate_page_link($permalink) {
+    function translate_page_link( $permalink ) {
+      global $page;
+      
+      if( $page >= 2 ) return $permalink;   //Fix: "La pagina web ha generato un loop di reindirizzamento"
       if( is_admin() ) return $permalink;
     
       if( empty( $this->_permalink_structure ) ) :
@@ -2754,7 +2759,7 @@ class CeceppaML {
 	    
 	    //Se ho scelto la modalità PRE_PATH l'id della lingua lo "rivelo" dallo "slug" della lingua
 	    if($this->_url_mode == PRE_PATH) :
-	      $this->clean_url();
+	      $this->clear_url();
 	    endif;
 
 	    if( !isset( $this->_force_current_language ) || empty( $this->_force_current_language) ) :

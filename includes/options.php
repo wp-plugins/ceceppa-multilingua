@@ -53,8 +53,8 @@ class CeceppaMLOptions {
   function update_flags_info() {
     //Float
     @update_option("cml_add_float_div", intval($_POST['float-div']));
-      $css = addslashes($_POST['custom-css']);
-      file_put_contents(CECEPPA_PLUGIN_PATH . "/css/float.css", $css);
+      $css = addslashes( $_POST['custom-css'] );
+      update_option( 'cml_float_css', $css ); //Non posso scrivere su file, sennò ad ogni aggiornamento viene sovrascritto ;)
 
       //Show as...
       @update_option("cml_show_float_items_as", intval($_POST['float-as']));

@@ -470,10 +470,10 @@ function cml_is_homepage() {
 }
 
 function cml_get_page_id_by_path($url, $types = null) {
-  $plinks = explode("/", $url);
+  $plinks = explode( "/", $url );
 
   //Se l'ultimo elemento è vuoto, lo cancello ;)
-  if(substr($url, -1) == "/") array_pop($plinks);
+  if( substr($url, -1) == "/" ) array_pop($plinks);
   $title = array_pop($plinks);
 
   if($types == null) $types = array_keys(get_post_types()); 
