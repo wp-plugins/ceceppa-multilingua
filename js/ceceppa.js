@@ -22,7 +22,7 @@ function toggleDetails(index) {
 }
 
 function addRow(count, lid) {
-  $table = jQuery("table.ceceppaml");
+  $table = jQuery("table.wp-ceceppaml");
   $tr = jQuery("<tr>");
   
   //Stringa
@@ -30,7 +30,7 @@ function addRow(count, lid) {
     $hidden = jQuery("<input>").attr('type', 'hidden').attr('name', 'id[]');
     $td.append($hidden);
 
-    $input = jQuery("<input>").attr('type', 'text').attr('name', 'string[]');
+    $input = jQuery("<input>").attr('type', 'text').attr('name', 'string[]').css('width', '100%');
     $td.append($input);
     $tr.append($td);
 
@@ -42,7 +42,7 @@ function addRow(count, lid) {
     $hidden = jQuery("<input>").attr('type', 'hidden').attr('name', 'lang_id[' + row + '][' + i + ']').attr('value', id[i]);
     $td.append($hidden);
 
-    $input = jQuery("<input>").attr('type', 'text').attr('name', 'value[' + row + '][' + i + ']');
+    $input = jQuery("<input>").attr('type', 'text').attr('name', 'value[' + row + '][' + i + ']').css('width', '100%');
     $td.append($input);
     $tr.append($td);
   }
@@ -52,29 +52,29 @@ function addRow(count, lid) {
 
 jQuery(document).ready(function(e) {
 	//DropDown
-	jQuery(".linked_post").msDropDown();
-	jQuery(".link-category").msDropDown();
-	jQuery(".page_lang").msDropDown();
-	jQuery(".post_lang").msDropDown();
-	jQuery('.linked_page').msDropDown();
+	jQuery("#ceceppaml-meta-box .linked_post").msDropDown();
+	jQuery("#ceceppaml-meta-box .link-category").msDropDown();
+	jQuery("#ceceppaml-meta-box .page_lang").msDropDown();
+	jQuery("#ceceppaml-meta-box .post_lang").msDropDown();
+	jQuery('#ceceppaml-meta-box .linked_page').msDropDown();
 	jQuery(".ceceppa-form select").msDropDown();
 	jQuery(".cml-widget-flags").msDropDown();
 
 	//Tooltip
 	jQuery('._tipsy').tipsy({gravity: 'n', html: true});
-	jQuery('img').tipsy({gravity: 'e'});
-	jQuery('th.column-cml_flags a').tipsy();
+	jQuery('img').tipsy({gravity: 'e', html: true});
+	jQuery('th.column-cml_flags a').tipsy({html: true});
 
 	//Delete language
 	jQuery('a._delete').click(function() {
-		if(!confirm('Cancella la lingua selezionata?'))
+		if(!confirm('Delete selected language?'))
 			return false;
 		else {
-			var id = jQuery(this).attr('id');
-			var ids = id.split("-");
+		  var id = jQuery(this).attr('id');
+		  var ids = id.split("-");
 
-			jQuery('input#delete').attr('value', ids[1]);
-			jQuery('form.ceceppa-form').submit();
+		  jQuery('input#delete').attr('value', ids[1]);
+		  jQuery('form input#submit').click();
 		}
 	});
 
