@@ -37,6 +37,7 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
       if( $tab < 1 ) $tab = 1 ?>
     <a class="nav-tab <?php echo $tab == 1 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-options-page&tab=1"><?php _e('Actions', 'ceceppaml') ?></a>
     <a class="nav-tab <?php echo $tab == 2 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-options-page&tab=2"><?php _e('Filters', 'ceceppaml') ?></a>
+    <a class="nav-tab <?php echo $tab == 3 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-options-page&tab=3"><?php _e('Uninstall', 'ceceppaml') ?></a>
     <?php endif; ?>
   </h2>
 
@@ -104,7 +105,11 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 		</label>
 		<br /><br />
 		<label>
-		  <input type="radio" id="url-mode" name="url-mode" value="1" <?php checked( get_option('cml_modification_mode', 1) ); ?> />&nbsp;<?php _e('Append the suffix <strong>&amp;lang=</strong> to the home page', 'ceceppaml') ?>
+		  <input type="radio" id="url-mode" name="url-mode" value="1" <?php checked( get_option( 'cml_modification_mode' ), 1 ); ?> />&nbsp;<?php _e('Append the suffix <strong>&amp;lang=</strong> to the url', 'ceceppaml') ?>
+		</label>
+		<br /><br />
+		<label>
+		  <input type="radio" id="url-mode" name="url-mode" value="0" <?php checked( get_option('cml_modification_mode'), 0 ); ?> />&nbsp;<?php _e('None', 'ceceppaml') ?>
 		</label>
 		<br /><br />
 	    </td>

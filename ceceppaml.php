@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.2.21
+Version: 1.2.22
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -31,7 +31,8 @@ define('CECEPPA_ML_POSTS', $wpdb->base_prefix . 'ceceppa_ml_posts');
 define('CECEPPA_ML_PAGES', $wpdb->base_prefix . 'ceceppa_ml_posts');
 
 /* Url modification mode */
-define('PRE_NONE', 1);
+define('PRE_NONE', 0);
+define('PRE_LANG', 1);
 define('PRE_PATH', 2);
 define('PRE_DOMAIN', 3);
 
@@ -100,7 +101,7 @@ class CeceppaML {
     $this->_url_mode = get_option( "cml_modification_mode", 1 );
 
     /* Il permalink di default ?p=## e la struttura /en/ non vanno per nulla d'accordo */
-    if( empty( $this->_permalink_structure ) && $this->_url_mode == PRE_PATH ) $this->_url_mode = PRE_NONE;
+    if( empty( $this->_permalink_structure ) && $this->_url_mode == PRE_PATH ) $this->_url_mode = PRE_LANG;
 
     //Wow
     $this->preload_posts();
@@ -348,6 +349,7 @@ class CeceppaML {
     //Next and Prev post
     add_filter( 'get_previous_post_where', array( &$this, 'get_previous_next_post_where' ) );
     add_filter( 'get_next_post_where', array( &$this, 'get_previous_next_post_where' ) );
+    add_filter( 'wp_link_pages_link', array( &$this, 'link_pages_link'), 0, 2 );
     add_filter( 'get_pagenum_link', array( &$this, 'get_pagenum_link'), 0 );
 
     /*
@@ -1479,7 +1481,7 @@ class CeceppaML {
 	  <?php endforeach; ?>
         </p>
       <span class="add-to-menu">
-	<input type="submit" class="button-secondary submit-add-to-menu right" value="<?php _e('Add to Menu') ?>" name="add-post-type-menu-item" id="submit-posttype-wl-login">
+	<input type="submit" class="button-secondary submit-add-to-menu right" value="<?php _e('Add to Menu', 'ceceppaml') ?>" name="add-post-type-menu-item" id="submit-posttype-wl-login">
       <span class="spinner"></span>
     <?php
   }
@@ -2197,7 +2199,7 @@ class CeceppaML {
      */
     function translate_post_link($permalink, $post, $leavename, $lang_id = null) {
       global $page;
-      
+
       if( $page >= 2 ) return $permalink;   //Fix: "La pagina web ha generato un loop di reindirizzamento"
       if( is_preview() ) return $permalink;
 
@@ -2407,7 +2409,7 @@ class CeceppaML {
             $homeUrl = str_replace("http://", "http://$slug.", $homeUrl);
         endif;
 
-        $lang_arg = ( $this->_url_mode == PRE_NONE ) ? ("?lang=" . $slug) : "";
+        $lang_arg = ( $this->_url_mode == PRE_LANG ) ? ("?lang=" . $slug) : "";
 	//Ricreo il permalink con le categorie tradotte... :)
 	if( !empty( $cats )) :
 	  return $homeUrl . join( "/", $cats ) . "/" . $lang_arg;
@@ -2488,8 +2490,11 @@ class CeceppaML {
 
 	return $this->_homeUrl . $slug . "/" . join( "/", $plinks );
 	break;
-      default:
+      case PRE_LANG:
 	return add_query_arg( array( "lang" => $slug ), $permalink );
+	break;
+      default:
+	return $permalink;
       endswitch;
     }
     function show_admin_notice() {
@@ -2986,8 +2991,7 @@ class CeceppaML {
       break;
     case PRE_DOMAIN:
       break;
-    case PRE_NONE:
-//       $url = preg_replace('/\?.*/', "", $this->_url);
+    case PRE_LANG:
       $url = remove_query_arg( "lang", $this->_url );
       return $url == $this->_homeUrl;
       break;
@@ -3002,9 +3006,7 @@ class CeceppaML {
   }
 
   function get_pagenum_link( $link ) {
-    if( is_category() ) return $this->convert_url( $this->_current_lang_slug, $link );
-
-    return add_query_arg( array( "lang" => $this->_current_lang_slug ) , $link );
+    return $this->convert_url( $this->_current_lang_slug, $link );
   }
 
   function wp_title( $title ) {
@@ -3013,6 +3015,15 @@ class CeceppaML {
 
   function bloginfo ( $info ) {
     return cml_translate( $info, $this->_current_lang_id, 'M' );
+  }
+  
+  function link_pages_link( $link, $i ) {
+    if( $i == 1 ) return $link;
+
+    $link = preg_replace( '/\?lang=[a-z]{2}/', '', $link );
+    preg_match( '/\"(.*)\"/', $link, $l );
+
+    return str_replace( end( $l ), $this->convert_url( $this->_current_lang_slug, end( $l ) ), $link );
   }
 }
 
