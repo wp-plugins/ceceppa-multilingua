@@ -18,11 +18,11 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 = Features =
 
 - Separated posts and pages for each languages, so you can use different SEO and url for each languages.
+- Translate your theme (Plugin will generate the .mo file for wordpress)
 - URLs pretty and SEO-friendly. ?lang=en, /en/foo/ or en.yoursite.com
 - Different menu for each language.
 - Translate widget's title.
 - Translate Site Title / Tagline
-- Translate your theme (Plugin will generate the .mo file for wordpress)
 - One-Click-Switching between the languages
 - One-Click-Switching between the translations
 - Category link translation
