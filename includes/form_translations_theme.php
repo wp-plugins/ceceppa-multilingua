@@ -17,14 +17,14 @@
 
     //'valore', 'textdomain'
     $m = end( $matches );
-    list( $text, $domain ) = explode( ",", $m );
+    preg_match_all( '/\'(.+?)\'/', $m, $matches );
     
+    list( $text, $domain ) = $matches[1];
+
     $d = preg_replace( '/^[\'\"]|[\'|\"]$/', '', trim( $domain ) );
-//     $d = str_replace( "'", "", $domain ); //text_domain
-    
+      
     //Rimuovo gli apici iniziali e finali :)
-    $domains[ $d ][] = preg_replace( '/^[\'\"]|[\'|\"]$/', '', $text);
-//     $domains[ $d ][] = substr( $text, 1, -1 );
+    $domains[ $d ][] = preg_replace( '/^[\'\"]|[\'|\"]$/', '', trim( $text ) );
   endforeach;
 
   //Percorso vuoto?
@@ -98,7 +98,7 @@
 
   //Cerco la traduzione per ogni stringa
   foreach( $keys as $d ) :
-    $strings = $domains[$d] = array_unique( $domains[$d] );
+    $strings = array_unique( $domains[ $d ] );
     $domains[ $d ] = $strings;
 
     //Ciclo per ogni lingua per evitare caricamenti continui
@@ -118,16 +118,18 @@
 	if( strcasecmp( $ret, $string ) == 0 ) $ret = __( $string );  //Cerco anche tra le traduzioni di wordpress
 	$done = !( strcasecmp( $ret, $string ) == 0 );
 
-	$trans[ $lang->id ][] = array( "string" => $ret, "done" => $done );
+	$trans[ $lang->id ][] = array( "string" => stripslashes( $ret ), "done" => $done );
       endforeach;
 
     endforeach;
   endforeach;
-
-  foreach( $keys as $d ) :
   
-    $i = 0;
-    foreach( $domains[$d] as $s ) :
+  $i = 0;
+  foreach( $keys as $d ) :
+
+    foreach( $domains[ $d ] as $s ) :
+      $originals[] = $s;
+
       $alternate = ( empty( $alternate ) ) ? "alternate" : "";
 
       echo "<tr class=\"row-domain-" . trim( $d ) . " $alternate row-domain\">";
@@ -144,7 +146,7 @@
 
       echo "<tr class=\"row-domain-" . trim( $d ) ." $alternate row-details row-hidden\">";
       echo "<td colspan=\"" . ( count( $langs ) + 1 ) ."\">";
-      echo '<input type="hidden" name="original[]" value="' . $s . '" />';
+//       echo '<textarea style="display: none;" name="original[]">' . htmlentities( $s ) . '</textarea>';
 
       foreach( $langs as $lang ) :
 	echo "<div class=\"ceceppaml-trans-fields\">";
@@ -162,6 +164,9 @@
     endforeach;
 
   endforeach;
+  
+  //Memorizzo le stringhe originali in un file "temporaneo", così evito la conversione degli elementi html ( &rsquo;, etc... )
+  file_put_contents( $cml_theme_locale_path . "/tmp.pot", implode( "\n", $originals ) );
 ?>
 
   </tbody>
