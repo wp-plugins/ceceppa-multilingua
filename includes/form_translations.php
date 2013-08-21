@@ -23,7 +23,9 @@ if(!is_object($wpCeceppaML)) die("Access denied");
 
 global $wpdb;
 
-$tab = ( isset( $_GET['page'] ) && $_GET['page'] == 'ceceppaml-translations-title' ) ? 1 : 0;
+$tab = isset( $_GET['page'] ) ? intval( $_GET['tab'] ) : 0;
+$tab = ( $_GET['page'] == 'ceceppaml-translations-title' ) ? 1 : $tab;
+$tab = ( $_GET['page'] == 'ceceppaml-translations-plugins-themes' ) ? 3 : $tab;
 ?>
 
 <div class="wrap">
@@ -33,10 +35,24 @@ $tab = ( isset( $_GET['page'] ) && $_GET['page'] == 'ceceppaml-translations-titl
   <h2 class="nav-tab-wrapper">
     <a class="nav-tab <?php echo $tab == 0 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-translations-page"><?php _e('My translations', 'ceceppaml') ?></a>
     <a class="nav-tab <?php echo $tab == 1 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-translations-title"><?php _e('Site Title') ?>/<?php _e('Tagline') ?></a>
+<!--     <a class="nav-tab <?php echo $tab == 2 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-translations-plugins-themes&tab=2"><?php _e('Plugins') ?></a> -->
+    <a class="nav-tab <?php echo $tab == 3 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-translations-plugins-themes&tab=3"><?php _e('Theme') ?></a>
     </h2>
     <br />
     <form class="ceceppa-form" name="wrap" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>?page=<?php echo $_GET['page'] ?>">
-<?php if ( $tab == 0) : ?>
+<?php 
+  if ( $tab == 0) : 
+?>
+
+<div class="updated">
+    <p>
+      <?php _e('These translations are used by plugin for translate custom links in the menu.', 'ceceppaml') ?><br />
+      <br />
+      <?php _e('You can use them also with shortcode "cml_text".', 'ceceppaml') ?>
+      <a href="?page=ceceppaml-shortcode-page&tab=0#strings"><?php _e( 'Click here to see the shortcode page', 'ceceppaml' ); ?></a>
+      <br />
+    </p>
+</div>
     <input type="hidden" name="form" value="1" />
     <table class="wp-list-table widefat wp-ceceppaml">
       <thead>
@@ -105,7 +121,9 @@ $tab = ( isset( $_GET['page'] ) && $_GET['page'] == 'ceceppaml-translations-titl
       </p>
     </div>
 <?php 
-else: 
+endif;
+
+if( $tab == 1 ) :
   echo '<input type="hidden" name="form" value="2" />';
   
   $langs = cml_get_languages( 0, 0 );
@@ -126,7 +144,15 @@ else:
 
   echo "</dl>";
   
-  submit_button( __('Update', 'ceceppaml', 'ceceppaml'), "button-primary", "action", false, 'class="button button-primary"' );endif; 
+  submit_button( __('Update', 'ceceppaml', 'ceceppaml'), "button-primary", "action", false, 'class="button button-primary"' );
+  
+  endif; 
+  
+if( $tab == 3 ) :
+  echo '<input type="hidden" name="form" value="3" />';
+
+  require_once 'form_translations_theme.php';
+endif;
 ?>
     </form>
 </div>

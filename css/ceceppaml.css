@@ -127,3 +127,57 @@ dl.site-title dd > span {
   display: inline-block;
   width: 100px;
 }
+
+h2 span.textdomain {
+  font-size: 0.5em ;
+  float:right;
+}
+
+.ceceppaml-theme-translations th:nth-child(n+2) {
+  width: 20px;
+}
+
+h2 .textdomain img {
+  padding-right: 5px;
+}
+
+h2 .textdomain .light {
+  color: #e7e7e7;
+}
+
+img.not-available {
+  opacity: 0.4;
+}
+
+.ceceppaml-theme-translations th.flag {
+  text-align: center !important;
+}
+
+.ceceppaml-trans-fields {
+  display: block;
+  padding: 5px;
+}
+.ceceppaml-trans-fields img,
+.ceceppaml-trans-fields textarea,
+.ceceppaml-trans-fields input {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.ceceppaml-trans-fields input[type="text"],
+.ceceppaml-trans-fields textarea {
+  width: 95%;
+  margin-right: 10px;
+}
+
+.ceceppaml-theme-translations tr.row-domain:hover {
+  cursor: pointer;
+  background: #FFFFE5;
+}
+.ceceppaml-theme-translations tr.row-hidden {
+  display: none;
+}
+
+.ceceppaml-theme-translations tr.row-open td:first-child {
+  border-bottom: 0 !important;
+}

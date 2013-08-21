@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.2.22
+Version: 1.3.0
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -48,6 +48,9 @@ define('CECEPPA_PLUGIN_PATH', plugin_dir_path(__FILE__));
 
 //LOCALE DIR
 define('LOCALE_DIR', WP_CONTENT_DIR . "/languages");
+
+//THEME LOCALE PATH
+$cml_theme_locale_path = null;
 
 require_once(CECEPPA_PLUGIN_PATH . 'functions.php');
 require_once(CECEPPA_PLUGIN_PATH . 'utils.php');
@@ -161,7 +164,7 @@ class CeceppaML {
       add_action( 'admin_notices', array(&$this, 'admin_notices'));
 
       if(array_key_exists("cml-hide-notice", $_GET)) update_option('cml_show_admin_notice', 0);
-      if(get_option('cml_show_admin_notice', 1))
+      if( get_option('cml_show_admin_notice', 1) )
 	add_action( 'admin_notices', array(&$this, 'show_admin_notice'));
 
       if(isset($_GET['cml_update_posts'])) :
@@ -463,13 +466,52 @@ class CeceppaML {
    * Aggiungo la pagina delle opzioni nella barra laterale di Wordpress
    */
   function add_option_page() {
-    add_menu_page('Ceceppa ML Options', __('Ceceppa Multilingua', 'ceceppaml'), 'administrator', 'ceceppaml-language-page', array(&$this, 'form_languages'), CECEPPA_PLUGIN_URL . '/images/logo_mini.png');
-    add_submenu_page('ceceppaml-language-page', __('Widget titles', 'ceceppaml'), __('Widget titles', 'ceceppaml'), 'manage_options', 'ceceppaml-widgettitles-page', array(&$this, 'form_widgettitles'));
-    add_submenu_page('ceceppaml-language-page', __('My translations', 'ceceppaml'), __('My translations', 'ceceppaml'), 'manage_options', 'ceceppaml-translations-page', array(&$this, 'form_translations'));
-    add_submenu_page('ceceppaml-language-page', __('Site Title'), __( 'Site Title' ) . "/" . __( 'Tagline' ), 'manage_options', 'ceceppaml-translations-title', array(&$this, 'form_translations'));
-    add_submenu_page('ceceppaml-language-page', __('Flags', 'ceceppaml'), __('Flags', 'ceceppaml'), 'manage_options', 'ceceppaml-flags-page', array( &$this, 'form_options' ) );
-    add_submenu_page('ceceppaml-language-page', __('Settings', 'ceceppaml'), __('Settings', 'ceceppaml'), 'manage_options', 'ceceppaml-options-page', array(&$this, 'form_options'));
-    add_submenu_page('ceceppaml-language-page', __('Shortcode & Functions', 'ceceppaml'), __('Shortcode & Functions', 'ceceppaml'), 'manage_options', 'ceceppaml-shortcode-page', array(&$this, 'shortcode_page'));
+    $page[] = add_menu_page('Ceceppa ML Options', __('Ceceppa Multilingua', 'ceceppaml'), 'administrator', 'ceceppaml-language-page', array(&$this, 'form_languages'), CECEPPA_PLUGIN_URL . '/images/logo_mini.png');
+    $page[] = add_submenu_page('ceceppaml-language-page', __('Widget titles', 'ceceppaml'), __('Widget titles', 'ceceppaml'), 'manage_options', 'ceceppaml-widgettitles-page', array(&$this, 'form_widgettitles'));
+    $page[] = add_submenu_page('ceceppaml-language-page', __('My translations', 'ceceppaml'), __('My translations', 'ceceppaml'), 'manage_options', 'ceceppaml-translations-page', array(&$this, 'form_translations'));
+    $page[] = add_submenu_page('ceceppaml-language-page', __('Site Title'), __( 'Site Title' ) . "/" . __( 'Tagline' ), 'manage_options', 'ceceppaml-translations-title', array(&$this, 'form_translations'));
+    $page[] = add_submenu_page('ceceppaml-language-page', __('Translate your theme', 'ceceppaml'), __( 'Translate your theme', 'ceceppaml' ), 'manage_options', 'ceceppaml-translations-plugins-themes', array(&$this, 'form_translations'));
+    $page[] = add_submenu_page('ceceppaml-language-page', __('Show flags', 'ceceppaml'), __('Show flags', 'ceceppaml'), 'manage_options', 'ceceppaml-flags-page', array( &$this, 'form_options' ) );
+    $page[] = add_submenu_page('ceceppaml-language-page', __('Settings', 'ceceppaml'), __('Settings', 'ceceppaml'), 'manage_options', 'ceceppaml-options-page', array(&$this, 'form_options'));
+    $page[] = add_submenu_page('ceceppaml-language-page', __('Shortcode & Functions', 'ceceppaml'), __('Shortcode & Functions', 'ceceppaml'), 'manage_options', 'ceceppaml-shortcode-page', array(&$this, 'shortcode_page'));
+    
+    foreach( $page as $p ) :
+      add_action( 'load-' . $p, array( &$this, 'add_help_tab' ) );
+    endforeach;
+
+    add_action( 'load-nav-menus.php', array( &$this, 'add_tips_to_help_tab' ) );
+    add_action( 'load-options-reading.php', array( &$this, 'add_tips_to_help_tab' ) );
+    add_action( 'load-options-general.php', array( &$this, 'add_tips_to_help_tab' ) );
+  }
+
+  function add_help_tab() {
+    require_once 'includes/help_tab.php';
+  }
+
+  function add_tips_to_help_tab() {
+    global $pagenow;
+    $screen = get_current_screen();
+    
+    if( $pagenow == 'nav-menus.php' ) :
+      $screen->add_help_tab( array(
+			  'id'       => 'cml_nav_menu_help',
+			  'title'    => 'Ceceppa Multilingua',
+			  'content'  => "<p>" . $this->nav_menu_notice_text() . "</p>" ) );
+    endif;
+    
+    if( $pagenow == 'options-reading.php' ) :
+      $screen->add_help_tab( array(
+			  'id'       => 'cml_nav_menu_help',
+			  'title'    => 'Ceceppa Multilingua',
+			  'content'  => "<p>" . $this->options_reading_help_text() . "</p>" ) );
+    endif;
+    
+    if( $pagenow == 'options-general.php' ) :
+      $screen->add_help_tab( array(
+			  'id'       => 'cml_nav_menu_help',
+			  'title'    => 'Ceceppa Multilingua',
+			  'content'  => "<p>" . $this->options_reading_help_text() . "</p>" ) );
+    endif;
   }
 
   /*
@@ -2203,7 +2245,7 @@ class CeceppaML {
       if( $page >= 2 ) return $permalink;   //Fix: "La pagina web ha generato un loop di reindirizzamento"
       if( is_preview() ) return $permalink;
 
-      if($lang_id == null) $lang_id = $this->get_language_id_by_post_id($post->ID);
+      if($lang_id == null) $lang_id = $this->get_language_id_by_post_id( $post->ID );
       if($lang_id == 0) $lang_id = $this->_current_lang_id;
 
       $slug = $this->get_language_slug_by_id( $lang_id );
@@ -2497,9 +2539,11 @@ class CeceppaML {
 	return $permalink;
       endswitch;
     }
+
     function show_admin_notice() {
 ?>
 	<div class="updated">
+	<h2><img src="<?php echo CECEPPA_PLUGIN_URL ?>/images/logo.png" height="16" />&nbsp;Ceceppa Multilingua</h2>
 	<?php _e('If you like this plugin, you can:', 'ceceppaml') ?>
 	  <ul style="list-style: circle;padding-left: 30px">
 	    <li>
@@ -2526,10 +2570,8 @@ class CeceppaML {
 	    <?php _e('If you have any question or you need new features contact me :)', 'ceceppaml') ?>
 	  </a>
 	  <br /></br>
-	  <?php       
-	      $link = add_query_arg('cml-hide-notice', 1);
-	  ?>
 	  <div style="text-align: right;width:100%">
+	    <?php $link = add_query_arg('cml-hide-notice', 1); ?>
 	    <a href="<?php echo $link ?>"><?php _e('Dismiss') ?></a>
 	  </div>
 	</div>
@@ -2537,10 +2579,10 @@ class CeceppaML {
 <?php
     }
     
-    function admin_notices() {
+    function admin_notices( $force = false ) {
       global $pagenow;
       
-      if(get_option("cml_check_language_file_exists", 1))
+      if( get_option("cml_check_language_file_exists", 1) )
 	$this->check_language_file_exists();
 
 //OPTIMIZATION
@@ -2557,18 +2599,18 @@ class CeceppaML {
       endif;
 
 // UPDATE POSTS
-      if(get_option("cml_need_update_posts", false)) :
+      if( get_option("cml_need_update_posts", false) || $force ) :
 	echo "<div class=\"updated\">\n";
 	echo "<p>\n";
 
 	  _e('It is necessary assign default language to existing posts. ', 'ceceppaml'); echo "<br />";
 	  echo "<a href='edit.php?&cml_update_posts=1'>" . sprintf(__('<strong>If your default language is "%s"</strong> click here for automatically assign this language to all existing posts.', 'ceceppaml'), $this->_default_language) . "</a>"; 
-	    echo "<br />";
+	    echo "<br /><br />";
 	  _e('Otherwhise add correct default language first', 'ceceppaml'); echo "<br />";
 	  echo "<br />";
 
 	  $link = add_query_arg('cml_hide_update_posts', 1);
-	  echo '<a href="' . $link . '">' . __('Hide this message.', 'ceceppaml') . '</a>';
+	  if( !$force ) echo '<a href="' . $link . '">' . __('Hide this message.', 'ceceppaml') . '</a>';
 	echo "</p>\n";
 	echo "</div>";
       endif;
@@ -2587,54 +2629,78 @@ class CeceppaML {
       endif;
 
 //FIRST INSTALL
-      if( get_option("cml_first_install", false) ) :
+      if( get_option("cml_first_install", 0) ) :
 	$this->successfully_installed();
 	
 	update_option("cml_first_install", 0);
       endif;
 
 //MENU page
-      if($pagenow == 'nav-menus.php') :
+      if( isset( $_GET['cml_hide_notice_nav_menus'] ) ) update_option( 'cml_show_notice_nav_menus', 0 );
+      if($pagenow == 'nav-menus.php' && get_option( 'cml_show_notice_nav_menus', 1 ) ) :
 ?>
 	<div class="updated">
 	    <p>
-	      Ceceppa Multilingua: <strong><?php _e('Tip', 'ceceppaml') ?></strong><br /><br />
-	      <?php _e('All items will be automatically translated when user switch between languages.', 'ceceppaml') ?><br />
-	      <font style="color: #f00"><?php _e('Add only pages existing in your default language, not their translation.', 'ceceppaml') ?></font><br />
-	      <?php _e('If you add an custom item ("Links"), you must add translation of navigation label in "Ceceppa Multilingua" -> "My translations"', 'ceceppaml') ?>
-	      <br /><br />
-	      <?php _e('If you want to have different items for each languages, create a menu for each language', 'ceceppaml') ?>
-	      <?php _e('and assigns it to the corresponding menu, otherwise assign it only to the primary menu', 'ceceppaml') ?>
-	      <br /><br />
-	      <strong><?php _e('In same cases is displayed a blank menu for non default language. If that happens you must create different menu for each language. :(', 'ceceppaml') ?></strong>
+	      <?php echo $this->nav_menu_notice_text(); ?>
+	      
+	      <div style="text-align: right;width:100%">
+		<?php $link = add_query_arg( 'cml_hide_notice_nav_menus', 1 ); ?>
+		<a href="<?php echo $link ?>"><?php _e('Dismiss') ?></a>
+	      </div>
+
 	    </p>
 	</div>
 <?php
       endif;
       
 //SETTINGS -> READING page
-      if($pagenow == 'options-reading.php') :
+      if( isset( $_GET['cml_hide_notice_options_reading'] ) ) update_option( 'cml_show_notice_options_reading', 0 );
+      if($pagenow == 'options-reading.php' && get_option( 'cml_show_notice_options_reading', 1 ) ) :
 ?>
 	<div class="updated">
 	    <p>
-	      Ceceppa Multilingua: <strong><?php _e('Tip', 'ceceppaml') ?></strong><br /><br />
-	      <?php _e('You can to use a static page as homepage for your site/blog.', 'ceceppaml') ?><br />
-	      <?php _e('Select a desided page for front and post page and translate them in all languages.', 'ceceppaml') ?><br />
+	      <?php echo $this->options_reading_help_text(); ?>
+	      
+	      <div style="text-align: right;width:100%">
+		<?php $link = add_query_arg( 'cml_hide_notice_options_reading', 1 ); ?>
+		<a href="<?php echo $link ?>"><?php _e('Dismiss') ?></a>
+	      </div>
 	    </p>
 	</div>
 <?php
       endif;
      
 // SETTINGS -> General page (Site Title / Tagline)     
-      if( $pagenow == 'options-general.php' ) :
-	  $link = home_url('wp-admin') . "/admin.php?page=ceceppaml-translations-title";
+      if( isset( $_GET['cml_hide_notice_options_general'] ) ) update_option( 'cml_show_notice_options_general', 0 );
+      if($pagenow == 'options-general.php' && get_option( 'cml_show_notice_options_general', 1 ) ) :
 ?>
 	<div class="updated">
 	    <p>
-	      Ceceppa Multilingua: <strong><?php _e('Tip', 'ceceppaml') ?></strong><br /><br />
-	      <a href="<?php echo $link ?>"><?php _e('Clicke here for translate the "Site Title" and "Tagline" in other languages', 'ceceppaml') ?></a><br /><br />
-	      <span style="color: red"><strongs><?php _e('N.B.: If you have translated the title of the website you have to upgrade it if you make changes', 'ceceppaml') ?><br />
+	      <?php echo $this->options_general_help_text(); ?>
+	      
+	      <div style="text-align: right;width:100%">
+		<?php $link = add_query_arg( 'cml_hide_notice_options_general', 1 ); ?>
+		<a href="<?php echo $link ?>"><?php _e('Dismiss') ?></a>
+	      </div>
 	    </p>
+	</div>
+<?php
+      endif;
+      
+// TRANSLATE THEME !!!!
+      if( array_key_exists( "cml_remove_translate_theme_notice", $_GET ) ) update_option( "cml_show_notice_translate_theme", 0 );
+      if( get_option( 'cml_show_notice_translate_theme', 1 ) ) :
+?>
+	<div class="updated">
+	      <h2><img src="<?php echo CECEPPA_PLUGIN_URL ?>/images/logo.png" height="16" />&nbsp;Ceceppa Multilingua</h2>
+	      <?php _e( 'With "Ceceppa Multilingua" now you can also <b>translate your theme</b>, if it support localization', 'ceceppaml' ); ?>.<br /><br />
+	      <?php _e( 'Go to "Ceceppa Multilingua" -> "Translate your theme"', 'ceceppaml' ); ?>,&nbsp;
+	      <a href="<?php echo home_url('wp-admin') ?>/admin.php?page=ceceppaml-translations-plugins-themes&cml_remove_translate_theme_notice=1"><?php _e( 'or click here', 'ceceppaml' ) ?></a>.
+
+	      <div style="text-align: right;width:100%">
+		<?php $link = add_query_arg( array( "cml_remove_translate_theme_notice" => 1 ) ) ?>
+		<a href="<?php echo $link ?>"><?php _e('Dismiss') ?></a>
+	      </div>
 	</div>
 <?php
       endif;
@@ -2682,7 +2748,7 @@ class CeceppaML {
     function successfully_installed() {
 ?>
       <div class="updated">
-	<p>
+	  <h2><img src="<?php echo CECEPPA_PLUGIN_URL ?>/images/logo.png" height="16" />&nbsp;Ceceppa Multilingua</h2>
 	  <?php _e('Plugin successfully installed', 'ceceppaml') ?><br /><br />
 	  <label>
 	    <?php _e('Language detected:', 'ceceppaml') ?>
@@ -2696,7 +2762,6 @@ class CeceppaML {
 	    <?php _e('Click here for advanced settings or for add another language', 'ceceppaml') ?>
 	  </a>
 	  <br />
-	</p>
       </div>
 <?php
     }
@@ -2875,12 +2940,12 @@ class CeceppaML {
     $item = '<li class="menu-item menu-cml-flag">';
 
     $id = get_the_ID();
-    $linked = cml_get_linked_post($this->_current_lang, $lang, $id, $lang->id);
+    $linked = cml_get_linked_post( $this->_current_lang, $lang, $id, $lang->id );
     
-    if(empty($linked)) :
-      $url = home_url() . '?lang=' . $lang->cml_language_slug;
+    if( empty( $linked ) || cml_is_homepage() ) :
+      $url = $this->get_home_url( $lang->cml_language_slug );
     else:
-      $url = get_permalink($linked);
+      $url = get_permalink( $linked );
     endif;
 
     $item .= '<a href="' . $url . '">';
@@ -3025,6 +3090,39 @@ class CeceppaML {
 
     return str_replace( end( $l ), $this->convert_url( $this->_current_lang_slug, end( $l ) ), $link );
   }
+  
+  function nav_menu_notice_text() {
+    $text = "Ceceppa Multilingua: <strong>" . __( 'Tip', 'ceceppaml' ) . "</strong><br /><br />";
+    $text .= __('All items will be automatically translated when user switch between languages.', 'ceceppaml') . "<br />";
+    $text .= '<font style="color: #f00">' . __('Add only pages existing in your default language, not their translation.', 'ceceppaml') . '</font><br />';
+    $text .= __('If you add an custom item ("Links"), you must add translation of navigation label in "Ceceppa Multilingua" -> "My translations"', 'ceceppaml');
+    $text .= "<br /><br />";
+    $text .= __( 'If you want to have different items for each languages, create a menu for each language', 'ceceppaml' );
+    $text .= __( 'and assigns it to the corresponding menu, otherwise assign it only to the primary menu', 'ceceppaml');
+    $text .= "<br /><br />";
+    $text .= "<strong>" . __( 'In same cases is displayed a blank menu for non default language. If that happens you must create different menu for each language. :(', 'ceceppaml') . "</strong>";
+
+    return $text;
+  }
+  
+  function options_reading_help_text() {
+    $text = "Ceceppa Multilingua: <strong>" . __( 'Tip', 'ceceppaml' ) . "</strong><br /><br />";
+    $text .= __( 'You can to use a static page as homepage for your site/blog.', 'ceceppaml' ) . "<br />";
+    $text .= __( 'Select a desided page for front and post page and translate them in all languages.', 'ceceppaml' ) . "<br />";
+    
+    return $text;
+  }
+  
+  function options_general_help_text() {
+    $link = home_url('wp-admin') . "/admin.php?page=ceceppaml-translations-title";
+
+    $text = "Ceceppa Multilingua: <strong>" . __( 'Tip', 'ceceppaml' ) . "</strong><br /><br />";
+    $text .= "<a href=\"$link\">" . __( 'Clicke here for translate the "Site Title" and "Tagline" in other languages' , 'ceceppaml' ) . "</a><br /><br />";
+    $text .= '<span style="color: red"><strongs>' . __('N.B.: If you have translated the title of the website you have to upgrade it if you make changes', 'ceceppaml') . "<br />";
+    
+    return $text;
+
+  }
 }
 
 function removesmartquotes($content) {
@@ -3035,6 +3133,39 @@ function removesmartquotes($content) {
     
      return $content;
 }
+
+/*
+ * Recupero il percorso dove il tema va a leggere i file di "localizzazione"
+ */
+function cml_grab_theme_locale( $mofile, $domain ) {
+  global $cml_theme_locale_path;
+
+  //Recupero il nome del tema corrente
+  $theme = get_current_theme();
+  
+  //Se il tema non è cambiato recupero il path dal db, invece di "recuperarlo" ad ogni interazione :)
+  if( get_option( "cml_current_theme" ) == $theme ) :
+    $cml_theme_locale_path = get_option( 'cml_current_theme_locale' );
+    
+    remove_filter( 'load_textdomain_mofile', 'cml_grab_theme_locale', 0, 2 );
+    return;
+  endif;
+
+  $path = get_template_directory();	//Path del tema
+  $info = pathinfo( $mofile );
+  
+  if( strcasecmp( $info[ 'dirname' ], $path ) > 0 ) :
+    $cml_theme_locale_path = $info[ 'dirname' ];
+
+    //Nome del tema e path "locale"
+    update_option( 'cml_current_theme', $theme );
+    update_option( 'cml_current_theme_locale', $info[ 'dirname' ] );
+
+    //Fatto
+    remove_filter( 'load_textdomain_mofile', 'cml_grab_theme_locale', 0, 2 );
+  endif;
+}
+add_filter( 'load_textdomain_mofile', 'cml_grab_theme_locale', 0, 2 );
 
 $wpCeceppaML = new CeceppaML();
 ?>

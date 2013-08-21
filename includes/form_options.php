@@ -37,7 +37,7 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
       if( $tab < 1 ) $tab = 1 ?>
     <a class="nav-tab <?php echo $tab == 1 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-options-page&tab=1"><?php _e('Actions', 'ceceppaml') ?></a>
     <a class="nav-tab <?php echo $tab == 2 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-options-page&tab=2"><?php _e('Filters', 'ceceppaml') ?></a>
-    <a class="nav-tab <?php echo $tab == 3 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-options-page&tab=3"><?php _e('Uninstall', 'ceceppaml') ?></a>
+    <a class="nav-tab <?php echo $tab == 3 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-options-page&tab=3"><?php _e('Advanced', 'ceceppaml') ?></a>
     <?php endif; ?>
   </h2>
 
@@ -55,6 +55,11 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 	    require_once('form_options_flags.php');
 
 	    do_meta_boxes('cml_options_page_flags','advanced',null);
+	  endif;
+	  
+	  
+	  if ( $tab == 3 ) :
+	    require_once( 'form_options_advanced.php' );
 	  endif;
 	?>
 

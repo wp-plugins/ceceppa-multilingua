@@ -115,9 +115,13 @@ class CMLMoDownloader {
   }
 
   function failed($language, $filename) {
+    if( isset( $this->_failed_message ) ) return;
+
     echo "<div class='error'><br />";
-    echo sprintf(__('Language file for: <b>%s</b> failed', 'ceceppaml'), $language) . " :'(<br />";
-    echo sprintf(__('Filename: <b>%s</b>', 'ceceppaml'), $filename) . ".mo<br /><br /></div>";
+    echo sprintf( __('Wordpress interface isn\'t available in "<b>%s</b>" language', 'ceceppaml'), $language ) . "<br /><br />";
+    echo "<b>" . __('Don\'t worry, The plugin works correctly, it doesn\'t need the language pack.', 'ceceppaml')  . "</b><br /><br /></div>";
+    
+    $this->_failed_message = true;
   }
   
   function download($language, $locale, $filename, $outfile = null) {

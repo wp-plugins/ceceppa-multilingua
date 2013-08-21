@@ -12,4 +12,5 @@ function cml_donate_box_content() {
     </div>
 <?php
 }
+
 ?>

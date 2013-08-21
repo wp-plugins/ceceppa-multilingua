@@ -183,4 +183,24 @@ function hextobin( $hexstr ) {
     } 
     return $sbin; 
 } 
+
+function getAllFilesFrom( $dir, $ext, $files = array() ) { 
+  if( !($res=opendir( $dir ) ) ) return;
+
+  while( ( $file = readdir ( $res ) ) == TRUE )
+    if( $file != "." && $file != ".." )
+      if( is_dir ( "$dir/$file" ) ) :
+	$files = getAllFilesFrom( "$dir/$file", $ext, $files );
+      else:
+	$info = pathinfo( "$dir/$file" );
+
+	if( strtolower( $info['extension'] ) == strtolower( $ext ) ) :
+	  array_push( $files, "$dir/$file" ); 
+	endif;
+      endif;
+      
+  closedir($res); 
+
+  return $files; 
+} 
 ?>

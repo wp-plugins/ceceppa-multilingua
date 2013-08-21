@@ -268,10 +268,10 @@ function cml_translate($string, $id, $type = "", $wpgettext = false, $gettext = 
   $ret = $wpdb->get_var($query);
 
   if(empty($ret) && $wpgettext) :
-    $ret = __($string);
+    $ret = __( $string );
   endif;
 
-  if(empty($ret) && $gettext) :
+  if( empty( $ret ) && $gettext) :
     //Recupero la traduzione dalle frasi di wordpress ;)
     require_once("gettext/gettext.inc");
     
@@ -279,7 +279,7 @@ function cml_translate($string, $id, $type = "", $wpgettext = false, $gettext = 
     $locale = $lang->cml_locale;
 
     // gettext setup
-    T_setlocale(LC_MESSAGES, $locale);
+    T_setlocale( LC_MESSAGES, $locale );
     // Set the text domain as 'messages'
 
     $domain = $locale;

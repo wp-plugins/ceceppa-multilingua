@@ -51,61 +51,67 @@ function addRow(count, lid) {
 }
 
 jQuery(document).ready(function(e) {
-	//DropDown
-	jQuery("#ceceppaml-meta-box .linked_post").msDropDown();
-	jQuery("#ceceppaml-meta-box .link-category").msDropDown();
-	jQuery("#ceceppaml-meta-box .page_lang").msDropDown();
-	jQuery("#ceceppaml-meta-box .post_lang").msDropDown();
-	jQuery('#ceceppaml-meta-box .linked_page').msDropDown();
-	jQuery(".ceceppa-form select").msDropDown();
-	jQuery(".cml-widget-flags").msDropDown();
+  //DropDown
+  jQuery("#ceceppaml-meta-box .linked_post").msDropDown();
+  jQuery("#ceceppaml-meta-box .link-category").msDropDown();
+  jQuery("#ceceppaml-meta-box .page_lang").msDropDown();
+  jQuery("#ceceppaml-meta-box .post_lang").msDropDown();
+  jQuery('#ceceppaml-meta-box .linked_page').msDropDown();
+  jQuery(".ceceppa-form select:not(.no-dd)").msDropDown();
+  jQuery(".cml-widget-flags").msDropDown();
 
-	//Tooltip
-	jQuery('._tipsy').tipsy({gravity: 'n', html: true});
-	jQuery('img').tipsy({gravity: 'e', html: true});
-	jQuery('th.column-cml_flags a').tipsy({html: true});
+  //Tooltip
+  jQuery('._tipsy').tipsy({gravity: 'n', html: true});
+  jQuery('.tipsy-e').tipsy({gravity: 'e', html: true});
+  jQuery('img').tipsy({gravity: 'e', html: true});
+  jQuery('th.column-cml_flags a').tipsy({html: true});
 
-	//Delete language
-	jQuery('a._delete').click(function() {
-		if(!confirm('Delete selected language?'))
-			return false;
-		else {
-		  var id = jQuery(this).attr('id');
-		  var ids = id.split("-");
+  //Delete language
+  jQuery('a._delete').click(function() {
+	  if(!confirm('Delete selected language?'))
+		  return false;
+	  else {
+	    var id = jQuery(this).attr('id');
+	    var ids = id.split("-");
 
-		  jQuery('input#delete').attr('value', ids[1]);
-		  jQuery('form input#submit').click();
-		}
-	});
+	    jQuery('input#delete').attr('value', ids[1]);
+	    jQuery('form input#submit').click();
+	  }
+  });
 
-	//Get language name and locale from dropdown list
-	jQuery('.ceceppa-ml-flags').change(function() {
-		var $this = jQuery(this);
-		var val = $this.val();
-		var ids = $this.attr('id');
-		
-		//Locale and Id
-		var locale = val.split('@');
-		var id = ids.split('-');
+  //Get language name and locale from dropdown list
+  jQuery('.ceceppa-ml-flags').change(function() {
+	  var $this = jQuery(this);
+	  var val = $this.val();
+	  var ids = $this.attr('id');
+	  
+	  //Locale and Id
+	  var locale = val.split('@');
+	  var id = ids.split('-');
 
-		//Testo dell'elemento selezionato 
-		var text = $this.children("option:selected").text();
+	  //Testo dell'elemento selezionato 
+	  var text = $this.children("option:selected").text();
 
-		//Set language name
-		jQuery('#language-' + id[1]).val(text);
+	  //Set language name
+	  jQuery('#language-' + id[1]).val(text);
 
-		//Url slug, come predefinito considero le prime 2 cifre del "locale"
-		var loc = locale[0];
-		var l = loc.split("_");
-		jQuery('#slug-' + id[1]).val(l[0].toLowerCase());
+	  //Url slug, come predefinito considero le prime 2 cifre del "locale"
+	  var loc = locale[0];
+	  var l = loc.split("_");
+	  jQuery('#slug-' + id[1]).val(l[0].toLowerCase());
 
-		//Set locale
-		jQuery('#locale-' + id[1]).val(locale[0]);
-	});
+	  //Set locale
+	  jQuery('#locale-' + id[1]).val(locale[0]);
+  });
 
-	//Toggle all details
-	toggleDetails(-1);
-	
-	//Remove button
-	//jQuery('img.delete').
+  //Toggle all details
+  toggleDetails(-1);
+
+  jQuery('table.ceceppaml-theme-translations tr.row-domain').click(function() {
+    jQuery( this ).removeClass( 'row-open' );
+
+    $next = jQuery( this ).next();
+    $next.toggle();
+    if( $next.is(":visible") ) jQuery( this ).addClass( 'row-open' );
+  });
 });

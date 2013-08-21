@@ -3,7 +3,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate, international, .mo file, .po file, localization, widget, post
 Requires at least: 3.4.1
 Tested up to: 3.7
-Stable tag: 1.2.22
+Stable tag: 1.3.0
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG
@@ -22,6 +22,11 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 - Different menu for each language.
 - Translate widget's title.
 - Translate Site Title / Tagline
+- Translate your theme (Plugin will generate the .mo file for wordpress)
+- One-Click-Switching between the languages
+- One-Click-Switching between the translations
+- Category link translation
+- Add flags to menu
 - Group/Ungroup comments for each post's languages.
 - Show notice when the post/page/category that user is viewing is available, based on the information provided by the browser, in their its language
 - Redirects the browser depending on the user's language. Append the suffix &lang= to the home url-
@@ -31,10 +36,6 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 - Show the list flag of available languages on top or bottom of page/post
 - Hide translations of posts of the current language
 - Show only posts of the current language
-- One-Click-Switching between the languages
-- One-Click-Switching between the translations
-- Category link translation
-- Add flags to menu
 - Plugin works also with custom post types :)
 
 = Widgets =
@@ -65,6 +66,7 @@ jQuery image dropdown [DD](http://www.marghoobsuleman.com/jquery-image-dropdown)
 
 = Php gettext =
 Php-gettext by Danilo Shegan [php-gettext] https://launchpad.net/php-gettext/
+Pgettext by Ruben Nijveld 
 
 == Installation ==
 
@@ -81,7 +83,7 @@ Installation of this plugin is fairly easy:
 == Frequently Asked Questions ==
 
 = Where can I find full shortcode list =
-After instlling the plugin you can find full shortcode list in "Ceceppa Multilingua" -> "Shortcode" page.
+After installing the plugin you can find full shortcode list in "Ceceppa Multilingua" -> "Shortcode" page.
 
 = Can I translate also the Widget Text =
 
@@ -127,11 +129,15 @@ For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide
 
 = Can I show flags on my website without using widget? =
 
-Yes. You can:
+Yes, you can:
 
   1) Add float div to website and customize look via css
   2) Append flag to html element
   3) Add flags to menu
+
+= Can I translate the "Site Title" and/or "Tagline"
+
+Yes, you can translate them in "Ceceppa Multilingua" -> "Site Title/Tagline" page.
 
 == Screenshots ==
 
@@ -145,6 +151,12 @@ Yes. You can:
 7. Box for manage language files
 
 == Changelog ==
+
+= 1.3.0 =
+* Now you can translate your theme with Ceceppa Multilingua
+* Fixed minor bugs
+* Improved help
+* Moved tips in help tab
 
 = 1.2.22 =
 * Added Url Modification mode: NONE
