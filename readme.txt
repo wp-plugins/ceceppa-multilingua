@@ -147,8 +147,8 @@ Yes, you can translate them in "Ceceppa Multilingua" -> "Site Title/Tagline" pag
 4. Plugin configuration
 5. Link to the article
 6. Menus configuration
-7. Box for see or add translation to current post/page
 7. Box for manage language files
+8. Translate your theme
 
 == Changelog ==
 
