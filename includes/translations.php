@@ -3,8 +3,9 @@ global $wpCeceppaML;
 
 if(!is_object($wpCeceppaML)) die("Access denied");
 
-include_once ( CECEPPA_PLUGIN_PATH . '/Pgettext/Pgettext.php' );
-use Pgettext\Pgettext as Pgettext;
+
+//Richiede php > 5.3.0 :(
+if( PHP_VERSION_ID >= 50300 ) include_once( 'mo-generator.php' );
 
 class CeceppaMLTranslations {
   public function __construct() {
@@ -170,8 +171,9 @@ class CeceppaMLTranslations {
 
       fclose( $fp );
       
-      //Tadaaaaa, file generato... genero il .mo
-      Pgettext::msgfmt( $filename );
+      if( function_exists( 'cml_generate_mo' ) ) :
+	cml_generate_mo( $filename );
+      endif;
 
     endforeach;
   }

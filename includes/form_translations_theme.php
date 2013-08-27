@@ -3,6 +3,18 @@
 
   wp_enqueue_script("ceceppa-tipsy");
 
+  //Warning: required php >= 5.3.0
+  if( PHP_VERSION_ID < 50300 ) :
+?>
+    <div class="error">
+      <p>
+	<b><?php _e( 'Feature not available', 'ceceppaml' ) ?> :(</b><br /><br />
+	<?php _e( 'This feature require Php >= 5.3.0, your current version is: ', 'ceceppaml' ); echo phpversion() ?>
+      </p>
+    </div>
+<?php
+  endif;
+
   $path = get_template_directory();
 
   //Cerco eventuali file *.po/*.mo
@@ -13,7 +25,7 @@
   foreach( $files as $filename ) :
     $content = file_get_contents( $filename );
     
-    preg_match ( '/(_e|__)\((.*?)\)/', $content, $matches );
+    preg_match ( '/(_e|__|esc_html_e|esc_attr__)\((.*?)\)/', $content, $matches );
 
     //'valore', 'textdomain'
     $m = end( $matches );
@@ -21,10 +33,11 @@
     
     list( $text, $domain ) = $matches[1];
 
-    $d = preg_replace( '/^[\'\"]|[\'|\"]$/', '', trim( $domain ) );
+//     $d = preg_replace( '/^[\'\"]|[\'|\"]$/', '', trim( $domain ) );
       
     //Rimuovo gli apici iniziali e finali :)
-    $domains[ $d ][] = preg_replace( '/^[\'\"]|[\'|\"]$/', '', trim( $text ) );
+//     $domains[ $d ][] = preg_replace( '/^[\'\"]|[\'|\"]$/', '', trim( $text ) );
+    $domains[ $domain ][] = $text;
   endforeach;
 
   //Percorso vuoto?
@@ -171,4 +184,4 @@
 
   </tbody>
   </table>
-      <?php submit_button(); ?>
+      <?php if( PHP_VERSION_ID >= 50300 ) submit_button(); ?>

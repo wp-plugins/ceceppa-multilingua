@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.1
+Version: 1.3.2
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -2693,10 +2693,12 @@ class CeceppaML {
 ?>
 	<div class="updated">
 	      <h2><img src="<?php echo CECEPPA_PLUGIN_URL ?>/images/logo.png" height="16" />&nbsp;Ceceppa Multilingua</h2>
-	      <?php _e( 'With "Ceceppa Multilingua" now you can also <b>translate your theme</b>, if it support localization', 'ceceppaml' ); ?>.<br /><br />
+	      <?php _e( 'With "Ceceppa Multilingua" you can also <b>translate your theme</b>, if it support localization.', 'ceceppaml' ); ?>.<br /><br />
 	      <?php _e( 'Go to "Ceceppa Multilingua" -> "Translate your theme"', 'ceceppaml' ); ?>,&nbsp;
 	      <a href="<?php echo home_url('wp-admin') ?>/admin.php?page=ceceppaml-translations-plugins-themes&cml_remove_translate_theme_notice=1"><?php _e( 'or click here', 'ceceppaml' ) ?></a>.
 
+	      <br /><br />
+	      <b><?php _e( 'This feature require PHP >= 5.3.0', 'ceceppaml' ); ?></b>
 	      <div style="text-align: right;width:100%">
 		<?php $link = add_query_arg( array( "cml_remove_translate_theme_notice" => 1 ) ) ?>
 		<a href="<?php echo $link ?>"><?php _e('Dismiss') ?></a>
