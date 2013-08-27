@@ -3,7 +3,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate, international, .mo file, .po file, localization, widget, post
 Requires at least: 3.4.1
 Tested up to: 3.7
-Stable tag: 1.3.0
+Stable tag: 1.3.2
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG
@@ -18,11 +18,11 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 = Features =
 
 - Separated posts and pages for each languages, so you can use different SEO and url for each languages.
+- Translate your theme ( Plugin let you translate strings and will generate the .mo file for wordpress )
 - URLs pretty and SEO-friendly. ?lang=en, /en/foo/ or en.yoursite.com
 - Different menu for each language.
 - Translate widget's title.
 - Translate Site Title / Tagline
-- Translate your theme (Plugin will generate the .mo file for wordpress)
 - One-Click-Switching between the languages
 - One-Click-Switching between the translations
 - Category link translation
@@ -147,10 +147,18 @@ Yes, you can translate them in "Ceceppa Multilingua" -> "Site Title/Tagline" pag
 4. Plugin configuration
 5. Link to the article
 6. Menus configuration
-7. Box for see or add translation to current post/page
-7. Box for manage language files
+7. Wordpress in your language
+8. Translate your theme
 
 == Changelog ==
+
+= 1.3.2 =
+* Improved translation of the themes
+* Fixed error in "My translations" if Php < 5.3.0
+* Added warning in "Translate your theme if Php < 5.3.0"
+
+= 1.3.1 =
+* Improved translation of the themes
 
 = 1.3.0 =
 * Now you can translate your theme with Ceceppa Multilingua
