@@ -127,6 +127,7 @@ class CeceppaMLOptions {
   function update_filters() {
     //Change locale
     update_option("cml_option_change_locale", intval($_POST['change-locale']));
+    update_option("cml_option_change_locale_admin", intval($_POST['change-locale-admin']));
 
     //Filter posts
     @update_option("cml_option_filter_posts", intval($_POST['filter-posts']));
