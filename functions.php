@@ -70,9 +70,12 @@ function cml_get_languages_list() {
  * Restituisco il percorso della bandiera
  */
 function cml_get_flag($flag, $size = "tiny") {
-  if(empty($flag)) return "";
+  if( empty( $flag ) ) return "";
 
-  return CECEPPA_PLUGIN_URL . "flags/$size/$flag.png";
+  if( file_exists( CECEPPA_PLUGIN_PATH . "flags/$size/$flag.png" ) )
+    return CECEPPA_PLUGIN_URL . "flags/$size/$flag.png";
+  else
+    return CECEPPA_UPLOAD_URL . "/$size/$flag.png";
 }
 
 /**

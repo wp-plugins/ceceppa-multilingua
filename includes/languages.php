@@ -32,8 +32,54 @@ class CeceppaMLLanguages {
 
     for($i = 0; $i < count($_POST['id']); $i++) :
 	$id = $_POST['id'][$i];
-	@list($lang, $lang_slug) = explode("@", $_POST['flags'][$i]);
+	@list( $lang, $lang_slug ) = explode( "@", $_POST['flags'][$i] );
 	$default = (array_key_exists('default', $_POST) && $_POST['default'] == $id) ? 1 : 0;
+
+	$flag_path = "";
+
+	//Upload?
+	if( ! empty( $_FILES[ 'flag_file' ][ 'name' ][ $i ] ) ) :
+	  if ( $_FILES["flag_file"]["error"][ $i ] > 0 ) :	//Errore
+	    echo '<div class="error">';
+	    echo "Error: " . $_FILES["flag_file"]["name"][ $i ] . "<br />";
+	    echo '</div>';
+	  else:
+	    $imageData = @getimagesize( $_FILES["flag_file"]["tmp_name"][ $i ] );
+
+	    if( $imageData === FALSE || !( $imageData[2] == IMAGETYPE_GIF || $imageData[2] == IMAGETYPE_JPEG || $imageData[2] == IMAGETYPE_PNG ) ) {
+	      echo '<div class="error">';
+	      echo __( "Invalid image: ", 'ceceppaml' ) . $_FILES["flag_file"]["name"][ $i ] . "<br />";
+	      echo '</div>';
+	    } else {
+	      $upload_dir = wp_upload_dir();
+	      $temp = $_FILES["flag_file"]["tmp_name"][ $i ];
+	      $outname = $_POST[ 'locale' ][ $i ] . ".png";
+
+	      //Ridimensiono
+	      list( $width, $height ) = getimagesize( $temp );
+	      $src = imagecreatefromstring( file_get_contents( $temp ) );
+	      
+	      //Creo le cartelle
+	      if( ! is_dir( $upload_dir[ 'basedir' ] . "/ceceppaml/tiny/" ) ) mkdir( $upload_dir[ 'basedir' ] . "/ceceppaml/tiny/" );
+	      if( ! is_dir( $upload_dir[ 'basedir' ] . "/ceceppaml/small/" ) ) mkdir( $upload_dir[ 'basedir' ] . "/ceceppaml/small/" );
+
+	      //Tiny
+	      $out = $upload_dir[ 'basedir' ] . "/ceceppaml/tiny/" . $outname;
+	      $tiny = imagecreatetruecolor( 16, 11 );
+	      imagecopyresized( $tiny, $src, 0, 0, 0, 0, 16, 11, $width, $height );
+	      imagepng( $tiny, $out );
+
+	      //Small
+	      $out = $upload_dir[ 'basedir' ] . "/ceceppaml/small/" . $outname;
+	      $small = imagecreatetruecolor( 32, 23 );
+	      imagecopyresized( $small, $src, 0, 0, 0, 0, 32, 23, $width, $height );
+	      imagepng( $small, $out );
+
+	      $lang = $_POST[ 'locale' ][ $i ];
+	      $flag_path = $upload_dir[ 'basedir' ] . "/ceceppaml/";
+	    }
+	  endif;
+	endif;
 
 	//Se è vuoto, è una "nuova lingua"
 	if(empty($id)) {
@@ -48,8 +94,9 @@ class CeceppaMLLanguages {
 				'cml_notice_page' => bin2hex(htmlentities($_POST['notice_page'][$i], ENT_COMPAT, "UTF-8")),
 				'cml_notice_category' => '',
 				'cml_enabled' => 1,
-				'cml_sort_id' => $_POST['sort-id'][$i]),
-			    array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d'));
+				'cml_sort_id' => $_POST['sort-id'][$i],
+				'cml_flag_path' => $flag_path ),
+			    array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s'));
 
 	    if( substr( $lang, 0, 2 ) != "en" )
 	      $d->download_language($wpdb->insert_id, $_POST['language'][$i]);
@@ -65,9 +112,10 @@ class CeceppaMLLanguages {
 				'cml_notice_page' => bin2hex(htmlentities($_POST['notice_page'][$i], ENT_COMPAT, "UTF-8")),
 				'cml_notice_category' => '',
 				'cml_enabled' => $_POST['lang-enabled'][$i],
-				'cml_sort_id' => $_POST['sort-id'][$i]),
+				'cml_sort_id' => $_POST['sort-id'][$i],
+				'cml_flag_path' => $flag_path ),
 			    array('id' => $id),
-			    array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d'),
+			    array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s'),
 			    array('%d'));
 	}
 	
