@@ -82,6 +82,10 @@ Installation of this plugin is fairly easy:
 
 == Frequently Asked Questions ==
 
+= Is it possible to not have a slug for the main language? =
+Yes, it is :).
+In "Ceceppa Multilingua" -> "Settings" set the option "Detect browser language:" to "Do Nothing".
+
 = Where can I find full shortcode list =
 After installing the plugin you can find full shortcode list in "Ceceppa Multilingua" -> "Shortcode" page.
 
@@ -155,7 +159,6 @@ Yes, you can translate them in "Ceceppa Multilingua" -> "Site Title/Tagline" pag
 = 1.3.3 =
 * Added Farsi flag
 * Now you can add custom language and flag
-* Added the option "change language also in the admin panel"
 
 = 1.3.2 =
 * Improved translation of the themes
