@@ -155,6 +155,7 @@ Yes, you can translate them in "Ceceppa Multilingua" -> "Site Title/Tagline" pag
 = 1.3.3 =
 * Added Farsi flag
 * Now you can add custom language and flag
+* Added the option "change language also in the admin panel"
 
 = 1.3.2 =
 * Improved translation of the themes
