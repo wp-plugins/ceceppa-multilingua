@@ -44,7 +44,7 @@ add_shortcode('cml_show_flags', 'cml_shortcode_show_flags');
 function cml_shortcode_text($attrs) {
   global $wpCeceppaML;
 
-  $string = $attrs[$wpCeceppaML->get_current_lang()];
+  $string = @$attrs[ $wpCeceppaML->get_current_language_slug() ];
   if(!empty($string))
     return $string;
   else

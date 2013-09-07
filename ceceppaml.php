@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.3
+Version: 1.3.4
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -16,7 +16,7 @@ Tags: multilingual, multi, language, admin, tinymce, qTranslate, Polyglot, bilin
  * 
  */
 // Make sure we don't expose any info if called directly
-if ( !function_exists( 'add_action' ) ) {
+if ( ! defined( 'ABSPATH' ) ) {
 	echo 'Hi there!  I\'m just a plugin, not much I can do when called directly.';
 	exit;
 }
@@ -199,7 +199,7 @@ class CeceppaML {
       * Filtro gli articoli per lingua
       * Filter posts by language
       */
-      if(get_option("cml_option_filter_posts", false)) {
+      if( get_option("cml_option_filter_posts", false) ) {
 	add_action( 'pre_get_posts', array( &$this, 'filter_posts_by_language' ), 0 );
       }
 
@@ -346,7 +346,7 @@ class CeceppaML {
     endif;
     
     //hide_category_translations si occupa anche di "sistemare" il link alla categoria "originale"
-    if(get_option("cml_option_filter_translations", true) || array_key_exists("ht", $_GET) || $this->_translate_term_link) {
+    if(get_option( "cml_option_filter_translations", true ) || array_key_exists( "ht", $_GET) || $this->_translate_term_link ) {
       //Se l'utente non vuole nascondere le traduzioni non vedo perché lo devo "forzare"? :)
       add_action('pre_get_posts', array(&$this, 'hide_category_translations'));
     }
@@ -1171,7 +1171,7 @@ class CeceppaML {
   function get_language_id_by_post_id($post_id) {
     global $wpdb;
 
-    $lang = get_option("cml_page_lang_$post_id");
+    $lang = get_option( "cml_page_lang_$post_id" );
     if(!empty($lang) || $lang == 0) return $lang;
 
     if( !isset( $this->_language_detected ) ) $this->update_current_lang();
@@ -2318,14 +2318,19 @@ class CeceppaML {
 	    switch($item->object) :
 	    case 'page':
 	    case 'post':
-	      $page_id = cml_get_linked_post($this->_default_language_id, null, $item->object_id, $this->_current_lang_id);
+	      $page_id = cml_get_linked_post( $this->_default_language_id, null, $item->object_id, $this->_current_lang_id );
 
 	      if(!empty($page_id)) :
 		//Su un sito mi è capitato che get_the_title() restituisse una stringa vuota, nonstante l'id della pagina fosse corretto
-		$title = get_the_title($page_id);
+		$title = get_the_title( $page_id );
 		if(empty($title)) :
-		  $page = get_page($page_id);
-		  $title = $page->post_title;
+		  $page = get_page( $page_id );
+
+		  //Qualcosa non quadra... restituisco l'oggetto originale...
+		  if( ! is_object( $page ) ) {
+		    return $item;
+		  }
+		  $title = ( $item->object == 'page' ) ? $page->title : $page->post_title;
 		endif;
 
 	        $item->ID = $page_id;
@@ -3144,11 +3149,13 @@ function removesmartquotes($content) {
 function cml_grab_theme_locale( $mofile, $domain ) {
   global $cml_theme_locale_path;
 
+  if( ! is_admin() ) return;
+
   //Recupero il nome del tema corrente
-  $theme = get_current_theme();
-  
+  $theme = wp_get_theme();
+
   //Se il tema non è cambiato recupero il path dal db, invece di "recuperarlo" ad ogni interazione :)
-  if( get_option( "cml_current_theme" ) == $theme ) :
+  if( get_option( "cml_current_theme" ) == $theme->Name ) :
     $cml_theme_locale_path = get_option( 'cml_current_theme_locale' );
     
     remove_filter( 'load_textdomain_mofile', 'cml_grab_theme_locale', 0, 2 );
@@ -3162,7 +3169,7 @@ function cml_grab_theme_locale( $mofile, $domain ) {
     $cml_theme_locale_path = $info[ 'dirname' ];
 
     //Nome del tema e path "locale"
-    update_option( 'cml_current_theme', $theme );
+    update_option( 'cml_current_theme', $theme->Name );
     update_option( 'cml_current_theme_locale', $info[ 'dirname' ] );
 
     //Fatto

@@ -73,9 +73,11 @@ function cml_get_flag($flag, $size = "tiny") {
   if( empty( $flag ) ) return "";
 
   if( file_exists( CECEPPA_PLUGIN_PATH . "flags/$size/$flag.png" ) )
-    return CECEPPA_PLUGIN_URL . "flags/$size/$flag.png";
+    $url = CECEPPA_PLUGIN_URL . "flags/$size/$flag.png";
   else
-    return CECEPPA_UPLOAD_URL . "/$size/$flag.png";
+    $url = CECEPPA_UPLOAD_URL . "/$size/$flag.png";
+    
+  return esc_url( $url );
 }
 
 /**
@@ -91,7 +93,7 @@ function cml_get_flag_by_lang_id($id, $size = "tiny") {
 
   $flag = $wpdb->get_var("SELECT cml_flag FROM " . CECEPPA_ML_TABLE . " WHERE id = " . intval($id));
 
-  return cml_get_flag($flag, $size);
+  return cml_get_flag( $flag, $size );
 }
 
 /**
