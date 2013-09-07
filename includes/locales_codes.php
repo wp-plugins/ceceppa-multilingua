@@ -111,8 +111,9 @@ $_langs = array(
 "Vietnamese (Vietnam)" => "vi_VN");
 
 $path = CECEPPA_UPLOAD_DIR . "/small";
-$files = getAllFilesFrom( $path, "png" );
-if( is_array( $files ) ) :
+$files = @getAllFilesFrom( $path, "png" );
+
+if( is_array( $files ) ) {
   global $wpdb;
 
   foreach( $files as $file ) :
@@ -126,5 +127,7 @@ if( is_array( $files ) ) :
   endforeach;
   
   if( is_array( $_custom_langs ) ) $_langs = array_merge( $_custom_langs, $_langs );
-endif;
+} else {
+  $_custom_langs = array();
+}
  ?>
