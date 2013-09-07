@@ -44,6 +44,7 @@ $_langs = array(
 "English (United States)" => "en_US",
 "Esperanto" => "epo_EPO",
 "Estonian (Estonia)" => "et_EE",
+"Farsi (Iran)" => "fa_IR",
 "Finnish (Finland)" => "fi_FI",
 "French (Belgium)" => "fr_BE",
 "French (Canada)" => "fr_CA",
@@ -56,7 +57,7 @@ $_langs = array(
 "German (Switzerland)" => "de_CH",
 "Greek (Cyprus)" => "el_CY",
 "Greek (Greece)" => "el_GR",
-"Hebrew (Israel)" => "iw_IL",
+"Hebrew (Israel)" => "he_IL",
 "Hindi (India)" => "hi_IN",
 "Hungarian (Hungary)" => "hu_HU",
 "Icelandic (Iceland)" => "is_IS",
@@ -108,4 +109,22 @@ $_langs = array(
 "Turkish (Turkey)" => "tr_TR",
 "Ukrainian (Ukraine)" => "uk_UA",
 "Vietnamese (Vietnam)" => "vi_VN");
+
+$path = CECEPPA_UPLOAD_DIR . "/small";
+$files = getAllFilesFrom( $path, "png" );
+if( is_array( $files ) ) :
+  global $wpdb;
+
+  foreach( $files as $file ) :
+    //Info sul file
+    $path = pathinfo( $file );
+
+    //Cerco la corrispondenza all'interno della mia tabella
+    $name = $wpdb->get_var( "SELECT cml_language FROM " . CECEPPA_ML_TABLE . " WHERE cml_locale = '" . $path[ 'filename' ] . "'" );
+    
+    $_custom_langs[ $name ] = $path[ 'filename' ];
+  endforeach;
+  
+  if( is_array( $_custom_langs ) ) $_langs = array_merge( $_custom_langs, $_langs );
+endif;
  ?>

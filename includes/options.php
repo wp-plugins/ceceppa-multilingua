@@ -64,13 +64,13 @@ class CeceppaMLOptions {
 
     //Append
     @update_option("cml_append_flags", intval($_POST['append-flags']));
-    update_option("cml_append_flags_to", $_POST['id-class']);
+    update_option("cml_append_flags_to", esc_html( $_POST['id-class'] ) );
 
       //Show as...
       @update_option("cml_show_items_as", intval($_POST['show-items-as']));
     
       //Flag size...
-      @update_option("cml_show_items_size", $_POST['item-as-size']);
+      @update_option( "cml_show_items_size", sanitize_title( $_POST['item-as-size'] ) );
 
     //Menu
     @update_option("cml_add_flags_to_menu", intval($_POST['to-menu']));
@@ -82,43 +82,43 @@ class CeceppaMLOptions {
       @update_option("cml_show_in_menu_as", intval($_POST['show-as']));
 
       //Flag size...
-      @update_option("cml_show_in_menu_size", $_POST['submenu-size']);
+      @update_option("cml_show_in_menu_size", sanitize_title( $_POST['submenu-size'] ) );
   }
 
   function update_actions() {
     //Add slug & url mode
-    update_option("cml_add_slug_to_link", $_POST['add-slug']);
-    update_option("cml_modification_mode", $_POST['url-mode']);
+//     update_option("cml_add_slug_to_link", sanitize_title( $_POST['add-slug'] ) );
+    update_option("cml_modification_mode", sanitize_title( $_POST['url-mode'] ) );
     
     //Traduzione categorie
-    @update_option('cml_option_translate_categories', $_POST['categories']);
+    @update_option('cml_option_translate_categories', sanitize_title( $_POST['categories'] ) );
 
     //Redirect
-    update_option("cml_option_redirect", $_POST['redirect']);
-    update_option("cml_option_redirect_type", $_POST['redirect-type']);
+    update_option("cml_option_redirect", sanitize_title( $_POST['redirect'] ) );
+//     update_option("cml_option_redirect_type", sanitize_title( $_POST['redirect-type'] ) );
 
-    if(array_key_exists("posts", $_POST))
-      update_option("cml_option_post_redirect", $_POST['posts']);
+    if( array_key_exists( "posts", $_POST ) )
+      update_option("cml_option_post_redirect", sanitize_title( $_POST['posts'] ) );
 
     //Flags
     @update_option("cml_option_flags_on_post", intval($_POST['flags-on-posts']));
     @update_option("cml_option_flags_on_page", intval($_POST['flags-on-pages']));
     @update_option("cml_option_flags_on_custom_type", intval($_POST['flags-on-custom']));
-    @update_option("cml_option_flags_on_pos", $_POST['flags_on_pos']);
+    @update_option("cml_option_flags_on_pos", sanitize_title( $_POST['flags_on_pos'] ) );
 
       //Size
-      @update_option("cml_option_flags_on_size", $_POST['flag-size']);
+      @update_option("cml_option_flags_on_size", sanitize_title($_POST['flag-size']));
 
     //Avviso
-    @update_option("cml_option_notice", $_POST['notice']);
-    @update_option("cml_option_notice_pos", $_POST['notice_pos']);
-    @update_option("cml_option_notice_after", $_POST['notice_after']);
-    @update_option("cml_option_notice_before", $_POST['notice_before']);
+    @update_option("cml_option_notice", sanitize_title($_POST['notice']));
+    @update_option("cml_option_notice_pos", sanitize_title($_POST['notice_pos']));
+    @update_option("cml_option_notice_after", esc_html($_POST['notice_after']));
+    @update_option("cml_option_notice_before", esc_html($_POST['notice_before']));
     @update_option("cml_option_notice_post", intval($_POST['notice-post']));
     @update_option("cml_option_notice_page", intval($_POST['notice-page']));
 
     //Commenti
-    @update_option('cml_option_comments', $_POST['comments']);
+    @update_option('cml_option_comments', sanitize_title($_POST['comments']));
 
     //Translate menu items?
     @update_option( "cml_option_action_menu", intval( $_POST['action-menu'] ) );
@@ -127,6 +127,7 @@ class CeceppaMLOptions {
   function update_filters() {
     //Change locale
     update_option("cml_option_change_locale", intval($_POST['change-locale']));
+    update_option("cml_option_change_locale_admin", intval($_POST['change-locale-admin']));
 
     //Filter posts
     @update_option("cml_option_filter_posts", intval($_POST['filter-posts']));
@@ -139,7 +140,7 @@ class CeceppaMLOptions {
 	  
     //Filter search
     @update_option("cml_option_filter_search", intval($_POST['filter-search']));
-    @update_option("cml_option_filter_form_class", $_POST['filter-form']);
+    @update_option("cml_option_filter_form_class", sanitize_title($_POST['filter-form']));
   }    
 }
 ?>

@@ -181,3 +181,9 @@ img.not-available {
 .ceceppaml-theme-translations tr.row-open td:first-child {
   border-bottom: 0 !important;
 }
+
+.cml-hidden {
+ width: 0px;
+ height: 0px;
+ overflow: hidden;
+}

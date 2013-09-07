@@ -3,8 +3,9 @@ global $wpCeceppaML;
 
 if(!is_object($wpCeceppaML)) die("Access denied");
 
-include_once ( CECEPPA_PLUGIN_PATH . '/Pgettext/Pgettext.php' );
-use Pgettext\Pgettext as Pgettext;
+
+//Richiede php > 5.3.0 :(
+if( PHP_VERSION_ID >= 50300 ) include_once( 'mo-generator.php' );
 
 class CeceppaMLTranslations {
   public function __construct() {
@@ -21,9 +22,6 @@ class CeceppaMLTranslations {
 	break;
       endif;
     endfor;
-
-    //Download?
-    if( isset( $_GET['download'] ) ) $this->download_mo();
 
     if( array_key_exists("form", $_POST) ) :
       if( $_POST['form'] == 1 && array_key_exists("id", $_POST) ) :
@@ -134,7 +132,7 @@ class CeceppaMLTranslations {
     endif;
 
     $domain = trim( $_POST[ 'textdomain' ] );
-    $originals = $_POST[ 'original' ];
+    $originals = explode( "\n", file_get_contents( $cml_theme_locale_path . "/tmp.pot" ) );
 
     //Intestazione file .po
     $header = file_get_contents( CECEPPA_PLUGIN_PATH . "/includes/header.po" );
@@ -173,38 +171,11 @@ class CeceppaMLTranslations {
 
       fclose( $fp );
       
-      //Tadaaaaa, file generato... genero il .mo
-      Pgettext::msgfmt( $filename );
+      if( function_exists( 'cml_generate_mo' ) ) :
+	cml_generate_mo( $filename );
+      endif;
 
     endforeach;
-  }
-  
-  function download_mo() {
-    global $cml_theme_locale_path;
-
-    if( empty( $cml_theme_locale_path ) ) return;
-
-    $lang = cml_get_language_info( intval( $_GET['download'] ) );
-
-    $file = "$cml_theme_locale_path/$lang->cml_locale.mo";
-    echo $file;
-
-    if( !file_exists( $file ) ) return;
-
-    header('Content-Description: File Transfer');
-    header('Content-Type: application/octet-stream');
-    header('Content-Disposition: attachment; filename='.basename( $file ) );
-    header('Content-Transfer-Encoding: binary');
-    header('Expires: 0');
-    header('Cache-Control: must-revalidate');
-    header('Pragma: public');
-    header('Content-Length: ' . filesize( $file ) );
-
-    ob_clean();
-    flush();
-    readfile( $file );
-
-    exit;
   }
 }
 ?>
