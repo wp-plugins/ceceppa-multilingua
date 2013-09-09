@@ -192,16 +192,13 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
 
       $lang_id = $wpCeceppaML->get_current_lang_id();
 
-      if( (is_single() || is_page() ) &&  $linked ) :
-	//Collego gli articoli delle varie pagine
-	if(is_single() || is_page()) {
-	  $link = cml_get_linked_post($lang_id, $result, get_the_ID());
+      if( ( is_single() || is_page() ) &&  $linked ) :
+	$link = cml_get_linked_post( $lang_id, $result, get_the_ID() );
 
-	  if(!empty($link)) $link = get_permalink($link);
-	}
+	if( !empty( $link ) ) $link = get_permalink($link);
       endif;
 
-      if(is_archive() && !is_category()) :
+      if( is_archive() && !is_category() ) :
 	global $wp;
 
 	$link = home_url($wp->request) . "/";
@@ -235,12 +232,12 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
 
          Se non ho trovato nesuna traduzione per l'articolo, la bandiera punterà alla homepage
       */
-      if( cml_is_homepage() || empty($link) ) :
+      if( empty($link) ) :
 	$link = $wpCeceppaML->get_home_url( $result->cml_language_slug );
       endif;
     }
 
-    $img = "<img class=\"$size $image_class\" src='" . cml_get_flag_by_lang_id($result->id, $size) . "' title='$result->cml_language' width=\"$width\"/>";
+    $img = "<img class=\"$size $image_class\" src='" . cml_get_flag_by_lang_id( $result->id, $size ) . "' title='$result->cml_language' width=\"$width\"/>";
     if($show == "text") $img = "";
 
     $r .= "<li><a href='$link'>$img$lang</a></li>";
@@ -386,8 +383,8 @@ function cml_dropdown_langs($name, $default, $link = false, $none = false, $none
 	foreach($langs as $lang) :
 	  $selected = ($lang->id == $default) ? "selected" : "";
 
-	  $value = (!$link) ? $lang->id : get_permalink(cml_get_linked_post($id, null, get_the_ID(), $lang->id));
-	  $dataimage = 'data-image="' . cml_get_flag_by_lang_id($lang->id) . '"';
+	  $value = (!$link) ? $lang->id : get_permalink( cml_get_linked_post( $id, null, get_the_ID(), $lang->id ) );
+	  $dataimage = 'data-image="' . cml_get_flag_by_lang_id( $lang->id ) . '"';
 
 	  echo "<option $dataimage value=\"$value\" $selected>$lang->cml_language</option>";
 	endforeach;
