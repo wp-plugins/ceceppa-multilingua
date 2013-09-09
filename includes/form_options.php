@@ -258,6 +258,11 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 	    <blockquote>
 		<input id="change-locale" type="checkbox" value="1" name="change-locale" <?php echo ((get_option('cml_option_change_locale', 1) == 1) ? 'checked' : '') ?> />
 		<label for="change-locale"><?php _e('Enable') ?></label>
+		<blockquote>
+		<label>
+		  <input type="checkbox" name="change-locale-admin" value="1" <?php echo checked( get_option( 'cml_option_change_locale_admin', 1 ), 1 ) ?> />
+		  <?php _e( 'change language also in the admin panel', 'ceceppaml' ); ?>
+		</label>
 	    </blockquote>
 	</td>
 	</tr>

@@ -104,6 +104,10 @@ function cml_fix_database() {
     if( $dbVersion <= 17 ) :
 	add_action( 'plugins_loaded', 'cml_fix_rebuild_posts_info' );
     endif;
+    
+    if( $dbVersion <= 18 ) :
+      $wpdb->query( "ALTER TABLE  " . CECEPPA_ML_TABLE . " ADD  `cml_flag_path` TEXT" );
+    endif;
 }
 
 //Imposto in automatico la lingua in tutti i post

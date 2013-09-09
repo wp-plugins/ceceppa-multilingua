@@ -43,7 +43,7 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
   <div id="post-body" class="metabox-holder columns-2">
   <?php if($tab == 0) : ?>
     <div id="post-body-content">
-    <form class="ceceppa-form" name="wrap" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>?page=ceceppaml-language-page">
+    <form class="ceceppa-form" name="wrap" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>?page=ceceppaml-language-page" enctype="multipart/form-data">
     <input type="hidden" name="form" value="languages" />
     <input type="hidden" name="action" value="add" />
     <?php wp_nonce_field('cml_edit_language','cml_nonce_edit_language'); ?>
@@ -87,7 +87,7 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
       </td>
 <!-- Combobox lingue -->
       <td rowspan="2">
-		<?php ceceppa_show_flags($_langs, $result->id, $result->cml_flag) ?>
+		<?php ceceppa_show_flags($_langs, $_custom_langs, $result->id, $result->cml_flag) ?>
 	  </td>
 <!-- nome della lingua -->
 	  <td>
@@ -137,7 +137,7 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 	  <?php $max = $wpdb->get_var("SELECT max(cml_sort_id) + 1 FROM " . CECEPPA_ML_TABLE); ?>
 	  <input type="text" name="sort-id[]" value="<?php echo $max ?>" size="3" style="width: 30px" />
       </td>
-      <td><?php ceceppa_show_flags($_langs, "x", null) ?></td>
+      <td><?php ceceppa_show_flags($_langs, $_custom_langs, "x", null) ?></td>
       <td><input name="language[]" id="language-x" type="text" style="width: 100%"></td>
       <td></td>
       <td style="text-align: center">
@@ -197,19 +197,29 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
   /**
    * Bandierine :)
    */
-  function ceceppa_show_flags($_langs, $id, $item) {
+  function ceceppa_show_flags( $_langs, $_custom_langs, $id, $item ) {
     $path = WP_PLUGIN_URL . "/ceceppa-multilingua";
 
+?>
+  <div class="cml-hidden">
+    <input type="file" name="flag_file[]" id="flag-file-<?php echo $id ?>" />
+  </div>
+
+<?php
     echo "<select id=\"flags-$id\" name=\"flags[]\" class=\"ceceppa-ml-flags\">\n";
     echo "<option>" . __('Choose the language', 'ceceppaml') . "</option>\n";
 
-    $keys = array_keys($_langs);
-    foreach($keys as $key) :
-      $selected = ($item == $_langs[$key]) ? "selected" : "";
+    echo "<option value=\"upload-$id\">" . __( 'Upload flag', 'ceceppaml' ) . "</option>\n";
 
-	  //L'identificativo della lingua, it, en, uk.. sono le ultime 2 lettere del locale
+    $keys = array_keys( $_langs );
+    foreach($keys as $key) :
+      $selected = ( $item == $_langs[$key] ) ? "selected" : "";
+
+      //L'identificativo della lingua, it, en, uk.. sono le ultime 2 lettere del locale
       $slug = strtolower(substr($_langs[$key], -2));
       $img = "$path/flags/small/$_langs[$key].png";
+      if( is_array( $_custom_langs ) && array_key_exists( $key, $_custom_langs ) ) $img = CECEPPA_UPLOAD_URL . "/small/$_langs[$key].png";
+
       echo "<option $selected data-image='$img' value='$_langs[$key]@$slug'>$key</option>\n";
     endforeach;
 

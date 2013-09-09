@@ -84,7 +84,16 @@ jQuery(document).ready(function(e) {
 	  var $this = jQuery(this);
 	  var val = $this.val();
 	  var ids = $this.attr('id');
-	  
+
+	  console.log( val, val.substring( 0, 6 ) );
+	  if( val.substring( 0, 6 ) == "upload" ) {
+	    var id = val.substring( 7 );
+	    $input = ( jQuery( '#' + ids ).parent().parent().find( 'input#flag-file-' + id ) );
+	    $input.trigger( 'click' );
+
+	    return;
+	  }
+
 	  //Locale and Id
 	  var locale = val.split('@');
 	  var id = ids.split('-');
