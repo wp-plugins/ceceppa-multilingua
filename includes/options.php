@@ -105,7 +105,8 @@ class CeceppaMLOptions {
     @update_option("cml_option_flags_on_page", intval($_POST['flags-on-pages']));
     @update_option("cml_option_flags_on_custom_type", intval($_POST['flags-on-custom']));
     @update_option("cml_option_flags_on_pos", sanitize_title( $_POST['flags_on_pos'] ) );
-
+    @update_option("cml_options_flags_on_translations", intval( $_POST['flags-translated-only'] ) );
+    
       //Size
       @update_option("cml_option_flags_on_size", sanitize_title($_POST['flag-size']));
 

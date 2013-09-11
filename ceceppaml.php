@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.6
+Version: 1.3.7
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -248,7 +248,7 @@ class CeceppaML {
 	if(get_option('cml_option_flags_on_pos', 'top') == "bottom") {
 	    add_filter("the_content", array(&$this, 'add_flags_on_bottom'));
 	} else {
-	    add_filter("the_title", array(&$this, 'add_flags_on_top'), 10, 2);
+	    add_filter( "the_title", array( &$this, 'add_flags_on_top' ), 10, 2 );
 	}
       endif;
 
@@ -288,7 +288,7 @@ class CeceppaML {
 
       //Translate menu items    
       if( get_option( "cml_option_action_menu", true) )
-	add_filter('wp_setup_nav_menu_item', array(&$this, 'translate_menu_item'));
+	add_filter('wp_setup_nav_menu_item', array( &$this, 'translate_menu_item' ) );
 
       //Translate categories
       add_filter('wp_get_object_terms', array(&$this, 'translate_object_terms'));
@@ -637,7 +637,11 @@ class CeceppaML {
 	    $this->_title_applied = true;
 
 	    $size = get_option('cml_option_flags_on_size', "small");
-	    return $title . cml_show_available_langs( array("class" => "cml_flags_on_top", "size" => $size ) );
+	    
+	    $args = array( "class" => "cml_flags_on_top", "size" => $size );
+	    $flags = ( get_option( 'cml_options_flags_on_translations', 1 ) ) ?
+			  cml_shortcode_other_langs_available( $args ) : cml_show_available_langs( $args );
+	    return $title . $flags;
         endif;
 
 	return $title;
@@ -1979,22 +1983,24 @@ class CeceppaML {
    * Cambio il menu predefinito del tema, in accordo con quello della lingua corrente
    */
   function change_menu() {
+    global $_wp_registered_nav_menus;
+    
     $mods = get_theme_mods();
-    $locations = get_theme_mod('nav_menu_locations');
+    $locations = get_theme_mod( 'nav_menu_locations' );
 
     //Se non inizia per cml_ allora sarà quella definito dal tema :)
-    if(is_array($locations)) :
-	$keys = array_keys($locations);
-	foreach($keys as $key) :
-	  if(!empty($key) && substr($key, 0, 4) != "cml_") {
+    if( is_array( $locations ) ) :
+	$keys = array_keys( $locations );
+	foreach( $keys as $key ) :
+	  if( ! empty( $key ) && substr( $key, 0, 4 ) != "cml_" ) {
 	    $menu = $this->_current_lang;
 
-	    if(!empty($locations["cml_menu_$menu"])) {
+	    if( ! empty ( $locations["cml_menu_$menu"] ) ) {
 	      //Se ho scelto un menu diverso per la lingua corrente, non devo "tradurre" le etichette
 	      $this->_no_translate_menu_item = ( $locations[$key] != $locations["cml_menu_$menu"] );
 
 	      $locations[$key] = $locations["cml_menu_$menu"];
-	      set_theme_mod('nav_menu_locations', $locations);
+	      set_theme_mod( 'nav_menu_locations', $locations );
 	    }
 
 	    //Esco dal ciclo
@@ -2637,7 +2643,7 @@ class CeceppaML {
 
 //FIRST INSTALL
       if( get_option("cml_first_install", 0) ) :
-	$this->successfully_installed();
+// 	$this->successfully_installed();
 	
 	update_option("cml_first_install", 0);
       endif;
@@ -2762,7 +2768,7 @@ class CeceppaML {
 	  <label>
 	    <?php _e('Language detected:', 'ceceppaml') ?>
 	    <strong>
-		<img src="<?php echo cml_get_flag_by_lang_id($this->_installed_language_id) ?>" />
+		<img src="<?php echo cml_get_flag_by_lang_id( $this->_installed_language_id ) ?>" />
 		<?php echo $this->_installed_language ?>
 	    </strong>
 	  </label>
@@ -3133,7 +3139,17 @@ class CeceppaML {
     $text .= '<span style="color: red"><strongs>' . __('N.B.: If you have translated the title of the website you have to upgrade it if you make changes', 'ceceppaml') . "<br />";
     
     return $text;
+  }
+  
+  function has_translations( $id ) {
+    global $wpdb;
 
+    //Mi basta che abbia almeno una traduzione per restituire true :)
+    $query = sprintf( "SELECT * FROM %s WHERE ( cml_post_id_1 = %d AND cml_post_id_2 > 0 ) OR ( cml_post_id_2 = %d AND cml_post_id_1 > 0 )", 
+			CECEPPA_ML_POSTS, $id, $id );
+    $row = $wpdb->get_row( $query );
+    
+    return $row != null;
   }
 }
 

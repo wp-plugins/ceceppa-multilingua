@@ -39,6 +39,7 @@
 add_shortcode("cml_text", 'cml_shortcode_text');
 add_shortcode("cml_shortcode", 'cml_do_shortcode');
 add_shortcode('cml_show_available_langs', 'cml_show_available_langs');
+add_shortcode( 'cml_other_langs_available', 'cml_shortcode_other_langs_available' );
 add_shortcode('cml_show_flags', 'cml_shortcode_show_flags');
 
 function cml_shortcode_text($attrs) {
@@ -79,6 +80,7 @@ function cml_show_available_langs( $attrs ) {
 
   $class = $attrs['class'];
   $size = isset($attrs['size']) ? $attrs['size'] : "small";
+  $id = isset( $attrs[ 'id' ] ) ? intval( $attrs[ 'id' ] ) : get_the_ID();
 
   $langs = cml_get_languages();
   $l_id = $wpCeceppaML->get_current_lang_id();
@@ -94,7 +96,7 @@ function cml_show_available_langs( $attrs ) {
 
   foreach($langs as $lang) {
     if( is_category() ) $link = $wpCeceppaML->translate_term_link(get_category_link($cat_id), $lang->id);
-    if( is_single() || is_page() ) $link = cml_get_linked_post($l_id, $lang, get_the_ID(), null);
+    if( is_single() || is_page() ) $link = cml_get_linked_post($l_id, $lang, $id, null);
 
     if( !empty( $link ) ) {
       if( !$is_static ) {
@@ -111,6 +113,18 @@ function cml_show_available_langs( $attrs ) {
   $r .= "</ul>";
 
   return $r;
+}
+
+function cml_shortcode_other_langs_available( $attrs ) {
+  global $wpdb, $wpCeceppaML;
+
+  //Controllo se il post è dotato di traduzione ;)
+  $id = isset( $attrs[ 'id' ] ) ? intval( $attrs( $id ) ) : get_the_ID();
+
+  if( $wpCeceppaML->has_translations( $id ) )
+    return cml_show_available_langs( $attrs );
+    
+  return "";
 }
 
 function cml_shortcode_show_flags($attrs) {

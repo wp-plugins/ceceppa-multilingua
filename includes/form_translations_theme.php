@@ -25,19 +25,19 @@
   foreach( $files as $filename ) :
     $content = file_get_contents( $filename );
     
-    preg_match ( '/(_e|__|esc_html_e|esc_attr__)\((.*?)\)/', $content, $matches );
+    preg_match_all ( '/(_e|__|esc_html_e|esc_attr__|esc_html__)\((.*?)\)/', $content, $matches );
 
     //'valore', 'textdomain'
     $m = end( $matches );
-    preg_match_all( '/\'(.+?)\'/', $m, $matches );
-    
-    list( $text, $domain ) = $matches[1];
+    foreach( $m as $line ) :
+      preg_match_all( '/\'(.+?)\'/', $line, $string );
+      list( $text, $domain ) = end( $string );
 
-//     $d = preg_replace( '/^[\'\"]|[\'|\"]$/', '', trim( $domain ) );
-      
-    //Rimuovo gli apici iniziali e finali :)
-//     $domains[ $d ][] = preg_replace( '/^[\'\"]|[\'|\"]$/', '', trim( $text ) );
-    $domains[ $domain ][] = $text;
+      //Rimuovo gli apici iniziali e finali :)
+      if( ! empty( $text ) ) :
+	$domains[ $domain ][] = $text;
+      endif;
+    endforeach; //$m as $line
   endforeach;
 
   //Percorso vuoto?
@@ -127,7 +127,7 @@
 
       //Cerco le traduzioni delle stringhe per ogni lingua
       foreach( $strings as $string ) :
-	$ret = T_gettext($string);
+	$ret = T_gettext( $string );
 	if( strcasecmp( $ret, $string ) == 0 ) $ret = __( $string );  //Cerco anche tra le traduzioni di wordpress
 	$done = !( strcasecmp( $ret, $string ) == 0 );
 
@@ -159,14 +159,13 @@
 
       echo "<tr class=\"row-domain-" . trim( $d ) ." $alternate row-details row-hidden\">";
       echo "<td colspan=\"" . ( count( $langs ) + 1 ) ."\">";
-//       echo '<textarea style="display: none;" name="original[]">' . htmlentities( $s ) . '</textarea>';
 
       foreach( $langs as $lang ) :
 	echo "<div class=\"ceceppaml-trans-fields\">";
 	echo '<img src="' . cml_get_flag( $lang->cml_flag ) . '" class="available-lang" />';
-	echo "&nbsp;<textarea name=\"string[" . $lang->id . "][]\">" . $trans[ $lang->id ][ $i ][ 'string' ] . "</textarea>";
+	echo "&nbsp;<textarea name=\"string[" . $lang->id . "][]\">" . esc_html( $trans[ $lang->id ][ $i ][ 'string' ] ) . "</textarea>";
 	
-	$done = ( $trans[ $lang->id ][ $i ][ 'done' ] == 1 )  ? __( 'Translation complete' ) : __( 'Translation not complete' );
+	$done = ( $trans[ $lang->id ][ $i ][ 'done' ] == 1 )  ? __( 'Translation complete', 'ceceppaml' ) : __( 'Translation not complete', 'ceceppaml' );
 	echo "</div>";
       endforeach;
       echo "</td>";

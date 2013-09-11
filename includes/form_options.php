@@ -187,6 +187,11 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 		</label>
 	      </li>
 	    </ul>
+	    </br />
+	    <label>
+	      <input type="checkbox" name="flags-translated-only" value="1" <?php checked( get_option( "cml_options_flags_on_translations", 0 ), 1 ) ?> >
+	      <strong><?php _e( 'Show flags only on translated page.', 'ceceppaml' ) ?></strong>
+	    </label>
 	  </div>
 	    </td>
 	</tr>

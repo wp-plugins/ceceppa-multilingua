@@ -508,4 +508,8 @@ function cml_is_custom_post_type() {
   $name = get_post_type();
   return in_array( $name, $types );
 }
+
+function cml_other_langs_available( $id ) {
+  echo cml_shortcode_other_langs_available( $id );
+}
 ?>
