@@ -329,6 +329,23 @@
 </blockquote>
 </div>
 
+
+<div id="availables-only"><br />
+<h3><?php _e('How to show flags only when translation exists', 'ceceppaml') ?></h3>
+<blockquote>
+  <?php _e('This shortcode return an &lt;ul&gt;...&lt;/ul&gt; list') ?>
+  <pre class="code">
+    &lt;?php cml_other_langs_available( $id ); ?&gt;
+  </pre>
+    <span class="parameters"><?php _e('Parameters:', 'ceceppaml') ?></span>
+      <ul style="float: none; list-style: circle;padding-left: 50px;">
+	<li><strong>$id</strong> <i>(string)</i>: - The id of the post/page ( optional )</li>
+      </ul>
+
+</blockquote>
+</div>
+
+
 <div id="menuname"><br />
 <h3><?php _e('Get the name of the menu associated to current language', 'ceceppaml') ?></h3>
 <blockquote>

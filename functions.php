@@ -70,9 +70,14 @@ function cml_get_languages_list() {
  * Restituisco il percorso della bandiera
  */
 function cml_get_flag($flag, $size = "tiny") {
-  if(empty($flag)) return "";
+  if( empty( $flag ) ) return "";
 
-  return CECEPPA_PLUGIN_URL . "flags/$size/$flag.png";
+  if( file_exists( CECEPPA_PLUGIN_PATH . "flags/$size/$flag.png" ) )
+    $url = CECEPPA_PLUGIN_URL . "flags/$size/$flag.png";
+  else
+    $url = CECEPPA_UPLOAD_URL . "/$size/$flag.png";
+    
+  return esc_url( $url );
 }
 
 /**
@@ -88,7 +93,7 @@ function cml_get_flag_by_lang_id($id, $size = "tiny") {
 
   $flag = $wpdb->get_var("SELECT cml_flag FROM " . CECEPPA_ML_TABLE . " WHERE id = " . intval($id));
 
-  return cml_get_flag($flag, $size);
+  return cml_get_flag( $flag, $size );
 }
 
 /**
@@ -187,16 +192,13 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
 
       $lang_id = $wpCeceppaML->get_current_lang_id();
 
-      if( (is_single() || is_page() ) &&  $linked ) :
-	//Collego gli articoli delle varie pagine
-	if(is_single() || is_page()) {
-	  $link = cml_get_linked_post($lang_id, $result, get_the_ID());
+      if( ( is_single() || is_page() ) &&  $linked ) :
+	$link = cml_get_linked_post( $lang_id, $result, get_the_ID() );
 
-	  if(!empty($link)) $link = get_permalink($link);
-	}
+	if( !empty( $link ) ) $link = get_permalink($link);
       endif;
 
-      if(is_archive() && !is_category()) :
+      if( is_archive() && !is_category() ) :
 	global $wp;
 
 	$link = home_url($wp->request) . "/";
@@ -230,12 +232,12 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
 
          Se non ho trovato nesuna traduzione per l'articolo, la bandiera punterà alla homepage
       */
-      if( cml_is_homepage() || empty($link) ) :
+      if( empty($link) ) :
 	$link = $wpCeceppaML->get_home_url( $result->cml_language_slug );
       endif;
     }
 
-    $img = "<img class=\"$size $image_class\" src='" . cml_get_flag_by_lang_id($result->id, $size) . "' title='$result->cml_language' width=\"$width\"/>";
+    $img = "<img class=\"$size $image_class\" src='" . cml_get_flag_by_lang_id( $result->id, $size ) . "' title='$result->cml_language' width=\"$width\"/>";
     if($show == "text") $img = "";
 
     $r .= "<li><a href='$link'>$img$lang</a></li>";
@@ -381,8 +383,8 @@ function cml_dropdown_langs($name, $default, $link = false, $none = false, $none
 	foreach($langs as $lang) :
 	  $selected = ($lang->id == $default) ? "selected" : "";
 
-	  $value = (!$link) ? $lang->id : get_permalink(cml_get_linked_post($id, null, get_the_ID(), $lang->id));
-	  $dataimage = 'data-image="' . cml_get_flag_by_lang_id($lang->id) . '"';
+	  $value = (!$link) ? $lang->id : get_permalink( cml_get_linked_post( $id, null, get_the_ID(), $lang->id ) );
+	  $dataimage = 'data-image="' . cml_get_flag_by_lang_id( $lang->id ) . '"';
 
 	  echo "<option $dataimage value=\"$value\" $selected>$lang->cml_language</option>";
 	endforeach;
@@ -505,5 +507,9 @@ function cml_is_custom_post_type() {
 
   $name = get_post_type();
   return in_array( $name, $types );
+}
+
+function cml_other_langs_available( $id ) {
+  echo cml_shortcode_other_langs_available( $id );
 }
 ?>

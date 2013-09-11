@@ -42,6 +42,7 @@ English (United Kingdom)	:  	en_GB
 English (United States)	:  	en_US
 Esperanto : epo_EPO
 Estonian (Estonia)	:  	et_EE
+Farsi (Iran)	:	fa_IR
 Finnish (Finland)	:  	fi_FI
 French (Belgium)	:  	fr_BE
 French (Canada)	:  	fr_CA
@@ -54,7 +55,7 @@ German (Luxembourg)	:  	de_LU
 German (Switzerland)	:  	de_CH
 Greek (Cyprus)	:  	el_CY
 Greek (Greece)	:  	el_GR
-Hebrew (Israel)	:  	iw_IL
+Hebrew (Israel)	:  	he_IL
 Hindi (India)	:  	hi_IN
 Hungarian (Hungary)	:  	hu_HU
 Icelandic (Iceland)	:  	is_IS

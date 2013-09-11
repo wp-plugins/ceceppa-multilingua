@@ -3,6 +3,18 @@
 
   wp_enqueue_script("ceceppa-tipsy");
 
+  //Warning: required php >= 5.3.0
+  if( PHP_VERSION_ID < 50300 ) :
+?>
+    <div class="error">
+      <p>
+	<b><?php _e( 'Feature not available', 'ceceppaml' ) ?> :(</b><br /><br />
+	<?php _e( 'This feature require Php >= 5.3.0, your current version is: ', 'ceceppaml' ); echo phpversion() ?>
+      </p>
+    </div>
+<?php
+  endif;
+
   $path = get_template_directory();
 
   //Cerco eventuali file *.po/*.mo
@@ -13,18 +25,19 @@
   foreach( $files as $filename ) :
     $content = file_get_contents( $filename );
     
-    preg_match ( '/(_e|__)\((.*?)\)/', $content, $matches );
+    preg_match_all ( '/(_e|__|esc_html_e|esc_attr__|esc_html__)\((.*?)\)/', $content, $matches );
 
     //'valore', 'textdomain'
     $m = end( $matches );
-    list( $text, $domain ) = explode( ",", $m );
-    
-    $d = preg_replace( '/^[\'\"]|[\'|\"]$/', '', trim( $domain ) );
-//     $d = str_replace( "'", "", $domain ); //text_domain
-    
-    //Rimuovo gli apici iniziali e finali :)
-    $domains[ $d ][] = preg_replace( '/^[\'\"]|[\'|\"]$/', '', $text);
-//     $domains[ $d ][] = substr( $text, 1, -1 );
+    foreach( $m as $line ) :
+      preg_match_all( '/\'(.+?)\'/', $line, $string );
+      list( $text, $domain ) = end( $string );
+
+      //Rimuovo gli apici iniziali e finali :)
+      if( ! empty( $text ) ) :
+	$domains[ $domain ][] = $text;
+      endif;
+    endforeach; //$m as $line
   endforeach;
 
   //Percorso vuoto?
@@ -98,7 +111,7 @@
 
   //Cerco la traduzione per ogni stringa
   foreach( $keys as $d ) :
-    $strings = $domains[$d] = array_unique( $domains[$d] );
+    $strings = array_unique( $domains[ $d ] );
     $domains[ $d ] = $strings;
 
     //Ciclo per ogni lingua per evitare caricamenti continui
@@ -114,20 +127,22 @@
 
       //Cerco le traduzioni delle stringhe per ogni lingua
       foreach( $strings as $string ) :
-	$ret = T_gettext($string);
+	$ret = T_gettext( $string );
 	if( strcasecmp( $ret, $string ) == 0 ) $ret = __( $string );  //Cerco anche tra le traduzioni di wordpress
 	$done = !( strcasecmp( $ret, $string ) == 0 );
 
-	$trans[ $lang->id ][] = array( "string" => $ret, "done" => $done );
+	$trans[ $lang->id ][] = array( "string" => stripslashes( $ret ), "done" => $done );
       endforeach;
 
     endforeach;
   endforeach;
-
-  foreach( $keys as $d ) :
   
-    $i = 0;
-    foreach( $domains[$d] as $s ) :
+  $i = 0;
+  foreach( $keys as $d ) :
+
+    foreach( $domains[ $d ] as $s ) :
+      $originals[] = $s;
+
       $alternate = ( empty( $alternate ) ) ? "alternate" : "";
 
       echo "<tr class=\"row-domain-" . trim( $d ) . " $alternate row-domain\">";
@@ -144,14 +159,13 @@
 
       echo "<tr class=\"row-domain-" . trim( $d ) ." $alternate row-details row-hidden\">";
       echo "<td colspan=\"" . ( count( $langs ) + 1 ) ."\">";
-      echo '<input type="hidden" name="original[]" value="' . $s . '" />';
 
       foreach( $langs as $lang ) :
 	echo "<div class=\"ceceppaml-trans-fields\">";
 	echo '<img src="' . cml_get_flag( $lang->cml_flag ) . '" class="available-lang" />';
-	echo "&nbsp;<textarea name=\"string[" . $lang->id . "][]\">" . $trans[ $lang->id ][ $i ][ 'string' ] . "</textarea>";
+	echo "&nbsp;<textarea name=\"string[" . $lang->id . "][]\">" . esc_html( $trans[ $lang->id ][ $i ][ 'string' ] ) . "</textarea>";
 	
-	$done = ( $trans[ $lang->id ][ $i ][ 'done' ] == 1 )  ? __( 'Translation complete' ) : __( 'Translation not complete' );
+	$done = ( $trans[ $lang->id ][ $i ][ 'done' ] == 1 )  ? __( 'Translation complete', 'ceceppaml' ) : __( 'Translation not complete', 'ceceppaml' );
 	echo "</div>";
       endforeach;
       echo "</td>";
@@ -162,8 +176,11 @@
     endforeach;
 
   endforeach;
+  
+  //Memorizzo le stringhe originali in un file "temporaneo", così evito la conversione degli elementi html ( &rsquo;, etc... )
+  file_put_contents( $cml_theme_locale_path . "/tmp.pot", implode( "\n", $originals ) );
 ?>
 
   </tbody>
   </table>
-      <?php submit_button(); ?>
+      <?php if( PHP_VERSION_ID >= 50300 ) submit_button(); ?>

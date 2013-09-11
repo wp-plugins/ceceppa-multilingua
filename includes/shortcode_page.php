@@ -22,6 +22,7 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
   <li><a href="#shortcode"><?php _e('Execute another shortcode and pass parameters in according to current language', 'ceceppaml') ?></a></li>
   <li><a href="#alllangs"><?php _e('How to show all available languages', 'ceceppaml') ?></a></li>
   <li><a href="#availables"><?php _e('How to show in which language is available current page/post', 'ceceppaml') ?></a></li>
+  <li><a href="#availables-only"><?php _e('How to show flags only when translation exists', 'ceceppaml') ?></a></li>
 </ul>
 <div id="strings"><br />
 <h3><?php _e('Translate strings in different languages', 'ceceppaml') ?></h3>
@@ -172,6 +173,34 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
     </blockquote>
 </blockquote>
 </div>
+
+<div id="availables-only"><br />
+<h3><?php _e('How to show flags only when translation exists', 'ceceppaml') ?></h3>
+<blockquote>
+  <span style="color: #00f;">
+    <strong>[cml_other_langs_available]</strong><br />
+  </span><br />
+    <?php _e('This shortcode return an &lt;ul&gt;...&lt;/ul&gt; list') ?>
+  <br />
+  <blockquote>
+    <span style="color: #f00"><?php _e('Usage:', 'ceceppaml') ?></span>
+    <br />
+      <p style="padding-left: 20px">
+	[cml_other_langs_available class="[classname]" id="[post_id]]
+      </p>
+	<ul style="float: none; list-style: circle;padding-left: 50px;">
+	  <li><strong>class:</strong> - classname to be assigned to the &lt;ul&gt;...&lt;/ul&gt; list.</li>
+	  <li><strong>id:</strong> - id of the post/page <i>( optional )</i></li>
+	</ul>
+      <br />
+      <strong><?php _e('Example:', 'ceceppaml') ?></strong>
+      <p style="padding-left: 20px">
+	<i>[cml_other_langs_available class="myclassname"]</i>
+      </p>
+    </blockquote>
+</blockquote>
+</div>
+
 <?php else : 
 	require_once("functions_page.php");
       endif;

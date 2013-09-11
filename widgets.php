@@ -68,7 +68,7 @@ class CeceppaMLWidgetRecentPosts extends WP_Widget {
 	$the_query->next_post();
 
 	if(in_array($the_query->post->ID, $ids)) :
-	  echo '<li><a href="' . get_permalink($the_query->post->ID) . '" title="' . get_the_title($the_query->post->ID) . '">' . get_the_title($the_query->post->ID) . '</a></li>';
+	  echo '<li><a href="' . get_permalink( $the_query->post->ID ) . '" title="' . get_the_title($the_query->post->ID) . '">' . get_the_title($the_query->post->ID) . '</a></li>';
 
 	  $i++;
 	  if($i > $number) break;
@@ -152,13 +152,14 @@ class CeceppaMLWidgetChooser extends WP_Widget {
     if (!empty($title) && $hide_title != 1)
       echo $before_title . $title . $after_title;
 
-    $display = $instance['display'];
-    if(empty($display)) $display = "flag";
+    $display = @$instance['display'];
+    if( empty( $display ) ) $display = "flag";
 
-    $size = $instance['size'];
+    $size = @$instance['size'];
+    if( empty( $size ) ) $size = 'small';
 
     if($display != "dropdown") :
-      cml_show_flags($display, $size, $classname, "cml_widget_$display");
+      cml_show_flags( $display, $size, $classname, "cml_widget_$display" );
     else :
       $dd = intval($instance['msdropdown']);
 
@@ -296,7 +297,7 @@ class CeceppaMLWidgetChooser extends WP_Widget {
 	function _dropdown($args) {
 		global $wpCeceppaML;
 
-		cml_dropdown_langs("cml-widget-flags", $wpCeceppaML->get_current_lang_id(), true);
+		cml_dropdown_langs( "cml-widget-flags", $wpCeceppaML->get_current_lang_id(), true );
 	}
 };
 
