@@ -295,9 +295,9 @@ class CeceppaMLWidgetChooser extends WP_Widget {
 	}
 
 	function _dropdown($args) {
-		global $wpCeceppaML;
+	  global $wpCeceppaML;
 
-		cml_dropdown_langs( "cml-widget-flags", $wpCeceppaML->get_current_lang_id(), true );
+	  cml_dropdown_langs( "cml-widget-flags", $wpCeceppaML->get_current_lang_id(), true );
 	}
 };
 

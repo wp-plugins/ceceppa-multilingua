@@ -2,6 +2,9 @@
 /*
  * Ho spostato in questo file vari fix ovvero funzioni che mi servono solo per alcuni aggiornamenti
  */
+if ( ! defined( 'ABSPATH' ) ) {
+  die();
+}
  
 require_once(CECEPPA_PLUGIN_PATH . "functions.php");
 
@@ -269,4 +272,14 @@ function cml_fix_widget_titles() {
   endforeach;
 }
 
+function cml_update_float_css() {
+  $filename = CECEPPA_PLUGIN_PATH . "/css/float.css";
+  $css = get_option( 'cml_float_css', "" );
+
+  if( ! empty( $css ) ) :
+    file_put_contents( $filename, $css );
+  endif;
+
+  update_option( "cml_version", CECEPPA_ML_VERSION );
+}
 ?>

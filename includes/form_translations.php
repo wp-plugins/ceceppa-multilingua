@@ -23,7 +23,7 @@ if(!is_object($wpCeceppaML)) die("Access denied");
 
 global $wpdb;
 
-$tab = isset( $_GET['page'] ) ? intval( $_GET['tab'] ) : 0;
+$tab = isset( $_GET['tab'] ) ? intval( $_GET['tab'] ) : 0;
 $tab = ( $_GET['page'] == 'ceceppaml-translations-title' ) ? 1 : $tab;
 $tab = ( $_GET['page'] == 'ceceppaml-translations-plugins-themes' ) ? 3 : $tab;
 ?>
@@ -39,7 +39,7 @@ $tab = ( $_GET['page'] == 'ceceppaml-translations-plugins-themes' ) ? 3 : $tab;
     <a class="nav-tab <?php echo $tab == 3 ? "nav-tab-active" : "" ?>" href="?page=ceceppaml-translations-plugins-themes&tab=3"><?php _e('Theme') ?></a>
     </h2>
     <br />
-    <form class="ceceppa-form" name="wrap" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>?page=<?php echo $_GET['page'] ?>">
+    <form class="ceceppa-form-translations" name="wrap" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>?page=<?php echo $_GET['page'] ?>">
 <?php 
   if ( $tab == 0) : 
 ?>
