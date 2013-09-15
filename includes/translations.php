@@ -118,26 +118,41 @@ class CeceppaMLTranslations {
   function generate_mo() {
     global $cml_theme_locale_path;
     
-    if( empty( $cml_theme_locale_path ) ) return;
+    //Ho cliccato il pulsante per gestire la lingua di default del tema?
+    if( isset( $_POST[ 'theme-lang-button' ] ) ) :
+      update_option( "cml_theme_language", intval( $_POST[ 'theme-lang' ] ) );
+    endif;
+
+    //Se qualcosa è andato storto lo dico
+    if( empty( $cml_theme_locale_path ) ) :
+      echo '<div class="error"><p>';
+      echo __( 'Something goes wrong :\'(. I don\'t know where to store .mo file', 'ceceppaml' );
+      echo '</div>';
+    endif;
     
     //Se il percorso non esiste lo creo :)
     if( ! file_exists( $cml_theme_locale_path ) ) :
       if ( ! mkdir( $cml_theme_locale_path ) ) :
-	echo '<div class="error">';
+	echo '<div class="error"><p>';
 	echo __( 'Failed to create folder: ', '' ), $cml_theme_locale_path;
-	echo '</div>';
+	echo '</p></div>';
 	
 	return;
       endif;
     endif;
 
     $domain = trim( $_POST[ 'textdomain' ] );
+    
+    //Recupero le stringhe originali da un file "temporaneo", così evito la conversione degli elementi html ( &rsquo;, etc... )
     $originals = explode( "\n", file_get_contents( $cml_theme_locale_path . "/tmp.pot" ) );
 
     //Intestazione file .po
     $header = file_get_contents( CECEPPA_PLUGIN_PATH . "/includes/header.po" );
-    $langs = cml_get_languages();
-    
+
+    //Escludo la lingua principale del tema 
+    $langs = exclude_theme_language();
+
+    $done = array(); //File completati
     foreach( $langs as $lang ) :
       $filename = "$cml_theme_locale_path/$lang->cml_locale.po";
       $fp = fopen( $filename, 'w' );
@@ -172,10 +187,42 @@ class CeceppaMLTranslations {
       fclose( $fp );
       
       if( function_exists( 'cml_generate_mo' ) ) :
-	cml_generate_mo( $filename );
+	$output = cml_generate_mo( $filename );
+	if( ! empty( $output ) ) :
+	  echo '<div class="error"><p>';
+	  echo "<b>" . $output . "</b>: " . $filename;
+	  echo "</p></div>";
+	else:
+	  $done[] = $filename;
+	endif;
       endif;
 
     endforeach;
+    
+    //File generati
+    if( ! empty( $done ) ) :
+      echo '<div class="updated"><p>';
+      echo __( 'Created files:', 'ceceppaml' ) . "<br /><blockquote>";
+      echo join( "<br />", $done );
+      echo '</blockquote></div>';
+    endif;
   }
+}
+
+function exclude_theme_language() {
+  $langs = cml_get_languages();
+
+  //Rimuovo tra le lingue da tradurre quella del tema
+  $theme_lang = get_option( "cml_theme_language", -1 );
+  if( $theme_lang >= 0 ) :
+    for( $i = 0; $i < count( $langs ); $i++ ) :
+      if( $langs[ $i ]->id == $theme_lang ) {
+	unset( $langs[ $i ] );
+	break;
+      }
+    endfor;
+  endif;
+  
+  return $langs;
 }
 ?>

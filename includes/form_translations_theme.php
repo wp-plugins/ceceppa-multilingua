@@ -45,7 +45,7 @@
 ?>
     <div class="error">
       <p>
-	<?php echo sprintf( __( 'Current theme <i>"%s"</i> doesn\'t support localization, <b>cannot be translated!</b>', 'ceceppaml' ), get_current_theme() ); ?>
+	<?php printf( __( 'Current theme <i>"%s"</i> doesn\'t support localization, <b>cannot be translated!</b>', 'ceceppaml' ), wp_get_theme()->name ); ?>
       </p>
     </div>
 <?php
@@ -53,13 +53,15 @@
   endif;
 
   echo "<h2 class='nav-tab-wrapper'>";
-  echo get_current_theme();
+  echo wp_get_theme()->name;
 
   $keys = array_filter( array_keys( $domains ) );
-  $langs = cml_get_languages();
+
+  $theme_lang = get_option( "cml_theme_language", -1 );
+  $langs = exclude_theme_language();
 ?>
     <span class="textdomain">
-      <?php _e( 'Available languages:', 'ceceppaml' ); ?>
+      <?php _e( 'Available languages: ', 'ceceppaml' ); ?>
 <?php
   //Elenco delle lingue disponibili
   if( !empty( $loc ) ) :
@@ -79,16 +81,20 @@
   endif;
 ?>
       &nbsp;&nbsp;&nbsp;<span class="light">|</span>&nbsp;&nbsp;&nbsp;
-      <?php _e( 'Textdomain:', 'ceceppaml' ); ?>
-      <select id="textdomain" name="textdomain" class="no-dd">
-      <?php foreach( $keys as $k ) : ?>
-	<option value="<?php echo $k ?>"><?php echo $k ?></option>
-      <?php endforeach; ?>
-      </select>
+      <?php _e( 'Main language of the theme:', 'ceceppaml' ) ?>
+      <?php cml_dropdown_langs( "theme-lang", $theme_lang, false, true, __( 'None of the following', 'ceceppaml' ) ); ?>
     </span>
 <?php
   echo "</h2>";
 ?>
+<h2 class="nav-tab-wrapper tab-strings">
+  &nbsp;
+  <a class="nav-tab  nav-tab-active" href="javascript:showStrings( 0 )"><?php _e( 'All strings', 'ceceppaml' ) ?><span></span></a>
+  <a class="nav-tab" href="javascript:showStrings( 1, 'to-translate' )"><?php _e( 'To translate', 'ceceppaml' ) ?><span></span></a>
+  <a class="nav-tab" href="javascript:showStrings( 2, 'incomplete' )"><?php _e( 'Incomplete', 'ceceppaml' ) ?><span></span></a>
+  <a class="nav-tab" href="javascript:showStrings( 3, 'translated' )"><?php _e( 'Translated', 'ceceppaml' ) ?><span></span></a>
+  <?php if( PHP_VERSION_ID >= 50300 ) submit_button(); ?>
+</h2>
   <input type="hidden" name="textdomain" value="<?php echo $keys[0] ?>" />
 
   <table class="widefat ceceppaml-theme-translations">
@@ -97,7 +103,7 @@
 	<th>String</th>
 	<?php
 	  foreach( $langs as $lang ) :
-	      echo "<th class=\"flag\"><img src='" . cml_get_flag($lang->cml_flag) . "'/></th>";
+	      echo "<th class=\"flag\"><img src='" . cml_get_flag( $lang->cml_flag ) . "'/></th>";
 	  endforeach;
 	?>
       </tr>
@@ -138,6 +144,7 @@
   endforeach;
   
   $i = 0;
+  $total = count( $langs );
   foreach( $keys as $d ) :
 
     foreach( $domains[ $d ] as $s ) :
@@ -145,27 +152,41 @@
 
       $alternate = ( empty( $alternate ) ) ? "alternate" : "";
 
-      echo "<tr class=\"row-domain-" . trim( $d ) . " $alternate row-domain\">";
-      echo "<td>$s</td>";
+      $td = "<td>$s</td>";
       
+      $translated = 0;
       foreach( $langs as $lang ) :
-	echo "<td>";
-	$not = ( $trans[ $lang->id ][ $i ][ 'done' ] == 1 ) ? "" : "not-available";
+	$done = $trans[ $lang->id ][ $i ][ 'done' ] == 1;
+	$translated += intval( $done );
+	$td .= "<td>";
+	$not = ( $done ) ? "" : "not-available";
 	$msg = !empty( $not ) ? __( 'Translate', 'ceceppaml' ) : __( 'Translated', 'ceceppaml' );
-	echo '<img src="' . cml_get_flag( $lang->cml_flag ) . '" class="available-lang ' . $not . ' tipsy-e" title="' . $msg . '" />';
-	echo "</td>";
+	$td .= '<img src="' . cml_get_flag( $lang->cml_flag ) . '" class="available-lang ' . $not . ' tipsy-e" title="' . $msg . '" />';
+	$td .= "</td>";
       endforeach;
+
+      if( $translated == 0 )
+	$class = "to-translate";
+      else if( $translated == $total )
+	$class = "translated";
+      else
+	$class = "to-translate string-incomplete";
+
+      echo "<tr class=\"row-domain-" . trim( $d ) . " $alternate row-domain string-$class\">";
+	echo $td;
       echo "</tr>";
 
-      echo "<tr class=\"row-domain-" . trim( $d ) ." $alternate row-details row-hidden\">";
+      echo "<tr class=\"row-domain-" . trim( $d ) ." $alternate row-details row-hidden \">";
       echo "<td colspan=\"" . ( count( $langs ) + 1 ) ."\">";
-
+      
       foreach( $langs as $lang ) :
+	$done = $trans[ $lang->id ][ $i ][ 'done' ] == 1;
+
 	echo "<div class=\"ceceppaml-trans-fields\">";
 	echo '<img src="' . cml_get_flag( $lang->cml_flag ) . '" class="available-lang" />';
 	echo "&nbsp;<textarea name=\"string[" . $lang->id . "][]\">" . esc_html( $trans[ $lang->id ][ $i ][ 'string' ] ) . "</textarea>";
 	
-	$done = ( $trans[ $lang->id ][ $i ][ 'done' ] == 1 )  ? __( 'Translation complete', 'ceceppaml' ) : __( 'Translation not complete', 'ceceppaml' );
+	$done = ( $done )  ? __( 'Translation complete', 'ceceppaml' ) : __( 'Translation not complete', 'ceceppaml' );
 	echo "</div>";
       endforeach;
       echo "</td>";

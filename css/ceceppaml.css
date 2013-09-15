@@ -187,3 +187,23 @@ img.not-available {
  height: 0px;
  overflow: hidden;
 }
+
+.tab-strings a span {
+  color: #888;
+  font-size: 70%;
+  font-style: italic;
+  padding-left: 10px;
+}
+
+.tab-strings p.submit {
+  display: inline-block;
+  height: auto !important;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  right: 20px;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {  
+.tab-strings p.submit { margin-top: -40px; }  
+}  
