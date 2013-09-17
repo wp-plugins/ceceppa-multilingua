@@ -159,6 +159,8 @@ function locale_emulation() {
  * Checks if the current locale is supported on this system.
  */
 function _check_locale_and_function($function=false) {
+  return false;
+
     global $EMULATEGETTEXT;
     if ($function and !function_exists($function))
         return false;
@@ -252,6 +254,7 @@ function _bindtextdomain($domain, $path) {
       if ($path[strlen($path)-1] != '/')
         $path .= '/';
     }
+
     if (!array_key_exists($domain, $text_domains)) {
       // Initialize an empty domain object.
       $text_domains[$domain] = new domain();
@@ -282,13 +285,6 @@ function _gettext($msgid) {
     $l10n = _get_reader();
     return _encode($l10n->translate($msgid));
 }
-
-/**
- * Alias for gettext.
- */
-// function __($msgid) {
-//     return _gettext($msgid);
-// }
 
 /**
  * Plural version of gettext.

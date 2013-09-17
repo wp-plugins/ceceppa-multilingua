@@ -79,6 +79,9 @@ jQuery(document).ready(function(e) {
 	  }
   });
 
+  //Aggiorno le info sul numero di righe da tradurre
+  if( jQuery( '.ceceppaml-theme-translations' ).length > 0 ) updateInfo();
+
   //Get language name and locale from dropdown list
   jQuery('.ceceppa-ml-flags').change(function() {
 	  var $this = jQuery(this);
@@ -124,3 +127,28 @@ jQuery(document).ready(function(e) {
     if( $next.is(":visible") ) jQuery( this ).addClass( 'row-open' );
   });
 });
+
+function showStrings( id, what ) {
+  if( what == undefined )
+    what = ".row-domain";
+  else
+    what = ".string-" + what;
+
+  jQuery( 'h2.tab-strings a' ).removeClass( 'nav-tab-active' );
+  jQuery( jQuery( 'h2.tab-strings a' ).get( id ) ).addClass( 'nav-tab-active' );
+
+  console.log( what );
+  jQuery( 'table.ceceppaml-theme-translations tbody tr' + what ).show();
+  
+  if( what != undefined || what != "" )
+    jQuery( 'table.ceceppaml-theme-translations tbody tr' ).not( what ).hide();
+}
+
+function updateInfo() {
+  $a = jQuery( '.tab-strings a' );
+  
+  $a.first().find( 'span' ).html( " (" + jQuery( '.row-domain' ).length + ")" );
+  jQuery( $a.get( 1 ) ).find( 'span' ).html( " (" + jQuery( '.string-to-translate' ).length + ")" );
+  jQuery( $a.get( 2 ) ).find( 'span' ).html( " (" + jQuery( '.string-incomplete' ).length + ")" );
+  $a.last().find( 'span' ).html( " (" + jQuery( '.string-translated' ).length + ")" );
+}

@@ -15,8 +15,10 @@
       <li><a href="#is-default"><?php _e('Check if current language is the default one', 'ceceppaml') ?></a></li>
       <li><a href="#lang-name"><?php _e('Get the name of the language', 'ceceppaml') ?></a></li>
       <li><a href="#all-langs"><?php _e('Get all languages', 'ceceppaml') ?></a></li>
+      <hr style="color: #ddd; background-color: #ddd; height: 1px; border: none"/>
       <li><a href="#all-infos"><?php _e('Get all infos about language', 'ceceppaml') ?></a></li>
       <li><a href="#default-id"><?php _e('Get the id of default language', 'ceceppaml') ?></a></li>
+      <li><a href="#byslug"><?php _e('Get language by slug', 'ceceppaml') ?></a></li>
     </ul>
 <?php
   }
@@ -40,6 +42,9 @@
     <ul class="cml_list">
       <li><a href="#menu"><?php _e('Get the menu associated to current language', 'ceceppaml') ?></a></li>
       <li><a href="#menuname"><?php _e('Get the name of the menu associated to current language', 'ceceppaml') ?></a></li>
+      <hr style="color: #ddd; background-color: #ddd; height: 1px; border: none"/>
+      <li><a href="#getlang"><?php _e('Get the language of page/post', 'ceceppaml') ?></a></li>
+      <li><a href="#setlang"><?php _e('Set the language of page/post', 'ceceppaml') ?></a></li>
     </ul>
 <?php
   }
@@ -169,6 +174,43 @@
       &lt;?php cml_get_default_language_id(); ?&gt;
     </pre>
   </blockquote>
+</div>
+
+<div id="byslug"><br />
+<h3><?php _e('Get language by slug', 'ceceppaml') ?></h3>
+<blockquote>
+  <pre class="code">
+    &lt;?php cml_get_language_by_slug( $slug ); ?&gt;
+  </pre>
+  <blockquote>
+    <span class="parameters"><?php _e('Parameters:', 'ceceppaml') ?></span>
+	<ul style="float: none; list-style: circle;padding-left: 50px;">
+	  <li><strong>$locale:</strong> <i>(string)</i> - Slug of the language defined in the "Languages" tab of "Ceceppa Multilingua" page</li>
+	</ul>  
+      <span class="return"><?php _e('Return:', 'ceceppaml') ?></span>
+      <p style="padding-left: 20px">
+	This function return an object and Its fields are:
+
+	  <pre>
+	  *) id           - id of language
+	  *) cml_default  - 1 if it is the default language
+	  *) cml_flag     - name of flag
+	  *) cml_language - name of the language
+	  *) cml_language_slug - slug of the language
+	  *) cml_locale        - wordpress locale
+	  *) cml_sort_id       - language order
+	  </pre>
+      </p>
+    </blockquote>
+  <blockquote>
+    <span class="example"><?php _e('Example:', 'ceceppaml') ?></span>
+    <pre>
+      &lt;?php;
+	$lang = cml_get_language_by_slug( 'it' );
+      ?&gt;
+    </pre>
+  </blockquote>
+</blockquote>
 </div>
 
 <!-- FLAGS -->
@@ -357,3 +399,66 @@
 </blockquote>
 </div>
 
+
+<div id="getlang"><br />
+<h3><?php _e('Get the language of page/post', 'ceceppaml') ?></h3>
+<blockquote>
+  <pre class="code">
+    &lt;?php cml_get_language_of_post( $post_id ); ?&gt;
+  </pre>
+  <blockquote>
+    <span class="parameters"><?php _e('Parameters:', 'ceceppaml') ?></span>
+	<ul style="float: none; list-style: circle;padding-left: 50px;">
+	  <li><strong>$post_id:</strong> <i>(integer)</i> - The ID of the post/page.</li>
+	</ul>  
+      <span class="return"><?php _e('Return:', 'ceceppaml') ?></span>
+      <p style="padding-left: 20px">
+	This function return an object and Its fields are:
+
+	  <pre>
+	  *) id           - id of language
+	  *) cml_default  - 1 if it is the default language
+	  *) cml_flag     - name of flag
+	  *) cml_language - name of the language
+	  *) cml_language_slug - slug of the language
+	  *) cml_locale        - wordpress locale
+	  *) cml_sort_id       - language order
+	  </pre>
+      </p>
+    </blockquote>
+  <blockquote>
+    <span class="example"><?php _e('Example:', 'ceceppaml') ?></span>
+    <pre>
+      &lt;?php;
+	$lang = cml_get_language_of_post( 1 );
+      ?&gt;
+    </pre>
+  </blockquote>
+</blockquote>
+</div>
+
+<div id="setlang"><br />
+<h3><?php _e('Set the language of page/post', 'ceceppaml') ?></h3>
+<blockquote>
+  <pre class="code">
+    &lt;?php cml_set_language_of_post( $post_id, $lang_id ); ?&gt;
+  </pre>
+  <blockquote>
+    <span class="parameters"><?php _e('Parameters:', 'ceceppaml') ?></span>
+	<ul style="float: none; list-style: circle;padding-left: 50px;">
+	  <li><strong>$post_id:</strong> <i>(integer)</i> - The ID of the post/page</li>
+	  <li><strong>$lang_id:</strong> <i>(integer)</i> - The id of the language</li>
+	</ul>  
+    </blockquote>
+  <blockquote>
+    <span class="example"><?php _e('Example:', 'ceceppaml') ?></span>
+    <pre>
+      &lt;?php;
+	$lang = cml_get_language_by_slug( 'it' );
+	
+	cml_set_language_of_post( 1, $lang->id );
+      ?&gt;
+    </pre>
+  </blockquote>
+</blockquote>
+</div>

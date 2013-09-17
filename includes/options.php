@@ -113,8 +113,8 @@ class CeceppaMLOptions {
     //Avviso
     @update_option("cml_option_notice", sanitize_title($_POST['notice']));
     @update_option("cml_option_notice_pos", sanitize_title($_POST['notice_pos']));
-    @update_option("cml_option_notice_after", esc_html($_POST['notice_after']));
-    @update_option("cml_option_notice_before", esc_html($_POST['notice_before']));
+    @update_option("cml_option_notice_after", addslashes($_POST['notice_after']));
+    @update_option("cml_option_notice_before", addslashes($_POST['notice_before']));
     @update_option("cml_option_notice_post", intval($_POST['notice-post']));
     @update_option("cml_option_notice_page", intval($_POST['notice-page']));
 

@@ -2,6 +2,9 @@
 /*
  * Ho spostato in questo file vari fix ovvero funzioni che mi servono solo per alcuni aggiornamenti
  */
+if ( ! defined( 'ABSPATH' ) ) {
+  die();
+}
  
 require_once(CECEPPA_PLUGIN_PATH . "functions.php");
 
@@ -185,7 +188,7 @@ function cml_fix_rebuild_posts_info() {
 
 	//Se non è vuoto, vuol dire che esiste traduzione per questo articolo in questa lingua e va escluso quando
 	//richiamo la funzione hide_translation
-	if(!empty($id)) :
+	if( ! empty( $id ) ) :
 	  $exclude[$l->id][] = $pid;
 	else:
 	  //Se non ho trovato la traduzione per la lingua corrente, allora aggiungo questo articolo 
@@ -212,7 +215,7 @@ function cml_fix_rebuild_posts_info() {
   //Recupero tutte le traduzioni...
   //Se gestisco più lingue un articolo può essere tradotto in tutte e 3 queste lingue
   //quindi devo verificarne l'esistenza per ogni lingua gestita
-  $query = sprintf("SELECT * FROM %s WHERE cml_post_lang_1 > 0 AND cml_post_lang_2 > 0 AND (cml_post_lang_1 <> cml_post_lang_2)", CECEPPA_ML_POSTS);
+  $query = sprintf("SELECT * FROM %s WHERE cml_post_lang_1 > 0 AND cml_post_lang_2 > 0 AND (cml_post_lang_1 <> cml_post_lang_2) AND ( cml_post_id_1 > 0 AND cml_post_id_2 > 0 )", CECEPPA_ML_POSTS);
   $results = $wpdb->get_results($query);
   
   foreach($results as $result) :
@@ -269,4 +272,14 @@ function cml_fix_widget_titles() {
   endforeach;
 }
 
+function cml_update_float_css() {
+  $filename = CECEPPA_PLUGIN_PATH . "/css/float.css";
+  $css = get_option( 'cml_float_css', "" );
+
+  if( ! empty( $css ) ) :
+    file_put_contents( $filename, $css );
+  endif;
+
+  update_option( "cml_version", CECEPPA_ML_VERSION );
+}
 ?>
