@@ -361,33 +361,33 @@ function cml_get_notice_by_lang_id($lang_id) {
 function cml_dropdown_langs($name, $default, $link = false, $none = false, $none_text = null, $none_id = "", $only_enabled = 1) {
   global $wpCeceppaML;
 
-	$none_text = ($none_text == null) ? __('No language selected', 'ceceppaml') : $none_text;
-	$none_text = ($none) ? $none_text : "";
-	if($link) :
-	?>
-	  <script type="text/javascript">
-	    jQuery(document).ready(function(){
-		    jQuery('.<?php echo $name ?>').change(function() {
-			    window.location.href = jQuery((".<?php echo $name ?> option:selected")).val();
-		    });
-	    });
-	  </script>
-	<?php endif; ?>
+  $none_text = ($none_text == null) ? __('No language selected', 'ceceppaml') : $none_text;
+  $none_text = ($none) ? $none_text : "";
+  if($link) :
+  ?>
+    <script type="text/javascript">
+      jQuery(document).ready(function(){
+	      jQuery('.<?php echo $name ?>').change(function() {
+		      window.location.href = jQuery((".<?php echo $name ?> option:selected")).val();
+	      });
+      });
+    </script>
+  <?php endif; ?>
 
   <select class="<?php echo $name ?>" name="<?php echo $name ?>">
-	<option value="<?php echo $none_id ?>"><?php echo $none_text ?></option>
-	
-	<?php
-	$id = $wpCeceppaML->get_current_lang_id();
-	$langs = cml_get_languages($only_enabled);
-	foreach($langs as $lang) :
-	  $selected = ($lang->id == $default) ? "selected" : "";
+    <option value="<?php echo $none_id ?>"><?php echo $none_text ?></option>
 
-	  $value = (!$link) ? $lang->id : get_permalink( cml_get_linked_post( $id, null, get_the_ID(), $lang->id ) );
-	  $dataimage = 'data-image="' . cml_get_flag_by_lang_id( $lang->id ) . '"';
+    <?php
+    $id = $wpCeceppaML->get_current_lang_id();
+    $langs = cml_get_languages($only_enabled);
+    foreach($langs as $lang) :
+      $selected = ($lang->id == $default) ? "selected" : "";
 
-	  echo "<option $dataimage value=\"$value\" $selected>$lang->cml_language</option>";
-	endforeach;
+      $value = (!$link) ? $lang->id : get_permalink( cml_get_linked_post( $id, null, get_the_ID(), $lang->id ) );
+      $dataimage = 'data-image="' . cml_get_flag_by_lang_id( $lang->id ) . '"';
+
+      echo "<option $dataimage value=\"$value\" $selected>$lang->cml_language</option>";
+    endforeach;
 
   echo "</select>";
 }
@@ -511,5 +511,19 @@ function cml_is_custom_post_type() {
 
 function cml_other_langs_available( $id ) {
   echo cml_shortcode_other_langs_available( $id );
+}
+
+function cml_get_language_by_post_id( $id ) {
+  global $wpCeceppaML;
+  
+  $lang_id = $wpCeceppaML->get_language_id_by_post_id( $id );
+  
+  return cml_get_language_info( $id );
+}
+
+function cml_set_language_of_post( $id, $lang_id ) {
+  global $wpCeceppaML;
+  
+  $wpCeceppaML->set_language_of_post( $id, $lang_id, 0, 0 );
 }
 ?>
