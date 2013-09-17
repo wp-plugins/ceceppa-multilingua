@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.8
+Version: 1.3.9
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -1353,7 +1353,7 @@ class CeceppaML {
     $t_id = $tag->ID;
     $linked_to = $wpdb->get_var(sprintf("SELECT cml_post_id_2 FROM %s WHERE cml_post_id_1 = %d AND cml_post_id_2 > 0",
 		    CECEPPA_ML_POSTS, $t_id));
-    $linked_to = empty($linked_post) ? $linked_to : $linked_post;
+    $linked_to = empty( $linked_post ) ? $linked_to : $linked_post;
 
     if( empty( $lang_id ) ) $lang_id = $this->_default_language_id;
     $not = ( get_option( "cml_hide_posts_for_lang_" . $lang_id ) );
@@ -1730,11 +1730,11 @@ class CeceppaML {
   /* 
    * Salvo il collegamento tra i post
    */
-  function save_extra_post_fields($term_id) {
+  function save_extra_post_fields( $term_id ) {
       global $wpdb, $pagenow;
 
       //Dalla 3.5.2 questa funzione viene richiamata 2 volte :O, la seconda volta $_POST però è vuoto :O
-      if(empty($_POST)) return;
+      if( empty( $_POST ) ) return;
 
       $post_id = is_object($term_id) ? $term_id->ID : $term_id;
 
@@ -1744,11 +1744,18 @@ class CeceppaML {
       if(empty($_POST['post_lang']))
 	$post_lang = 0;
       else
-	$post_lang = intval($_POST['post_lang']);
+	$post_lang = intval( $_POST['post_lang'] );
+	
+      $this->set_language_of_post( $post_id, $post_lang, $linked_lang, $linked_post );
+  }
+    
+  function set_language_of_post( $post_id, $post_lang, $linked_lang, $linked_post ) {
+      global $wpdb;
 
+      print_r( $post_lang );
       //Elimino i vecchi collegamenti presenti nel database
       $query = sprintf("SELECT id FROM %s WHERE cml_post_id_1 = %d", CECEPPA_ML_POSTS, intval($post_id));
-      $id = intval($wpdb->get_var($query));
+      $id = intval( $wpdb->get_var( $query ) );
       if($id > 0) {
 	  $query = "DELETE FROM " . CECEPPA_ML_POSTS . " WHERE id = " .intval($id);
 	  $wpdb->query($query);
@@ -1764,10 +1771,7 @@ class CeceppaML {
 		      array('%d', '%d', '%d', '%d'));
       endif;
 
-      if(!empty($query)) 
-	$wpdb->query($query);
-
-      if(!isset($post_lang))
+      if( ! isset ( $post_lang ) )
 	delete_option("cml_page_lang_$post_id");
 
       update_option("cml_page_${post_id}", $linked_post);
@@ -1904,7 +1908,7 @@ class CeceppaML {
     }
     
     //Aggiorno il menu del tema :)
-//     $this->change_menu();
+    $this->change_menu();
 
     $this->_language_detected = true;
   }
@@ -1990,7 +1994,6 @@ class CeceppaML {
   function change_menu() {
     global $_wp_registered_nav_menus;
 
-    return;
     if( ! get_option( "cml_option_action_menu", true ) ) return;
 
     $mods = get_theme_mods();
@@ -2001,7 +2004,7 @@ class CeceppaML {
 	$keys = array_keys( $locations );
 	foreach( $keys as $key ) :
 	  if( ! empty( $key ) && substr( $key, 0, 4 ) != "cml_" ) {
-	    $menu = $this->_current_lang;
+	    $menu = $this->_current_lang_slug;
 
 	    if( ! empty ( $locations["cml_menu_$menu"] ) ) {
 	      //Se ho scelto un menu diverso per la lingua corrente, non devo "tradurre" le etichette
@@ -2307,16 +2310,21 @@ class CeceppaML {
       if( $page >= 2 ) return $permalink;   //Fix: "La pagina web ha generato un loop di reindirizzamento"
       if( is_admin() ) return $permalink;
 
-      if( empty( $this->_permalink_structure ) ) :
-	$page_id = $this->get_post_id_by_url( $permalink );
+      //Se è stata scelta la modalità suffix: ?lang=## lo slug è quello della lingua attuale?
+      if( $this->_url_mode == PRE_LANG ) :
+	$slug = $this->_current_lang_slug;
       else:
-	$page_id = cml_get_page_id_by_path( $permalink, array('page') );
+	if( empty( $this->_permalink_structure ) ) :
+	  $page_id = $this->get_post_id_by_url( $permalink );
+	else:
+	  $page_id = cml_get_page_id_by_path( $permalink, array('page') );
+	endif;
+
+	$slug = $this->get_language_id_by_post_id( $page_id );
+	if( empty( $slug) ) $slug = $this->_current_lang_id;
+
+	$slug = $this->get_language_slug_by_id($slug);
       endif;
-
-      $slug = $this->get_language_id_by_post_id($page_id);
-      if( empty( $slug) ) $slug = $this->_current_lang_id;
-
-      $slug = $this->get_language_slug_by_id($slug);
 
       return $this->convert_url( $slug, $permalink );
     }

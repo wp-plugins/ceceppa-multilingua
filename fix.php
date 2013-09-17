@@ -188,7 +188,7 @@ function cml_fix_rebuild_posts_info() {
 
 	//Se non è vuoto, vuol dire che esiste traduzione per questo articolo in questa lingua e va escluso quando
 	//richiamo la funzione hide_translation
-	if(!empty($id)) :
+	if( ! empty( $id ) ) :
 	  $exclude[$l->id][] = $pid;
 	else:
 	  //Se non ho trovato la traduzione per la lingua corrente, allora aggiungo questo articolo 
@@ -215,7 +215,7 @@ function cml_fix_rebuild_posts_info() {
   //Recupero tutte le traduzioni...
   //Se gestisco più lingue un articolo può essere tradotto in tutte e 3 queste lingue
   //quindi devo verificarne l'esistenza per ogni lingua gestita
-  $query = sprintf("SELECT * FROM %s WHERE cml_post_lang_1 > 0 AND cml_post_lang_2 > 0 AND (cml_post_lang_1 <> cml_post_lang_2)", CECEPPA_ML_POSTS);
+  $query = sprintf("SELECT * FROM %s WHERE cml_post_lang_1 > 0 AND cml_post_lang_2 > 0 AND (cml_post_lang_1 <> cml_post_lang_2) AND ( cml_post_id_1 > 0 AND cml_post_id_2 > 0 )", CECEPPA_ML_POSTS);
   $results = $wpdb->get_results($query);
   
   foreach($results as $result) :

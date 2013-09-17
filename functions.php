@@ -512,4 +512,18 @@ function cml_is_custom_post_type() {
 function cml_other_langs_available( $id ) {
   echo cml_shortcode_other_langs_available( $id );
 }
+
+function cml_get_language_by_post_id( $id ) {
+  global $wpCeceppaML;
+  
+  $lang_id = $wpCeceppaML->get_language_id_by_post_id( $id );
+  
+  return cml_get_language_info( $id );
+}
+
+function cml_set_language_of_post( $id, $lang_id ) {
+  global $wpCeceppaML;
+  
+  $wpCeceppaML->set_language_of_post( $id, $lang_id, 0, 0 );
+}
 ?>
