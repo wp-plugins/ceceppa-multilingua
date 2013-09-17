@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.9
+Version: 1.3.10
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -1752,7 +1752,6 @@ class CeceppaML {
   function set_language_of_post( $post_id, $post_lang, $linked_lang, $linked_post ) {
       global $wpdb;
 
-      print_r( $post_lang );
       //Elimino i vecchi collegamenti presenti nel database
       $query = sprintf("SELECT id FROM %s WHERE cml_post_id_1 = %d", CECEPPA_ML_POSTS, intval($post_id));
       $id = intval( $wpdb->get_var( $query ) );

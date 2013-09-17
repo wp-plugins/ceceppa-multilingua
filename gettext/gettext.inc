@@ -287,13 +287,6 @@ function _gettext($msgid) {
 }
 
 /**
- * Alias for gettext.
- */
-// function __($msgid) {
-//     return _gettext($msgid);
-// }
-
-/**
  * Plural version of gettext.
  */
 function _ngettext($singular, $plural, $number) {
