@@ -156,6 +156,10 @@ Yes, you can translate them in "Ceceppa Multilingua" -> "Site Title/Tagline" pag
 
 == Changelog ==
 
+= 1.3.11 =
+* Fixed problem with duplicated "menus"
+* Fixed various bugs
+
 = 1.3.10 =
 * Remove print_r :O ( sorry )
 

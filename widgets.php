@@ -68,7 +68,7 @@ class CeceppaMLWidgetRecentPosts extends WP_Widget {
 	$the_query->next_post();
 
 	if(in_array($the_query->post->ID, $ids)) :
-	  echo '<li><a href="' . get_permalink( $the_query->post->ID ) . '" title="' . get_the_title($the_query->post->ID) . '">' . get_the_title($the_query->post->ID) . '</a></li>';
+	  echo '<li><a href="' . get_permalink( $the_query->post->ID ) . '" title="' . get_the_title( $the_query->post->ID ) . '">' . get_the_title($the_query->post->ID) . '</a></li>';
 
 	  $i++;
 	  if($i > $number) break;
@@ -144,9 +144,9 @@ class CeceppaMLWidgetChooser extends WP_Widget {
     //Aggiungo lo stile ;)
     wp_enqueue_style('ceceppaml-widget-style');
 
-    $title = apply_filters('widget_title', $instance['title'] );
-    $hide_title = array_key_exists('hide-title', $instance) ? intval($instance['hide-title']) : 0;
-    $classname = array_key_exists('classname', $instance) ? ($instance['classname']) : 'cml_widget_flag';
+    $title = apply_filters( 'widget_title', $instance['title'] );
+    $hide_title = array_key_exists( 'hide-title', $instance ) ? intval($instance['hide-title']) : 0;
+    $classname = array_key_exists( 'classname', $instance ) ? ($instance['classname']) : 'cml_widget_flag';
 
     echo $before_widget;
     if (!empty($title) && $hide_title != 1)
