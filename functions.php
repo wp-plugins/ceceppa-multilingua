@@ -468,7 +468,7 @@ function cml_get_language_by_post_id( $id ) {
   
   $lang_id = $wpCeceppaML->get_language_id_by_post_id( $id );
   
-  return cml_get_language_info( $id );
+  return cml_get_language_info( $lang_id );
 }
 
 function cml_set_language_of_post( $id, $lang_id ) {
@@ -477,10 +477,10 @@ function cml_set_language_of_post( $id, $lang_id ) {
   $wpCeceppaML->set_language_of_post( $id, $lang_id, 0, 0 );
 }
 
-function cml_get_posts_of_language( $lang_id ) {
+function cml_get_posts_by_language( $lang_id ) {
   global $wpCeceppaML;
   
-  return $wpCeceppaML->get_posts_of_language();
+  return $wpCeceppaML->get_posts_of_language( $lang_id );
 }
 
 /*
