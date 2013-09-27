@@ -1,59 +1,5 @@
-
-<?php 
-
-function cml_show_flags_on() {
-  global $wpCeceppaML;
-
-  $tiny = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "tiny");
-  $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
-?>
-  <blockquote>
-    <div class="block-left">
-      <strong><?php _e('Show the list flag of available languages on:', 'ceceppaml') ?></strong>
-      <blockquote>
-	  <input type="checkbox" id="flags-on-posts" name="flags-on-posts" value="1" <?php echo ((get_option('cml_option_flags_on_post', '1') == 1) ? 'checked' : '') ?> />
-	  <label for="flags-on-posts"><?php _e('Posts', 'ceceppaml') ?></label> <br />
-	  <input type="checkbox" id="flags-on-pages" name="flags-on-pages" value="1" <?php echo ((get_option('cml_option_flags_on_page', '1') == 1) ? 'checked' : '') ?> />
-	  <label for="flags-on-pages"><?php _e('Pages', 'ceceppaml') ?></label><br />
-	  <input type="checkbox" id="flags-on-custom" name="flags-on-custom" value="1" <?php echo ((get_option('cml_option_flags_on_custom_type', '0') == 1) ? 'checked' : '') ?> />
-	  <label for="flags-on-custom"><?php _e('Custom posts type', 'ceceppaml') ?></label><br />
-      </blockquote>
-      <strong><?php _e('Where:', 'ceceppaml') ?></strong>
-      <blockquote>
-	  <input type="radio" name="flags_on_pos" value="top" id="flags_on_top" <?php echo ((get_option('cml_option_flags_on_pos', 'top') == 'top') ? 'checked' : '') ?> />
-	  <label for="flags_on_top"><?php _e('On the top of page/post/category', 'ceceppaml') ?></label><br>
-	  <input type="radio" name="flags_on_pos" value="bottom" id="flags_on_bottom" <?php echo ((get_option('cml_option_flags_on_pos') == 'bottom') ? 'checked' : '') ?> />
-	  <label for="flags_on_bottom"><?php _e('On the bottom of post/page/category', 'ceceppaml') ?></label><br>
-      </blockquote>
-  </div>
-    <div class="block-right">
-      <strong><?php _e('Flags size:', 'ceceppaml'); ?>:</strong>
-      <ul>
-	<li>
-	  <label>
-	    <input type="radio" id="flag-size" name="flag-size" value="small" <?php checked(get_option("cml_option_flags_on_size", "small"), "small"); ?> />
-	    <img src="<?php echo $small ?>" />
-	    <?php _e('Small', 'ceceppaml') ?> (32x23)
-	  </label>
-	</li>
-	<li>
-	  <label>
-	    <input type="radio" id="flag-size" name="flag-size" value="tiny" <?php checked(get_option("cml_option_flags_on_size", "small"), "tiny"); ?> />
-	    <img src="<?php echo $tiny ?>" />
-	    <?php _e('Tiny', 'ceceppaml') ?> (16x11)
-	  </label>
-	</li>
-      </ul>
-      </br />
-      <label>
-	<input type="checkbox" name="flags-translated-only" value="1" <?php checked( get_option( "cml_options_flags_on_translations", 0 ), 1 ) ?> >
-	<strong><?php _e( 'Show flags only on translated page.', 'ceceppaml' ) ?></strong>
-      </label>
-    </div>
-  </blockquote>
-<?php } ?>
-
-<?php function cml_option_flags_float() {
+<?php function cml_option_flags_float() { ?>
+<?php
 global $wpCeceppaML;
 
 $tiny = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "tiny");
@@ -183,40 +129,21 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 ?>
 <!-- Add to menu -->
 	<blockquote>
-	  <div class="block-left">
-	    <strong><?php _e('Style:', 'ceceppaml') ?></strong>
-	    <ul>
-	      <li>
-		<label>
-		    <input type="radio" name="add-as" id="add-as" value="1" <?php checked(get_option("cml_add_items_as", 1), 1) ?> />
-		    <?php _e('Add an element for each language', 'ceceppaml') ?>
-		</label>
-	      </li>
-	      <li>
-		<label>
-		    <input type="radio" name="add-as" id="add-as" value="2" <?php checked(get_option("cml_add_items_as", 1), 2) ?> />
-		    <?php _e('Add elements in a submenu:', 'ceceppaml') ?>
-		</label>
-	      </li>
-	    </ul>
-	  </div>
-	  <div class="block-right">
-	    <?php _e( 'Add to', 'ceceppaml' ) ?>
-	    <select name="cml_add_items_to">
-	      <option value=""><?php _e( 'All menus', 'ceceppaml' ) ?></option>
-	    <?php
-	      $locations = get_nav_menu_locations();
-
-	      $menu = array();
-	      $sel = get_option( 'cml_add_items_to' );
-
-	      foreach( $locations as $key => $location ) :
-		echo '<option value="' . $key . '" ' . selected( $key, $sel ) . '>' . $key . '</option>';
-	      endforeach;
-	    ?>
-	    </select>
-	  </div>
-	  <div>&nbsp;</div>
+	  <strong><?php _e('Style:', 'ceceppaml') ?></strong>
+	  <ul>
+	    <li>
+	      <label>
+		  <input type="radio" name="add-as" id="add-as" value="1" <?php checked(get_option("cml_add_items_as", 1), 1) ?> />
+		  <?php _e('Add an element for each language', 'ceceppaml') ?>
+	      </label>
+	    </li>
+	    <li>
+	      <label>
+		  <input type="radio" name="add-as" id="add-as" value="2" <?php checked(get_option("cml_add_items_as", 1), 2) ?> />
+		  <?php _e('Add elements in a submenu:', 'ceceppaml') ?>
+	      </label>
+	    </li>
+	  </ul>
 	  <div class="block-left">
 	    <strong><?php _e('Display items as:', 'ceceppaml') ?></strong>
 	    <blockquote>

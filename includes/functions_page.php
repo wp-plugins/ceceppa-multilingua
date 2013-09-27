@@ -45,7 +45,6 @@
       <hr style="color: #ddd; background-color: #ddd; height: 1px; border: none"/>
       <li><a href="#getlang"><?php _e('Get the language of page/post', 'ceceppaml') ?></a></li>
       <li><a href="#setlang"><?php _e('Set the language of page/post', 'ceceppaml') ?></a></li>
-      <li><a href="#get-all"><?php _e('Get the indexes of the posts by language', 'ceceppaml') ?></a></li>
     </ul>
 <?php
   }
@@ -405,7 +404,7 @@
 <h3><?php _e('Get the language of page/post', 'ceceppaml') ?></h3>
 <blockquote>
   <pre class="code">
-    &lt;?php cml_get_language_by_post_id( $post_id ); ?&gt;
+    &lt;?php cml_get_language_of_post( $post_id ); ?&gt;
   </pre>
   <blockquote>
     <span class="parameters"><?php _e('Parameters:', 'ceceppaml') ?></span>
@@ -448,32 +447,6 @@
     <span class="parameters"><?php _e('Parameters:', 'ceceppaml') ?></span>
 	<ul style="float: none; list-style: circle;padding-left: 50px;">
 	  <li><strong>$post_id:</strong> <i>(integer)</i> - The ID of the post/page</li>
-	  <li><strong>$lang_id:</strong> <i>(integer)</i> - The id of the language</li>
-	</ul>  
-    </blockquote>
-  <blockquote>
-    <span class="example"><?php _e('Example:', 'ceceppaml') ?></span>
-    <pre>
-      &lt;?php;
-	$lang = cml_get_language_by_slug( 'it' );
-	
-	cml_set_language_of_post( 1, $lang->id );
-      ?&gt;
-    </pre>
-  </blockquote>
-</blockquote>
-</div>
-
-<div id="get-all"><br />
-<h3><?php _e('Get all posts of ', 'ceceppaml') ?></h3>
-<blockquote>
-  <pre class="code">
-    This function will return all the indexes of the posts/page of desired languages.
-    &lt;?php cml_get_posts_of_language( $lang_id ); ?&gt;
-  </pre>
-  <blockquote>
-    <span class="parameters"><?php _e('Parameters:', 'ceceppaml') ?></span>
-	<ul style="float: none; list-style: circle;padding-left: 50px;">
 	  <li><strong>$lang_id:</strong> <i>(integer)</i> - The id of the language</li>
 	</ul>  
     </blockquote>
