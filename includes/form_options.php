@@ -144,7 +144,58 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 	    </td>
 	    </tr>
 
-
+<!-- 	     -->
+	    <tr class="alternate">
+	    <td><center>
+		<strong><?php _e('Show language\'s flag:', 'ceceppaml') ?></strong><br /><br />
+		<img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/flags.png" />
+	    </center></td>
+	    <td>
+	      <div class="block-left">
+		<strong><?php _e('Show the list flag of available languages on:', 'ceceppaml') ?></strong>
+		<blockquote>
+		    <input type="checkbox" id="flags-on-posts" name="flags-on-posts" value="1" <?php echo ((get_option('cml_option_flags_on_post', '1') == 1) ? 'checked' : '') ?> />
+		    <label for="flags-on-posts"><?php _e('Posts', 'ceceppaml') ?></label> <br />
+		    <input type="checkbox" id="flags-on-pages" name="flags-on-pages" value="1" <?php echo ((get_option('cml_option_flags_on_page', '1') == 1) ? 'checked' : '') ?> />
+		    <label for="flags-on-pages"><?php _e('Pages', 'ceceppaml') ?></label><br />
+		    <input type="checkbox" id="flags-on-custom" name="flags-on-custom" value="1" <?php echo ((get_option('cml_option_flags_on_custom_type', '0') == 1) ? 'checked' : '') ?> />
+		    <label for="flags-on-custom"><?php _e('Custom posts type', 'ceceppaml') ?></label><br />
+		</blockquote>
+		<strong><?php _e('Where:', 'ceceppaml') ?></strong>
+		<blockquote>
+		    <input type="radio" name="flags_on_pos" value="top" id="flags_on_top" <?php echo ((get_option('cml_option_flags_on_pos', 'top') == 'top') ? 'checked' : '') ?> />
+		    <label for="flags_on_top"><?php _e('On the top of page/post/category', 'ceceppaml') ?></label><br>
+		    <input type="radio" name="flags_on_pos" value="bottom" id="flags_on_bottom" <?php echo ((get_option('cml_option_flags_on_pos') == 'bottom') ? 'checked' : '') ?> />
+		    <label for="flags_on_bottom"><?php _e('On the bottom of post/page/category', 'ceceppaml') ?></label><br>
+		</blockquote>
+	  </div>
+	  <div class="block-right">
+	    <strong><?php _e('Flags size:', 'ceceppaml'); ?>:</strong>
+	    <ul>
+	      <li>
+		<label>
+		  <input type="radio" id="flag-size" name="flag-size" value="small" <?php checked(get_option("cml_option_flags_on_size", "small"), "small"); ?> />
+		  <img src="<?php echo $small ?>" />
+		  <?php _e('Small', 'ceceppaml') ?> (32x23)
+		</label>
+	      </li>
+	      <li>
+		<label>
+		  <input type="radio" id="flag-size" name="flag-size" value="tiny" <?php checked(get_option("cml_option_flags_on_size", "small"), "tiny"); ?> />
+		  <img src="<?php echo $tiny ?>" />
+		  <?php _e('Tiny', 'ceceppaml') ?> (16x11)
+		</label>
+	      </li>
+	    </ul>
+	    </br />
+	    <label>
+	      <input type="checkbox" name="flags-translated-only" value="1" <?php checked( get_option( "cml_options_flags_on_translations", 0 ), 1 ) ?> >
+	      <strong><?php _e( 'Show flags only on translated page.', 'ceceppaml' ) ?></strong>
+	    </label>
+	  </div>
+	    </td>
+	</tr>
+	<tr>
 <!-- Avviso -->
 	<td rowspan="2">
 	  <center>
@@ -179,7 +230,7 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 		    <label for="notice_bottom"><?php _e('On the bottom of page/post/category', 'ceceppaml') ?></label><br>
 		<blockquote>
 		    <br /><strong><em><?php _e('Cusomize notice:', 'ceceppaml') ?></em></strong><br /><br />
-		    <strong><?php _e('Before:', 'ceceppaml') ?></strong>&nbsp;<input type="text" name="notice_before" value="<?php echo stripslashes( esc_html ( get_option('cml_option_notice_before', '<h4 class=\'cml-notice\'>') ) ) ?>" size="100" /><br />
+		    <strong><?php _e('Before:', 'ceceppaml') ?></strong>&nbsp;<input type="text" name="notice_before" value="<?php echo stripslashes(get_option('cml_option_notice_before', '<h4 class=\'cml-notice\'>')) ?>" size="100" /><br />
 		    <strong><?php _e('After:', 'ceceppaml') ?></strong>&nbsp;<input type="text" name="notice_after" value="<?php echo stripslashes(get_option('cml_option_notice_after', '</h4>')) ?>" size="100" /><br />
 		</blockquote>
 	    </blockquote>

@@ -65,12 +65,10 @@ h3 {
 div.block-left {
   display: table-cell;
   width: 400px;
-  vertical-align: top;
 }
 
 div.block-right {
   display: table-cell;
-  vertical-align: top;
 }
 
 table.mo-table {
