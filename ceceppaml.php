@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.11
+Version: 1.3.13
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -642,6 +642,8 @@ class CeceppaML {
      * Aggiungo le bandiere sotto al titolo del post
      */
     function add_flags_on_top($title, $id = -1) {
+      global $_cml_settings;
+
 	if(isset($this->_title_applied)) return $title;
         if($id < 0) return $title;
         if( is_single() && ! $_cml_settings['cml_option_flags_on_post'] ) return $title;
@@ -740,7 +742,7 @@ class CeceppaML {
    * Creo le tabelle necessarie al funzionamento del plugin
    */
   function create_table() {
-    global $wpdb;
+    global $wpdb, $_cml_settings;
 
     //Server per poter utilizare la funzione dbDelta
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -1053,23 +1055,44 @@ class CeceppaML {
     } else {
       if( ! $this->_filter_search ) return;
     }
-    
+
     //Recupero tutti i post associati alla lingua corrente
     $posts = $this->get_posts_of_language( $this->_current_lang_id );
 
-    if( ! empty ( $posts ) ) :
-      $wp_query->query_vars[ 'post__in' ] = $posts;
-    endif;
+    /*
+     * Dato che ho avuto un pò di noie con i nav_menu_items che mi provocavano
+     * menù "doppi" in homepage, nascondo i post delle altre lingue, invece di
+     * forzare solo quelli della lingua corrente, in quanto nel file fix.php
+     * ignoro i nav_menu_items, ma seleziono solo i post e pagine...
+     */
+    $langs = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " WHERE cml_enabled = 1");
     
+    $exclude = get_option( 'cml_exclude_posts_for_' . $this->_current_lang_id );
+    if( empty( $exclude ) ) {
+      $exclude = array();
+      foreach( $langs as $lang ) {
+        if( $lang->id == $this->_current_lang_id ) continue;
+        
+        $exclude = array_merge( $exclude, $this->get_posts_of_language( $lang->id ) );
+      }
+      //Escludo tutti i post senza lingua, che quindi devono essere visibili anche nella mia lingua...
+      $posts = $this->get_posts_of_language( $this->_current_lang_id );
+      foreach( $exclude as $i => $h ) {
+        if( in_array( $h, $posts ) ) {
+          unset( $exclude[ $i ] );
+        }
+      }
+    }
+
     if( !isset( $this->_hide_posts ) || empty( $this->_hide_posts ) ) :
       $this->_hide_posts = array();
 
       $this->_hide_posts = get_option( "cml_hide_posts_for_lang_" . $this->_current_lang_id );
     endif;
 
-    $wp_query->query_vars[ 'post__not_in' ] = $this->_hide_posts;
-    
-    $this->change_menu();
+    $wp_query->query_vars[ 'post__not_in' ] = array_merge( $this->_hide_posts, $exclude );
+
+    //$this->change_menu();
   }
 
     /*
@@ -1626,7 +1649,7 @@ class CeceppaML {
    * Redirect category/post/page??
    */
   function show_notice($content) {
-    global $wpdb;
+    global $wpdb, $_cml_settings;
 
     if(isCrawler()) return $content;
     
@@ -2010,6 +2033,8 @@ class CeceppaML {
    * Cambio il menu predefinito del tema, in accordo con quello della lingua corrente
    */
   function change_menu() {
+    global $_cml_settings;
+
     if( ! $_cml_settings[ "cml_option_action_menu" ] ) return;
 
     $mods = get_theme_mods();
@@ -2109,7 +2134,9 @@ class CeceppaML {
     if( empty( $lang ) ) $lang = $this->_current_lang_id;
   
    //Gli articoli senza lingua sono "figli di tutti"
-   $posts = $this->_posts_of_lang[$lang];
+   if( empty( $this->_posts_of_lang ) ) $this->preload_posts();
+
+   $posts = $this->_posts_of_lang[ $lang ];
 
    return !empty($posts) ? array_unique($posts) : array();
   }
@@ -2940,10 +2967,10 @@ class CeceppaML {
    * 
    */
   function preload_posts() {
-    if(!is_admin()) :
-      $langs = cml_get_languages();
-    else:
+    if( !is_admin() ) :
       $langs = cml_get_languages( 0 );
+    else:
+      $langs = cml_get_languages( 1 );
     endif;
     
     foreach($langs as $lang) :
@@ -2952,6 +2979,8 @@ class CeceppaML {
   }
   
   function add_flags_to_menu( $items, $args ) {
+    global $_cml_settings;
+
     if( $_cml_settings["cml_add_items_as"] == 2) return $this->add_flags_in_submenu($items, $args);
 
     $to = $_cml_settings[ 'cml_add_items_to' ];
@@ -2968,6 +2997,8 @@ class CeceppaML {
   }
  
   function add_flags_in_submenu($items, $args) {
+    global $_cml_sttings;
+
     $size = $_cml_settings["cml_show_in_menu_size"];
 
     //Lingua corrente
@@ -2991,6 +3022,8 @@ class CeceppaML {
   }
 
   function add_item_to_menu( $lang, $close = true, $size = "small" ) {
+    global $_cml_settings;
+
     $display = $_cml_settings["cml_show_in_menu_as"];
 
     $item = '<li class="menu-item menu-cml-flag">';
@@ -3015,6 +3048,8 @@ class CeceppaML {
   }
 
   function append_flags_to_element() {
+    global $_cml_settings;
+
     $appendTo = $_cml_settings[ "cml_append_flags_to" ];
     if(empty($appendTo)) return;
 
@@ -3031,6 +3066,8 @@ class CeceppaML {
   }
 
   function add_flying_flags() {
+    global $_cml_settings;
+
     $show = array("", "both", "text", "flag");
     $as = intval( $_cml_settings[ "cml_show_float_items_as" ] );
     $size = $_cml_settings[ "cml_show_float_items_size" ];
