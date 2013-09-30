@@ -21,6 +21,8 @@ class CeceppaMLOptions {
   }
 
   function add_meta_box() {
+    add_meta_box("cml_show_flags_on", $input .__('Show language\'s flag:', 'ceceppaml') . '</input></label>', "cml_show_flags_on", "cml_options_page_flags");
+
     /* Tab 0: Flags */
     $input = '<label><input type="checkbox" id="to-menu" name="float-div" value="1" ' . checked(get_option('cml_add_float_div', false), true, false) . ' />&nbsp;';
     add_meta_box("cml_options_float_flags", $input .__('Add float div to website:', 'ceceppaml') . '</input></label>', "cml_option_flags_float", "cml_options_page_flags");
@@ -51,10 +53,23 @@ class CeceppaMLOptions {
   }
   
   function update_flags_info() {
+    //Flags
+    @update_option("cml_option_flags_on_post", intval($_POST['flags-on-posts']));
+    @update_option("cml_option_flags_on_page", intval($_POST['flags-on-pages']));
+    @update_option("cml_option_flags_on_custom_type", intval($_POST['flags-on-custom']));
+    @update_option("cml_option_flags_on_pos", sanitize_title( $_POST['flags_on_pos'] ) );
+    @update_option("cml_options_flags_on_translations", intval( $_POST['flags-translated-only'] ) );
+    
+      //Size
+      @update_option("cml_option_flags_on_size", sanitize_title($_POST['flag-size']));
+
     //Float
-    @update_option("cml_add_float_div", intval($_POST['float-div']));
+    @update_option("cml_add_float_div", intval( $_POST['float-div'] ) );
       $css = addslashes( $_POST['custom-css'] );
       update_option( 'cml_float_css', $css ); //Non posso scrivere su file, sennò ad ogni aggiornamento viene sovrascritto ;)
+
+      if( ! file_exists( CECEPPA_UPLOAD_DIR ) ) mkdir( CECEPPA_UPLOAD_DIR );
+      file_put_contents( CECEPPA_UPLOAD_DIR . "/float.css", $css );
 
       //Show as...
       @update_option("cml_show_float_items_as", intval($_POST['float-as']));
@@ -74,7 +89,10 @@ class CeceppaMLOptions {
 
     //Menu
     @update_option("cml_add_flags_to_menu", intval($_POST['to-menu']));
-    
+
+      //Menu location
+      @update_option( "cml_add_items_to", addslashes( $_POST['cml_add_items_to'] ) );
+
       //Add items as...
       @update_option("cml_add_items_as", intval($_POST['add-as']));
       
@@ -100,21 +118,11 @@ class CeceppaMLOptions {
     if( array_key_exists( "posts", $_POST ) )
       update_option("cml_option_post_redirect", sanitize_title( $_POST['posts'] ) );
 
-    //Flags
-    @update_option("cml_option_flags_on_post", intval($_POST['flags-on-posts']));
-    @update_option("cml_option_flags_on_page", intval($_POST['flags-on-pages']));
-    @update_option("cml_option_flags_on_custom_type", intval($_POST['flags-on-custom']));
-    @update_option("cml_option_flags_on_pos", sanitize_title( $_POST['flags_on_pos'] ) );
-    @update_option("cml_options_flags_on_translations", intval( $_POST['flags-translated-only'] ) );
-    
-      //Size
-      @update_option("cml_option_flags_on_size", sanitize_title($_POST['flag-size']));
-
     //Avviso
     @update_option("cml_option_notice", sanitize_title($_POST['notice']));
     @update_option("cml_option_notice_pos", sanitize_title($_POST['notice_pos']));
-    @update_option("cml_option_notice_after", addslashes($_POST['notice_after']));
-    @update_option("cml_option_notice_before", addslashes($_POST['notice_before']));
+    @update_option("cml_option_notice_after", $_POST['notice_after'] );
+    @update_option("cml_option_notice_before", $_POST['notice_before'] );
     @update_option("cml_option_notice_post", intval($_POST['notice-post']));
     @update_option("cml_option_notice_page", intval($_POST['notice-page']));
 

@@ -82,6 +82,8 @@ function cml_show_available_langs( $attrs ) {
   $size = isset($attrs['size']) ? $attrs['size'] : "small";
   $id = isset( $attrs[ 'id' ] ) ? intval( $attrs[ 'id' ] ) : get_the_ID();
 
+  if( get_option( 'cml_options_flags_on_translations', 1 ) && ! $wpCeceppaML->has_translations( $id ) ) return;
+
   $langs = cml_get_languages();
   $l_id = $wpCeceppaML->get_current_lang_id();
   $cat_id = $wpCeceppaML->get_category_id( single_cat_title( "", false ) );

@@ -183,59 +183,7 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
   foreach($results as $result) :
     $lang = ($show == "flag") ? "" : $result->cml_language;
 
-    if( cml_is_homepage() ) {
-      //Se stò nella home vuol dire che ho scelto come metodo di reindirizzamento &lang
-      $link = $wpCeceppaML->get_home_url( $result->cml_language_slug );
-    } else {
-      /* Collego la categoria della lingua attuale con quella della linga della bandierina */
-      $link = "";
-
-      $lang_id = $wpCeceppaML->get_current_lang_id();
-
-      if( ( is_single() || is_page() ) &&  $linked ) :
-	$link = cml_get_linked_post( $lang_id, $result, get_the_ID() );
-
-	if( !empty( $link ) ) $link = get_permalink($link);
-      endif;
-
-      if( is_archive() && !is_category() ) :
-	global $wp;
-
-	$link = home_url($wp->request) . "/";
-	$link = add_query_arg( array( "lang" => $result->cml_language_slug ), $link );
-      endif;
-
-      //Collego le categorie delle varie lingue
-      if( is_category() ) :
-	$cat = get_the_category();
-
-	if(is_array($cat)) :
-	  $cat_id = $cat[count($cat) - 1]->term_id;
-	  
-	  //Mi serve a "forzare" lo slug corretto nel link
-	  $wpCeceppaML->force_category_lang( $result->id );
-	  
-	  //Mi recupererà il link tradotto dal mio plugin ;)
-	  $link = get_category_link( $cat_id );
-	endif;
-
-	$wpCeceppaML->unset_category_lang();
-      endif;
-      
-      if( is_paged() ) :
-	$link = add_query_arg( array( "lang" => $result->cml_language_slug ) );
-      endif;
-
-      /* Controllo se è stata impostata una pagina statica,
-         perché così invece di restituire il link dell'articolo collegato
-         aggiungo il più "bello" ?lang=## alla fine della home.
-
-         Se non ho trovato nesuna traduzione per l'articolo, la bandiera punterà alla homepage
-      */
-      if( empty($link) ) :
-	$link = $wpCeceppaML->get_home_url( $result->cml_language_slug );
-      endif;
-    }
+    $link = cml_get_the_link( $result );
 
     $img = "<img class=\"$size $image_class\" src='" . cml_get_flag_by_lang_id( $result->id, $size ) . "' title='$result->cml_language' width=\"$width\"/>";
     if($show == "text") $img = "";
@@ -445,9 +393,11 @@ function cml_get_current_language_id() {
 
 /* Controllo se sto nella homepage */
 function cml_is_homepage() {
+  if( is_category() || is_archive() ) return false;
+
   //Controllo se è stata impostata una pagina "statica" se l'id di questa è = a quello della statica
   if( cml_use_static_page() ) :
-    $static_id = get_option("page_for_posts") + get_option("page_on_front");
+    $static_id = get_option( "page_for_posts" ) + get_option( "page_on_front" );
 
     $lang_id = cml_get_current_language_id();
     $the_id = get_the_ID();
@@ -518,12 +468,81 @@ function cml_get_language_by_post_id( $id ) {
   
   $lang_id = $wpCeceppaML->get_language_id_by_post_id( $id );
   
-  return cml_get_language_info( $lang_id );
+  return cml_get_language_info( $id );
 }
 
 function cml_set_language_of_post( $id, $lang_id ) {
   global $wpCeceppaML;
   
   $wpCeceppaML->set_language_of_post( $id, $lang_id, 0, 0 );
+}
+
+function cml_get_posts_of_language( $lang_id ) {
+  global $wpCeceppaML;
+  
+  return $wpCeceppaML->get_posts_of_language();
+}
+
+/*
+ * Ritorno il link formattato in base alla pagina corrente
+ */
+function cml_get_the_link( $result ) {
+  global $wpCeceppaML;
+
+  if( cml_is_homepage() ) {
+    //Se stò nella home vuol dire che ho scelto come metodo di reindirizzamento &lang
+    $link = $wpCeceppaML->get_home_url( $result->cml_language_slug );
+  } else {
+    /* Collego la categoria della lingua attuale con quella della linga della bandierina */
+    $link = "";
+
+    $lang_id = $wpCeceppaML->get_current_lang_id();
+
+    if( ( is_single() || is_page() ) &&  $linked ) :
+      $link = cml_get_linked_post( $lang_id, $result, get_the_ID() );
+
+      if( !empty( $link ) ) $link = get_permalink($link);
+    endif;
+
+    if( is_archive() && !is_category() ) :
+      global $wp;
+
+      $link = home_url( $wp->request ) . "/";
+      $link = add_query_arg( array( "lang" => $result->cml_language_slug ), $link );
+    endif;
+
+    //Collego le categorie delle varie lingue
+    if( is_category() ) :
+      $cat = get_the_category();
+
+      if( is_array( $cat ) ) :
+	$cat_id = $cat[count($cat) - 1]->term_id;
+	
+	//Mi serve a "forzare" lo slug corretto nel link
+	$wpCeceppaML->force_category_lang( $result->id );
+	
+	//Mi recupererà il link tradotto dal mio plugin ;)
+	$link = get_category_link( $cat_id );
+      endif;
+
+      $wpCeceppaML->unset_category_lang();
+    endif;
+    
+    if( is_paged() ) :
+      $link = add_query_arg( array( "lang" => $result->cml_language_slug ) );
+    endif;
+
+    /* Controllo se è stata impostata una pagina statica,
+	perché così invece di restituire il link dell'articolo collegato
+	aggiungo il più "bello" ?lang=## alla fine della home.
+
+	Se non ho trovato nesuna traduzione per l'articolo, la bandiera punterà alla homepage
+    */
+    if( empty($link) ) :
+      $link = $wpCeceppaML->get_home_url( $result->cml_language_slug );
+    endif;
+  }
+  
+  return $link;
 }
 ?>

@@ -163,53 +163,80 @@ function cml_update_all_posts_language() {
  */
 function cml_fix_rebuild_posts_info() {
   global $wpCeceppaML, $wpdb;
+  global $_wp_registered_nav_menus;
 
-  //Indici degli articoli
-  //$posts = array();
+  /*
+   * Non sono riuscito a trovare un metodo che identifichi il menu "padre" a partire dall'id
+   * del menu, quindi "precarico" tutti gli elementi dei vari menu...
+   */
+  $nav_menus = get_nav_menu_locations();
+  $keys = array_keys( $nav_menus );
+  
+  foreach( $keys as $key ) :
+    $items = wp_get_nav_menu_items( $nav_menus[ $key ] );
+
+    foreach( $items as $item ) :
+      $menus[ $key ][] = $item->ID;
+    endforeach;
+
+  endforeach;
+
+  //Tipi di post + custon_posts
+  /* 
+    I tipi nav_menu_item mi servono quando l'utente attiva l'opzione
+    "filtra post per lingua", perché non riesco a determinare, almeno con tutti i tipi di tema,
+    quando è il momento di in_main_query() */
+  $types = array_merge( array( 'post' => 'post', 'page' => 'page' ), 
+				get_post_types( array( '_builtin' => false ), 'names' ) );
+
   //Recupero tutti gli articoli
   $args = array('numberposts' => -1, 'posts_per_page' => 999999,
-		  'post_type' => get_post_types('','names'),
-		  'status' => 'publish,draft,private,future');
+		  'post_type' => $types,
+		  'status' => 'publish,draft,private,future' );
 
-  $p = new WP_Query($args);
-  $langs = cml_get_languages(0);
-  while($p->have_posts()) :
+  $p = new WP_Query( $args );
+  $langs = cml_get_languages( 0 );
+  while( $p->have_posts() ) :
     $p->next_post();
-    
+
     $pid = $p->post->ID;
-    $lang = $wpCeceppaML->get_language_id_by_post_id($pid);
     
-    //In 0 memorizzo tutti gli articoli senza "lingua", ovvero tutti gli articoli visibili in tutte le lingue
-    if(empty($lang)) $lang = 0;
+    //if( $p->post->post_type != 'nav_menu_item' ) :
+      $lang = $wpCeceppaML->get_language_id_by_post_id( $pid );
 
-    if($lang == 0) :
-      foreach($langs as $l) :
-	$id = cml_get_linked_post(0, null, $pid, $l->id);
+      //In 0 memorizzo tutti gli articoli senza "lingua", ovvero tutti gli articoli visibili in tutte le lingue
+      if(empty($lang)) $lang = 0;
 
-	//Se non è vuoto, vuol dire che esiste traduzione per questo articolo in questa lingua e va escluso quando
-	//richiamo la funzione hide_translation
-	if( ! empty( $id ) ) :
-	  $exclude[$l->id][] = $pid;
-	else:
-	  //Se non ho trovato la traduzione per la lingua corrente, allora aggiungo questo articolo 
-	  //all'elenco degli articoli di questa lingua
-	  $posts[$l->id][] = $pid;
-	endif;
-      endforeach;
-      
-//       $posts[$lang] = $pid;
-//       continue;
-//     else:
-    endif;
-    $posts[$lang][] = $pid;
-//     endif;
+      if($lang == 0) :
+        foreach($langs as $l) :
+          $id = cml_get_linked_post(0, null, $pid, $l->id);
+    
+          //Se non è vuoto, vuol dire che esiste traduzione per questo articolo in questa lingua e va escluso quando
+          //richiamo la funzione hide_translation
+          if( ! empty( $id ) ) :
+            $exclude[$l->id][] = $pid;
+          else:
+            //Se non ho trovato la traduzione per la lingua corrente, allora aggiungo questo articolo 
+            //all'elenco degli articoli di questa lingua
+            $posts[$l->id][] = $pid;
+          endif;
+        endforeach;
+      endif;
+
+      $posts[ $lang ][] = $pid;
   endwhile;
 
   foreach( $langs as $lang ) :
-    @update_option("cml_posts_of_lang_" . $lang->id, array_unique($posts[$lang->id]));
+    @update_option( "cml_posts_of_lang_" . $lang->id, array_unique( $posts[ $lang->id ] ) );
   endforeach;
 
+  //Calcolo i post da escludere per la funzione filter_posts_by_language
+  foreach( $langs as $lang ) {
+    //I post da escludere sono tutti i post delle altre lingue a esclusione dei post senza lingua
+  }
+
   @update_option( "cml_posts_of_lang_" . 0, array_unique( $posts[0] ) );
+
 
   //Articoli da escludere
   //Recupero tutte le traduzioni...
@@ -232,7 +259,7 @@ function cml_fix_rebuild_posts_info() {
      Se scelgo la modalità "hide_translations" devo informare il plugin che per la lingua 2 va nascosto anche l'articolo
      C in quanto, indirettamente, è una traduzione dell'articolo B
     */
-    if(count($langs) >= 2) :
+    if( count( $langs ) >= 2 ) :
       foreach($langs as $l) :
 	//1
 	if($result->cml_post_lang_1 != $l->id) :
@@ -244,11 +271,11 @@ function cml_fix_rebuild_posts_info() {
 	endif;
 
 	//2
-	if($result->cml_post_lang_2 != $l->id) :
+	if( $result->cml_post_lang_2 != $l->id ) :
 	  $tid = cml_get_linked_post(0, null, $result->cml_post_id_2, $l->id);
 
-	  if(!empty($tid)) :
-	    $exclude[$result->cml_post_lang_2][] = $tid;
+	  if( ! empty( $tid ) ) :
+	    $exclude[ $result->cml_post_lang_2 ][] = $tid;
 	  endif;
 	endif;
     endforeach;
@@ -281,5 +308,31 @@ function cml_update_float_css() {
   endif;
 
   update_option( "cml_version", CECEPPA_ML_VERSION );
+}
+
+function cml_update_settings() {
+  //Genero il file "settings.php"
+  $filename = CECEPPA_UPLOAD_DIR . "/settings.php";
+  $fp = fopen( $filename, 'w' );
+  
+  if( ! $fp ) return;
+
+  //Scrivo la riga di accesso negato
+  fwrite( $fp, '<?php' . PHP_EOL );
+  fwrite( $fp, "if ( ! defined( 'ABSPATH' ) ) die();" . PHP_EOL . PHP_EOL );
+
+  //Apro il file delle opzioni
+  require 'settings_fallback.php';
+  
+  $keys = array_keys( $_cml_settings );
+  foreach( $keys as $key ) :
+    $valore = $_cml_settings[ $key ];
+    if( !is_numeric( $valore ) ) $valore = "'" . addslashes($valore) . "'";
+    $string = "$" . "_cml_settings[ '$key' ] = $valore;";
+    fwrite( $fp, $string . PHP_EOL );
+  endforeach;
+  
+  fwrite( $fp, '?>' );
+  fclose( $fp );
 }
 ?>
