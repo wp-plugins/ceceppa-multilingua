@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.11
+Version: 1.3.14
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -452,7 +452,7 @@ class CeceppaML {
 	$_italic = "</span>";
       endif;
 
-      add_menu_page($result->cml_language, $italic . $result->cml_language . $_italic, 'read', $link, null, //array(&$this, 'switch_language'), 
+    add_menu_page($result->cml_language, $italic . $result->cml_language . $_italic, 'read', $link, null, //array(&$this, 'switch_language'), 
 		    WP_PLUGIN_URL . '/ceceppa-multilingua/flags/tiny/' . $result->cml_flag . '.png');
     endforeach;
   }
@@ -642,6 +642,8 @@ class CeceppaML {
      * Aggiungo le bandiere sotto al titolo del post
      */
     function add_flags_on_top($title, $id = -1) {
+      global $_cml_settings;
+
 	if(isset($this->_title_applied)) return $title;
         if($id < 0) return $title;
         if( is_single() && ! $_cml_settings['cml_option_flags_on_post'] ) return $title;
@@ -740,7 +742,7 @@ class CeceppaML {
    * Creo le tabelle necessarie al funzionamento del plugin
    */
   function create_table() {
-    global $wpdb;
+    global $wpdb, $_cml_settings;
 
     //Server per poter utilizare la funzione dbDelta
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -1053,22 +1055,43 @@ class CeceppaML {
     } else {
       if( ! $this->_filter_search ) return;
     }
-    
+
     //Recupero tutti i post associati alla lingua corrente
     $posts = $this->get_posts_of_language( $this->_current_lang_id );
 
-    if( ! empty ( $posts ) ) :
-      $wp_query->query_vars[ 'post__in' ] = $posts;
-    endif;
+    /*
+     * Dato che ho avuto un pò di noie con i nav_menu_items che mi provocavano
+     * menù "doppi" in homepage, nascondo i post delle altre lingue, invece di
+     * forzare solo quelli della lingua corrente, in quanto nel file fix.php
+     * ignoro i nav_menu_items, ma seleziono solo i post e pagine...
+     */
+    $langs = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " WHERE cml_enabled = 1");
     
+    $exclude = get_option( 'cml_exclude_posts_for_' . $this->_current_lang_id );
+    if( empty( $exclude ) ) {
+      $exclude = array();
+      foreach( $langs as $lang ) {
+        if( $lang->id == $this->_current_lang_id ) continue;
+        
+        $exclude = array_merge( $exclude, $this->get_posts_of_language( $lang->id ) );
+      }
+      //Escludo tutti i post senza lingua, che quindi devono essere visibili anche nella mia lingua...
+      $posts = $this->get_posts_of_language( $this->_current_lang_id );
+      foreach( $exclude as $i => $h ) {
+        if( in_array( $h, $posts ) ) {
+          unset( $exclude[ $i ] );
+        }
+      }
+    }
+
     if( !isset( $this->_hide_posts ) || empty( $this->_hide_posts ) ) :
       $this->_hide_posts = array();
 
       $this->_hide_posts = get_option( "cml_hide_posts_for_lang_" . $this->_current_lang_id );
     endif;
 
-    $wp_query->query_vars[ 'post__not_in' ] = $this->_hide_posts;
-    
+    $wp_query->query_vars[ 'post__not_in' ] = array_merge( $this->_hide_posts, $exclude );
+
     $this->change_menu();
   }
 
@@ -1626,7 +1649,7 @@ class CeceppaML {
    * Redirect category/post/page??
    */
   function show_notice($content) {
-    global $wpdb;
+    global $wpdb, $_cml_settings;
 
     if(isCrawler()) return $content;
     
@@ -1829,29 +1852,36 @@ class CeceppaML {
 
     if( $pagenow == "wp-login.php" ) return $locale;
 
+    /*
+     * Nel pannello di amministrazione di alcuni non riesco a "mantenere" la
+     * lingua scelta perché quando richiamo la funzione get_language_by_url
+     * non esiste la funzione is_logged_in, e quindi non riesco a recuperare la lingua
+     * scelta in precedenza, per questo forzo l'aggiornamento della lingua ogni qual volta
+     * viene richiamata la funzione setlocale
+     */
+    if( is_admin() ) unset( $this->_language_detected );
+
     //Per gli utenti "loggati" memorizzo la lingua selezionata, nel pannello di amministrazione
     $this->update_current_lang();
 
-    $logged_in = function_exists('is_user_logged_in') && is_user_logged_in();
+    $logged_in = function_exists( 'is_user_logged_in' ) && is_user_logged_in();
     if( is_admin() && $logged_in ) :
       global $current_user;
+
       get_currentuserinfo();
 
       $user = $current_user->user_login;
-      update_option( "cml_${user}_locale", $locale );
+      update_option( "cml_${user}_locale", $this->_current_lang_locale );
     endif;
-
 
     //Nella pagina dei widget devo forzare il locale in "en_US"
     //per evitare che i titoli dei widget nella colonna a sx cambino al cambiare
     //della lingua...
-    if(isset($_GET['page']) && $_GET['page'] == 'ceceppaml-widgettitles-page') :
+    if( isset( $_GET ['page'] ) && $_GET[ 'page' ] == 'ceceppaml-widgettitles-page' ) :
       $locale = "en_US";
-    else :
-      $locale = $this->_current_lang_locale;
     endif;
 
-    return $locale;
+    return $this->_current_lang_locale;
   }
 
   /**
@@ -1883,7 +1913,6 @@ class CeceppaML {
       $lang = $_GET['lang'];
 
       $lang = $this->get_language_id_by_slug($lang);
-      
     else :
       $lang = $this->get_language_by_url();
     endif;
@@ -1898,19 +1927,16 @@ class CeceppaML {
       $this->_current_lang_id = $lang;
 
       if( $this->_filter_search ) {
-	//For Fix Notice
-	//add_action('wp_enqueue_scripts', array(&$this, 'enqueue_script_search')); //Non funziona :(
-	$this->enqueue_script_search();
-
-	$array = array('lang' => $this->_current_lang, 'form_class' => $this->_filter_form_class);
-	wp_localize_script('ceceppa-search', 'cml_object', $array);
-
-	//Evito che esegua più di una volta questo if
-	//$this->_filter_search = false;
+        //For Fix Notice
+        //add_action('wp_enqueue_scripts', array(&$this, 'enqueue_script_search')); //Non funziona :(
+        $this->enqueue_script_search();
+    
+        $array = array('lang' => $this->_current_lang, 'form_class' => $this->_filter_form_class);
+        wp_localize_script('ceceppa-search', 'cml_object', $array);
       }
 
       //Recupero il campo "Locale Wordpress"
-      $query = sprintf("SELECT * FROM %s WHERE id = %d", CECEPPA_ML_TABLE, $lang);
+      $query = sprintf( "SELECT * FROM %s WHERE id = %d", CECEPPA_ML_TABLE, $lang );
       $row = $wpdb->get_row( $query );
 
       $this->_current_lang_id = $lang;
@@ -1939,31 +1965,31 @@ class CeceppaML {
       preg_match( "/^([a-z]{2})/", $this->_url, $matches );
       
       if( !empty($matches) ) :
-	$lang = $matches[0];
+        $lang = $matches[0];
       endif;
     endif;
 
     if( empty( $lang ) ) :
       //get_currentuserinfo non esiste quando viene chiamato "set_locale"
-      $logged_in = function_exists('is_user_logged_in') && is_user_logged_in();
+      $logged_in = function_exists( 'is_user_logged_in' ) && is_user_logged_in();
 
       if( is_admin() && $logged_in ) :
-	//Recupero l'info dalle opzioni
-	global $current_user;
-	get_currentuserinfo();
+        //Recupero l'info dalle opzioni
+        global $current_user;
+        get_currentuserinfo();
+    
+        $user = $current_user->user_login;
+        $locale = get_option( "cml_${user}_locale" ); //, $this->_default_language_locale );
+    
+        $lang = $this->get_language_id_by_locale( $locale );
 
-	$user = $current_user->user_login;
-	$locale = get_option( "cml_${user}_locale", $this->_default_language_locale );
-
-	$lang = $this->get_language_id_by_locale( $locale );
-
-	$this->_force_current_language = $this->get_language_id_by_locale($locale);
+        $this->_force_current_language = $this->get_language_id_by_locale($locale);
       else:
-	$this->clear_url();
+    	$this->clear_url();
 
-	if( !empty( $this->_force_current_language ) ) :
-	  return $this->_force_current_language;
-	else:
+      if( !empty( $this->_force_current_language ) ) :
+        return $this->_force_current_language;
+      else:
 	  //Se non sono riuscito a recuperare la lingua dal link, recupero l'info dall'articolo
 
 	  //Funzione con alcuni tipi di permalink, quali ?p=##, archives/ e non nel pannello di admin (almeno in alcuni casi)
@@ -2010,6 +2036,8 @@ class CeceppaML {
    * Cambio il menu predefinito del tema, in accordo con quello della lingua corrente
    */
   function change_menu() {
+    global $_cml_settings;
+
     if( ! $_cml_settings[ "cml_option_action_menu" ] ) return;
 
     $mods = get_theme_mods();
@@ -2109,7 +2137,9 @@ class CeceppaML {
     if( empty( $lang ) ) $lang = $this->_current_lang_id;
   
    //Gli articoli senza lingua sono "figli di tutti"
-   $posts = $this->_posts_of_lang[$lang];
+   if( empty( $this->_posts_of_lang ) ) $this->preload_posts();
+
+   $posts = $this->_posts_of_lang[ $lang ];
 
    return !empty($posts) ? array_unique($posts) : array();
   }
@@ -2346,32 +2376,33 @@ class CeceppaML {
     }
 
     function translate_menu_item($item) {
-	//Se l'utente ha scelto un menu differente per la lingua corrente
-	//non devo applicare nessun tipo di filtro agli elementi del menu, esco :)
-	//Questo è vero solo per le pagine... altrimenti non mi traduce il nome delle categorie
-	if( $this->_no_translate_menu_item == true && $item->object == 'page' ) :
-	  remove_filter( 'wp_setup_nav_menu_item', array(&$this, 'translate_menu_item') );
-	  return $item;
-	endif;
+      //Se l'utente ha scelto un menu differente per la lingua corrente
+      //non devo applicare nessun tipo di filtro agli elementi del menu, esco :)
+      //Questo è vero solo per le pagine... altrimenti non mi traduce il nome delle categorie
+      if( $this->_no_translate_menu_item == true && $item->object == 'page' ) :
+        remove_filter( 'wp_setup_nav_menu_item', array(&$this, 'translate_menu_item') );
+        return $item;
+      endif;
 
-        if($this->_current_lang_id != $this->_default_language_id) :
+      if($this->_current_lang_id != $this->_default_language_id) :
 	    switch($item->object) :
 	    case 'page':
 	    case 'post':
 	      $page_id = cml_get_linked_post( $this->_default_language_id, null, $item->object_id, $this->_current_lang_id );
 
 	      if(!empty($page_id)) :
-		//Su un sito mi è capitato che get_the_title() restituisse una stringa vuota, nonstante l'id della pagina fosse corretto
-		$title = get_the_title( $page_id );
-		if(empty($title)) :
-		  $page = get_page( $page_id );
+            //Su un sito mi è capitato che get_the_title() restituisse una stringa vuota, nonstante l'id della pagina fosse corretto
+            $title = get_the_title( $page_id );
+            if(empty($title)) :
+            $page = get_page( $page_id );
+  
+            //Qualcosa non quadra... restituisco l'oggetto originale...
+            if( ! is_object( $page ) ) {
+              return $item;
+            }
 
-		  //Qualcosa non quadra... restituisco l'oggetto originale...
-		  if( ! is_object( $page ) ) {
-		    return $item;
-		  }
-		  $title = ( $item->object == 'page' ) ? $page->title : $page->post_title;
-		endif;
+            $title = ( $item->object == 'page' ) ? $page->title : $page->post_title;
+          endif;
 
 	        $item->ID = $page_id;
 		$item->title = $title;
@@ -2940,10 +2971,10 @@ class CeceppaML {
    * 
    */
   function preload_posts() {
-    if(!is_admin()) :
-      $langs = cml_get_languages();
-    else:
+    if( !is_admin() ) :
       $langs = cml_get_languages( 0 );
+    else:
+      $langs = cml_get_languages( 1 );
     endif;
     
     foreach($langs as $lang) :
@@ -2952,6 +2983,8 @@ class CeceppaML {
   }
   
   function add_flags_to_menu( $items, $args ) {
+    global $_cml_settings;
+
     if( $_cml_settings["cml_add_items_as"] == 2) return $this->add_flags_in_submenu($items, $args);
 
     $to = $_cml_settings[ 'cml_add_items_to' ];
@@ -2968,6 +3001,8 @@ class CeceppaML {
   }
  
   function add_flags_in_submenu($items, $args) {
+    global $_cml_sttings;
+
     $size = $_cml_settings["cml_show_in_menu_size"];
 
     //Lingua corrente
@@ -2991,6 +3026,8 @@ class CeceppaML {
   }
 
   function add_item_to_menu( $lang, $close = true, $size = "small" ) {
+    global $_cml_settings;
+
     $display = $_cml_settings["cml_show_in_menu_as"];
 
     $item = '<li class="menu-item menu-cml-flag">';
@@ -3015,6 +3052,8 @@ class CeceppaML {
   }
 
   function append_flags_to_element() {
+    global $_cml_settings;
+
     $appendTo = $_cml_settings[ "cml_append_flags_to" ];
     if(empty($appendTo)) return;
 
@@ -3031,6 +3070,8 @@ class CeceppaML {
   }
 
   function add_flying_flags() {
+    global $_cml_settings;
+
     $show = array("", "both", "text", "flag");
     $as = intval( $_cml_settings[ "cml_show_float_items_as" ] );
     $size = $_cml_settings[ "cml_show_float_items_size" ];
