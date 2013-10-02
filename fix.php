@@ -163,29 +163,8 @@ function cml_update_all_posts_language() {
  */
 function cml_fix_rebuild_posts_info() {
   global $wpCeceppaML, $wpdb;
-  global $_wp_registered_nav_menus;
-
-  /*
-   * Non sono riuscito a trovare un metodo che identifichi il menu "padre" a partire dall'id
-   * del menu, quindi "precarico" tutti gli elementi dei vari menu...
-   */
-  $nav_menus = get_nav_menu_locations();
-  $keys = array_keys( $nav_menus );
   
-  foreach( $keys as $key ) :
-    $items = wp_get_nav_menu_items( $nav_menus[ $key ] );
-
-    foreach( $items as $item ) :
-      $menus[ $key ][] = $item->ID;
-    endforeach;
-
-  endforeach;
-
   //Tipi di post + custon_posts
-  /* 
-    I tipi nav_menu_item mi servono quando l'utente attiva l'opzione
-    "filtra post per lingua", perché non riesco a determinare, almeno con tutti i tipi di tema,
-    quando è il momento di in_main_query() */
   $types = array_merge( array( 'post' => 'post', 'page' => 'page' ), 
 				get_post_types( array( '_builtin' => false ), 'names' ) );
 
