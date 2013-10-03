@@ -72,10 +72,10 @@ function cml_get_languages_list() {
 function cml_get_flag($flag, $size = "tiny") {
   if( empty( $flag ) ) return "";
 
-  if( file_exists( CECEPPA_PLUGIN_PATH . "flags/$size/$flag.png" ) )
-    $url = CECEPPA_PLUGIN_URL . "flags/$size/$flag.png";
-  else
+  if( file_exists( CECEPPA_UPLOAD_URL . "$size/$flag.png" ) )
     $url = CECEPPA_UPLOAD_URL . "/$size/$flag.png";
+  else
+    $url = CECEPPA_PLUGIN_URL . "flags/$size/$flag.png";
     
   return esc_url( $url );
 }
@@ -183,7 +183,7 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
   foreach($results as $result) :
     $lang = ($show == "flag") ? "" : $result->cml_language;
 
-    $link = cml_get_the_link( $result );
+    $link = cml_get_the_link( $result, $linked );
 
     $img = "<img class=\"$size $image_class\" src='" . cml_get_flag_by_lang_id( $result->id, $size ) . "' title='$result->cml_language' width=\"$width\"/>";
     if($show == "text") $img = "";
@@ -408,7 +408,8 @@ function cml_is_homepage() {
       $linked = cml_get_linked_post( $lang_id, null, $the_id , cml_get_default_language_id() );
       if( !empty($linked) ) return $linked == $static_id;
     endif;
-    
+  else:
+    return false;
   endif;
 
   //Non posso utilizzare la funzione is_home, quindi controllo "manualmente"
@@ -486,7 +487,7 @@ function cml_get_posts_of_language( $lang_id ) {
 /*
  * Ritorno il link formattato in base alla pagina corrente
  */
-function cml_get_the_link( $result ) {
+function cml_get_the_link( $result, $linked = true ) {
   global $wpCeceppaML;
 
   if( cml_is_homepage() ) {
@@ -501,7 +502,7 @@ function cml_get_the_link( $result ) {
     if( ( is_single() || is_page() ) &&  $linked ) :
       $link = cml_get_linked_post( $lang_id, $result, get_the_ID() );
 
-      if( !empty( $link ) ) $link = get_permalink($link);
+      if( !empty( $link ) ) $link = get_permalink( $link );
     endif;
 
     if( is_archive() && !is_category() ) :

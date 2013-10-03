@@ -81,7 +81,6 @@ function cml_get_linked_post($lang_id, $result, $post_id, $browser_lang = null) 
   return $link;
 }
 
-
 /**
  * http://www.cult-f.net/detect-crawlers-with-php/
  *
