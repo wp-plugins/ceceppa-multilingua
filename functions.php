@@ -72,10 +72,10 @@ function cml_get_languages_list() {
 function cml_get_flag($flag, $size = "tiny") {
   if( empty( $flag ) ) return "";
 
-  if( file_exists( CECEPPA_PLUGIN_PATH . "flags/$size/$flag.png" ) )
-    $url = CECEPPA_PLUGIN_URL . "flags/$size/$flag.png";
-  else
+  if( file_exists( CECEPPA_UPLOAD_URL . "$size/$flag.png" ) )
     $url = CECEPPA_UPLOAD_URL . "/$size/$flag.png";
+  else
+    $url = CECEPPA_PLUGIN_URL . "flags/$size/$flag.png";
     
   return esc_url( $url );
 }
