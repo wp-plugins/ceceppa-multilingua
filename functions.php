@@ -72,7 +72,7 @@ function cml_get_languages_list() {
 function cml_get_flag($flag, $size = "tiny") {
   if( empty( $flag ) ) return "";
 
-  if( file_exists( CECEPPA_UPLOAD_URL . "$size/$flag.png" ) )
+  if( file_exists( CECEPPA_UPLOAD_DIR . "/$size/$flag.png" ) )
     $url = CECEPPA_UPLOAD_URL . "/$size/$flag.png";
   else
     $url = CECEPPA_PLUGIN_URL . "flags/$size/$flag.png";
@@ -179,7 +179,7 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
   $results = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " WHERE cml_enabled = 1 ORDER BY cml_sort_id");  
   $width = ($size == "tiny") ? 16 : 32;
 
-  $r = "<ul class='$class_name'>";
+  $r = "<ul class=\"$class_name\">";
   foreach($results as $result) :
     $lang = ($show == "flag") ? "" : $result->cml_language;
 
@@ -217,7 +217,7 @@ function cml_translate($string, $id, $type = "", $wpgettext = false, $gettext = 
 
   $ret = $wpdb->get_var($query);
 
-  if(empty($ret) && $wpgettext) :
+  if( empty( $ret ) && $wpgettext ) :
     $ret = __( $string );
   endif;
 
@@ -408,8 +408,6 @@ function cml_is_homepage() {
       $linked = cml_get_linked_post( $lang_id, null, $the_id , cml_get_default_language_id() );
       if( !empty($linked) ) return $linked == $static_id;
     endif;
-  else:
-    return false;
   endif;
 
   //Non posso utilizzare la funzione is_home, quindi controllo "manualmente"
@@ -499,7 +497,7 @@ function cml_get_the_link( $result, $linked = true ) {
 
     $lang_id = $wpCeceppaML->get_current_lang_id();
 
-    if( ( is_single() || is_page() ) &&  $linked ) :
+    if( ( is_single() || is_page() ) ||  $linked ) :
       $link = cml_get_linked_post( $lang_id, $result, get_the_ID() );
 
       if( !empty( $link ) ) $link = get_permalink( $link );
@@ -517,13 +515,13 @@ function cml_get_the_link( $result, $linked = true ) {
       $cat = get_the_category();
 
       if( is_array( $cat ) ) :
-	$cat_id = $cat[count($cat) - 1]->term_id;
-	
-	//Mi serve a "forzare" lo slug corretto nel link
-	$wpCeceppaML->force_category_lang( $result->id );
-	
-	//Mi recupererà il link tradotto dal mio plugin ;)
-	$link = get_category_link( $cat_id );
+        $cat_id = $cat[count($cat) - 1]->term_id;
+        
+        //Mi serve a "forzare" lo slug corretto nel link
+        $wpCeceppaML->force_category_lang( $result->id );
+        
+        //Mi recupererà il link tradotto dal mio plugin ;)
+        $link = get_category_link( $cat_id );
       endif;
 
       $wpCeceppaML->unset_category_lang();
@@ -543,7 +541,7 @@ function cml_get_the_link( $result, $linked = true ) {
       $link = $wpCeceppaML->get_home_url( $result->cml_language_slug );
     endif;
   }
-  
+
   return $link;
 }
 ?>
