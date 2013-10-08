@@ -30,6 +30,7 @@
   $_cml_settings[ 'cml_option_flags_on_page' ] = get_option('cml_option_flags_on_page', true);
   $_cml_settings[ 'cml_option_flags_on_custom_type' ] = get_option('cml_option_flags_on_custom_type', 0);
   $_cml_settings[ 'cml_option_flags_on_pos' ] = get_option('cml_option_flags_on_pos', 'top');
+  $_cml_settings[ 'cml_option_flags_on_the_loop' ] = get_option( 'cml_option_flags_on_the_loop' );
 
   $_cml_settings[ 'cml_option_notice' ] = get_option('cml_option_notice', 'notice');
   $_cml_settings[ 'cml_option_notice_pos' ] = get_option('cml_option_notice_pos', 'top');
