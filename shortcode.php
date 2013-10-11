@@ -78,9 +78,12 @@ function cml_do_shortcode($attrs) {
 }
 
 function cml_show_available_langs( $attrs ) {
-  global $wpdb, $wpCeceppaML;
+  extract(shortcode_atts(array("show" => "flag", 
+				"size" => "tiny", 
+				"class" => "cml_flags",
+				"image" => ""), $attrs));
 
-  return cml_shortcode_show_flags( $attrs );
+  return cml_show_flags( $show, $size, $class, $image, false, true, true );
 }
 
 function cml_shortcode_other_langs_available( $attrs ) {
@@ -101,7 +104,7 @@ function cml_shortcode_show_flags($attrs) {
 				"class" => "cml_flags",
 				"image" => ""), $attrs));
 
-  return cml_show_flags($show, $size, $class, $image, false, true);
+  return cml_show_flags( $show, $size, $class, $image, false, true );
 }
 
 ?>

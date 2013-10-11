@@ -172,7 +172,7 @@ function cml_is_default_lang($lang = null) {
  * @param "linked" - se true: la bandiera deve restituire il link all'articolo nelle varie lingue (se presente),
 * 				false: la bandiera punterà alla home aggiungendo il suffisso "?lang=##"
  */
-function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags", $image_class = "", $echo = true, $linked = true) {
+function cml_show_flags( $show = "flag", $size = "tiny", $class_name = "cml_flags", $image_class = "", $echo = true, $linked = true, $only_existings = false ) {
   global $wpdb, $wpCeceppaML;
 
   $redirect = get_option('cml_option_redirect');
@@ -183,7 +183,8 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
   foreach($results as $result) :
     $lang = ($show == "flag") ? "" : $result->cml_language;
 
-    $link = cml_get_the_link( $result, $linked );
+    $link = cml_get_the_link( $result, $linked, $only_existings );
+    if( empty( $link) ) continue;
 
     $img = "<img class=\"$size $image_class\" src='" . cml_get_flag_by_lang_id( $result->id, $size ) . "' title='$result->cml_language' width=\"$width\"/>";
     if($show == "text") $img = "";
@@ -484,8 +485,12 @@ function cml_get_posts_of_language( $lang_id ) {
 
 /*
  * Ritorno il link formattato in base alla pagina corrente
+ *
+ * @param $result - language information ( i.e. cml_get_language() )
+ * @param $linked - return linked post, or homepage
+ * @param $exists - return linked post only if it exists, otherwise return blank link
  */
-function cml_get_the_link( $result, $linked = true ) {
+function cml_get_the_link( $result, $linked = true, $only_existings = false ) {
   global $wpCeceppaML;
 
   if( cml_is_homepage() ) {
@@ -537,7 +542,7 @@ function cml_get_the_link( $result, $linked = true ) {
 
 	Se non ho trovato nesuna traduzione per l'articolo, la bandiera punterà alla homepage
     */
-    if( empty($link) ) :
+    if( empty($link) && ! $only_existings ) :
       $link = $wpCeceppaML->get_home_url( $result->cml_language_slug );
     endif;
   }

@@ -209,11 +209,6 @@ function cml_fix_rebuild_posts_info() {
     @update_option( "cml_posts_of_lang_" . $lang->id, array_unique( $posts[ $lang->id ] ) );
   endforeach;
 
-  //Calcolo i post da escludere per la funzione filter_posts_by_language
-  foreach( $langs as $lang ) {
-    //I post da escludere sono tutti i post delle altre lingue a esclusione dei post senza lingua
-  }
-
   @update_option( "cml_posts_of_lang_" . 0, array_unique( $posts[0] ) );
 
 

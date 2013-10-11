@@ -21,6 +21,7 @@ class CeceppaMLOptions {
   }
 
   function add_meta_box() {
+    //$input = '<label><input>';
     add_meta_box("cml_show_flags_on", $input .__('Show language\'s flag:', 'ceceppaml') . '</input></label>', "cml_show_flags_on", "cml_options_page_flags");
 
     /* Tab 0: Flags */
@@ -132,6 +133,7 @@ class CeceppaMLOptions {
 
     //Translate menu items?
     @update_option( "cml_option_action_menu", intval( $_POST['action-menu'] ) );
+    @update_option( 'cml_option_menu_hide_items', intval( $_POST[ 'menu-hide-items' ] ) );
   }
 
   function update_filters() {
