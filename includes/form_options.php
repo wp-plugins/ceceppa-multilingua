@@ -83,6 +83,11 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 		      <?php _e('Automatically redirects the browser depending on the user\'s language.', 'ceceppaml'); ?>
 		    </label>
 		    <br /><br />
+            <label>
+              <input type="radio" id="redirect" name="redirect" value="default" <?php echo ((get_option('cml_option_redirect', 'auto') == 'default') ? 'checked' : '') ?> />
+		      <?php _e('Automatically redirects the default language.', 'ceceppaml'); ?>
+            </label>
+		    <br /><br />
 		    <label>
 		      <input type="radio" id="no-redirect" name="redirect" value="nothing" <?php echo ((get_option('cml_option_redirect') == 'nothing') ? 'checked' : '') ?>/>
 		      <?php _e('Do nothing', 'ceceppaml') ?>
@@ -139,8 +144,16 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 		</td>
 	    <td>
 		<br />
-		<input type="checkbox" id="action-menu" name="action-menu" value="1" <?php checked(get_option('cml_option_action_menu', true), true) ?> />
-		<label for="action-menu"><?php _e( 'Translate menu items', 'ceceppaml' ) ?>&nbsp;</label><br>
+			<label>
+			<input type="checkbox" id="action-menu" name="action-menu" value="1" <?php checked(get_option('cml_option_action_menu', true), true) ?> />
+			<?php _e( 'Translate menu items', 'ceceppaml' ) ?>
+			</label>
+			<br /><br />
+			<label>
+				<input type="checkbox" id="menu-hide-items" name="menu-hide-items" value="1" <?php checked(get_option('cml_option_menu_hide_items', false), true) ?> />
+				<?php _e( 'Hide items that doesn\'t exists in current language', 'ceceppaml' ) ?>
+			</label>
+			<br /><br />
 	    </td>
 	    </tr>
 
