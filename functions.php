@@ -177,7 +177,7 @@ function cml_show_flags( $show = "flag", $size = "tiny", $class_name = "cml_flag
 
   $redirect = get_option('cml_option_redirect');
   $results = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " WHERE cml_enabled = 1 ORDER BY cml_sort_id");  
-  $width = ($size == "tiny") ? 16 : 32;
+  $width = ( $size == "tiny" ) ? 16 : 32;
 
   $r = "<ul class=\"$class_name\">";
   foreach($results as $result) :
@@ -194,7 +194,7 @@ function cml_show_flags( $show = "flag", $size = "tiny", $class_name = "cml_flag
 
   $r .= "</ul>";
 
-  if($echo) 
+  if( $echo ) 
     echo $r;
   else
     return $r;
@@ -502,7 +502,12 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false ) {
 
     $lang_id = $wpCeceppaML->get_current_lang_id();
 
-    if( ( is_single() || is_page() ) ||  $linked ) :
+    /*
+     * I must check that is_category is false, because
+     * if wp display 404, is_single is true also for category and in this case
+     * the plugin will return wrong link
+     */
+    if( ( ( is_single() || is_page() ) ||  $linked ) && ! is_category() ):
       $link = cml_get_linked_post( $lang_id, $result, get_the_ID() );
 
       if( !empty( $link ) ) $link = get_permalink( $link );

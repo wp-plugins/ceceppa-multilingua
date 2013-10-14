@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.18
+Version: 1.3.19
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -246,8 +246,8 @@ class CeceppaML {
       * Serve a reindirizzare il browser
       */
       $this->_redirect_browser = $_cml_settings[ 'cml_option_redirect' ];
-      if( $this->_redirect_browser == 'auto' )
-        add_action('plugins_loaded', array(&$this, 'redirect_browser'));
+      if( $this->_redirect_browser != 'nothing' )
+        add_action( 'plugins_loaded', array( &$this, 'redirect_browser' ) );
 
       /*
       * Devo visualizzare le bandiere delle lingue disponibili?
@@ -320,7 +320,7 @@ class CeceppaML {
 
       //Elemento volante?
       if( $_cml_settings[ "cml_add_float_div" ] == true) :
-        add_action('wp_head', array(&$this, 'add_flying_flags'));
+        add_action('wp_footer', array(&$this, 'add_flying_flags'));
       endif;
     
       //La funzione clean_url si occupa di eliminare lo slug della lingua dal link,
@@ -1054,7 +1054,7 @@ class CeceppaML {
   function filter_posts_by_language( $wp_query ) {
     global $wpdb;
 
-    if( ! in_the_loop() ) return;
+    //if( ! in_the_loop() ) return;
     if( ! is_search() ) {
       if( is_single() || is_admin() || isCrawler() || is_page() || is_preview() ) return;
     } else {
@@ -1072,22 +1072,24 @@ class CeceppaML {
      */
     $langs = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " WHERE cml_enabled = 1");
     
-    //$exclude = get_option( 'cml_exclude_posts_for_' . $this->_current_lang_id );
-    //if( empty( $exclude ) ) {
-    //  $exclude = array();
-    //  foreach( $langs as $lang ) {
-    //    if( $lang->id == $this->_current_lang_id ) continue;
-    //    
-    //    $exclude = array_merge( $exclude, $this->get_posts_of_language( $lang->id ) );
-    //  }
-    //  Escludo tutti i post senza lingua, che quindi devono essere visibili anche nella mia lingua...
-    //  $posts = $this->get_posts_of_language( $this->_current_lang_id );
-    //  foreach( $exclude as $i => $h ) {
-    //    if( in_array( $h, $posts ) ) {
-    //      unset( $exclude[ $i ] );
-    //    }
-    //  }
-    //}
+    if( ! in_the_loop() ) {
+      $exclude = get_option( 'cml_exclude_posts_for_' . $this->_current_lang_id );
+      if( empty( $exclude ) ) {
+        $exclude = array();
+        foreach( $langs as $lang ) {
+          if( $lang->id == $this->_current_lang_id ) continue;
+          
+          $exclude = array_merge( $exclude, $this->get_posts_of_language( $lang->id ) );
+        }
+        //Escludo tutti i post senza lingua, che quindi devono essere visibili anche nella mia lingua...
+        $posts = $this->get_posts_of_language( $this->_current_lang_id );
+        foreach( $exclude as $i => $h ) {
+          if( in_array( $h, $posts ) ) {
+            unset( $exclude[ $i ] );
+          }
+        }
+      }
+    }
 
     global $wpdb;
     
@@ -1196,7 +1198,7 @@ class CeceppaML {
     *
     * @return category id
     */
-  function get_category_id($cat_name){
+  function get_category_id( $cat_name ) {
     $term = get_term_by('name', $cat_name, 'category');
 
     return (is_object($term)) ? $term->term_id : $term;
@@ -1612,6 +1614,15 @@ class CeceppaML {
                     <input type="hidden" class="menu-item-url" name="menu-item[<?php echo $_nav_menu_placeholder; ?>][menu-item-url]" value="#cml-others">
                 </li>
 
+                <li>
+                    <label class="menu-item-title">
+                      <input type="checkbox" id="cml-menu-item" name="menu-item[<?php echo $_nav_menu_placeholder; ?>][menu-item-object-id]" class="menu-item-checkbox" value="1" />
+                      <?php _e( 'All languages excluded current', 'ceceppaml' ) ?>
+                    </label>
+                    <input type="hidden" class="menu-item-type" name="menu-item[<?php echo $_nav_menu_placeholder; ?>][menu-item-type]" value="custom">
+                    <input type="hidden" class="menu-item-title" name="menu-item[<?php echo $_nav_menu_placeholder; ?>][menu-item-title]" value="<?php _e( 'All languages excluded current', 'ceceppaml' ); ?>">
+                    <input type="hidden" class="menu-item-url" name="menu-item[<?php echo $_nav_menu_placeholder; ?>][menu-item-url]" value="#cml-no-current">
+                </li>
             </ul>
         </div>
         <p class="button-controls">
@@ -1631,13 +1642,12 @@ class CeceppaML {
      * devo filtrare i contenuti in base alla lingua corrente
      */
     //L'untente non è interessato al redirect
-    if($this->_redirect_browser == 'nothing' || isCrawler()) return;
+    if( $this->_redirect_browser == 'nothing' || isCrawler() ) return;
     if( is_admin() ) return;
-
 
     //Non posso utilizzare la funzione is_home, quindi controllo "manualmente"
     //Sto nell'home?
-    if($this->_url != $this->_homeUrl || isset($_GET['lang'])) {
+    if( $this->_url != $this->_homeUrl || isset($_GET['lang']) ) {
 	return;
     }
 
@@ -1651,7 +1661,11 @@ class CeceppaML {
       $location = $this->get_home_url( $slug );
     }
 
-    if(!empty($location)) {
+    if( $this->_redirect_browser == 'default' ) {
+      $location = $this->get_home_url( $this->_default_language_slug );
+    }
+
+    if( ! empty( $location ) ) {
       $this->_redirect_browser = 'nothing';
 
       wp_redirect($location, $status);
@@ -1813,22 +1827,28 @@ class CeceppaML {
    * Salvo il collegamento tra i post
    */
   function save_extra_post_fields( $term_id ) {
-      global $wpdb, $pagenow;
+    global $wpdb, $pagenow;
 
-      //Dalla 3.5.2 questa funzione viene richiamata 2 volte :O, la seconda volta $_POST però è vuoto :O
-      if( empty( $_POST ) ) return;
+    //Dalla 3.5.2 questa funzione viene richiamata 2 volte :O, la seconda volta $_POST però è vuoto :O
+    if( empty( $_POST ) ) return;
 
-      $post_id = is_object($term_id) ? $term_id->ID : $term_id;
+    $post_id = is_object($term_id) ? $term_id->ID : $term_id;
 
-      @list($linked_lang, $linked_post) = explode("@", $_POST['linked_post']);
+    @list($linked_lang, $linked_post) = explode("@", $_POST['linked_post']);
 
-      //Recupero dalla mia tabella l'id della lingua :)
-      if(empty($_POST['post_lang']))
-	$post_lang = 0;
-      else
-	$post_lang = intval( $_POST['post_lang'] );
-	
-      $this->set_language_of_post( $post_id, $post_lang, $linked_lang, $linked_post );
+    //Recupero dalla mia tabella l'id della lingua :)
+    if( empty( $_POST['post_lang'] ) )
+      $post_lang = 0;
+    else
+      $post_lang = intval( $_POST['post_lang'] );
+
+    /* If is a page check the parent_id */
+    if( $_POST[ 'post_type' ] == 'page' && intval( $_POST[ 'parent_id' ] ) > 0 ) {
+      //Recover the language of parent
+      $post_lang = $this->get_language_id_by_page_id( intval( $_POST[ 'parent_id' ] ) );
+    }
+
+    $this->set_language_of_post( $post_id, $post_lang, $linked_lang, $linked_post );
   }
     
   function set_language_of_post( $post_id, $post_lang, $linked_lang, $linked_post ) {
@@ -2516,17 +2536,10 @@ class CeceppaML {
     	$link = add_query_arg( array( 'lang' => $this->_force_category_lang ), $link );
       endif; //!empty
 
-      if( isset( $_GET[ 'cdbg'] ) ) {
-        echo "Link: $link, ";
-        echo "Slug: $slug, ";
-        echo "Lang: $lang_id, default: " . $this->_default_language_id . ", ";
-      }
-      if($this->_current_lang_id != $this->_default_language_id ) :
+      if( $this->_current_lang_id != $this->_default_language_id  ) :
     	$link = $this->convert_url( $slug, $link );
       endif;
-      if( isset( $_GET[ 'cdbg'] ) ) {
-        echo "Convertito: $link <br />";
-      }
+
       return $link;
     }
 
@@ -3292,7 +3305,6 @@ class CeceppaML {
       }
 
       if( $item->url == '#cml-current' ) {
-        $lang = $this->get_current_language();
         $item->title = "";
         if( $what == 1 || $what == 2 )
           $item->title = $lang->cml_language;
@@ -3304,7 +3316,9 @@ class CeceppaML {
         $item->url = cml_get_the_link( $lang );
       }
 
-      if( $item->url == '#cml-others' ) {
+      if( $item->url == '#cml-others' || $item->url == '#cml-no-current' ) {
+        if( $item->url == '#cml-no-current' ) $lang = cml_get_current_language();
+
         $langs = cml_get_languages();
         foreach( $langs as $l ) {
           if( isset( $lang ) && $l->id == $lang->id ) continue;
