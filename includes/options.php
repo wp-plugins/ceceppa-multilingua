@@ -10,7 +10,7 @@ class CeceppaMLOptions {
     //Css
     wp_enqueue_style('ceceppaml-style');
     wp_enqueue_style('ceceppaml-dd');
-    
+
     if(array_key_exists("options", $_POST) && wp_verify_nonce($_POST['cml_nonce_edit_settings'], 'cml_edit_settings')) :
       $this->update_options();
     endif;
@@ -21,6 +21,7 @@ class CeceppaMLOptions {
   }
 
   function add_meta_box() {
+    //$input = '<label><input>';
     add_meta_box("cml_show_flags_on", $input .__('Show language\'s flag:', 'ceceppaml') . '</input></label>', "cml_show_flags_on", "cml_options_page_flags");
 
     /* Tab 0: Flags */
@@ -57,6 +58,7 @@ class CeceppaMLOptions {
     @update_option("cml_option_flags_on_post", intval($_POST['flags-on-posts']));
     @update_option("cml_option_flags_on_page", intval($_POST['flags-on-pages']));
     @update_option("cml_option_flags_on_custom_type", intval($_POST['flags-on-custom']));
+    @update_option("cml_option_flags_on_the_loop", intval($_POST['flags-on-loop']));
     @update_option("cml_option_flags_on_pos", sanitize_title( $_POST['flags_on_pos'] ) );
     @update_option("cml_options_flags_on_translations", intval( $_POST['flags-translated-only'] ) );
     
@@ -131,6 +133,7 @@ class CeceppaMLOptions {
 
     //Translate menu items?
     @update_option( "cml_option_action_menu", intval( $_POST['action-menu'] ) );
+    @update_option( 'cml_option_menu_hide_items', intval( $_POST[ 'menu-hide-items' ] ) );
   }
 
   function update_filters() {
