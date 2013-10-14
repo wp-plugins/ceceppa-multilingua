@@ -14,12 +14,12 @@ function cml_fix_database() {
   $dbVersion = get_option("cml_db_version", CECEPPA_DB_VERSION);
 
     //Rimuovo le colonne non più necessarie
-    if(get_option("cml_db_version", CECEPPA_DB_VERSION) <= 9) :
+    if( $dbVersion <= 9 ) :
       $wpdb->query("ALTER table " . CECEPPA_ML_TABLE . " DROP cml_category_name, DROP cml_category_id, DROP cml_category_slug, DROP cml_page_id, DROP cml_page_slug");
     endif;
 
     //modifico il charset della tabella
-    if(get_option("cml_db_version", CECEPPA_DB_VERSION) <= 9) :
+    if( $dbVersion <= 9 ) :
       $alter = "ALTER TABLE  " . CECEPPA_ML_TABLE . " CHANGE  `cml_language`  `cml_language` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NULL DEFAULT NULL,"
 		. "CHANGE  `cml_notice_post`  `cml_notice_post` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NULL DEFAULT NULL ,"
 		. "CHANGE  `cml_notice_page`  `cml_notice_page` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NULL DEFAULT NULL ,"
@@ -111,6 +111,8 @@ function cml_fix_database() {
     if( $dbVersion <= 18 ) :
       $wpdb->query( "ALTER TABLE  " . CECEPPA_ML_TABLE . " ADD  `cml_flag_path` TEXT" );
     endif;
+    
+    update_option("cml_db_version", CECEPPA_DB_VERSION);
 }
 
 //Imposto in automatico la lingua in tutti i post
