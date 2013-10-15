@@ -111,7 +111,7 @@ function cml_fix_database() {
     if( $dbVersion <= 18 ) :
       $wpdb->query( "ALTER TABLE  " . CECEPPA_ML_TABLE . " ADD  `cml_flag_path` TEXT" );
     endif;
-    
+
     update_option("cml_db_version", CECEPPA_DB_VERSION);
 }
 
@@ -149,7 +149,7 @@ function cml_update_all_posts_language() {
 		  "cml_post_id_2" => 0),
 	    array('%d', '%d', '%d', '%d'));
   endforeach;
-  
+
   update_option("cml_need_update_posts", false);
 }
 
