@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.21
+Version: 1.3.22
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -1938,7 +1938,7 @@ class CeceppaML {
     //per evitare che i titoli dei widget nella colonna a sx cambino al cambiare
     //della lingua...
     if( isset( $_GET ['page'] ) && $_GET[ 'page' ] == 'ceceppaml-widgettitles-page' ) :
-      $locale = "en_US";
+      $this->_current_lang_locale = "en_US";
     endif;
 
     return $this->_current_lang_locale;
@@ -2354,10 +2354,16 @@ class CeceppaML {
       $id = $query->query_vars['page_id'];
       
       //Recupero l'id collegato
-      $nid = cml_get_linked_post($this->_default_language_id, null, $id, $lang_id);
+      $nid = cml_get_linked_post( $this->_default_language_id, null, $id, $lang_id );
 
-      if(empty($nid)) $nid = $id;
+      if( empty( $nid ) ) $nid = $id;
       $query->query_vars['page_id'] = $nid;
+      $query->query_vars['is_home'] = 1;
+
+      /*
+       * Change the id of "page_on_front", so wordpress will add "home" to body_class
+       */
+      update_option( 'page_on_front', $nid );
 
       $this->_static_page = true;
     }
