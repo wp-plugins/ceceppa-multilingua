@@ -175,8 +175,8 @@ function cml_is_default_lang($lang = null) {
 function cml_show_flags( $show = "flag", $size = "tiny", $class_name = "cml_flags", $image_class = "", $echo = true, $linked = true, $only_existings = false ) {
   global $wpdb, $wpCeceppaML;
 
-  $redirect = get_option('cml_option_redirect');
-  $results = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " WHERE cml_enabled = 1 ORDER BY cml_sort_id");  
+  $redirect = get_option( 'cml_option_redirect' );
+  $results = cml_get_languages();
   $width = ( $size == "tiny" ) ? 16 : 32;
 
   $r = "<ul class=\"$class_name\">";
@@ -401,8 +401,8 @@ function cml_is_homepage() {
     $static_id = get_option( "page_for_posts" ) + get_option( "page_on_front" );
 
     $lang_id = cml_get_current_language_id();
-    $the_id = get_the_ID();
-    if( !empty( $the_id ) ) :
+    $the_id = get_queried_object_id();
+    if( ! empty( $the_id ) ) :
       if( $the_id == $static_id ) return true;	//E' proprio lei...
       
       //Mica è una traduzione?
@@ -508,7 +508,7 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false ) {
      * the plugin will return wrong link
      */
     if( ( ( is_single() || is_page() ) ||  $linked ) && ! is_category() ):
-      $link = cml_get_linked_post( $lang_id, $result, get_the_ID() );
+      $link = cml_get_linked_post( $lang_id, $result, get_the_ID(), $result->id );
 
       if( !empty( $link ) ) $link = get_permalink( $link );
     endif;

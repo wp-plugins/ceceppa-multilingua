@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.22
+Version: 1.3.23
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -292,9 +292,7 @@ class CeceppaML {
         //is_home a questo "punto" non funziona :(
         $this->update_current_lang();
     
-        //Se è una lingua valida controllo...
-        if( $this->_current_lang_id != $this->_default_language_id )
-          add_filter( 'pre_get_posts', array( &$this, 'get_static_page' ), 0 );
+        add_filter( 'pre_get_posts', array( &$this, 'get_static_page' ), 0 );
       endif;
   
       //Filtro il link degli archivi :)
@@ -345,7 +343,7 @@ class CeceppaML {
     //Translate post_link e page_link
     add_filter('post_link', array( &$this, 'translate_post_link' ), 0, 3);
     add_filter('post_type_link', array( &$this, 'translate_post_link' ), 0, 3);
-    add_filter('page_link', array( &$this, 'translate_page_link' ), 0);
+    add_filter( 'page_link', array( &$this, 'translate_page_link' ), 0, 3 );
 
     add_filter('term_link', array( &$this, 'translate_term_link' ), 0);
     add_filter('term_name', array( &$this, 'translate_term_name' ), 0, 1);
@@ -2354,7 +2352,7 @@ class CeceppaML {
       $id = $query->query_vars['page_id'];
       
       //Recupero l'id collegato
-      $nid = cml_get_linked_post( $this->_default_language_id, null, $id, $lang_id );
+      $nid = cml_get_linked_post( $this->get_language_id_by_post_id( $id ), null, $id, $lang_id );
 
       if( empty( $nid ) ) $nid = $id;
       $query->query_vars['page_id'] = $nid;
@@ -2378,8 +2376,8 @@ class CeceppaML {
       if( $page >= 2 ) return $permalink;   //Fix: "La pagina web ha generato un loop di reindirizzamento"
       if( is_preview() ) return $permalink;
 
-      if($lang_id == null) $lang_id = $this->get_language_id_by_post_id( $post->ID );
-      if($lang_id == 0) $lang_id = $this->_current_lang_id;
+      if( $lang_id == null ) $lang_id = $this->get_language_id_by_post_id( $post->ID );
+      if( $lang_id == 0 ) $lang_id = $this->_current_lang_id;
 
       $slug = $this->get_language_slug_by_id( $lang_id );
 
@@ -2391,23 +2389,24 @@ class CeceppaML {
       $title = array_pop($plinks);
 
       //Non traduco le categorie per la lingua di default
-      if($lang_id != $this->_default_language_id) :
-	foreach( $plinks as $plink ) :
-	  //Cerco la traduzione della categoria nella lingua del post :)
-	  $_cat = get_category_by_slug($plink);
-	  if(is_object($_cat)) :
-	    $id = $_cat->term_id;
+      if($lang_id != $this->_default_language_id) {
+        foreach( $plinks as $plink ) {
+          //Cerco la traduzione della categoria nella lingua del post :)
+          $_cat = get_category_by_slug($plink);
 
-	    if( !empty( $plink ) ) :
-	      $cat = strtolower( get_option( "cml_category_" . $id . "_lang_" . $lang_id, $plink ) );
-	      $url = str_replace(" ", "-", $cat);
-	      $plink = urlencode($url);
-	    endif;
-	  endif;
-
-	  $cats[] = $plink;
-	endforeach;
-      endif;
+          if(is_object($_cat)) :
+            $id = $_cat->term_id;
+    
+            if( !empty( $plink ) ) :
+              $cat = strtolower( get_option( "cml_category_" . $id . "_lang_" . $lang_id, $plink ) );
+              $url = str_replace(" ", "-", $cat);
+              $plink = urlencode($url);
+            endif;
+          endif;
+    
+          $cats[] = $plink;
+        }
+      }
 
       //Ricreo il permalink con le categorie tradotte... :)
       if( empty( $cats ) ) $cats = $plinks;
@@ -2416,27 +2415,33 @@ class CeceppaML {
       return $this->convert_url( $slug, $url );
     }
     
-    function translate_page_link( $permalink ) {
+    function translate_page_link( $permalink, $id, $sample ) {
       global $page;
       
       if( $page >= 2 ) return $permalink;   //Fix: "La pagina web ha generato un loop di reindirizzamento"
       if( is_admin() ) return $permalink;
 
       //Se è stata scelta la modalità suffix: ?lang=## lo slug è quello della lingua attuale?
-      if( $this->_url_mode == PRE_LANG ) :
-	$slug = $this->_current_lang_slug;
-      else:
-	if( empty( $this->_permalink_structure ) ) :
-	  $page_id = $this->get_post_id_by_url( $permalink );
-	else:
-	  $page_id = cml_get_page_id_by_path( $permalink, array('page') );
-	endif;
+      if( ! empty( $id ) ) {
+        $slug = $this->get_language_id_by_post_id( $id );
+      } else {
+        if( $this->_url_mode == PRE_LANG ) {
+          $slug = $this->_current_lang_slug;
+        } else {
+          if( empty( $this->_permalink_structure ) ) {
+            $page_id = $this->get_post_id_by_url( $permalink );
+          } else {
+            $page_id = cml_get_page_id_by_path( $permalink, array('page') );
+          }
+  
+          $slug = $this->get_language_id_by_post_id( $page_id );
+        }
+      }
 
-	$slug = $this->get_language_id_by_post_id( $page_id );
-	if( empty( $slug) ) $slug = $this->_current_lang_id;
-
-	$slug = $this->get_language_slug_by_id($slug);
-      endif;
+      if( ! empty( $slug) )
+        $slug = $this->get_language_slug_by_id( $slug );
+      else
+        $slug = $this->_current_lang_slug;
 
       return $this->convert_url( $slug, $permalink );
     }

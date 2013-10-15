@@ -48,7 +48,7 @@ function cml_get_linked_post($lang_id, $result, $post_id, $browser_lang = null) 
   endif;
 
   //Non confronto la lingua con se stessa :D
-  if(is_object($result) && $result->id != $lang_id) {
+  if( is_object( $result ) && $result->id != $lang_id ) {
       /*
 	* Devo cercare sia in cml_post_id_1 che in cml_post_id_2, xkè posso avere
 	* degli articoli collegati tra di loro, ma non a quella predefinita, e considerando
@@ -56,19 +56,19 @@ function cml_get_linked_post($lang_id, $result, $post_id, $browser_lang = null) 
 	*/
       $query = sprintf("SELECT *, cml_post_id_2 as post_id FROM %s WHERE (cml_post_id_1 = %d OR cml_post_id_2 = %d) AND (cml_post_id_1 > 0 AND cml_post_id_2 > 0)",
 			CECEPPA_ML_POSTS, $post_id, $post_id);
-      $new_id = $wpdb->get_row($query);
+      $new_id = $wpdb->get_row( $query );
 
-      if(!empty($new_id)) :
-	if($new_id->cml_post_lang_2 != $result->id && $new_id->post_id > 0) {
-	  //Se la lingua che ho recuperato è diversa da quella attuale verifico se c'è un altro
-	  //post in un'altra lingua collegato a questo
-	  $query = sprintf("SELECT *, cml_post_id_1 as post_id FROM %s WHERE cml_post_id_2 = %d AND cml_post_lang_1 = %d",
-			    CECEPPA_ML_POSTS, $new_id->post_id, $result->id);
-
-	  $new_id = $wpdb->get_row($query);
-	} else {
-	  $new_id = $new_id->post_id;
-	}
+      if( ! empty( $new_id ) ) :
+        if($new_id->cml_post_lang_2 != $result->id && $new_id->post_id > 0) {
+          //Se la lingua che ho recuperato è diversa da quella attuale verifico se c'è un altro
+          //post in un'altra lingua collegato a questo
+          $query = sprintf("SELECT *, cml_post_id_1 as post_id FROM %s WHERE cml_post_id_2 = %d AND cml_post_lang_1 = %d",
+                    CECEPPA_ML_POSTS, $new_id->post_id, $result->id);
+    
+          $new_id = $wpdb->get_row($query);
+        } else {
+          $new_id = $new_id->post_id;
+        }
       endif;
 
       if(is_object($new_id)) $new_id = $new_id->post_id;
