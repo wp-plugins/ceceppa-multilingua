@@ -22,7 +22,7 @@ class CeceppaMLOptions {
 
   function add_meta_box() {
     //$input = '<label><input>';
-    add_meta_box("cml_show_flags_on", $input .__('Show language\'s flag:', 'ceceppaml') . '</input></label>', "cml_show_flags_on", "cml_options_page_flags");
+    add_meta_box("cml_show_flags_on", __('Show language\'s flag:', 'ceceppaml'), "cml_show_flags_on", "cml_options_page_flags");
 
     /* Tab 0: Flags */
     $input = '<label><input type="checkbox" id="to-menu" name="float-div" value="1" ' . checked(get_option('cml_add_float_div', false), true, false) . ' />&nbsp;';

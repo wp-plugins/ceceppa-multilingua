@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.23
+Version: 1.3.24
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $wpdb;
 
-define('CECEPPA_DB_VERSION', 19);
+define( 'CECEPPA_DB_VERSION', 19 );
 
 define('CECEPPA_ML_TABLE', $wpdb->base_prefix . 'ceceppa_ml');
 define('CECEPPA_ML_CATS', $wpdb->base_prefix . 'ceceppa_ml_cats');
@@ -145,8 +145,8 @@ class CeceppaML {
       add_action('admin_menu', array(&$this, 'add_menu_flags'));
 
       /*
-	* Aggiungo il box di collegamento nei post e nelle pagine 
-	*/
+      * Aggiungo il box di collegamento nei post e nelle pagine 
+      */
       add_action('admin_init', array(&$this, 'add_meta_boxes'));
       add_action('edit_post', array(&$this, 'save_extra_post_fields'));
       add_action('delete_post', array(&$this, 'delete_extra_post_fields'));
@@ -221,7 +221,8 @@ class CeceppaML {
       * Nascondo i post "collegati", quindi tra quelli collegati visualizzo solo quelli
       * della lingua corrente
       */
-      if( $_cml_settings[ "cml_option_filter_translations" ] || array_key_exists( "ht", $_GET ) ) {
+      if( ( $_cml_settings[ "cml_option_filter_translations" ] || array_key_exists( "ht", $_GET ) )
+         && ! $_cml_settings[ 'cml_option_filter_posts' ] ) {
         add_action('pre_get_posts', array(&$this, 'hide_translations'));
       }
 
@@ -751,6 +752,7 @@ class CeceppaML {
     //Server per poter utilizare la funzione dbDelta
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
+    
     /*
      * CECEPPA_ML_TABLE: Contiene le informazioni sulle lingue da gestire
      */
@@ -1071,7 +1073,7 @@ class CeceppaML {
      * ignoro i nav_menu_items, ma seleziono solo i post e pagine...
      */
     $langs = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " WHERE cml_enabled = 1");
-    
+
     if( ! in_the_loop() ) {
       $exclude = get_option( 'cml_exclude_posts_for_' . $this->_current_lang_id );
       if( empty( $exclude ) ) {
@@ -1089,10 +1091,11 @@ class CeceppaML {
           }
         }
       }
+      
     } else {
       //Recupero tutti i post associati alla lingua corrente
       $posts = $this->get_posts_of_language( $this->_current_lang_id );
-  
+
       if( ! empty ( $posts ) ) :
         $wp_query->query_vars[ 'post__in' ] = $posts;
       endif;
@@ -1350,18 +1353,18 @@ class CeceppaML {
     global $wp_registered_sidebars;
 
     ob_start();
-      if ( !function_exists('dynamic_sidebar') ) { //|| !dynamic_sidebar("Sidebar") ) {
-	echo "No widgets...";
-	return;
-      }
+    if ( !function_exists('dynamic_sidebar') ) { //|| !dynamic_sidebar("Sidebar") ) {
+      echo "No widgets...";
+      return;
+    }
 
-      if(is_array($wp_registered_sidebars)) :
-	$keys = array_keys($wp_registered_sidebars);
-
-	foreach($keys as $key) :
-	  dynamic_sidebar($key);
-	endforeach;
-      endif;
+    if( is_array( $wp_registered_sidebars ) ) {
+      $keys = array_keys( $wp_registered_sidebars );
+  
+      foreach($keys as $key) :
+        dynamic_sidebar( $key );
+      endforeach;
+    }
     
     //Cancello l'output
     ob_end_clean();
@@ -1415,16 +1418,18 @@ class CeceppaML {
     $linked_to = empty( $linked_post ) ? $linked_to : $linked_post;
 
     if( empty( $lang_id ) ) $lang_id = $this->_default_language_id;
-    $not = ( get_option( "cml_hide_posts_for_lang_" . $lang_id ) );
-    $not = array_merge ( $not, $this->_posts_of_lang[ $lang_id ] );
-    $untranslated = array_merge( array( $linked_to ), get_option( "cml_posts_of_lang_" . 0 ) );
+    $not = get_option( "cml_hide_posts_for_lang_" . $lang_id );
+    $not = @array_merge ( $not, $this->_posts_of_lang[ $lang_id ] );
+    $untranslated = @array_merge( array( $linked_to ), get_option( "cml_posts_of_lang_" . 0 ) );
 
-    //Cancello dai post da escludere quello collegato 
-    foreach ( $untranslated as $v ) :
-      if( ( $key = array_search( $v, $not ) ) !== false ) {
-	  unset( $not[ $key ] );
-      }
-    endforeach;
+    //Cancello dai post da escludere quello collegato
+    if( is_array( $not ) && is_array( $untranslated ) ) {
+      foreach ( $untranslated as $v ) :
+        if( ( $key = array_search( $v, $not ) ) !== false ) {
+          unset( $not[ $key ] );
+        }
+      endforeach;
+    }
 
     //Elenco degli articoli
     $args = array('numberposts' => -1, 'order' => 'ASC', 'orderby' => 'title', 'posts_per_page' => 9999,
@@ -2626,27 +2631,28 @@ class CeceppaML {
       if(empty($obj)) return $obj;
 
       $nobj = $obj;
-      if(is_object($obj)) :
-	if($obj->taxonomy == 'category' || $obj->taxonomy == 'post_tag') {
-	  $term_id = $obj->term_id;
-	  $post_id = (isset($obj->object_id)) ? $obj->object_id : -1;
-
-	  if($post_id > 1 || $this->_current_lang_id != $this->_default_language_id) :
-	    $lang = $this->_current_lang_id;
-
-	    $n = get_option("cml_category_" . $term_id . "_lang_" . $lang);
-	    $obj->name = empty($n) ? $obj->name : $n;
-	  endif;
-	}
-	
-	return $obj;
-      endif;
+      if(is_object($obj)) {
+        if($obj->taxonomy == 'category' || $obj->taxonomy == 'post_tag') {
+          $term_id = $obj->term_id;
+          $post_id = (isset($obj->object_id)) ? $obj->object_id : -1;
+    
+          if($post_id > 1 || $this->_current_lang_id != $this->_default_language_id) :
+            $lang = $this->_current_lang_id;
+    
+            $n = get_option("cml_category_" . $term_id . "_lang_" . $lang);
+            $obj->name = empty($n) ? $obj->name : $n;
+          endif;
+        }
+        
+        return $obj;
+      }
 
       if(is_array($obj)) :
-	$nobj = null;
-	foreach($obj as $o) :
-	  $nobj[] = $this->translate_object_terms($o);
-	endforeach;
+        $nobj = null;
+
+        foreach($obj as $o) :
+          $nobj[] = $this->translate_object_terms($o);
+        endforeach;
       endif;
       
       return $nobj;

@@ -477,7 +477,7 @@ function cml_set_language_of_post( $id, $lang_id ) {
   $wpCeceppaML->set_language_of_post( $id, $lang_id, 0, 0 );
 }
 
-function cml_get_posts_of_language( $lang_id ) {
+function cml_get_posts_of_language( $lang_id = null ) {
   global $wpCeceppaML;
   
   return $wpCeceppaML->get_posts_of_language();
