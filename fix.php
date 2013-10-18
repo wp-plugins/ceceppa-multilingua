@@ -14,12 +14,12 @@ function cml_fix_database() {
   $dbVersion = get_option("cml_db_version", CECEPPA_DB_VERSION);
 
     //Rimuovo le colonne non più necessarie
-    if(get_option("cml_db_version", CECEPPA_DB_VERSION) <= 9) :
+    if( $dbVersion <= 9 ) :
       $wpdb->query("ALTER table " . CECEPPA_ML_TABLE . " DROP cml_category_name, DROP cml_category_id, DROP cml_category_slug, DROP cml_page_id, DROP cml_page_slug");
     endif;
 
     //modifico il charset della tabella
-    if(get_option("cml_db_version", CECEPPA_DB_VERSION) <= 9) :
+    if( $dbVersion <= 9 ) :
       $alter = "ALTER TABLE  " . CECEPPA_ML_TABLE . " CHANGE  `cml_language`  `cml_language` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NULL DEFAULT NULL,"
 		. "CHANGE  `cml_notice_post`  `cml_notice_post` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NULL DEFAULT NULL ,"
 		. "CHANGE  `cml_notice_page`  `cml_notice_page` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NULL DEFAULT NULL ,"
@@ -111,6 +111,8 @@ function cml_fix_database() {
     if( $dbVersion <= 18 ) :
       $wpdb->query( "ALTER TABLE  " . CECEPPA_ML_TABLE . " ADD  `cml_flag_path` TEXT" );
     endif;
+
+    update_option("cml_db_version", CECEPPA_DB_VERSION);
 }
 
 //Imposto in automatico la lingua in tutti i post
@@ -147,7 +149,7 @@ function cml_update_all_posts_language() {
 		  "cml_post_id_2" => 0),
 	    array('%d', '%d', '%d', '%d'));
   endforeach;
-  
+
   update_option("cml_need_update_posts", false);
 }
 
@@ -163,30 +165,9 @@ function cml_update_all_posts_language() {
  */
 function cml_fix_rebuild_posts_info() {
   global $wpCeceppaML, $wpdb;
-  global $_wp_registered_nav_menus;
-
-  /*
-   * Non sono riuscito a trovare un metodo che identifichi il menu "padre" a partire dall'id
-   * del menu, quindi "precarico" tutti gli elementi dei vari menu...
-   */
-  $nav_menus = get_nav_menu_locations();
-  $keys = array_keys( $nav_menus );
   
-  foreach( $keys as $key ) :
-    $items = wp_get_nav_menu_items( $nav_menus[ $key ] );
-
-    foreach( $items as $item ) :
-      $menus[ $key ][] = $item->ID;
-    endforeach;
-
-  endforeach;
-
   //Tipi di post + custon_posts
-  /* 
-    I tipi nav_menu_item mi servono quando l'utente attiva l'opzione
-    "filtra post per lingua", perché non riesco a determinare, almeno con tutti i tipi di tema,
-    quando è il momento di in_main_query() */
-  $types = array_merge( array( 'post' => 'post', 'page' => 'page', 'nav_menu_item' => 'nav_menu_item' ), 
+  $types = array_merge( array( 'post' => 'post', 'page' => 'page' ), 
 				get_post_types( array( '_builtin' => false ), 'names' ) );
 
   //Recupero tutti gli articoli
@@ -201,53 +182,29 @@ function cml_fix_rebuild_posts_info() {
 
     $pid = $p->post->ID;
     
-    if( $p->post->post_type != 'nav_menu_item' ) :
+    //if( $p->post->post_type != 'nav_menu_item' ) :
       $lang = $wpCeceppaML->get_language_id_by_post_id( $pid );
 
       //In 0 memorizzo tutti gli articoli senza "lingua", ovvero tutti gli articoli visibili in tutte le lingue
       if(empty($lang)) $lang = 0;
 
       if($lang == 0) :
-	foreach($langs as $l) :
-	  $id = cml_get_linked_post(0, null, $pid, $l->id);
-
-	  //Se non è vuoto, vuol dire che esiste traduzione per questo articolo in questa lingua e va escluso quando
-	  //richiamo la funzione hide_translation
-	  if( ! empty( $id ) ) :
-	    $exclude[$l->id][] = $pid;
-	  else:
-	    //Se non ho trovato la traduzione per la lingua corrente, allora aggiungo questo articolo 
-	    //all'elenco degli articoli di questa lingua
-	    $posts[$l->id][] = $pid;
-	  endif;
-	endforeach;
+        foreach($langs as $l) :
+          $id = cml_get_linked_post(0, null, $pid, $l->id);
+    
+          //Se non è vuoto, vuol dire che esiste traduzione per questo articolo in questa lingua e va escluso quando
+          //richiamo la funzione hide_translation
+          if( ! empty( $id ) ) :
+            $exclude[$l->id][] = $pid;
+          else:
+            //Se non ho trovato la traduzione per la lingua corrente, allora aggiungo questo articolo 
+            //all'elenco degli articoli di questa lingua
+            $posts[$l->id][] = $pid;
+          endif;
+        endforeach;
       endif;
-      
+
       $posts[ $lang ][] = $pid;
-    else:
-      //E' una voce di menu, vedo a chi "appartiene"
-      $i = 0;
-      foreach( $menus as $menu ) :
-	//Se non trovo l'ID in nessun menu lo scarto...
-	$found = false;
-
-	//Un elemento può essere associato a più di un menu...
-	if( in_array( $pid, $menu ) ) :
-	  //Recupero lo slug della lingua
-	  preg_match( '/cml_menu_(.*)/', $keys[ $i ], $slug );
-
-	  //E' un menu del mio plugin?
-	  if( ! empty( $slug ) ) :
-	    $lang = $wpCeceppaML->get_language_id_by_slug( end( $slug ) );
-	    $found = true;
-
-	    $posts[ $lang ][] = $pid;
-	  endif;
-	endif;
-
-	$i++;
-      endforeach;
-    endif;
   endwhile;
 
   foreach( $langs as $lang ) :
