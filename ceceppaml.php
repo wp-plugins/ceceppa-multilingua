@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.25
+Version: 1.3.26
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -1072,7 +1072,7 @@ class CeceppaML {
      * forzare solo quelli della lingua corrente, in quanto nel file fix.php
      * ignoro i nav_menu_items, ma seleziono solo i post e pagine...
      */
-    $langs = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " WHERE cml_enabled = 1");
+    $langs = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " WHERE cml_enabled >= 0");
 
     if( ! in_the_loop() ) {
       $exclude = get_option( 'cml_exclude_posts_for_' . $this->_current_lang_id );
@@ -1091,8 +1091,8 @@ class CeceppaML {
           }
         }
       }
-      
-    } else {
+    }
+    else {
       //Recupero tutti i post associati alla lingua corrente
       $posts = $this->get_posts_of_language( $this->_current_lang_id );
 
@@ -1110,7 +1110,8 @@ class CeceppaML {
     if( ! is_array( $this->_hide_posts ) ) $this->_hide_posts = array();
     if( ! is_array( $exclude ) ) $exclude = array();
 
-    $wp_query->query_vars[ 'post__not_in' ] = array_merge( $this->_hide_posts, $exclude );
+    $eclude = @array_merge( $this->_hide_posts, $exclude );
+    $wp_query->query_vars[ 'post__not_in' ] = array_merge( $wp_query->query_vars[ 'post__not_in' ], $exclude );
 
     $this->change_menu();
   }
@@ -1125,19 +1126,19 @@ class CeceppaML {
       if(is_preview() || isset($_GET['preview'])) return;
 
       if( !isset( $this->_hide_posts ) || empty( $this->_hide_posts ) ) :
-	$this->_hide_posts = array();
-
-	$this->_hide_posts = get_option( "cml_hide_posts_for_lang_" . $this->_current_lang_id );
+        $this->_hide_posts = array();
+    
+        $this->_hide_posts = get_option( "cml_hide_posts_for_lang_" . $this->_current_lang_id );
       endif;
 
       //Al momento utilizzo la vecchia funzione non ottimizzata per la visualizzazione dei tag
       if( is_tag() ) cml_deprecated_hide_translations_for_tags($wp_query);
 
-      if($wp_query != null && is_object($wp_query) && is_array($this->_hide_posts)) :
-	$wp_query->query_vars['post__not_in'] = $this->_hide_posts;
-
-	return $this->_hide_posts;
-      endif;
+      if($wp_query != null && is_object($wp_query) && is_array($this->_hide_posts)) {
+        $wp_query->query_vars['post__not_in'] = array_merge( $wp_query->query_vars[ 'post__not_in' ], $this->_hide_posts );
+    
+        return $this->_hide_posts;
+      }
 
       return $this->_hide_posts;
     }
