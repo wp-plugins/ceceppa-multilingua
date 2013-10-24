@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.26
+Version: 1.3.27
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $wpdb;
 
-define( 'CECEPPA_DB_VERSION', 19 );
+define( 'CECEPPA_DB_VERSION', 20 );
 
 define('CECEPPA_ML_TABLE', $wpdb->base_prefix . 'ceceppa_ml');
 define('CECEPPA_ML_CATS', $wpdb->base_prefix . 'ceceppa_ml_cats');
@@ -69,6 +69,7 @@ class CeceppaML {
   protected $_current_lang;              //Nome della lingua corrente
   protected $_current_lang_id;           //Id della lingua corrente
   protected $_current_lang_locale;       //"Locale Wordpress"
+  protected $_current_language;
   protected $_default_language;         //Lingua di default
   protected $_default_language_id;      //Id della lingua predefinita
   protected $_default_language_slug;    //
@@ -381,6 +382,7 @@ class CeceppaML {
     if( !is_admin() && $_cml_settings[ "cml_option_change_locale" ] == 1 || ( is_admin() && $_cml_settings[ 'cml_option_change_locale_admin'] ) ) :
       add_filter( 'locale', array( &$this, 'setlocale' ), 0, 1 );
     endif;
+    add_action('plugins_loaded', array( &$this, 'setup_rtl' ), 1);
   }
 
   /*
@@ -782,6 +784,7 @@ class CeceppaML {
       cml_enabled INT,
       cml_sort_id INT,
       cml_flag_path TEXT,
+      cml_rtl INT,
       PRIMARY KEY  id (id)
       ) ENGINE=InnoDB CHARACTER SET=utf8;";
 
@@ -915,7 +918,7 @@ class CeceppaML {
     }
 
     //for updates
-    update_option("cml_db_version", CECEPPA_DB_VERSION);
+    //update_option("cml_db_version", CECEPPA_DB_VERSION);
   }
 
     function register_scripts() {
@@ -1989,6 +1992,7 @@ class CeceppaML {
       //Aggiorno le info sulla lingua corrente
       $this->_current_lang = $this->get_language_slug_by_id($lang);
       $this->_current_lang_id = $lang;
+      $this->_current_language = cml_get_language_info( $this->_current_lang_id );
 
       if( $this->_filter_search ) {
         //For Fix Notice
@@ -3366,6 +3370,12 @@ class CeceppaML {
     }
 
     return $new;
+  }
+  
+  function setup_rtl() {
+    if( empty( $this->_current_language ) ) $this->update_current_lang();
+
+    $GLOBALS['text_direction'] = ( $this->_current_language->cml_rtl == 1 ) ? 'rtl' : 'ltr';
   }
 }
 

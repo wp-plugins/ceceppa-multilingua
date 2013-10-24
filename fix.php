@@ -13,6 +13,10 @@ function cml_fix_database() {
 
   $dbVersion = get_option("cml_db_version", CECEPPA_DB_VERSION);
 
+  if( $dbVersion < 20 ) {
+      $wpdb->query(  "ALTER TABLE  " . CECEPPA_ML_TABLE . " ADD  `cml_rtl` INT NOT NULL ;" );
+  }
+  
     //Rimuovo le colonne non più necessarie
     if( $dbVersion <= 9 ) :
       $wpdb->query("ALTER table " . CECEPPA_ML_TABLE . " DROP cml_category_name, DROP cml_category_id, DROP cml_category_slug, DROP cml_page_id, DROP cml_page_slug");

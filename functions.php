@@ -487,8 +487,8 @@ function cml_get_posts_of_language( $lang_id = null ) {
  * Ritorno il link formattato in base alla pagina corrente
  *
  * @param $result - language information ( i.e. cml_get_language() )
- * @param $linked - return linked post, or homepage
- * @param $exists - return linked post only if it exists, otherwise return blank link
+ * @param $linked - must return linked post ( = true ), or homepage ( = false )?
+ * @param $only_existings - return linked post only if it exists, otherwise return blank link
  */
 function cml_get_the_link( $result, $linked = true, $only_existings = false ) {
   global $wpCeceppaML;
