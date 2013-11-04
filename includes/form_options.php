@@ -83,6 +83,11 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 		      <?php _e('Automatically redirects the browser depending on the user\'s language.', 'ceceppaml'); ?>
 		    </label>
 		    <br /><br />
+            <label>
+              <input type="radio" id="redirect" name="redirect" value="default" <?php echo ((get_option('cml_option_redirect', 'auto') == 'default') ? 'checked' : '') ?> />
+		      <?php _e('Automatically redirects the default language.', 'ceceppaml'); ?>
+            </label>
+		    <br /><br />
 		    <label>
 		      <input type="radio" id="no-redirect" name="redirect" value="nothing" <?php echo ((get_option('cml_option_redirect') == 'nothing') ? 'checked' : '') ?>/>
 		      <?php _e('Do nothing', 'ceceppaml') ?>
@@ -139,8 +144,16 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 		</td>
 	    <td>
 		<br />
-		<input type="checkbox" id="action-menu" name="action-menu" value="1" <?php checked(get_option('cml_option_action_menu', true), true) ?> />
-		<label for="action-menu"><?php _e( 'Translate menu items', 'ceceppaml' ) ?>&nbsp;</label><br>
+			<label>
+			<input type="checkbox" id="action-menu" name="action-menu" value="1" <?php checked(get_option('cml_option_action_menu', true), true) ?> />
+			<?php _e( 'Translate menu items', 'ceceppaml' ) ?>
+			</label>
+			<br /><br />
+			<label>
+				<input type="checkbox" id="menu-hide-items" name="menu-hide-items" value="1" <?php checked(get_option('cml_option_menu_hide_items', false), true) ?> />
+				<?php _e( 'Hide items that doesn\'t exists in current language', 'ceceppaml' ) ?>
+			</label>
+			<br /><br />
 	    </td>
 	    </tr>
 
@@ -227,25 +240,26 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 	    <img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/posts.png" />
 	</center></td>
 	<td>
-	    <strong><?php _e('Show only posts of the current language', 'ceceppaml') ?></strong>
-	    <blockquote>
-		<input id="filter-posts" type="checkbox" value="1" name="filter-posts" <?php echo ((get_option('cml_option_filter_posts', 0) == 1) ? 'checked' : '') ?> />
-		<label for="filter-posts"><?php _e('Enable') ?></label>
-	    </blockquote>
-	</td>
-	</tr>
-<!-- Filtra Post tradotti -->
-	<tr>
-	<td><center>
-	    <strong><?php _e('Filter translations', 'ceceppaml') ?></strong><br /><br /><br />
-	    <img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/posts.png" />
-	</center></td>
-	<td>
-	    <strong><?php _e('Hide translations of posts of the current language', 'ceceppaml') ?></strong>
-	    <blockquote>
-		<input id="filter-translations" type="checkbox" value="1" name="filter-translations" <?php echo ((get_option('cml_option_filter_translations', 0) == 1) ? 'checked' : '') ?> />
-		<label for="filter-translations"><?php _e('Enable') ?></label>
-	    </blockquote>
+        <ul>
+          <li>
+            <label>
+        	  <input id="filter-posts" type="radio" value="1" name="filter-posts" <?php echo ( (get_option('cml_option_filter_posts', 1 ) == 1 ) ? 'checked' : '' ) ?> />
+              <?php _e('Show only posts of the current language', 'ceceppaml') ?>
+            </label>
+          </li>
+          <li>
+            <label>
+              <input id="filter-posts" type="radio" value="2" name="filter-posts" <?php echo ((get_option('cml_option_filter_posts', 1) == 2 ) ? 'checked' : '') ?> />
+              <?php _e('Show all posts, but hide translations their translation', 'ceceppaml') ?>
+            </label>
+          </li>
+          <li>
+            <label>
+              <input id="filter-posts" type="radio" value="3" name="filter-posts" <?php echo ((get_option('cml_option_filter_posts', 1) == 3) ? 'checked' : '') ?> />
+              <?php _e('Hide empty translations of posts and show in default language', 'ceceppaml') ?>
+            </label>
+          </li>
+        </ul>
 	</td>
 	</tr>
 <!-- Filtra query -->
