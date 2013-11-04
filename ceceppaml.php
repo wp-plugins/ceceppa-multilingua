@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.27
+Version: 1.3.28
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -213,17 +213,17 @@ class CeceppaML {
       * Filtro gli articoli per lingua
       * Filter posts by language
       */
-      if( $_cml_settings[ 'cml_option_filter_posts' ] ) {
+      if( $_cml_settings[ 'cml_option_filter_posts' ] == 1 ) {
+        add_action( 'get_pages', array ( &$this, 'filter_get_pages' ), 0, 2 );
         add_action( 'pre_get_posts', array( &$this, 'filter_posts_by_language' ), 0 );
       }
-
 
       /*
       * Nascondo i post "collegati", quindi tra quelli collegati visualizzo solo quelli
       * della lingua corrente
       */
-      if( ( $_cml_settings[ "cml_option_filter_translations" ] || array_key_exists( "ht", $_GET ) )
-         && ! $_cml_settings[ 'cml_option_filter_posts' ] ) {
+      if( $_cml_settings[ 'cml_option_filter_posts' ] > 1 || $_cml_settings[ "cml_option_filter_translations" ] || array_key_exists( "ht", $_GET )
+        ) {
         add_action('pre_get_posts', array(&$this, 'hide_translations'));
       }
 
@@ -1123,23 +1123,43 @@ class CeceppaML {
      * Nascondo i post tradotti
      */
     function hide_translations( $wp_query ) {
-      global $wpdb;
+      global $wpdb, $_cml_settings;
 
       if( $wp_query != null && ( is_page() || is_single() || isCrawler() ) ) return;
-      if(is_preview() || isset($_GET['preview'])) return;
+      if( is_preview() || isset($_GET['preview']) ) return;
 
-      if( !isset( $this->_hide_posts ) || empty( $this->_hide_posts ) ) :
+      if( ! isset( $this->_hide_posts ) || empty( $this->_hide_posts ) ) :
         $this->_hide_posts = array();
-    
+
         $this->_hide_posts = get_option( "cml_hide_posts_for_lang_" . $this->_current_lang_id );
       endif;
+
+      /*
+       * If I manage three or more languages, the use can choose to show only items of default language,
+       * if no translation exists in current...
+       */
+      if( $_cml_settings[ 'cml_option_filter_posts' ] == 3 && ! isset( $this->_hide_diff ) ) {
+        $langs = cml_get_languages();
+        $r = array();
+
+        foreach( $langs as $lang ) {
+          if( $lang->id == $this->_current_lang_id ) continue;
+
+          //print_r( $this->_posts_of_lang[ $lang->id ] );
+          $r = array_diff( $this->_posts_of_lang[ $lang->id ], $r );
+        }
+        
+        if( ! empty( $r ) ) $this->_hide_posts = array_merge( $this->_hide_posts, $r );
+
+        $this->_hide_diff = true;
+      }
 
       //Al momento utilizzo la vecchia funzione non ottimizzata per la visualizzazione dei tag
       if( is_tag() ) cml_deprecated_hide_translations_for_tags($wp_query);
 
-      if($wp_query != null && is_object($wp_query) && is_array($this->_hide_posts)) {
+      if( $wp_query != null && is_object( $wp_query ) && is_array( $this->_hide_posts ) ) {
         $wp_query->query_vars['post__not_in'] = array_merge( $wp_query->query_vars[ 'post__not_in' ], $this->_hide_posts );
-    
+
         return $this->_hide_posts;
       }
 
@@ -1859,34 +1879,40 @@ class CeceppaML {
   }
     
   function set_language_of_post( $post_id, $post_lang, $linked_lang, $linked_post ) {
-      global $wpdb;
+    global $wpdb;
 
-      //Elimino i vecchi collegamenti presenti nel database
-      $query = sprintf("SELECT id FROM %s WHERE cml_post_id_1 = %d", CECEPPA_ML_POSTS, intval($post_id));
-      $id = intval( $wpdb->get_var( $query ) );
-      if($id > 0) {
-	  $query = "DELETE FROM " . CECEPPA_ML_POSTS . " WHERE id = " .intval($id);
-	  $wpdb->query($query);
-      }
+    //Elimino i vecchi collegamenti presenti nel database
+    $query = sprintf("SELECT id FROM %s WHERE cml_post_id_1 = %d", CECEPPA_ML_POSTS, intval( $post_id ) );
+    $id = intval( $wpdb->get_var( $query ) );
+    if($id > 0) {
+      $query = "DELETE FROM " . CECEPPA_ML_POSTS . " WHERE id = " .intval($id);
+      $wpdb->query($query);
+    }
 
-      $query = "";
-      if($post_lang > 0) :
-	  $wpdb->insert(CECEPPA_ML_POSTS,
-		      array('cml_post_lang_1' => intval($post_lang),
-			    'cml_post_id_1' => intval($post_id),
-			    'cml_post_lang_2' => intval($linked_lang),
-			    'cml_post_id_2' => intval($linked_post)),
-		      array('%d', '%d', '%d', '%d'));
-      endif;
+    $query = "";
+    if($post_lang > 0) :
+    $wpdb->insert(CECEPPA_ML_POSTS,
+            array('cml_post_lang_1' => intval($post_lang),
+              'cml_post_id_1' => intval($post_id),
+              'cml_post_lang_2' => intval($linked_lang),
+              'cml_post_id_2' => intval($linked_post)),
+            array('%d', '%d', '%d', '%d'));
+    endif;
 
-      if( ! isset ( $post_lang ) )
-	delete_option("cml_page_lang_$post_id");
+    //Update column cml_post_lang_2...
+    $wpdb->update( CECEPPA_ML_POSTS,
+                  array( 'cml_post_lang_2' => intval( $post_lang ) ),
+                  array( 'cml_post_id_2' => intval( $post_id ) ),
+                  array( '%d' ),
+                  array( '%d' ) );
 
-      update_option("cml_page_${post_id}", $linked_post);
-      update_option("cml_page_lang_${post_id}", $post_lang);
+    if( ! isset ( $post_lang ) ) delete_option("cml_page_lang_$post_id");
 
-      //Ricreo la struttura degli articoli, questo metodo rallenterà soltanto chi scrive l'articolo... tollerabile :D
-      $this->code_optimization();
+    update_option("cml_page_${post_id}", $linked_post);
+    update_option("cml_page_lang_${post_id}", $post_lang);
+
+    //Ricreo la struttura degli articoli, questo metodo rallenterà soltanto chi scrive l'articolo... tollerabile :D
+    $this->code_optimization();
   }
 
   function delete_extra_post_fields($id) {
@@ -3376,6 +3402,18 @@ class CeceppaML {
     if( empty( $this->_current_language ) ) $this->update_current_lang();
 
     $GLOBALS['text_direction'] = ( $this->_current_language->cml_rtl == 1 ) ? 'rtl' : 'ltr';
+  }
+  
+  function get_filter_pages( $pages ) {
+    foreach( $pages as $key => $page ) {
+      if( $this->get_language_id_by_post_id( $page->ID ) !=
+          $this->_current_lang_id ) {
+        
+        unset( $pages[ $key ] );
+      }
+    }
+
+    return $pages;
   }
 }
 
