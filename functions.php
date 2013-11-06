@@ -212,13 +212,12 @@ function cml_show_flags( $show = "flag", $size = "tiny", $class_name = "cml_flag
 function cml_translate($string, $id, $type = "", $wpgettext = false, $gettext = false) {
   global $wpdb, $wpCeceppaML;
 
-  $s = ($type == "W") ? strtolower($string) : $string;
+  $s = ($type == "W") ? strtolower( $string ) : $string;
   $query = sprintf("SELECT UNHEX(cml_translation) FROM %s WHERE cml_text = '%s' AND cml_lang_id = %d AND cml_type LIKE '%s'",
 			  CECEPPA_ML_TRANS, bin2hex($s), $id, "%" . $type . "%");
-
   $ret = $wpdb->get_var($query);
 
-  if( empty( $ret ) && $wpgettext ) :
+  if( $wpgettext && empty( $ret ) ) :
     $ret = __( $string );
   endif;
 
@@ -241,7 +240,7 @@ function cml_translate($string, $id, $type = "", $wpgettext = false, $gettext = 
     $ret = T_gettext($string);
   endif;
 
-  return (empty($ret)) ?  $string : html_entity_decode(stripslashes($ret));
+  return ( empty( $ret ) ) ?  $string : html_entity_decode( stripslashes( $ret ) );
 }
 
 /**
