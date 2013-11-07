@@ -492,7 +492,7 @@ function cml_get_posts_of_language( $lang_id = null ) {
 function cml_get_the_link( $result, $linked = true, $only_existings = false ) {
   global $wpCeceppaML;
 
-  if( cml_is_homepage() ) {
+  if( cml_is_homepage() && ! in_the_loop() ) {
     //Se stò nella home vuol dire che ho scelto come metodo di reindirizzamento &lang
     $link = $wpCeceppaML->get_home_url( $result->cml_language_slug );
   } else {
