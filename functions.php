@@ -499,7 +499,10 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false ) {
     /* Collego la categoria della lingua attuale con quella della linga della bandierina */
     $link = "";
 
-    $lang_id = $wpCeceppaML->get_current_lang_id();
+    if( ! in_the_loop() )
+      $lang_id = $wpCeceppaML->get_current_lang_id();
+    else
+      $lang_id = $wpCeceppaML->get_language_id_by_post_id( get_the_ID() );
 
     /*
      * I must check that is_category is false, because
