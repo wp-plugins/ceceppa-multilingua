@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.33
+Version: 1.3.34
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -670,7 +670,6 @@ class CeceppaML {
        * "post correlati" a piè di pagina :(
        * Ho bisogno di modificare le "curly quotes" in "double quote", sennò il confronto fallisce :(
       */
-      echo "zk";
       if( esc_attr( $post->post_title ) == removesmartquotes( $title ) ) :
         //I need to skip same
         $this->_title_applied = true;
@@ -1194,8 +1193,6 @@ class CeceppaML {
     * eseguire anche il punto 2
   */
   function filter_query($query) {
-//     echo "zk".$query;
-
     //Filtro la query "Articoli più letti" (Least Read Post)
     $pos = strpos($query, 'ORDER BY m.meta_value');
     if(FALSE === $pos)
