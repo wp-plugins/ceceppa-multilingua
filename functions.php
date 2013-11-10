@@ -424,12 +424,12 @@ function cml_get_page_id_by_path($url, $types = null) {
   $plinks = explode( "/", $url );
 
   //Se l'ultimo elemento è vuoto, lo cancello ;)
-  if( substr($url, -1) == "/" ) array_pop($plinks);
-  $title = array_pop($plinks);
+  if( substr($url, -1) == "/" ) array_pop( $plinks );
+  $title = array_pop( $plinks );
 
-  if($types == null) $types = array_keys(get_post_types()); 
-  $p = cml_get_page_by_path( $title, OBJECT, $types );
-  $the_id = is_object($p) ? $p->ID : 0;
+  if( $types == null ) $types = array_keys( get_post_types() );
+  $p = cml_get_page_by_path( $url, OBJECT, $types );
+  $the_id = is_object( $p ) ? $p->ID : 0;
   
   return $the_id;
 }

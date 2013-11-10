@@ -212,7 +212,7 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 	    </td>
 	    </tr>
 	  </table>
-<? elseif($tab == 2) : ?>
+<?php elseif($tab == 2) : ?>
 	  <table id="ceceppaml-table" class="widefat">
 <!-- Applica locale wordpress in base alla bandierina -->
 	<tr>

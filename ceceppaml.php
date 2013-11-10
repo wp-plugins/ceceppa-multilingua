@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.31
+Version: 1.3.32
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -654,35 +654,36 @@ class CeceppaML {
     /*
      * Aggiungo le bandiere sotto al titolo del post
      */
-    function add_flags_on_top($title, $id = -1) {
+    function add_flags_on_top( $title, $id = -1 ) {
       global $_cml_settings;
 
-      if( isset( $this->_title_applied ) ) return $title;
-        if( $id < 0 ) return $title;
-        if( is_single() && ! $_cml_settings['cml_option_flags_on_post'] ) return $title;
-        if( is_page() && ! $_cml_settings[ 'cml_option_flags_on_page' ] ) return $title;
-        if( cml_is_custom_post_type() && ! $_cml_settings[ 'cml_option_flags_on_custom_type' ] ) return $title;
-        if( ! in_the_loop() || is_category() ) return $title;
+      if( isset( $this->_title_applied ) && ! in_the_loop() ) return $title;
+      if( $id < 0 ) return $title;
+      if( is_single() && ! $_cml_settings['cml_option_flags_on_post'] ) return $title;
+      if( is_page() && ! $_cml_settings[ 'cml_option_flags_on_page' ] ) return $title;
+      if( cml_is_custom_post_type() && ! $_cml_settings[ 'cml_option_flags_on_custom_type' ] ) return $title;
+      if( ! in_the_loop() || is_category() ) return $title;
 
-        global $post;
-        /* Mi serve per evitare che mi trovi bandiere ovunque :D.
-         * Non posso utilizzare in_the_loop senno rischio di trovarmi bandiere anche vicino ai
-         * "post correlati" a piè di pagina :(
-         * Ho bisogno di modificare le "curly quotes" in "double quote", sennò il confronto fallisce :(
-        */
-        if( esc_attr( $post->post_title ) == removesmartquotes( $title ) ) :
-          if( ! in_the_loop() || ! $_cml_settings[ 'cml_option_flags_on_the_loop' ] )
-            $this->_title_applied = true;
-  
-          $size = $_cml_settings['cml_option_flags_on_size'];
-          
-          $args = array( "class" => "cml_flags_on_top", "size" => $size );
-          $flags = ( $_cml_settings[ 'cml_options_flags_on_translations' ] ) ?
-                cml_shortcode_other_langs_available( $args ) : cml_show_available_langs( $args );
-          return $title . $flags;
-        endif;
+      global $post;
+      /* Mi serve per evitare che mi trovi bandiere ovunque :D.
+       * Non posso utilizzare in_the_loop senno rischio di trovarmi bandiere anche vicino ai
+       * "post correlati" a piè di pagina :(
+       * Ho bisogno di modificare le "curly quotes" in "double quote", sennò il confronto fallisce :(
+      */
+      echo "zk";
+      if( esc_attr( $post->post_title ) == removesmartquotes( $title ) ) :
+        //I need to skip same
+        $this->_title_applied = true;
 
-	return $title;
+        $size = $_cml_settings['cml_option_flags_on_size'];
+
+        $args = array( "class" => "cml_flags_on_top", "size" => $size );
+        $flags = ( $_cml_settings[ 'cml_options_flags_on_translations' ] ) ?
+              cml_shortcode_other_langs_available( $args ) : cml_show_available_langs( $args );
+        return $title . $flags;
+      endif;
+
+      return $title;
     }
 
     function add_flags_on_bottom($title) {
@@ -1073,6 +1074,9 @@ class CeceppaML {
       if( ! $this->_filter_search ) return;
     }
 
+    //Skip attachment type
+    if( $wp_query->query_vars['post_type' ] == 'attachment' ) return;
+
     //Recupero tutti i post associati alla lingua corrente
     $posts = $this->get_posts_of_language( $this->_current_lang_id );
 
@@ -1159,7 +1163,7 @@ class CeceppaML {
         if( ! empty( $r ) ) {
           if( empty( $this->_hide_posts ) ) $this->_hide_posts = array();
 
-          $this->_hide_posts = array_merge( $this->_hide_posts, $r );
+          @$this->_hide_posts = array_merge( $this->_hide_posts, $r );
         }
 
         $this->_hide_diff = true;
@@ -2066,19 +2070,19 @@ class CeceppaML {
     $lang = "";
 
     //it.example.com
-    if( $this->_url_mode == PRE_DOMAIN  && !is_admin() ) :
+    if( $this->_url_mode == PRE_DOMAIN  && !is_admin() ) {
       preg_match( "/^([a-z]{2})/", $this->_url, $matches );
       
-      if( !empty($matches) ) :
+      if( !empty($matches) ) {
         $lang = $matches[0];
-      endif;
-    endif;
+      }
+    }
 
-    if( empty( $lang ) ) :
+    if( empty( $lang ) ) {
       //get_currentuserinfo non esiste quando viene chiamato "set_locale"
       $logged_in = function_exists( 'is_user_logged_in' ) && is_user_logged_in();
 
-      if( is_admin() && $logged_in ) :
+      if( is_admin() && $logged_in ) {
         //Recupero l'info dalle opzioni
         global $current_user;
         get_currentuserinfo();
@@ -2089,34 +2093,35 @@ class CeceppaML {
         $lang = $this->get_language_id_by_locale( $locale );
 
         $this->_force_current_language = $this->get_language_id_by_locale($locale);
-      else:
+      } else {
     	$this->clear_url();
 
-      if( !empty( $this->_force_current_language ) ) :
-        return $this->_force_current_language;
-      else:
-	  //Se non sono riuscito a recuperare la lingua dal link, recupero l'info dall'articolo
+        if( !empty( $this->_force_current_language ) ) {
+          return $this->_force_current_language;
+        } else {
+          //Se non sono riuscito a recuperare la lingua dal link, recupero l'info dall'articolo
+    
+          //Funzione con alcuni tipi di permalink, quali ?p=##, archives/ e non nel pannello di admin (almeno in alcuni casi)
+          $the_id = 0;
+    
+          //Posso recuperare l'info dal numero dell'articolo?
+          $the_id = $this->get_post_id_by_url( $this->_url );
+          
+          if( empty( $the_id ) ) {
+            $the_id = cml_get_page_id_by_path( $this->_request_url );
+          }
+    
+          //Qualcosa è andato storto, non modifico il "locale"
+          if( empty( $the_id ) ) {
+            return $this->_default_language_id;
+          } else {
+            $lang= $this->get_language_id_by_page_id( $the_id );
+          }
+  
+        }
 
-	  //Funzione con alcuni tipi di permalink, quali ?p=##, archives/ e non nel pannello di admin (almeno in alcuni casi)
-	  $the_id = 0;
-
-	  //Posso recuperare l'info dal numero dell'articolo?
-	  $the_id = $this->get_post_id_by_url( $this->_url );
-	  
-	  if( empty( $the_id ) ) :
-	    $the_id = cml_get_page_id_by_path($this->_request_url);
-	  endif;
-
-	  //Qualcosa è andato storto, non modifico il "locale"
-	  if( empty( $the_id ) ) :
-	    return $this->_default_language_id;
-	  else:
-	    $lang= $this->get_language_id_by_page_id( $the_id );
-	  endif;
-
-	endif; //!empty
-      endif;
-    endif;
+      }
+    }
 
     return $lang;
   }

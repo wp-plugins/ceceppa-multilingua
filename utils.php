@@ -144,6 +144,7 @@ function cml_get_page_by_path($page_path, $output = OBJECT, $post_type = array('
 	    if ( $page->post_name == $revparts[0] ) {
 		    $count = 0;
 		    $p = $page;
+
 		    while ( $p->post_parent != 0 && isset( $pages[ $p->post_parent ] ) ) {
 			    $count++;
 			    $parent = $pages[ $p->post_parent ];
