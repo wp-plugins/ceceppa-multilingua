@@ -95,8 +95,9 @@ class CeceppaMLLanguages {
 				'cml_notice_category' => '',
 				'cml_enabled' => 1,
 				'cml_sort_id' => $_POST['sort-id'][$i],
+                'cml_rtl' => $_POST[ 'rtl' ][ $id ],
 				'cml_flag_path' => $flag_path ),
-			    array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s'));
+			    array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d', '%s'));
 
 	    if( substr( $lang, 0, 2 ) != "en" )
 	      $d->download_language($wpdb->insert_id, $_POST['language'][$i]);
@@ -113,9 +114,10 @@ class CeceppaMLLanguages {
 				'cml_notice_category' => '',
 				'cml_enabled' => $_POST['lang-enabled'][$i],
 				'cml_sort_id' => $_POST['sort-id'][$i],
+                'cml_rtl' => $_POST[ 'rtl' ][ $id ],
 				'cml_flag_path' => $flag_path ),
 			    array('id' => $id),
-			    array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s'),
+			    array('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d', '%s'),
 			    array('%d'));
 	}
 	
