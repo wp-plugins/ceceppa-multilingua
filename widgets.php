@@ -53,7 +53,7 @@ class CeceppaMLWidgetRecentPosts extends WP_Widget {
        * Quando l'utente scegli di impostare un articolo come "in evidenza", wordpress fa si che tutte le chiamate tramite
        * WP_Query includa sempre questi post, quindi me li ritrovato in tutte le lingue con le relative traduzioni :'(...
        */
-      $ids = $wpCeceppaML->get_posts_of_language();
+      $ids = $wpCeceppaML->get_posts_by_language();
       $the_args = array('post_status'=>'publish',
 				      'post__in' => $ids,
 				      'orderby' => 'post_date',

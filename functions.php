@@ -172,14 +172,18 @@ function cml_is_default_lang($lang = null) {
  * @param "linked" - se true: la bandiera deve restituire il link all'articolo nelle varie lingue (se presente),
 * 				false: la bandiera punterà alla home aggiungendo il suffisso "?lang=##"
  */
-function cml_show_flags( $show = "flag", $size = "tiny", $class_name = "cml_flags", $image_class = "", $echo = true, $linked = true, $only_existings = false ) {
+function cml_show_flags( $show = "flag", $size = "tiny", $class_name = "cml_flags", $image_class = "", $echo = true, $linked = true, $only_existings = false, $sort = false ) {
   global $wpdb, $wpCeceppaML;
 
   $redirect = get_option( 'cml_option_redirect' );
+  
   $results = cml_get_languages();
   $width = ( $size == "tiny" ) ? 16 : 32;
 
   $r = "<ul class=\"$class_name\">";
+  
+  //Post language...
+  $lang_id = ( ! $sort ) ? -1 : $wpCeceppaML->get_language_id_by_post_id( get_the_ID() );
   foreach($results as $result) :
     $lang = ($show == "flag") ? "" : $result->cml_language;
 
@@ -189,9 +193,15 @@ function cml_show_flags( $show = "flag", $size = "tiny", $class_name = "cml_flag
     $img = "<img class=\"$size $image_class\" src='" . cml_get_flag_by_lang_id( $result->id, $size ) . "' title='$result->cml_language' width=\"$width\"/>";
     if($show == "text") $img = "";
 
-    $r .= "<li><a href='$link'>$img$lang</a></li>";
+    $li = "<li><a href='$link'>$img$lang</a></li>";
+    if( $sort && $result->id == $lang_id )
+      array_unshift( $items, $li );
+    else
+      $items[] = $li;
+
   endforeach;
 
+  $r .= join( "\n", $items );
   $r .= "</ul>";
 
   if( $echo ) 
@@ -476,10 +486,10 @@ function cml_set_language_of_post( $id, $lang_id ) {
   $wpCeceppaML->set_language_of_post( $id, $lang_id, 0, 0 );
 }
 
-function cml_get_posts_of_language( $lang_id = null ) {
+function cml_get_posts_by_language( $lang_id = null ) {
   global $wpCeceppaML;
   
-  return $wpCeceppaML->get_posts_of_language();
+  return $wpCeceppaML->get_posts_by_language();
 }
 
 /*

@@ -11,7 +11,11 @@ require_once(CECEPPA_PLUGIN_PATH . "functions.php");
 function cml_fix_database() {
   global $wpdb;
 
-  $dbVersion = get_option("cml_db_version", CECEPPA_DB_VERSION);
+  $dbVersion = get_option( "cml_db_version", CECEPPA_DB_VERSION );
+
+  if( $dbVersion < 21 ) {
+      $wpdb->query(  "ALTER TABLE  " . CECEPPA_ML_TABLE . " ADD  `cml_date_format` TEXT NOT NULL ;" );
+  }
 
   if( $dbVersion < 20 ) {
       $wpdb->query(  "ALTER TABLE  " . CECEPPA_ML_TABLE . " ADD  `cml_rtl` INT NOT NULL ;" );

@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.34
+Version: 1.3.35
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $wpdb;
 
-define( 'CECEPPA_DB_VERSION', 20 );
+define( 'CECEPPA_DB_VERSION', 21 );
 
 define('CECEPPA_ML_TABLE', $wpdb->base_prefix . 'ceceppa_ml');
 define('CECEPPA_ML_CATS', $wpdb->base_prefix . 'ceceppa_ml_cats');
@@ -223,8 +223,8 @@ class CeceppaML {
       * della lingua corrente
       */
       if( $_cml_settings[ 'cml_option_filter_translations' ] == 1 && $_cml_settings[ 'cml_option_filter_posts' ] == 1 ) {
-	update_option( 'cml_option_filter_translations', 0 );
-	$_cml_settings[ "cml_option_filter_translations" ] = 0;
+        update_option( 'cml_option_filter_translations', 0 );
+        $_cml_settings[ "cml_option_filter_translations" ] = 0;
       }
 	
       if( $_cml_settings[ 'cml_option_filter_posts' ] > 1 || $_cml_settings[ "cml_option_filter_translations" ] || array_key_exists( "ht", $_GET )
@@ -338,6 +338,10 @@ class CeceppaML {
 
       //Titolo del blog/sito
       add_filter( 'bloginfo', array( &$this, 'bloginfo' ), 0 );
+      
+      //Date format
+      add_filter( 'get_the_date', array( &$this, 'get_the_date' ), 0 );
+      add_filter( 'get_comment_date', array( &$this, 'get_comment_date' ), 0 );
     }
 
     //Update current language
@@ -657,7 +661,7 @@ class CeceppaML {
     function add_flags_on_top( $title, $id = -1 ) {
       global $_cml_settings;
 
-      if( isset( $this->_title_applied ) && ! in_the_loop() ) return $title;
+      if( isset( $this->_title_applied ) && is_singular() ) return $title;
       if( $id < 0 ) return $title;
       if( is_single() && ! $_cml_settings['cml_option_flags_on_post'] ) return $title;
       if( is_page() && ! $_cml_settings[ 'cml_option_flags_on_page' ] ) return $title;
@@ -665,6 +669,7 @@ class CeceppaML {
       if( ! in_the_loop() || is_category() ) return $title;
 
       global $post;
+
       /* Mi serve per evitare che mi trovi bandiere ovunque :D.
        * Non posso utilizzare in_the_loop senno rischio di trovarmi bandiere anche vicino ai
        * "post correlati" a piè di pagina :(
@@ -676,22 +681,27 @@ class CeceppaML {
 
         $size = $_cml_settings['cml_option_flags_on_size'];
 
-        $args = array( "class" => "cml_flags_on_top", "size" => $size );
+        $args = array( "class" => "cml_flags_on_top", "size" => $size, "sort" => true );
         $flags = ( $_cml_settings[ 'cml_options_flags_on_translations' ] ) ?
               cml_shortcode_other_langs_available( $args ) : cml_show_available_langs( $args );
+
         return $title . $flags;
       endif;
 
       return $title;
     }
 
-    function add_flags_on_bottom($title) {
+    function add_flags_on_bottom( $title ) {
         if( is_single() && ! $_cml_settings['cml_option_flags_on_post'] ) return $title;
         if(is_page() && ! $_cml_settings[ 'cml_option_flags_on_page' ] ) return $title;
         if(cml_is_custom_post_type() && ! $_cml_settings[ 'cml_option_flags_on_custom_type' ] ) return $title;
 
-	$size = $_cml_settings['cml_option_flags_on_size'];
-        return $title . cml_show_available_langs(array("class" => "cml_flags_on_top", "size" => $size));
+    	$size = $_cml_settings['cml_option_flags_on_size'];
+        $args = array( "class" => "cml_flags_on_top", "size" => $size, "sort" => true );
+        $flags = ( $_cml_settings[ 'cml_options_flags_on_translations' ] ) ?
+              cml_shortcode_other_langs_available( $args ) : cml_show_available_langs( $args );
+
+        return $title . $flags;
     }
 
   /**
@@ -792,6 +802,7 @@ class CeceppaML {
       cml_sort_id INT,
       cml_flag_path TEXT,
       cml_rtl INT,
+      cml_date_format TEXT,
       PRIMARY KEY  id (id)
       ) ENGINE=InnoDB CHARACTER SET=utf8;";
 
@@ -969,7 +980,7 @@ class CeceppaML {
    */
   function filter_least_read_post($query, $pos) {
     //Recupero tutti i post collegati alla lingua corrente
-    $posts = $this->get_posts_of_language();
+    $posts = $this->get_posts_by_language();
     $where = " AND post_id IN (" . implode(", ", $posts) . ") ";
 
     //Aggiungo il $where prima della clausula ORDER
@@ -984,7 +995,7 @@ class CeceppaML {
    */
   function filter_most_commented($query, $pos) {
     //Recupero tutti i post collegati alla lingua corrente
-    $posts = $this->get_posts_of_language();
+    $posts = $this->get_posts_by_language();
     $where = " AND id IN (" . implode(", ", $posts) . ") ";
     
     //Aggiungo il $where prima della clausula ORDER
@@ -997,7 +1008,7 @@ class CeceppaML {
    */
   function filter_archives($query, $pos) {
     //Recupero tutti i post collegati alla lingua corrente
-    $posts = $this->get_posts_of_language();
+    $posts = $this->get_posts_by_language();
 
     $where = " AND id IN (" . implode(", ", $posts) . ") ";
 
@@ -1045,7 +1056,7 @@ class CeceppaML {
 
         if(is_admin() && $pagenow == "edit.php") :
 	  if($id > 0) :
-	    $posts = $this->get_posts_of_language($id);;
+	    $posts = $this->get_posts_by_language($id);;
 
 	    //non devo visualizzare i post senza traduzione
 	    if( isset( $_GET['cml_no_translation'] ) || empty( $_GET ) ) :
@@ -1077,7 +1088,7 @@ class CeceppaML {
     if( $wp_query->query_vars['post_type' ] == 'attachment' ) return;
 
     //Recupero tutti i post associati alla lingua corrente
-    $posts = $this->get_posts_of_language( $this->_current_lang_id );
+    $posts = $this->get_posts_by_language( $this->_current_lang_id );
 
     /*
      * Dato che ho avuto un pò di noie con i nav_menu_items che mi provocavano
@@ -1094,10 +1105,10 @@ class CeceppaML {
         foreach( $langs as $lang ) {
           if( $lang->id == $this->_current_lang_id ) continue;
           
-          $exclude = array_merge( $exclude, $this->get_posts_of_language( $lang->id ) );
+          $exclude = array_merge( $exclude, $this->get_posts_by_language( $lang->id ) );
         }
         //Escludo tutti i post senza lingua, che quindi devono essere visibili anche nella mia lingua...
-        $posts = $this->get_posts_of_language( $this->_current_lang_id );
+        $posts = $this->get_posts_by_language( $this->_current_lang_id );
         foreach( $exclude as $i => $h ) {
           if( in_array( $h, $posts ) ) {
             unset( $exclude[ $i ] );
@@ -1107,7 +1118,7 @@ class CeceppaML {
     }
     else {
       //Recupero tutti i post associati alla lingua corrente
-      $posts = $this->get_posts_of_language( $this->_current_lang_id );
+      $posts = $this->get_posts_by_language( $this->_current_lang_id );
 
       if( ! empty ( $posts ) ) :
         $wp_query->query_vars[ 'post__in' ] = $posts;
@@ -1138,6 +1149,9 @@ class CeceppaML {
       if( $wp_query != null && ( is_page() || is_single() || isCrawler() ) ) return;
       if( is_preview() || isset($_GET['preview']) ) return;
 
+      /*
+       * Hide translations in current language
+       */
       if( ! isset( $this->_hide_posts ) || empty( $this->_hide_posts ) ) :
         $this->_hide_posts = array();
 
@@ -1149,20 +1163,24 @@ class CeceppaML {
        * if no translation exists in current...
        */
       if( $_cml_settings[ 'cml_option_filter_posts' ] == 3 && ! isset( $this->_hide_diff ) ) {
-        $langs = cml_get_languages();
-        $r = array();
+        //I must hide all posts of all other languages ( excluded default )...
+        $langs = cml_get_languages( 1, 0 );
+        $diff = array();
 
+        /*
+         * I must remove mutual posts of all languages...
+         */
         foreach( $langs as $lang ) {
           if( $lang->id == $this->_current_lang_id ) continue;
 
-          //print_r( $this->_posts_of_lang[ $lang->id ] );
-          $r = array_diff( $this->_posts_of_lang[ $lang->id ], $r );
+          $r = array_diff( $this->_posts_of_lang[ $lang->id ], $diff );
+          $diff = @array_merge( $diff, $r );
         }
 
-        if( ! empty( $r ) ) {
+        if( ! empty( $diff ) ) {
           if( empty( $this->_hide_posts ) ) $this->_hide_posts = array();
 
-          @$this->_hide_posts = array_merge( $this->_hide_posts, $r );
+          @$this->_hide_posts = array_merge( $this->_hide_posts, $diff );
         }
 
         $this->_hide_diff = true;
@@ -2240,7 +2258,7 @@ class CeceppaML {
    *
    * @return gli id dei post associati alla lingua richiesta
    */
-  function get_posts_of_language( $lang = null ) {
+  function get_posts_by_language( $lang = null ) {
     if( empty( $lang ) ) $lang = $this->_current_lang_id;
   
    //Gli articoli senza lingua sono "figli di tutti"
@@ -2257,7 +2275,7 @@ class CeceppaML {
     * @param lang_id - lingua da ricercare
     */
   function get_pages_of_language($lang) {
-    return $this->get_posts_of_language($lang);
+    return $this->get_posts_by_language($lang);
   }
 
   /**
@@ -3272,7 +3290,7 @@ class CeceppaML {
   }
   
   function get_previous_next_post_where( $where ) {
-    $posts = $this->get_posts_of_language();
+    $posts = $this->get_posts_by_language();
     $where .= " AND p.id IN (" . implode(", ", $posts) . ") ";
     
     return $where;
@@ -3361,7 +3379,7 @@ class CeceppaML {
     foreach( $items as $item ) {
       if( $hide && $item->type == 'post_type' ) {
         //Esiste nella lingua corrente?
-        if( ! in_array( $item->object_id, $this->get_posts_of_language( ) ) ) {
+        if( ! in_array( $item->object_id, $this->get_posts_by_language( ) ) ) {
           unset( $item );
         }
       }
@@ -3427,6 +3445,24 @@ class CeceppaML {
     }
 
     return $pages;
+  }
+  
+  function get_the_date() {
+    global $post;
+
+    $format = $this->_current_language->cml_date_format;
+    if( empty( $format ) ) $format = get_option( 'date_format' );
+
+    return mysql2date( $format, $post->post_date );
+  }
+
+  function get_comment_date() {
+    global $comment;
+
+    $format = $this->_current_language->cml_date_format;
+    if( empty( $format ) ) $format = get_option( 'date_format' );
+
+    return mysql2date( $format, $comment->comment_date );
   }
 }
 

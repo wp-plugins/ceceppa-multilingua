@@ -81,9 +81,10 @@ function cml_show_available_langs( $attrs ) {
   extract(shortcode_atts(array("show" => "flag", 
 				"size" => "tiny", 
 				"class" => "cml_flags",
-				"image" => ""), $attrs));
+				"image" => "",
+                "sort" => false), $attrs));
 
-  return cml_show_flags( $show, $size, $class, $image, false, true, true );
+  return cml_show_flags( $show, $size, $class, $image, false, true, true, $sort );
 }
 
 function cml_shortcode_other_langs_available( $attrs ) {
