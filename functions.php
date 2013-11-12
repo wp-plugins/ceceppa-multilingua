@@ -194,7 +194,7 @@ function cml_show_flags( $show = "flag", $size = "tiny", $class_name = "cml_flag
     if($show == "text") $img = "";
 
     $li = "<li><a href='$link'>$img$lang</a></li>";
-    if( $sort && $result->id == $lang_id )
+    if( $sort && is_array( $items ) && $result->id == $lang_id )
       array_unshift( $items, $li );
     else
       $items[] = $li;
