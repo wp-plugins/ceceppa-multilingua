@@ -184,6 +184,7 @@ function cml_show_flags( $show = "flag", $size = "tiny", $class_name = "cml_flag
   
   //Post language...
   $lang_id = ( ! $sort ) ? -1 : $wpCeceppaML->get_language_id_by_post_id( get_the_ID() );
+  $items = array();
   foreach($results as $result) :
     $lang = ($show == "flag") ? "" : $result->cml_language;
 
