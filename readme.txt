@@ -2,8 +2,8 @@
 Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate, international, .mo file, .po file, localization, widget, post
 Requires at least: 3.4.1
-Tested up to: 3.7
-Stable tag: 1.3.10
+Tested up to: 3.8
+Stable tag: 1.3.37
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG
@@ -48,7 +48,7 @@ Ceceppa Multilingua supports infinite language, which can be easily added/modifi
 All you need to do is activate the plugin, configure categories and start writing the content!
 
 = About =
-For more Information visit the [Plugin Homepage](http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/)
+For more Information visit the [Plugin Homepage](http://www.alessandrosenese.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/)
 
 = Demo =
 [Plugin demo](http://www.youtube.com/watch?v=fAPIQonud-E).
@@ -70,7 +70,7 @@ Pgettext by Ruben Nijveld
 
 == Installation ==
 
-For more detailed instructions, take a look at the [Installation Guide](http://www.ceceppa.eu/it/pillole/wp-guide/ceceppa-multilingua-configurare-e-utilizzare-il-plugin/)
+For more detailed instructions, take a look at the [Installation Guide](http://www.alessandrosenese.eu/it/pillole/wp-guide/ceceppa-multilingua-configurare-e-utilizzare-il-plugin/)
 
 Installation of this plugin is fairly easy:
 
@@ -100,11 +100,7 @@ Replace lang1 and lang2 with your languages slug, for example:
 
 [cml_text it="Ciao" en="Hello" epo="Saluton"]
 
-For complete shortcode list visit: [Shortcode] (http://www.ceceppa.eu/it/pillole/wp-guide/ceceppa-multilingua-configurare-e-utilizzare-il-plugin/4/)
-
-The FAQ is available at the [Plugin Homepage](http://www.ceceppa.eu/it/pillole/wp-guide/ceceppa-multilingua-configurare-e-utilizzare-il-plugin/)
-
-For Problems visits the [Support page](http://www.ceceppa.eu/it/pillole/wp-guide/ceceppa-multilingua-configurare-e-utilizzare-il-plugin/)
+For complete shortcode list visit: [Shortcode] (http://www.alessandrosenese.eu/it/pillole/wp-guide/ceceppa-multilingua-configurare-e-utilizzare-il-plugin/4/)
 
 = How can I show flags for switch between languages =
 
@@ -139,9 +135,24 @@ Yes, you can:
   2) Append flag to html element
   3) Add flags to menu
 
-= Can I translate the "Site Title" and/or "Tagline"
+= Can I translate the "Site Title" and/or "Tagline" =
 
 Yes, you can translate them in "Ceceppa Multilingua" -> "Site Title/Tagline" page.
+
+= Can I customize the flags? =
+
+Yes, you can but don't store your own flags in the plugin directory, or you lose them when update the plugin.
+Store your own flags in:
+*) "wp-content/upload/ceceppaml/tiny" - tiny size
+*) "wp-content/upload/ceceppaml/small" - small size
+
+If the directory "ceceppaml" doesn't exists, create it
+
+= How to configure the plugin, and support page =
+
+The FAQ is available at the [Plugin Homepage](http://www.alessandrosenese.eu/it/pillole/wp-guide/ceceppa-multilingua-configurare-e-utilizzare-il-plugin/)
+
+For Problems visits the [Support page](http://www.alessandrosenese.eu/it/pillole/wp-guide/ceceppa-multilingua-configurare-e-utilizzare-il-plugin/)
 
 == Screenshots ==
 
@@ -155,6 +166,53 @@ Yes, you can translate them in "Ceceppa Multilingua" -> "Site Title/Tagline" pag
 8. Translate your theme
 
 == Changelog ==
+
+= 1.3.35 =
+* Added support for different date format for each language
+
+= 1.3.33 =
+* Fixed warning filter_get_pages
+
+= 1.3.31 =
+* Fixed flags in_the_loop
+
+= 1.3.28 =
+* Added new filter method: "Hide empty translations of posts and show in default language"
+
+= 1.3.26 =
+* Added support for right to left languages.
+
+= 1.3.23 =
+* Fixed bug with page links
+
+= 1.3.22 =
+* Fixed body class "home" when use static page
+
+= 1.3.21 =
+* Fixed activation hook
+
+= 1.3.19 =
+* Fixed bug for children pages
+* Added "All language exclued current" to menu meta box
+* Added new redirect mode: "Automatically redirects the default language."
+
+= 1.3.17 =
+* Fixed bug whit cml_show_available_langs
+
+= 1.3.16 =
+* Now you can add flags to menu directly in the page "Aspect" -> "Menu"
+* You can show flags also in the loop
+* Fixed bug with category and url mode: ?lang=##
+* Also the link of the custon post will be "translated"...
+
+= 1.3.15 =
+* Fixed warning in widget "chooser"
+
+= 1.3.13 =
+* Fixed bug "show posts only in current language"
+
+= 1.3.12 =
+* Revert to 1.3.10
 
 = 1.3.11 =
 * Fixed problem with duplicated "menus"

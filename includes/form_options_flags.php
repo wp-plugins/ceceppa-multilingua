@@ -17,6 +17,10 @@ function cml_show_flags_on() {
 	  <label for="flags-on-pages"><?php _e('Pages', 'ceceppaml') ?></label><br />
 	  <input type="checkbox" id="flags-on-custom" name="flags-on-custom" value="1" <?php echo ((get_option('cml_option_flags_on_custom_type', '0') == 1) ? 'checked' : '') ?> />
 	  <label for="flags-on-custom"><?php _e('Custom posts type', 'ceceppaml') ?></label><br />
+      <label>
+        <input type="checkbox" id="flags-on-loop" name="flags-on-loop" value="1" <?php echo ( ( get_option( 'cml_option_flags_on_the_loop', '0' ) == 1 ) ? 'checked' : '' ) ?> />
+        <?php _e( 'Loop', 'ceceppaml' ); ?>
+      </label>
       </blockquote>
       <strong><?php _e('Where:', 'ceceppaml') ?></strong>
       <blockquote>
