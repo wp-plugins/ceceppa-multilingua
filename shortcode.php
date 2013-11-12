@@ -36,11 +36,12 @@
   *                "small" = 80x55
   *        
   */
-add_shortcode("cml_text", 'cml_shortcode_text');
-add_shortcode("cml_shortcode", 'cml_do_shortcode');
-add_shortcode('cml_show_available_langs', 'cml_show_available_langs');
+add_shortcode( "cml_text", 'cml_shortcode_text' );
+add_shortcode( "cml_shortcode", 'cml_do_shortcode' );
+add_shortcode( 'cml_show_available_langs', 'cml_show_available_langs');
 add_shortcode( 'cml_other_langs_available', 'cml_shortcode_other_langs_available' );
-add_shortcode('cml_show_flags', 'cml_shortcode_show_flags');
+add_shortcode( 'cml_show_flags', 'cml_shortcode_show_flags' );
+add_shortcode( 'cml_translate', 'cml_shortcode_translate' );
 
 function cml_shortcode_text($attrs) {
   global $wpCeceppaML;
@@ -55,14 +56,15 @@ function cml_shortcode_text($attrs) {
 /*
   [cml_translate string="Hello" in="it"]
 */
-function cml_shortcode_translate($attrs) {
+function cml_shortcode_translate( $attrs ) {
   global $wpCeceppaML;
 
-  extract(shortcode_atts(array("string" => "", 
-				"in" => ""), $attrs));
+  extract(shortcode_atts( array( "string" => "", 
+                                "in" => "" ), $attrs ) );
   
-  $id = (!empty($in)) ? $wpCeceppaML->get_language_id_by_slug($in) : $wpCeceppaML->get_default_language_id();
-  return cml_translate($string, $id);
+  $id = ( ! empty( $in ) ) ? $wpCeceppaML->get_language_id_by_slug( $in ) : cml_get_current_language_id();
+
+  return cml_translate( $string, $id );
 }
 
 function cml_do_shortcode($attrs) {
@@ -76,45 +78,13 @@ function cml_do_shortcode($attrs) {
 }
 
 function cml_show_available_langs( $attrs ) {
-  global $wpdb, $wpCeceppaML;
+  extract(shortcode_atts(array("show" => "flag", 
+				"size" => "tiny", 
+				"class" => "cml_flags",
+				"image" => "",
+                "sort" => false), $attrs));
 
-  $class = $attrs['class'];
-  $size = isset($attrs['size']) ? $attrs['size'] : "small";
-  $id = isset( $attrs[ 'id' ] ) ? intval( $attrs[ 'id' ] ) : get_the_ID();
-
-  if( get_option( 'cml_options_flags_on_translations', 1 ) && ! $wpCeceppaML->has_translations( $id ) ) return;
-
-  $langs = cml_get_languages();
-  $l_id = $wpCeceppaML->get_current_lang_id();
-  $cat_id = $wpCeceppaML->get_category_id( single_cat_title( "", false ) );
-
-  $r = "<ul class='cml_flags $class'>";
-  
-  /*
-   * Se è stata impostata una pagina statica come home
-   * aggiungo solo il suffisso ?lang=##
-   */
-  $is_static = cml_is_homepage() && cml_use_static_page();
-
-  foreach($langs as $lang) {
-    if( is_category() ) $link = $wpCeceppaML->translate_term_link(get_category_link($cat_id), $lang->id);
-    if( is_single() || is_page() ) $link = cml_get_linked_post($l_id, $lang, $id, null);
-
-    if( !empty( $link ) ) {
-      if( !$is_static ) {
-        $link = (is_category()) ? $link : get_permalink($link);
-      } else {
-	$link = $wpCeceppaML->get_home_url( $lang->cml_language_slug );
-      }
-
-      $title = $lang->cml_language; //($notice && $l_id != $lang->id) ? cml_get_notice_by_lang_id($lang->id) : $lang->cml_language;
-      $r .= "<li><a href=\"$link\"><img src='" . cml_get_flag_by_lang_id($lang->id, $size) . "' title=\"$title\" class=\"tipsy-me\"/></a></li>";
-    }
-  }
-
-  $r .= "</ul>";
-
-  return $r;
+  return cml_show_flags( $show, $size, $class, $image, false, true, true, $sort );
 }
 
 function cml_shortcode_other_langs_available( $attrs ) {
@@ -135,7 +105,7 @@ function cml_shortcode_show_flags($attrs) {
 				"class" => "cml_flags",
 				"image" => ""), $attrs));
 
-  return cml_show_flags($show, $size, $class, $image, false, true);
+  return cml_show_flags( $show, $size, $class, $image, false, true );
 }
 
 ?>
