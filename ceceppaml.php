@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.37
+Version: 1.3.38
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -1085,7 +1085,7 @@ class CeceppaML {
     }
 
     //Skip attachment type
-    if( $wp_query->query_vars['post_type' ] == 'attachment' ) return;
+    if( @$wp_query->query_vars['post_type' ] == 'attachment' ) return;
 
     //Recupero tutti i post associati alla lingua corrente
     $posts = $this->get_posts_by_language( $this->_current_lang_id );
@@ -1900,7 +1900,7 @@ class CeceppaML {
       $post_lang = intval( $_POST['post_lang'] );
 
     /* If is a page check the parent_id */
-    if( $_POST[ 'post_type' ] == 'page' && intval( $_POST[ 'parent_id' ] ) > 0 ) {
+    if( @$_POST[ 'post_type' ] == 'page' && intval( $_POST[ 'parent_id' ] ) > 0 ) {
       //Recover the language of parent
       $post_lang = $this->get_language_id_by_page_id( intval( $_POST[ 'parent_id' ] ) );
     }
@@ -2044,11 +2044,10 @@ class CeceppaML {
       $lang = $this->_force_current_language;
     endif;
 
-    if( !empty( $lang ) ) {
+    if( ! empty( $lang ) ) {
       //Aggiorno le info sulla lingua corrente
       $this->_current_lang = $this->get_language_slug_by_id($lang);
       $this->_current_lang_id = $lang;
-      $this->_current_language = cml_get_language_info( $this->_current_lang_id );
 
       if( $this->_filter_search ) {
         //For Fix Notice
@@ -2074,6 +2073,8 @@ class CeceppaML {
       $this->_current_lang_slug = $this->_default_language_slug;
       $this->_current_lang_locale = $this->_default_language_locale;
     }
+
+    $this->_current_language = cml_get_language_info( $this->_current_lang_id );
     
     //Aggiorno il menu del tema :)
     $this->change_menu();
@@ -2428,7 +2429,8 @@ class CeceppaML {
       /*
        * Change the id of "page_on_front", so wordpress will add "home" to body_class
        */
-      update_option( 'page_on_front', $nid );
+      if( $nid > 0 ) 
+	update_option( 'page_on_front', $nid );
 
       $this->_static_page = true;
     }
