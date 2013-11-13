@@ -48,7 +48,7 @@ $tab = ( $_GET['page'] == 'ceceppaml-translations-plugins-themes' ) ? 3 : $tab;
     <p>
       <?php _e('These translations are used by plugin for translate custom links in the menu.', 'ceceppaml') ?><br />
       <br />
-      <?php _e('You can use them also with shortcode "cml_text".', 'ceceppaml') ?>
+      <?php _e('You can use them also with shortcode "cml_translate".', 'ceceppaml') ?>
       <a href="?page=ceceppaml-shortcode-page&tab=0#strings"><?php _e( 'Click here to see the shortcode page', 'ceceppaml' ); ?></a>
       <br />
     </p>
