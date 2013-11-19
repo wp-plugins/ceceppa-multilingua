@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.38
+Version: 1.3.39
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $wpdb;
 
-define( 'CECEPPA_DB_VERSION', 21 );
+define( 'CECEPPA_DB_VERSION', 22 );
 
 define('CECEPPA_ML_TABLE', $wpdb->base_prefix . 'ceceppa_ml');
 define('CECEPPA_ML_CATS', $wpdb->base_prefix . 'ceceppa_ml_cats');
@@ -208,6 +208,17 @@ class CeceppaML {
       
       //Tengo d'occhio le modifiche apportate al menu
       add_action( 'wp_update_nav_menu', array( &$this, 'update_nav_menu' ), 0, 2 );
+      
+      //Rimuovo info sui post
+      if( isset( $_GET[ 'cml-remove' ] ) ) {
+	$wpdb->query ( "TRUNCATE TABLE " . CECEPPA_ML_POSTS );
+      }
+      
+      if( isset( $_GET[ 'cml-form' ] ) && $_GET[ 'cml-form' ] == "menu-name" ) {
+	update_option( "cml_primary_menu_name", strtolower( $_GET[ 'name' ] ) );
+      }
+
+      add_action( 'init', array( &$this, 'select_menu' ) );
     } else {
       /*
       * Filtro gli articoli per lingua
@@ -268,10 +279,11 @@ class CeceppaML {
     	  $_cml_settings[ 'cml_option_flags_on_custom_type' ] ||
           $_cml_settings[ 'cml_option_flags_on_the_loop' ] ) :
 
-        if( $_cml_settings[ 'cml_option_flags_on_pos' ] == "bottom" ) {
-            add_filter( "the_content", array( &$this, 'add_flags_on_bottom' ) );
+        if( $_cml_settings[ 'cml_option_flags_on_pos' ] == "bottom" ||
+            $_cml_settings[ 'cml_option_flags_on_pos' ] == "top" ) {
+            add_filter( "the_content", array( &$this, 'add_flags_on_content' ) );
         } else {
-            add_filter( "the_title", array( &$this, 'add_flags_on_top' ), 10, 2 );
+            add_filter( "the_title", array( &$this, 'add_flags_on_title' ), 10, 2 );
         }
       endif;
 
@@ -340,8 +352,10 @@ class CeceppaML {
       add_filter( 'bloginfo', array( &$this, 'bloginfo' ), 0 );
       
       //Date format
-      add_filter( 'get_the_date', array( &$this, 'get_the_date' ), 0 );
-      add_filter( 'get_comment_date', array( &$this, 'get_comment_date' ), 0 );
+      if( get_option( 'cml_change_date_format', 1 ) ) {
+	add_filter( 'get_the_date', array( &$this, 'get_the_date' ), 0 );
+	add_filter( 'get_comment_date', array( &$this, 'get_comment_date' ), 0 );
+      }
     }
 
     //Update current language
@@ -585,7 +599,7 @@ class CeceppaML {
     wp_enqueue_style('ceceppaml-style');
     wp_enqueue_style('ceceppa-tipsy');
 
-    $langs = cml_get_languages(0);
+    $langs = cml_get_languages( 0 );
 
     //Non sono riuscito a trovare un altro modo per ridimensionare la larghezza del th...
     wp_enqueue_style('ceceppaml-style-all-posts', WP_PLUGIN_URL . '/ceceppa-multilingua/css/all_posts.php?langs=' . count($langs));
@@ -658,7 +672,7 @@ class CeceppaML {
     /*
      * Aggiungo le bandiere sotto al titolo del post
      */
-    function add_flags_on_top( $title, $id = -1 ) {
+    function add_flags_on_title( $title, $id = -1 ) {
       global $_cml_settings;
 
       if( isset( $this->_title_applied ) && is_singular() ) return $title;
@@ -685,13 +699,18 @@ class CeceppaML {
         $flags = ( $_cml_settings[ 'cml_options_flags_on_translations' ] ) ?
               cml_shortcode_other_langs_available( $args ) : cml_show_available_langs( $args );
 
-        return $title . $flags;
+        if( $_cml_settings[ 'cml_option_flags_on_pos' ] == "after" )
+	  return $title . $flags;
+	else
+	  return $flags . $title;
       endif;
 
       return $title;
     }
 
-    function add_flags_on_bottom( $title ) {
+    function add_flags_on_content( $title ) {
+      global $_cml_settings;
+      
         if( is_single() && ! $_cml_settings['cml_option_flags_on_post'] ) return $title;
         if(is_page() && ! $_cml_settings[ 'cml_option_flags_on_page' ] ) return $title;
         if(cml_is_custom_post_type() && ! $_cml_settings[ 'cml_option_flags_on_custom_type' ] ) return $title;
@@ -701,7 +720,10 @@ class CeceppaML {
         $flags = ( $_cml_settings[ 'cml_options_flags_on_translations' ] ) ?
               cml_shortcode_other_langs_available( $args ) : cml_show_available_langs( $args );
 
-        return $title . $flags;
+	if( $_cml_settings[ 'cml_option_flags_on_pos' ] == "top" )
+	  return $flags . $title;
+	else
+	  return $title . $flags;
     }
 
   /**
@@ -1029,7 +1051,7 @@ class CeceppaML {
 
       //All languages
       echo '<label class="cml-filter-label">&nbsp;' . __( 'Show only posts/page in:', 'ceceppaml' ) . '</label>';
-      cml_dropdown_langs("cml_language", $d, false, true, __('Show all languages', 'ceceppaml'), -1);
+      cml_dropdown_langs("cml_language", $d, false, true, __('Show all languages', 'ceceppaml'), -1, 0);
       
       $checked = isset ( $_GET['cml_no_translation'] ) ? 1 : 0;
       if( empty($_GET) ) $checked = 1;
@@ -1056,14 +1078,15 @@ class CeceppaML {
 
         if(is_admin() && $pagenow == "edit.php") :
 	  if($id > 0) :
-	    $posts = $this->get_posts_by_language($id);;
+	    $posts = $this->get_posts_by_language( $id );
 
 	    //non devo visualizzare i post senza traduzione
-	    if( isset( $_GET['cml_no_translation'] ) || empty( $_GET ) ) :
+	    if( isset( $_GET['cml_no_translation'] ) ) :
 	      $query->query_vars['post__not_in'] = get_option( "cml_hide_posts_for_lang_" . $d );
 	    else:
 	      $query->query_vars['post__in'] = $posts;
 	    endif;
+	    
 	  endif;
 	endif;
 
@@ -1472,6 +1495,7 @@ class CeceppaML {
     $linked_to = empty( $linked_post ) ? $linked_to : $linked_post;
 
     if( empty( $lang_id ) ) $lang_id = $this->_default_language_id;
+    $not = array();
     $not = get_option( "cml_hide_posts_for_lang_" . $lang_id );
     $not = @array_merge ( $not, $this->_posts_of_lang[ $lang_id ] );
     $untranslated = @array_merge( array( $linked_to ), get_option( "cml_posts_of_lang_" . 0 ) );
@@ -1812,13 +1836,18 @@ class CeceppaML {
     $browser_langs = explode(";", $_SERVER['HTTP_ACCEPT_LANGUAGE']);
     $lang = null;
 
+// //     if( is_user_logged_in() ) {
+//       echo "Browser: ";
+//       print_r( $browser_langs );
+// //     }
+
     //Se la lingua del browser coincide con una di quella attuale della pagina, ignoro tutto
     foreach($browser_langs as $blang) :
-      @list($code1, $code2) = explode(",", $blang);
+      @list( $code1, $code2 ) = explode( ",", $blang );
 
       $locale[] = str_replace("-", "_", $code1);
       $locale[] = str_replace("-", "_", $code2);
-      
+
       //Per ogni codice che trovo verifico se è gestito, appena ne trovo 1 mi fermo
       //Perché il mio browser mi restituisce sia it-IT, che en-EN, quindi mi devo fermare appena trovo un riscontro
       //Senno mi ritrovo sempre la lingua en-EN come $browser_langs;
@@ -1826,18 +1855,18 @@ class CeceppaML {
       while(empty($lang) && $i < count($locale)) :
 	$l = $locale[$i];
 
-	if(strlen($l) > 2) :
+	if(strlen($l) > 2) {
 	  $lang = $this->get_language_id_by_locale($l);
-	else:
-	  //Se ho solo 2 caratteri, cerco negli "slug"
-	  $query = sprintf("SELECT id FROM %s WHERE cml_language_slug = '%s'", CECEPPA_ML_TABLE, $l);
-	  $lang = $wpdb->get_var($query);
-	endif;
+	} else {
+	    //Se ho solo 2 caratteri, cerco negli "slug"
+// 	    $query = sprintf("SELECT id FROM %s WHERE cml_language_slug = '%s'", CECEPPA_ML_TABLE, $l);
+// 	    $lang = $wpdb->get_var($query);
+	}
 
 	$i++;
       endwhile;
 
-      if(!empty($lang)) {
+      if( ! empty ($lang ) ) {
 	break;
       }
     endforeach;
@@ -1921,12 +1950,12 @@ class CeceppaML {
 
     $query = "";
     if($post_lang > 0) :
-    $wpdb->insert(CECEPPA_ML_POSTS,
-            array('cml_post_lang_1' => intval($post_lang),
-              'cml_post_id_1' => intval($post_id),
-              'cml_post_lang_2' => intval($linked_lang),
-              'cml_post_id_2' => intval($linked_post)),
-            array('%d', '%d', '%d', '%d'));
+      $wpdb->insert(CECEPPA_ML_POSTS,
+		array('cml_post_lang_1' => intval($post_lang),
+		'cml_post_id_1' => intval($post_id),
+		'cml_post_lang_2' => intval($linked_lang),
+		'cml_post_id_2' => intval($linked_post)),
+	      array('%d', '%d', '%d', '%d'));
     endif;
 
     //Update column cml_post_lang_2...
@@ -2170,27 +2199,33 @@ class CeceppaML {
     $locations = get_theme_mod( 'nav_menu_locations' );
 
     //Se non inizia per cml_ allora sarà quella definito dal tema :)
-    if( is_array( $locations ) ) :
-	$keys = array_keys( $locations );
-	foreach( $keys as $key ) :
-	  if( ! empty( $key ) && substr( $key, 0, 4 ) != "cml_" ) {
-	    $menu = $this->_current_lang_slug;
+    if( is_array( $locations ) ) {
+      $key = get_option( "cml_primary_menu_name" );
 
-	    if( ! empty ( $locations["cml_menu_$menu"] ) ) {
-	      //Se ho scelto un menu diverso per la lingua corrente, non devo "tradurre" le etichette
-	      $this->_no_translate_menu_item = ( $locations[$key] != $locations["cml_menu_$menu"] );
+      $this->switch_menu( $key, $locations );
+    } else {
+      foreach( $locations as $key => $value ) {
+	if( ! empty( $key ) && substr( $key, 0, 4 ) != "cml_" ) {
+	  $this->switch_menu( $key, $locations );
 
-	      $locations[$key] = $locations["cml_menu_$menu"];
-	      $this->_current_menu_id = $locations[$key];
+	  break;
+	}
+      } //foreach
+    }
+  }
 
-	      set_theme_mod( 'nav_menu_locations', $locations );
-	    }
+  function switch_menu( $key, $locations ) {
+    $menu = $this->_current_lang_slug;
 
-	    //Esco dal ciclo
-	    break;
-	  }
-	endforeach;
-    endif;
+    if( empty ( $locations["cml_menu_$menu"] ) ) return;
+
+    //Se ho scelto un menu diverso per la lingua corrente, non devo "tradurre" le etichette
+    $this->_no_translate_menu_item = ( $locations[$key] != $locations["cml_menu_$menu"] );
+
+    $locations[$key] = $locations["cml_menu_$menu"];
+    $this->_current_menu_id = $locations[ $key ];
+
+    set_theme_mod( 'nav_menu_locations', $locations );
   }
 
   /**
@@ -2262,12 +2297,12 @@ class CeceppaML {
   function get_posts_by_language( $lang = null ) {
     if( empty( $lang ) ) $lang = $this->_current_lang_id;
   
-   //Gli articoli senza lingua sono "figli di tutti"
-   if( empty( $this->_posts_of_lang ) ) $this->preload_posts();
+    //Gli articoli senza lingua sono "figli di tutti"
+    if( empty( $this->_posts_of_lang ) ) $this->preload_posts();
 
-   $posts = $this->_posts_of_lang[ $lang ];
+    $posts = $this->_posts_of_lang[ $lang ];
 
-   return !empty($posts) ? array_unique($posts) : array();
+    return !empty($posts) ? array_unique($posts) : array();
   }
   
   /**
@@ -3106,7 +3141,7 @@ class CeceppaML {
    * 
    */
   function preload_posts() {
-    if( !is_admin() ) :
+    if( is_admin() ) :
       $langs = cml_get_languages( 0 );
     else:
       $langs = cml_get_languages( 1 );
@@ -3465,6 +3500,38 @@ class CeceppaML {
     if( empty( $format ) ) $format = get_option( 'date_format' );
 
     return mysql2date( $format, $comment->comment_date );
+  }
+  
+  function select_menu() {
+    global $pagenow;
+    global $_wp_registered_nav_menus;
+    
+    $menus = get_registered_nav_menus();
+    if( $pagenow == 'nav-menus.php' && count( $menus ) >= 1 ) {
+?>
+	<div class="updated">
+	  <p>
+	  <form name="cml-menu-primary-name" method="get">
+	  <input type="hidden" name="cml-form" value="menu-name" />
+	  <?php 
+	  _e( 'Select the name of your primary menu:', 'ceceppaml' );
+
+	  $name = get_option( "cml_primary_menu_name", "" );
+
+	  //Se non inizia per cml_ allora sarà quella definito dal tema :)
+	  if( is_array( $menus ) ) : ?>
+	  <select name="name">
+	    <?php foreach( $menus as $key => $n ) {
+	      echo '<option value="' . str_replace( " ", "-", esc_attr( $key ) ) . '" ' . selected( $key, $name, false ) . '>' . $n . '</option>';
+	    }?>
+	  </select>
+	  <?php endif; ?>
+	  <input type="submit" value="<?php _e( 'Save', 'ceceppaml' ) ?>" />
+	  </form>
+	  </p>
+	</div>
+<?php
+      }
   }
 }
 

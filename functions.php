@@ -327,7 +327,7 @@ function cml_dropdown_langs($name, $default, $link = false, $none = false, $none
     <script type="text/javascript">
       jQuery(document).ready(function(){
 	      jQuery('.<?php echo $name ?>').change(function() {
-		      window.location.href = jQuery((".<?php echo $name ?> option:selected")).val();
+		      window.location.href = jQuery( (".<?php echo $name ?> option:selected") ).val();
 	      });
       });
     </script>
@@ -342,7 +342,7 @@ function cml_dropdown_langs($name, $default, $link = false, $none = false, $none
     foreach($langs as $lang) :
       $selected = ($lang->id == $default) ? "selected" : "";
 
-      $value = (!$link) ? $lang->id : get_permalink( cml_get_linked_post( $id, null, get_the_ID(), $lang->id ) );
+      $value = ( ! $link ) ? $lang->id : cml_get_the_link( $lang );
       $dataimage = 'data-image="' . cml_get_flag_by_lang_id( $lang->id ) . '"';
 
       echo "<option $dataimage value=\"$value\" $selected>$lang->cml_language</option>";

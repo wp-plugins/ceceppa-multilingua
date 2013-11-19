@@ -13,6 +13,11 @@ function cml_fix_database() {
 
   $dbVersion = get_option( "cml_db_version", CECEPPA_DB_VERSION );
 
+  if( $dbVersion < 22 ) {
+    if( get_option( 'cml_option_flags_on_pos', 'top' ) == "top" )
+      update_option( "cml_option_flags_on_pos", "after" );
+  }
+
   if( $dbVersion < 21 ) {
       $wpdb->query(  "ALTER TABLE  " . CECEPPA_ML_TABLE . " ADD  `cml_date_format` TEXT NOT NULL ;" );
   }
