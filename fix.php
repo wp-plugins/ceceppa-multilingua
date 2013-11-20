@@ -195,6 +195,8 @@ function cml_fix_rebuild_posts_info() {
 
     $pid = $p->post->ID;
     
+    $pids[] = $p->post->ID;
+
     //if( $p->post->post_type != 'nav_menu_item' ) :
       $lang = $wpCeceppaML->get_language_id_by_post_id( $pid );
 
@@ -226,6 +228,14 @@ function cml_fix_rebuild_posts_info() {
 
   @update_option( "cml_posts_of_lang_" . 0, array_unique( $posts[0] ) );
 
+  //Remove deleted posts that already exists in my table :(
+  {
+      $sql = "DELETE FROM " . CECEPPA_ML_POSTS . " WHERE cml_post_id_1 NOT IN ( " . join( ",", $pids ) . ")";
+      $wpdb->query($sql);
+
+      $sql = "DELETE FROM " . CECEPPA_ML_POSTS . " WHERE cml_post_id_2 NOT IN ( " . join( ",", $pids ) . ")";
+      $wpdb->query($sql);
+  }
 
   //Articoli da escludere
   //Recupero tutte le traduzioni...
