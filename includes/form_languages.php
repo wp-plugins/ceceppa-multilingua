@@ -56,6 +56,7 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
       <th style="width: 1%;padding: 0 5px 0 5px;"><img src="<?php echo CECEPPA_PLUGIN_URL ?>images/sort.png" title="<?php _e('Choose language order', 'ceceppaml') ?>" class="tipsy-me"></th>
       <th style="width: 230px;"><?php _e('Flag', 'ceceppaml') ?></th>
       <th style="width:73%"><?php _e('Name of the language ', 'ceceppaml') ?></th>
+      <th><?php _e( 'Date format', 'ceceppaml' ) ?></th>
       <th style="width:5%"><img src="<?php echo CECEPPA_PLUGIN_URL ?>images/enabled.png" title="<?php _e('Enabled', 'ceceppaml') ?>?" class="tipsy-me" height="24"></th>
       <th style="width: 5%">
 	<a href="#" onclick="javascript: toggleDetails(-1)"><img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/details.png" width="32" title="<?php _e('Show/Hide advanced options for languages.') ?>"></a>
@@ -69,7 +70,7 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
      * La funzione hex2bin è disponibile solo da PHP >= 5.4, a quanto sembra non tutti i servizi di hosting hanno php aggiornato -.-".
      * Quindi utilizzo la funzione HEX di MySQL
      */
-    $query = "SELECT id, cml_default, cml_flag, cml_language, cml_language_slug, UNHEX(cml_notice_post) as cml_notice_post, UNHEX(cml_notice_page) as cml_notice_page, cml_locale, cml_enabled, cml_sort_id FROM " . CECEPPA_ML_TABLE . " ORDER BY cml_sort_id";
+    $query = "SELECT id, cml_default, cml_flag, cml_language, cml_language_slug, cml_date_format, UNHEX(cml_notice_post) as cml_notice_post, UNHEX(cml_notice_page) as cml_notice_page, cml_locale, cml_enabled, cml_sort_id, cml_rtl FROM " . CECEPPA_ML_TABLE . " ORDER BY cml_sort_id";
     $results = $wpdb->get_results($query);
     
     foreach($results as $result) :
@@ -93,10 +94,14 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 	  <td>
 	    <input name="language[]" type="text" id="language-<?php echo $result->id ?>" value="<?php echo $result->cml_language; ?>" style="width: 100%">
 	  </td>
+<!-- Date format -->
+      <td>
+	    <input name="dformat[]" type="text" id="language-<?php echo $result->id ?>" value="<?php echo $result->cml_date_format; ?>" style="width: 100%">
+      </td>
 <!-- Attiva lingua-->
-			<td>
-					<input type="checkbox" id="lang-enabled" name="lang-enabled[<?php echo $row++ ?>]" value="1" <?php echo ($result->cml_enabled == 1) ? "checked" : "" ?>/>
-			</td>
+      <td>
+              <input type="checkbox" id="lang-enabled" name="lang-enabled[<?php echo $row++ ?>]" value="1" <?php echo ($result->cml_enabled == 1) ? "checked" : "" ?>/>
+      </td>
       <th>
 <!-- Dettagli e cancella -->
 		<a href="#" onclick="javascript: toggleDetails(<?php echo $result->id ?>)"><img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/details.png" width="32" title="<?php _e('Show/Hide advanced options for languages', 'ceceppaml') ?>"></a><br />
@@ -112,6 +117,7 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 		<th><?php _e('Post notice', 'ceceppaml'); ?></th>
 		<th><?php _e('Page notice', 'ceceppaml'); ?></th>
 		<th style="width:100px"><?php _e('Locale Wordpress', 'ceceppaml') ?></th>
+		<th style="width:100px"><?php _e('Right to left', 'ceceppaml') ?></th>
 	      </tr>
 	      </thead>
 	      <tr>
@@ -119,6 +125,7 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 		<td><input name="notice_post[]" class="_tipsy" type="text" value="<?php echo stripslashes($result->cml_notice_post); ?>" style="margin-left:2%; width: 100%" title="<?php _e('Define the text of the notice to be displayed when the post is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
 		<td><input name="notice_page[]" class="_tipsy" type="text" value="<?php echo stripslashes($result->cml_notice_page); ?>" style="margin-left:2%; width: 100%" title="<?php _e('Define the text of the notice to be displayed when the page is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
 		<td><input name="locale[]" class="_tipsy" id="locale-<?php echo $result->id ?>" type="text" value="<?php echo $result->cml_locale ?>" title="<?php _e('Helps to link correctly the defined language by the user\'s browser. ', 'ceceppaml') ?>" /></td>
+		<td><input name="rtl[<?php echo $result->id ?>]" class="_tipsy" id="rtl-<?php echo $result->id ?>" type="checkbox" value="1" title="<?php _e('Click for enable Right To Left support. ', 'ceceppaml') ?>" <?php echo checked( $result->cml_rtl, 1 ) ?> /></td>
 	      </tr>
 	    </table>
 	  </td>
@@ -139,6 +146,10 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
       </td>
       <td><?php ceceppa_show_flags($_langs, $_custom_langs, "x", null) ?></td>
       <td><input name="language[]" id="language-x" type="text" style="width: 100%"></td>
+<!-- Date format -->
+      <td>
+	    <input name="dformat[]" type="text" id="language-x" value="<?php echo get_option( 'date_format' ) ?>" style="width: 100%">
+      </td>
       <td></td>
       <td style="text-align: center">
 	<img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/addlang.png" width="32" />
@@ -153,6 +164,7 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 		<th><?php _e('Post notice', 'ceceppaml'); ?></th>
 		<th><?php _e('Page notice', 'ceceppaml'); ?></th>
 		<th style="width:100px"><?php _e('Locale Wordpress', 'ceceppaml') ?></th>
+        <th><?php _e( 'Right to left', 'ceceppaml' ) ?></th>
 	      </tr>
 	      </thead>
 	      <tr>
@@ -160,6 +172,7 @@ $tab = isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 0;
 		<td><input name="notice_post[]" class="_tipsy" type="text" style="margin-left:2%; width: 100%" title="<?php _e('Define the text of the notice to be displayed when the post is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
 		<td><input name="notice_page[]" class="_tipsy" type="text" style="margin-left:2%; width: 100%" title="<?php _e('Define the text of the notice to be displayed when the page is available in the visitor\'s language', 'ceceppaml'	) ?>" /></td>
 		<td><input name="locale[]" class="_tipsy" id="locale-x" type="text" title="<?php _e('Helps to link correctly the defined language by the user\'s browser. ', 'ceceppaml') ?>" /></td>
+		<td><input name="rtl[]" class="_tipsy" id="rtl-x" type="checkbox" value="1" title="<?php _e('Check for enable Right To Left support. ', 'ceceppaml') ?>" /></td>
 	      </tr>
 	    </table>
 	  </td>

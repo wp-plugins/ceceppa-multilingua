@@ -1,6 +1,6 @@
 <?php
 
-gloabl $wpCeceppaML;
+global $wpCeceppaML;
 
 //Non posso richiamare lo script direttamente dal browser :)
 if(!is_object($wpCeceppaML)) die("Access denied");
