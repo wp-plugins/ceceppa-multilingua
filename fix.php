@@ -13,6 +13,10 @@ function cml_fix_database() {
 
   $dbVersion = get_option( "cml_db_version", CECEPPA_DB_VERSION );
 
+  if( $dbVersion < 23 ) {
+    add_action( 'plugins_loaded', 'cml_fix_insert_post_info' );
+  }
+
   if( $dbVersion < 22 ) {
     if( get_option( 'cml_option_flags_on_pos', 'top' ) == "top" )
       update_option( "cml_option_flags_on_pos", "after" );
@@ -230,11 +234,13 @@ function cml_fix_rebuild_posts_info() {
 
   //Remove deleted posts that already exists in my table :(
   {
-      $sql = "DELETE FROM " . CECEPPA_ML_POSTS . " WHERE cml_post_id_1 NOT IN ( " . join( ",", $pids ) . ")";
-      $wpdb->query($sql);
+    $pids[] = "0";
 
-      $sql = "DELETE FROM " . CECEPPA_ML_POSTS . " WHERE cml_post_id_2 NOT IN ( " . join( ",", $pids ) . ")";
-      $wpdb->query($sql);
+    $sql = sprintf( "DELETE FROM %s WHERE cml_post_id_1 NOT IN ( %s )", CECEPPA_ML_POSTS, join( ",", $pids ) );
+    $wpdb->query($sql);
+
+    $sql = sprintf( "DELETE FROM %s WHERE cml_post_id_2 NOT IN ( %s )", CECEPPA_ML_POSTS, join( ",", $pids ) );
+    $wpdb->query($sql);
   }
 
   //Articoli da escludere
@@ -333,5 +339,39 @@ function cml_update_settings() {
   
   fwrite( $fp, '?>' );
   fclose( $fp );
+}
+
+function cml_fix_insert_post_info() {
+  global $wpCeceppaML, $wpdb;
+  
+  //Tipi di post + custon_posts
+  $types = array_merge( array( 'post' => 'post', 'page' => 'page' ), 
+				get_post_types( array( '_builtin' => false ), 'names' ) );
+
+  //Recupero tutti gli articoli
+  $args = array('numberposts' => -1, 'posts_per_page' => 999999,
+		  'post_type' => $types,
+		  'status' => 'publish,draft,private,future' );
+
+  $p = new WP_Query( $args );
+  $langs = cml_get_languages( 0 );
+  while( $p->have_posts() ) :
+    $p->next_post();
+
+    $id = $p->post->ID;
+    $exists = $wpdb->get_row( sprintf( "SELECT * FROM %s WHERE cml_post_id_1 = %d OR cml_post_id_2 = %d", 
+			CECEPPA_ML_POSTS, 
+			$id, $id ) );
+			
+    if( empty( $exists ) ) {
+      $lang = $wpCeceppaML->get_language_id_by_post_id( $id );
+      
+      $wpdb->insert( CECEPPA_ML_POSTS,
+		      array( "cml_post_id_1" => $id, "cml_post_lang_1" => $lang,
+		      "cml_post_id_2" => 0, "cml_post_lang_2" => 0 ),
+		      array( "%d", "%d" ) );
+    }
+
+  endwhile;
 }
 ?>

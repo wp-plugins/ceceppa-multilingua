@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.42
+Version: 1.3.43
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $wpdb;
 
-define( 'CECEPPA_DB_VERSION', 22 );
+define( 'CECEPPA_DB_VERSION', 23 );
 
 define('CECEPPA_ML_TABLE', $wpdb->base_prefix . 'ceceppa_ml');
 define('CECEPPA_ML_CATS', $wpdb->base_prefix . 'ceceppa_ml_cats');
@@ -1123,6 +1123,7 @@ class CeceppaML {
 
     if( ! in_the_loop() ) {
       $exclude = get_option( 'cml_exclude_posts_for_' . $this->_current_lang_id );
+
       if( empty( $exclude ) ) {
         $exclude = array();
         foreach( $langs as $lang ) {
@@ -1130,6 +1131,7 @@ class CeceppaML {
           
           $exclude = array_merge( $exclude, $this->get_posts_by_language( $lang->id ) );
         }
+
         //Escludo tutti i post senza lingua, che quindi devono essere visibili anche nella mia lingua...
         $posts = $this->get_posts_by_language( $this->_current_lang_id );
         foreach( $exclude as $i => $h ) {
@@ -1138,8 +1140,7 @@ class CeceppaML {
           }
         }
       }
-    }
-    else {
+    } else {
       //Recupero tutti i post associati alla lingua corrente
       $posts = $this->get_posts_by_language( $this->_current_lang_id );
 
@@ -2773,6 +2774,7 @@ class CeceppaML {
 
       switch( $this->_url_mode ):
       case PRE_DOMAIN :
+        //##.example.com
 	if( strpos( $permalink, "http://www." ) === FALSE ) :
 	  $permalink = $this->add_slug_to_url( $slug );
 	else:
@@ -2788,6 +2790,7 @@ class CeceppaML {
 	return $this->_homeUrl . $slug . "/" . join( "/", $plinks );
 	break;
       case PRE_LANG:
+        //www.example.com?lang=##
 	return add_query_arg( array( "lang" => $slug ), $permalink );
 	break;
       default:
@@ -3145,11 +3148,7 @@ class CeceppaML {
    * 
    */
   function preload_posts() {
-    if( is_admin() ) :
-      $langs = cml_get_languages( 0 );
-    else:
-      $langs = cml_get_languages( 1 );
-    endif;
+    $langs = cml_get_languages( 0 );
     
     foreach($langs as $lang) :
       $this->_posts_of_lang[ $lang->id ] = get_option("cml_posts_of_lang_" . $lang->id);
@@ -3332,7 +3331,9 @@ class CeceppaML {
   
   function get_previous_next_post_where( $where ) {
     $posts = $this->get_posts_by_language();
-    $where .= " AND p.id IN (" . implode(", ", $posts) . ") ";
+    
+    if( ! empty( $posts ) )
+      $where .= " AND p.id IN (" . implode(", ", $posts) . ") ";
     
     return $where;
   }
