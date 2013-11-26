@@ -20,7 +20,7 @@
   
   $_cml_settings[ 'cml_show_admin_notice' ] = get_option( 'cml_show_admin_notice', 1 );
   $_cml_settings[ 'cml_code_optimization' ] = get_option( 'cml_code_optimization', 1 );
-  $_cml_settings[ 'cml_option_filter_posts' ] = get_option( 'cml_option_filter_posts', false );
+  $_cml_settings[ 'cml_option_filter_posts' ] = get_option( 'cml_option_filter_posts', 1 );
   $_cml_settings[ 'cml_option_filter_translations' ] = get_option( 'cml_option_filter_translations', true );
   $_cml_settings[ 'cml_option_filter_search' ] = get_option('cml_option_filter_search', false);
   $_cml_settings[ 'cml_option_filter_form_class' ] = get_option('cml_option_filter_form_class', false );
@@ -30,6 +30,7 @@
   $_cml_settings[ 'cml_option_flags_on_page' ] = get_option('cml_option_flags_on_page', true);
   $_cml_settings[ 'cml_option_flags_on_custom_type' ] = get_option('cml_option_flags_on_custom_type', 0);
   $_cml_settings[ 'cml_option_flags_on_pos' ] = get_option('cml_option_flags_on_pos', 'top');
+  $_cml_settings[ 'cml_option_flags_on_the_loop' ] = get_option( 'cml_option_flags_on_the_loop' );
 
   $_cml_settings[ 'cml_option_notice' ] = get_option('cml_option_notice', 'notice');
   $_cml_settings[ 'cml_option_notice_pos' ] = get_option('cml_option_notice_pos', 'top');
@@ -57,4 +58,6 @@
   $_cml_settings[ 'cml_show_float_items_as' ] = get_option("cml_show_float_items_as", 1);
   $_cml_settings[ 'cml_show_float_items_size' ] = get_option("cml_show_float_items_size", "small");
   $_cml_settings[ 'cml_add_items_to' ] = get_option( 'cml_add_items_to' );
+  
+  $_cml_settings[ 'cml_force_languge' ] = get_option( "cml_force_languge", 1 )
 ?>

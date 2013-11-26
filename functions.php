@@ -72,10 +72,10 @@ function cml_get_languages_list() {
 function cml_get_flag($flag, $size = "tiny") {
   if( empty( $flag ) ) return "";
 
-  if( file_exists( CECEPPA_PLUGIN_PATH . "flags/$size/$flag.png" ) )
-    $url = CECEPPA_PLUGIN_URL . "flags/$size/$flag.png";
-  else
+  if( file_exists( CECEPPA_UPLOAD_DIR . "/$size/$flag.png" ) )
     $url = CECEPPA_UPLOAD_URL . "/$size/$flag.png";
+  else
+    $url = CECEPPA_PLUGIN_URL . "flags/$size/$flag.png";
     
   return esc_url( $url );
 }
@@ -172,28 +172,40 @@ function cml_is_default_lang($lang = null) {
  * @param "linked" - se true: la bandiera deve restituire il link all'articolo nelle varie lingue (se presente),
 * 				false: la bandiera punterà alla home aggiungendo il suffisso "?lang=##"
  */
-function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags", $image_class = "", $echo = true, $linked = true) {
+function cml_show_flags( $show = "flag", $size = "tiny", $class_name = "cml_flags", $image_class = "", $echo = true, $linked = true, $only_existings = false, $sort = false ) {
   global $wpdb, $wpCeceppaML;
 
-  $redirect = get_option('cml_option_redirect');
-  $results = $wpdb->get_results("SELECT * FROM " . CECEPPA_ML_TABLE . " WHERE cml_enabled = 1 ORDER BY cml_sort_id");  
-  $width = ($size == "tiny") ? 16 : 32;
+  $redirect = get_option( 'cml_option_redirect' );
+  
+  $results = cml_get_languages();
+  $width = ( $size == "tiny" ) ? 16 : 32;
 
-  $r = "<ul class='$class_name'>";
+  $r = "<ul class=\"$class_name\">";
+  
+  //Post language...
+  $lang_id = ( ! $sort ) ? -1 : $wpCeceppaML->get_language_id_by_post_id( get_the_ID() );
+  $items = array();
   foreach($results as $result) :
     $lang = ($show == "flag") ? "" : $result->cml_language;
 
-    $link = cml_get_the_link( $result );
+    $link = cml_get_the_link( $result, $linked, $only_existings );
+    if( empty( $link) ) continue;
 
     $img = "<img class=\"$size $image_class\" src='" . cml_get_flag_by_lang_id( $result->id, $size ) . "' title='$result->cml_language' width=\"$width\"/>";
     if($show == "text") $img = "";
 
-    $r .= "<li><a href='$link'>$img$lang</a></li>";
+    $li = "<li><a href=\"$link\">$img$lang</a></li>";
+    if( $sort && is_array( $items ) && $result->id == $lang_id )
+      array_unshift( $items, $li );
+    else
+      $items[] = $li;
+
   endforeach;
 
+  $r .= join( "\n", $items );
   $r .= "</ul>";
 
-  if($echo) 
+  if( $echo ) 
     echo $r;
   else
     return $r;
@@ -211,13 +223,12 @@ function cml_show_flags($show = "flag", $size = "tiny", $class_name = "cml_flags
 function cml_translate($string, $id, $type = "", $wpgettext = false, $gettext = false) {
   global $wpdb, $wpCeceppaML;
 
-  $s = ($type == "W") ? strtolower($string) : $string;
+  $s = ($type == "W") ? strtolower( $string ) : $string;
   $query = sprintf("SELECT UNHEX(cml_translation) FROM %s WHERE cml_text = '%s' AND cml_lang_id = %d AND cml_type LIKE '%s'",
 			  CECEPPA_ML_TRANS, bin2hex($s), $id, "%" . $type . "%");
-
   $ret = $wpdb->get_var($query);
 
-  if(empty($ret) && $wpgettext) :
+  if( $wpgettext && empty( $ret ) ) :
     $ret = __( $string );
   endif;
 
@@ -240,7 +251,7 @@ function cml_translate($string, $id, $type = "", $wpgettext = false, $gettext = 
     $ret = T_gettext($string);
   endif;
 
-  return (empty($ret)) ?  $string : html_entity_decode(stripslashes($ret));
+  return ( empty( $ret ) ) ?  $string : html_entity_decode( stripslashes( $ret ) );
 }
 
 /**
@@ -316,7 +327,7 @@ function cml_dropdown_langs($name, $default, $link = false, $none = false, $none
     <script type="text/javascript">
       jQuery(document).ready(function(){
 	      jQuery('.<?php echo $name ?>').change(function() {
-		      window.location.href = jQuery((".<?php echo $name ?> option:selected")).val();
+		      window.location.href = jQuery( (".<?php echo $name ?> option:selected") ).val();
 	      });
       });
     </script>
@@ -331,7 +342,7 @@ function cml_dropdown_langs($name, $default, $link = false, $none = false, $none
     foreach($langs as $lang) :
       $selected = ($lang->id == $default) ? "selected" : "";
 
-      $value = (!$link) ? $lang->id : get_permalink( cml_get_linked_post( $id, null, get_the_ID(), $lang->id ) );
+      $value = ( ! $link ) ? $lang->id : cml_get_the_link( $lang );
       $dataimage = 'data-image="' . cml_get_flag_by_lang_id( $lang->id ) . '"';
 
       echo "<option $dataimage value=\"$value\" $selected>$lang->cml_language</option>";
@@ -400,15 +411,14 @@ function cml_is_homepage() {
     $static_id = get_option( "page_for_posts" ) + get_option( "page_on_front" );
 
     $lang_id = cml_get_current_language_id();
-    $the_id = get_the_ID();
-    if( !empty( $the_id ) ) :
+    $the_id = get_queried_object_id();
+    if( ! empty( $the_id ) ) :
       if( $the_id == $static_id ) return true;	//E' proprio lei...
       
       //Mica è una traduzione?
       $linked = cml_get_linked_post( $lang_id, null, $the_id , cml_get_default_language_id() );
       if( !empty($linked) ) return $linked == $static_id;
     endif;
-    
   endif;
 
   //Non posso utilizzare la funzione is_home, quindi controllo "manualmente"
@@ -425,12 +435,12 @@ function cml_get_page_id_by_path($url, $types = null) {
   $plinks = explode( "/", $url );
 
   //Se l'ultimo elemento è vuoto, lo cancello ;)
-  if( substr($url, -1) == "/" ) array_pop($plinks);
-  $title = array_pop($plinks);
+  if( substr($url, -1) == "/" ) array_pop( $plinks );
+  $title = array_pop( $plinks );
 
-  if($types == null) $types = array_keys(get_post_types()); 
-  $p = cml_get_page_by_path( $title, OBJECT, $types );
-  $the_id = is_object($p) ? $p->ID : 0;
+  if( $types == null ) $types = array_keys( get_post_types() );
+  $p = cml_get_page_by_path( $url, OBJECT, $types );
+  $the_id = is_object( $p ) ? $p->ID : 0;
   
   return $the_id;
 }
@@ -460,7 +470,7 @@ function cml_is_custom_post_type() {
 }
 
 function cml_other_langs_available( $id ) {
-  echo cml_shortcode_other_langs_available( $id );
+  echo cml_shortcode_other_langs_available( array( "id" => $id ) );
 }
 
 function cml_get_language_by_post_id( $id ) {
@@ -477,31 +487,43 @@ function cml_set_language_of_post( $id, $lang_id ) {
   $wpCeceppaML->set_language_of_post( $id, $lang_id, 0, 0 );
 }
 
-function cml_get_posts_of_language( $lang_id ) {
+function cml_get_posts_by_language( $lang_id = null ) {
   global $wpCeceppaML;
   
-  return $wpCeceppaML->get_posts_of_language();
+  return $wpCeceppaML->get_posts_by_language();
 }
 
 /*
  * Ritorno il link formattato in base alla pagina corrente
+ *
+ * @param $result - language information ( i.e. cml_get_language() )
+ * @param $linked - must return linked post ( = true ), or homepage ( = false )?
+ * @param $only_existings - return linked post only if it exists, otherwise return blank link
  */
-function cml_get_the_link( $result ) {
-  global $wpCeceppaML;
+function cml_get_the_link( $result, $linked = true, $only_existings = false ) {
+  global $wpCeceppaML, $_cml_settings;
 
-  if( cml_is_homepage() ) {
+  if( cml_is_homepage() && ! in_the_loop() ) {
     //Se stò nella home vuol dire che ho scelto come metodo di reindirizzamento &lang
     $link = $wpCeceppaML->get_home_url( $result->cml_language_slug );
   } else {
     /* Collego la categoria della lingua attuale con quella della linga della bandierina */
     $link = "";
 
-    $lang_id = $wpCeceppaML->get_current_lang_id();
+    if( ! in_the_loop() )
+      $lang_id = $wpCeceppaML->get_current_lang_id();
+    else
+      $lang_id = $wpCeceppaML->get_language_id_by_post_id( get_the_ID() );
 
-    if( ( is_single() || is_page() ) &&  $linked ) :
-      $link = cml_get_linked_post( $lang_id, $result, get_the_ID() );
+    /*
+     * I must check that is_category is false, because
+     * if wp display 404, is_single is true also for category and in this case
+     * the plugin will return wrong link
+     */
+    if( ( ( is_single() || is_page() ) ||  $linked ) && ! is_category() ):
+      $link = cml_get_linked_post( $lang_id, $result, get_the_ID(), $result->id );
 
-      if( !empty( $link ) ) $link = get_permalink($link);
+      if( !empty( $link ) ) $link = get_permalink( $link );
     endif;
 
     if( is_archive() && !is_category() ) :
@@ -516,13 +538,13 @@ function cml_get_the_link( $result ) {
       $cat = get_the_category();
 
       if( is_array( $cat ) ) :
-	$cat_id = $cat[count($cat) - 1]->term_id;
-	
-	//Mi serve a "forzare" lo slug corretto nel link
-	$wpCeceppaML->force_category_lang( $result->id );
-	
-	//Mi recupererà il link tradotto dal mio plugin ;)
-	$link = get_category_link( $cat_id );
+        $cat_id = $cat[count($cat) - 1]->term_id;
+
+        //Mi serve a "forzare" lo slug corretto nel link
+        $wpCeceppaML->force_category_lang( $result->id );
+
+        //Mi recupererà il link tradotto dal mio plugin ;)
+        $link = get_category_link( $cat_id );
       endif;
 
       $wpCeceppaML->unset_category_lang();
@@ -538,11 +560,20 @@ function cml_get_the_link( $result ) {
 
 	Se non ho trovato nesuna traduzione per l'articolo, la bandiera punterà alla homepage
     */
-    if( empty($link) ) :
-      $link = $wpCeceppaML->get_home_url( $result->cml_language_slug );
-    endif;
+    if( empty( $link ) && ! $only_existings ) {
+      if( $_cml_settings[ 'cml_force_languge' ] == 1 ) {
+	$url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+	
+	$wpCeceppaML->force_category_lang( $result->id );
+
+	$link = $wpCeceppaML->convert_url( cml_get_current_language()->cml_language_slug, $url, false, true );
+
+	$wpCeceppaML->unset_category_lang();
+      } else
+	$link = $wpCeceppaML->get_home_url( $result->cml_language_slug );
+    }
   }
-  
+
   return $link;
 }
 ?>
