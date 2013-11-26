@@ -58,4 +58,6 @@
   $_cml_settings[ 'cml_show_float_items_as' ] = get_option("cml_show_float_items_as", 1);
   $_cml_settings[ 'cml_show_float_items_size' ] = get_option("cml_show_float_items_size", "small");
   $_cml_settings[ 'cml_add_items_to' ] = get_option( 'cml_add_items_to' );
+  
+  $_cml_settings[ 'cml_force_languge' ] = get_option( "cml_force_languge", 1 )
 ?>

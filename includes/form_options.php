@@ -53,7 +53,24 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 	
 	  if($tab == 0) : 
 	    require_once('form_options_flags.php');
-
+?>
+<!-- Translation doesn't exists -->
+  <dl class="cml_options">
+    <dt>
+	<?php _e( 'If translations of current post/page/category doesn\'t exists in flag language:', 'ceceppaml' ) ?>
+    </dt>
+    <dd>
+	<label>
+	  <input type="radio" name="force" value="1" <?php echo checked( get_option( "cml_force_languge", 1 ), 1, false ) ?>>
+	  <?php _e( 'Switch always to flag language', 'ceceppaml' ) ?>
+	</label>
+	<label>
+	  <input type="radio" name="go-home" value="1" <?php echo checked( get_option( "cml_force_languge", 2 ), 1, false ) ?>>
+	  <?php _e( 'Go to homepage', 'ceceppaml' ) ?>
+	</label>
+    </dd>
+  </dl>
+<?php
 	    do_meta_boxes('cml_options_page_flags','advanced',null);
 	  endif;
 	  

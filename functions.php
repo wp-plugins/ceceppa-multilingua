@@ -470,7 +470,7 @@ function cml_is_custom_post_type() {
 }
 
 function cml_other_langs_available( $id ) {
-  echo cml_shortcode_other_langs_available( $id );
+  echo cml_shortcode_other_langs_available( array( "id" => $id ) );
 }
 
 function cml_get_language_by_post_id( $id ) {
@@ -501,7 +501,7 @@ function cml_get_posts_by_language( $lang_id = null ) {
  * @param $only_existings - return linked post only if it exists, otherwise return blank link
  */
 function cml_get_the_link( $result, $linked = true, $only_existings = false ) {
-  global $wpCeceppaML;
+  global $wpCeceppaML, $_cml_settings;
 
   if( cml_is_homepage() && ! in_the_loop() ) {
     //Se stò nella home vuol dire che ho scelto come metodo di reindirizzamento &lang
@@ -539,10 +539,10 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false ) {
 
       if( is_array( $cat ) ) :
         $cat_id = $cat[count($cat) - 1]->term_id;
-        
+
         //Mi serve a "forzare" lo slug corretto nel link
         $wpCeceppaML->force_category_lang( $result->id );
-        
+
         //Mi recupererà il link tradotto dal mio plugin ;)
         $link = get_category_link( $cat_id );
       endif;
@@ -560,9 +560,18 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false ) {
 
 	Se non ho trovato nesuna traduzione per l'articolo, la bandiera punterà alla homepage
     */
-    if( empty($link) && ! $only_existings ) :
-      $link = $wpCeceppaML->get_home_url( $result->cml_language_slug );
-    endif;
+    if( empty( $link ) && ! $only_existings ) {
+      if( $_cml_settings[ 'cml_force_languge' ] == 1 ) {
+	$url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+	
+	$wpCeceppaML->force_category_lang( $result->id );
+
+	$link = $wpCeceppaML->convert_url( cml_get_current_language()->cml_language_slug, $url, false, true );
+
+	$wpCeceppaML->unset_category_lang();
+      } else
+	$link = $wpCeceppaML->get_home_url( $result->cml_language_slug );
+    }
   }
 
   return $link;

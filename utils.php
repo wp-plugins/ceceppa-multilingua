@@ -81,6 +81,29 @@ function cml_get_linked_post($lang_id, $result, $post_id, $browser_lang = null) 
   return $link;
 }
 
+function cml_get_linked_posts( $id = null ) {
+  global $wpCeceppaML;
+
+  if( empty( $id ) ) $id = get_the_ID();
+  if( ! $wpCeceppaML->has_translations( $id ) ) return array();
+
+  $lid = $wpCeceppaML->get_language_id_by_post_id( get_the_ID() );
+  $langs = cml_get_languages();
+
+  $ids = array(); $posts = array();
+  foreach( $langs as $lang ) {
+    $nid = cml_get_linked_post( $lid, $lang, $id, $lang->id );
+
+    if( ! empty( $nid ) ) {
+      $ids[ $lang->cml_language_slug ] = $nid;
+      $posts[] = $nid;
+    }
+  }
+
+  $ids[ "posts" ] = join( ",", $posts );
+  return $ids;
+}
+
 /**
  * http://www.cult-f.net/detect-crawlers-with-php/
  *

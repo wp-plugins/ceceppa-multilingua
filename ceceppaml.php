@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.43
+Version: 1.3.44
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -80,6 +80,7 @@ class CeceppaML {
   protected $_filter_form_class = "searchform";
   protected $_no_translate_menu_item = false;
   protected $_url_mode = PRE_PATH;
+  protected $_category_url_mode = PRE_PATH;
   protected $_posts_of_lang = array();	//Al fine di evitare chiamate continue al db precarico nella variabile i post associati ad ogni lingua
   protected $_translations_by_lang = array();  //Memorizzo gli id di tutte le traduzioni per ogni lingua
 
@@ -118,9 +119,15 @@ class CeceppaML {
     $this->_default_language_slug = $_cml_settings[ 'default_language_slug' ];
     $this->_default_language_locale = $_cml_settings[ 'default_language_locale' ];
     $this->_url_mode = $_cml_settings[ 'url_mode' ];
+    $this->_is_default_language = 0;
 
     /* Il permalink di default ?p=## e la struttura /en/ non vanno per nulla d'accordo */
     if( empty( $this->_permalink_structure ) && $this->_url_mode == PRE_PATH ) $this->_url_mode = PRE_LANG;
+
+    //Category doesn't works correctly with "none" of "Url Modification mode"
+    $this->_category_url_mode = $this->_url_mode;
+    if( $this->_category_url_mode == PRE_NONE && ! $_cml_settings[ 'cml_option_translate_categories' ] )
+      $this->_category_url_mode = PRE_LANG;
 
     //Wow
     $this->preload_posts();
@@ -380,7 +387,7 @@ class CeceppaML {
     $this->_translate_term_link = $_cml_settings["cml_option_translate_categories"];
 
     //Non posso tradurre il link delle categorie per il permalink di default :D
-    if($this->_url_mode == PRE_PATH) :
+    if( $this->_url_mode == PRE_PATH ) :
       add_filter( 'tag_link', array( &$this, 'translate_category_url' ), 0 );
       add_filter( 'category_link', array( &$this, 'translate_category_url' ) );
     endif;
@@ -2109,6 +2116,7 @@ class CeceppaML {
     //Aggiorno il menu del tema :)
     $this->change_menu();
 
+    $this->_is_default_language = ( $this->_current_lang_id == $this->_default_language_id );
     $this->_language_detected = true;
   }
 
@@ -2647,7 +2655,7 @@ class CeceppaML {
           $id = get_the_ID();
           if( !empty( $id ) )
             $lang_id = $this->get_language_id_by_page_id( get_the_ID() );
-  
+
           //I tag mi arrivano con il parametro della lingua, lo tolgo sennò faccio casino :D
           $link = remove_query_arg( "lang", $link );
           return $this->translate_term_url( $link, $lang_id );
@@ -2656,8 +2664,8 @@ class CeceppaML {
     	$link = add_query_arg( array( 'lang' => $this->_force_category_lang ), $link );
       endif; //!empty
 
-      if( $this->_current_lang_id != $this->_default_language_id  ) :
-    	$link = $this->convert_url( $slug, $link );
+      if( ! $this->_is_default_language  ) :
+    	$link = $this->convert_url( $slug, $link, true );
       endif;
 
       return $link;
@@ -2707,10 +2715,11 @@ class CeceppaML {
       $lang_arg = ( $this->_url_mode == PRE_LANG ) ? ("?lang=" . $slug) : "";
 
       //Ricreo il permalink con le categorie tradotte... :)
-      if( !empty( $cats )) :
-        return $homeUrl . join( "/", $cats ) . "/" . $lang_arg;
-      endif; //!empty
-      
+      if( !empty( $cats ) ) {
+        $link = $homeUrl . join( "/", $cats ) . "/" . $lang_arg;
+      }
+
+      if( $this->_category_url_mode == PRE_LANG ) return $this->convert_url( null, $link, true );
       return $link;
     }
 
@@ -2728,7 +2737,7 @@ class CeceppaML {
       
       if( empty( $slug ) ) $slug = $this->get_language_slug_by_id( $this->_current_lang_id );
 
-      return $this->convert_url( $slug, $url );
+      return $this->convert_url( $slug, $url, true );
     }
 
     function translate_object_terms($obj) {
@@ -2768,11 +2777,16 @@ class CeceppaML {
 
     /*
      * Converto l'url a seconda della modalità _url_mode selezionata
+     *
+     * For category I have to check _category_url_mode instead of _url_mode
      */
-    function convert_url( $slug, $permalink ) {
+    function convert_url( $slug, $permalink, $is_category_url = false, $force_language = false ) {
       if( isset( $this->_force_category_lang ) ) $slug = $this->get_language_slug_by_id( $this->_force_category_lang );
 
-      switch( $this->_url_mode ):
+      $switch = ( ! $is_category_url ) ? $this->_url_mode : $this->_category_url_mode;
+      if( $force_language && $this->_url_mode == PRE_NONE ) $switch = PRE_LANG;
+
+      switch( $switch ):
       case PRE_DOMAIN :
         //##.example.com
 	if( strpos( $permalink, "http://www." ) === FALSE ) :
@@ -3260,7 +3274,7 @@ class CeceppaML {
    * rispetto alla lingua corrente, mentre a me serve il link per una 
    * lingua specifica.
    */
-  function force_category_lang($lang) {
+  function force_category_lang( $lang ) {
     $this->_force_category_lang = $lang;
   }
 
