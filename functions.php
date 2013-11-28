@@ -561,7 +561,13 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false ) {
 	Se non ho trovato nesuna traduzione per l'articolo, la bandiera punterà alla homepage
     */
     if( empty( $link ) && ! $only_existings ) {
+      //If post doesn't exists in current language I'll return the link to default language, if exists :)
       if( $_cml_settings[ 'cml_force_languge' ] == 1 ) {
+	if( is_single() || is_page() ) {
+	  $l = cml_get_linked_post( $lang_id, null, get_the_ID(), cml_get_default_language_id() );
+	  if( ! empty( $l ) ) return get_permalink( $l );
+	}
+
 	$url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 	
 	$wpCeceppaML->force_category_lang( $result->id );

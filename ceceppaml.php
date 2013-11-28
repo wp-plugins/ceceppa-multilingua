@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.44
+Version: 1.3.45
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -471,6 +471,7 @@ class CeceppaML {
     foreach($results as $result) :
       $url = get_bloginfo('wpurl');
       $link = add_query_arg('lang', $result->cml_language_slug);
+//       $link = cml_get_the_link( $result->cml_id );
       
       $language = $result->cml_language_slug;
 
@@ -2112,7 +2113,7 @@ class CeceppaML {
     }
 
     $this->_current_language = cml_get_language_info( $this->_current_lang_id );
-    
+
     //Aggiorno il menu del tema :)
     $this->change_menu();
 
@@ -2375,12 +2376,9 @@ class CeceppaML {
   function get_current_language() {
     global $wpdb;
 
-    if( !isset( $this->_language_detected ) ) $this->update_current_lang();
+    if( ! isset( $this->_language_detected ) ) $this->update_current_lang();
 
-    $query = sprintf("SELECT * FROM %s WHERE id = %d", CECEPPA_ML_TABLE, $this->_current_lang_id);
-    $info = $wpdb->get_row($query);
-
-    return $info;
+    return $this->_current_language;
   }
 
   function get_current_lang_id( $update = false ) {
@@ -3048,21 +3046,7 @@ class CeceppaML {
     $langs = cml_get_languages(0);
     $id = get_the_ID();
     foreach( $langs as $lang ) :
-      if( !cml_is_homepage() ) :
-	if( is_single() || is_page() ) :
-	  $linked = cml_get_linked_post( $this->_current_lang, $lang, $id, $lang->id );
-	
-	  if(empty($linked)) :
-	    $url = $this->get_home_url( $lang->cml_language_slug );
-	  else:
-	    $url = get_permalink($linked);
-	  endif;
-	else:
-	  $url = $this->convert_url( $lang->cml_language_slug, $this->_clean_url );	  
-	endif;
-      else:
-	$url = $this->get_home_url( $lang->cml_language_slug );
-      endif;
+      $url = cml_get_the_link( $lang );
 
       $title = '<img src="' . cml_get_flag($lang->cml_flag) . '">&nbsp;' . $lang->cml_language;
       $wp_admin_bar->add_menu( array( 'id' => 'cml_lang' . $lang->id, 'title' => $title, 'href' => $url) );
@@ -3541,6 +3525,8 @@ class CeceppaML {
 	  if( is_array( $menus ) ) : ?>
 	  <select name="name">
 	    <?php foreach( $menus as $key => $n ) {
+	      if( substr( $key, 0, 4 ) == "cml_" ) continue;
+
 	      echo '<option value="' . str_replace( " ", "-", esc_attr( $key ) ) . '" ' . selected( $key, $name, false ) . '>' . $n . '</option>';
 	    }?>
 	  </select>

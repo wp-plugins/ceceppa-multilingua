@@ -13,6 +13,8 @@
  //Lingue
   $_cml_settings[ 'default_language' ] = $wpdb->get_var("SELECT cml_language FROM " . CECEPPA_ML_TABLE . " WHERE cml_default = 1");
   $_cml_settings[ 'default_language_id' ] = $wpdb->get_var("SELECT id FROM " . CECEPPA_ML_TABLE . " WHERE cml_default = 1");
+  if( empty( $_cml_settings[ 'default_language_id' ] ) ) $_cml_settings[ 'default_language_id' ] = $wpdb->get_var("SELECT MIN(id) FROM " . CECEPPA_ML_TABLE );
+
   $_cml_settings[ 'default_language_slug' ] = $wpdb->get_var("SELECT cml_language_slug FROM " . CECEPPA_ML_TABLE . " WHERE cml_default = 1");
   $_cml_settings[ 'default_language_locale' ] = $wpdb->get_var("SELECT cml_locale FROM " . CECEPPA_ML_TABLE . " WHERE cml_default = 1");
   $_cml_settings[ 'url_mode' ] = get_option( "cml_modification_mode", 1 );
