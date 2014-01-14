@@ -102,12 +102,6 @@ class CeceppaMLLanguages {
 
 	    if( substr( $lang, 0, 2 ) != "en" )
 	      $d->download_language($wpdb->insert_id, $_POST['language'][$i]);
-          
-        //Aggiorno una nuova colonna alla tabella
-        $sql = sprintf( "ALTER TABLE %s ADD lang_%d bigint(20) NOT NULL DEFAULT 0", CECEPPA_ML_RELATIONS, $wpdb->insert_id );
-        $wpdb->query( $sql );
-
-        cml_table_language_columns();
 	  endif;
 	} else {
 	    $wpdb->update(CECEPPA_ML_TABLE,
@@ -134,14 +128,11 @@ class CeceppaMLLanguages {
     endfor;
 
     //Delete
-    if( ! empty( $_POST['delete'] ) && intval( $_POST[ "delete" ] ) > 0 ) :
+    if(!empty($_POST['delete'])) :
       $delete = intval($_POST['delete']);
 
       $wpdb->query("DELETE FROM " . CECEPPA_ML_TABLE . " WHERE id = " . $delete);
       $wpdb->query(sprintf("DELETE FROM " . CECEPPA_ML_POSTS . " WHERE cml_post_lang_1 = %d OR cml_post_lang_2 = %d", $delete, $delete));
-      
-      //Remove the column from CECEPPA_ML_RELATIONS table
-      $wpdb->query( "ALTER TABLE " . CECEPPA_ML_RELATIONS . " DROP lang_" . $delete );
     endif;
   }
 }

@@ -181,50 +181,115 @@ function cml_update_all_posts_language() {
  *
  */
 function cml_fix_rebuild_posts_info() {
-  global $wpCeceppaML, $wpdb, $_cml_language_columns;
-
-  $pids = array();
-  $apids = array(); //All pids
-  $i = 0;
-  $results = $wpdb->get_results( "SELECT * FROM " . CECEPPA_ML_RELATIONS );
-  foreach( $results as $result ) {
-    $r = ( Array ) $result;
-
-    foreach( $_cml_language_columns as $key => $l ) {
-      if( $r[ $l ] > 0 ) {
-	$pids[ $key ][] = $r[ $l ];
-	$apids[ $i ][ $key ] = $r[ $l ];
-      }
-    }
-
-    $i++;
-  }
-
-  foreach( $_cml_language_columns as $key => $l ) {
-    update_option( "cml_posts_of_lang_" . $key, array_unique( $pids[ $key ] ) );
-  }
-
-  /*
-   * hide translations of current post..
-   */
-  $hide = array();
-  $translations = array();
-  foreach( $apids as $pids ) {
-    foreach( $_cml_language_columns as $key => $l ) {
-      if( !isset( $pids[ $key ] ) || $pids[ $key ] == 0 ) continue;
-
-      $hide = $pids;
-      unset( $hide[ $key ] );
-
-      if( empty( $translations[ $key ] ) ) $translations[ $key ] = array();
-      $translations[ $key ] = array_merge( $hide, $translations[ $key ] );
-    }
-  }
+  global $wpCeceppaML, $wpdb;
   
-  //Indexes to hide
-  foreach( $_cml_language_columns as $key => $l ) {
-    update_option( "cml_hide_posts_for_lang_" . $key,  $translations[ $key ] );    
+  //Tipi di post + custon_posts
+  $types = array_merge( array( 'post' => 'post', 'page' => 'page' ), 
+				get_post_types( array( '_builtin' => false ), 'names' ) );
+
+  //Recupero tutti gli articoli
+  $args = array('numberposts' => -1, 'posts_per_page' => 999999,
+		  'post_type' => $types,
+		  'status' => 'publish,draft,private,future' );
+
+  $p = new WP_Query( $args );
+  $langs = cml_get_languages( 0 );
+  while( $p->have_posts() ) :
+    $p->next_post();
+
+    $pid = $p->post->ID;
+    
+    $pids[] = $p->post->ID;
+
+    //if( $p->post->post_type != 'nav_menu_item' ) :
+      $lang = $wpCeceppaML->get_language_id_by_post_id( $pid );
+
+      //In 0 memorizzo tutti gli articoli senza "lingua", ovvero tutti gli articoli visibili in tutte le lingue
+      if(empty($lang)) $lang = 0;
+
+      if($lang == 0) :
+        foreach($langs as $l) :
+          $id = cml_get_linked_post(0, null, $pid, $l->id);
+    
+          //Se non è vuoto, vuol dire che esiste traduzione per questo articolo in questa lingua e va escluso quando
+          //richiamo la funzione hide_translation
+          if( ! empty( $id ) ) :
+            $exclude[$l->id][] = $pid;
+          else:
+            //Se non ho trovato la traduzione per la lingua corrente, allora aggiungo questo articolo 
+            //all'elenco degli articoli di questa lingua
+            $posts[$l->id][] = $pid;
+          endif;
+        endforeach;
+      endif;
+
+      $posts[ $lang ][] = $pid;
+  endwhile;
+
+  foreach( $langs as $lang ) :
+    @update_option( "cml_posts_of_lang_" . $lang->id, array_unique( $posts[ $lang->id ] ) );
+  endforeach;
+
+  @update_option( "cml_posts_of_lang_" . 0, array_unique( $posts[0] ) );
+
+  //Remove deleted posts that already exists in my table :(
+  {
+    $pids[] = "0";
+
+    $sql = sprintf( "DELETE FROM %s WHERE cml_post_id_1 NOT IN ( %s )", CECEPPA_ML_POSTS, join( ",", $pids ) );
+    $wpdb->query($sql);
+
+    $sql = sprintf( "DELETE FROM %s WHERE cml_post_id_2 NOT IN ( %s )", CECEPPA_ML_POSTS, join( ",", $pids ) );
+    $wpdb->query($sql);
   }
+
+  //Articoli da escludere
+  //Recupero tutte le traduzioni...
+  //Se gestisco più lingue un articolo può essere tradotto in tutte e 3 queste lingue
+  //quindi devo verificarne l'esistenza per ogni lingua gestita
+  $query = sprintf("SELECT * FROM %s WHERE cml_post_lang_1 > 0 AND cml_post_lang_2 > 0 AND (cml_post_lang_1 <> cml_post_lang_2) AND ( cml_post_id_1 > 0 AND cml_post_id_2 > 0 )", CECEPPA_ML_POSTS);
+  $results = $wpdb->get_results($query);
+  
+  foreach($results as $result) :
+    $exclude[$result->cml_post_lang_1][] = $result->cml_post_id_2;
+    $exclude[$result->cml_post_lang_2][] = $result->cml_post_id_1;
+    
+    /*
+     Il problema si verfica solo con più di 2 lingue, perché se le traduzioni sono "relazionate" rispetto
+     alla lingua di default. 
+     Quindi se gestisco 3 lingue i rispettivi gli articoli A, B, C saranno memorizzati così:
+       A <--> B
+       A <--> C
+     
+     Se scelgo la modalità "hide_translations" devo informare il plugin che per la lingua 2 va nascosto anche l'articolo
+     C in quanto, indirettamente, è una traduzione dell'articolo B
+    */
+    if( count( $langs ) >= 2 ) :
+      foreach($langs as $l) :
+	//1
+	if($result->cml_post_lang_1 != $l->id) :
+	  $tid = cml_get_linked_post(0, null, $result->cml_post_id_1, $l->id);
+
+	  if(!empty($tid)) :
+	    $exclude[$result->cml_post_lang_1][] = $tid;
+	  endif;
+	endif;
+
+	//2
+	if( $result->cml_post_lang_2 != $l->id ) :
+	  $tid = cml_get_linked_post(0, null, $result->cml_post_id_2, $l->id);
+
+	  if( ! empty( $tid ) ) :
+	    $exclude[ $result->cml_post_lang_2 ][] = $tid;
+	  endif;
+	endif;
+    endforeach;
+    endif;
+  endforeach;
+
+  foreach($langs as $lang) :
+    @update_option("cml_hide_posts_for_lang_" . $lang->id, array_unique($exclude[$lang->id]));
+  endforeach;
 }
 
 function cml_fix_widget_titles() {

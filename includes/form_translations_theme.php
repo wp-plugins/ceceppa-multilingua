@@ -29,19 +29,14 @@
 
     //'valore', 'textdomain'
     $m = end( $matches );
-    $domain = 0;
     foreach( $m as $line ) :
-      preg_match_all( '/^[\'\"](.*)[\'\"][,](.*)[\'\"]$/', trim( $line ), $string );
+      preg_match_all( '/\'(.+?)\'/', $line, $string );
+      list( $text, $domain ) = end( $string );
 
-      if( count( $string ) > 1 ) {
-	$text = end( $string[ 1 ] );
-	$domain = end( $string[ 2 ] );
-
-	//Rimuovo gli apici iniziali e finali :)
-	if( ! empty( $text ) ) :
-	  $domains[ $domain ][] = $text;
-	endif;
-      }
+      //Rimuovo gli apici iniziali e finali :)
+      if( ! empty( $text ) ) :
+	$domains[ $domain ][] = $text;
+      endif;
     endforeach; //$m as $line
   endforeach;
 
@@ -150,11 +145,9 @@
   
   $i = 0;
   $total = count( $langs );
-
   foreach( $keys as $d ) :
 
-    $strings = $domains[ $d ];
-    foreach( $strings as $s ) :
+    foreach( $domains[ $d ] as $s ) :
       $originals[] = $s;
 
       $alternate = ( empty( $alternate ) ) ? "alternate" : "";

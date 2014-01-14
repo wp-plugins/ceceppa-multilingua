@@ -220,10 +220,9 @@ function cml_show_flags( $show = "flag", $size = "tiny", $class_name = "cml_flag
  *  @param - gettext - indica se utilizzare la funzione "gettext" di "Danilo"
  *  @return - la frase tradotta se esiste la traduzione, altrimeni la stringa passata
  */
-function cml_translate($string, $id = null, $type = "", $wpgettext = false, $gettext = false) {
+function cml_translate($string, $id, $type = "", $wpgettext = false, $gettext = false) {
   global $wpdb, $wpCeceppaML;
 
-  if( $id == null ) $id = cml_get_current_language_id();
   $s = ($type == "W") ? strtolower( $string ) : $string;
   $query = sprintf("SELECT UNHEX(cml_translation) FROM %s WHERE cml_text = '%s' AND cml_lang_id = %d AND cml_type LIKE '%s'",
 			  CECEPPA_ML_TRANS, bin2hex($s), $id, "%" . $type . "%");
@@ -415,9 +414,9 @@ function cml_is_homepage() {
     $the_id = get_queried_object_id();
     if( ! empty( $the_id ) ) :
       if( $the_id == $static_id ) return true;	//E' proprio lei...
-
+      
       //Mica è una traduzione?
-      $linked = cml_get_linked_post( $the_id , cml_get_default_language_id() );
+      $linked = cml_get_linked_post( $lang_id, null, $the_id , cml_get_default_language_id() );
       if( !empty($linked) ) return $linked == $static_id;
     endif;
   endif;
@@ -491,7 +490,7 @@ function cml_set_language_of_post( $id, $lang_id ) {
 function cml_get_posts_by_language( $lang_id = null ) {
   global $wpCeceppaML;
   
-  return $wpCeceppaML->get_posts_by_language( $lang_id );
+  return $wpCeceppaML->get_posts_by_language();
 }
 
 /*
@@ -504,7 +503,7 @@ function cml_get_posts_by_language( $lang_id = null ) {
 function cml_get_the_link( $result, $linked = true, $only_existings = false ) {
   global $wpCeceppaML, $_cml_settings;
 
-  if( cml_is_homepage() ) { //&& cml_use_static_page() ) {
+  if( cml_is_homepage() && ! in_the_loop() ) {
     //Se stò nella home vuol dire che ho scelto come metodo di reindirizzamento &lang
     $link = $wpCeceppaML->get_home_url( $result->cml_language_slug );
   } else {
@@ -522,7 +521,7 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false ) {
      * the plugin will return wrong link
      */
     if( ( ( is_single() || is_page() ) ||  $linked ) && ! is_category() ):
-      $link = cml_get_linked_post( get_the_ID(), $result->id );
+      $link = cml_get_linked_post( $lang_id, $result, get_the_ID(), $result->id );
 
       if( !empty( $link ) ) $link = get_permalink( $link );
     endif;
@@ -565,11 +564,12 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false ) {
       //If post doesn't exists in current language I'll return the link to default language, if exists :)
       if( $_cml_settings[ 'cml_force_languge' ] == 1 ) {
 	if( is_single() || is_page() ) {
-	  $l = cml_get_linked_post( get_the_ID(), cml_get_default_language_id() );
+	  $l = cml_get_linked_post( $lang_id, null, get_the_ID(), cml_get_default_language_id() );
 	  if( ! empty( $l ) ) return get_permalink( $l );
 	}
 
 	$url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+	
 	$wpCeceppaML->force_category_lang( $result->id );
 
 	$link = $wpCeceppaML->convert_url( cml_get_current_language()->cml_language_slug, $url, false, true );

@@ -119,7 +119,7 @@ class CeceppaMLTranslations {
     global $cml_theme_locale_path;
     
     //Ho cliccato il pulsante per gestire la lingua di default del tema?
-    if( isset( $_POST[ 'theme-lang' ] ) && intval( $_POST[ 'theme-lang' ] ) ) :
+    if( isset( $_POST[ 'theme-lang-button' ] ) ) :
       update_option( "cml_theme_language", intval( $_POST[ 'theme-lang' ] ) );
     endif;
 
@@ -169,8 +169,7 @@ class CeceppaMLTranslations {
       $h = $header;
       $user = wp_get_current_user();
 
-      $theme = wp_get_theme();
-      $h = str_replace( '%PROJECT%', $theme->get( 'Name' ), $h );
+      $h = str_replace( '%PROJECT%', get_current_theme(), $h );
       $h = str_replace( '%AUTHOR%', $user->user_firstname . " " . $user->user_lastname, $h );
       $h = str_replace( '%EMAIL%', $user->user_email, $h );
       $h = str_replace( '%LOCALE%', $lang->cml_locale, $h );
@@ -178,8 +177,6 @@ class CeceppaMLTranslations {
 
       $strings = $_POST[ 'string' ][ $lang->id ];
       for( $i = 0; $i <= count( $originals ); $i++ ) :
-	if( ! isset( $originals[ $i ] ) ) continue;
-
 	$o = 'msgid "' . addslashes( stripslashes( $originals[$i] ) ) . '"' . PHP_EOL;
 	$s = 'msgstr "' . addslashes( stripslashes( $strings[$i] ) ) . '"' . PHP_EOL . PHP_EOL;
 

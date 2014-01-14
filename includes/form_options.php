@@ -267,7 +267,7 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
           <li>
             <label>
               <input id="filter-posts" type="radio" value="2" name="filter-posts" <?php echo ((get_option('cml_option_filter_posts', 1) == 2 ) ? 'checked' : '') ?> />
-              <?php _e('Show all posts, but hide their translation', 'ceceppaml') ?>
+              <?php _e('Show all posts, but hide translations their translation', 'ceceppaml') ?>
             </label>
           </li>
           <li>

@@ -22,7 +22,7 @@
   *    Esempio:
   *      [amrp parameters="limit=4" it="cats=28" epo="1" en="2"]
   *
-  *  cml_show_available_lang - Serve a visualizzare l'elenco delle lingue in cui Ã¨ disponibile la catagoria/pagina/articolo
+  *  cml_show_available_lang - Serve a visualizzare l'elenco delle lingue in cui è disponibile la catagoria/pagina/articolo
   *
   *  cml_show_flags - visualizza le lingue disponibile con le relative bandiere
   *      Utilizzo:
@@ -90,7 +90,7 @@ function cml_show_available_langs( $attrs ) {
 function cml_shortcode_other_langs_available( $attrs ) {
   global $wpdb, $wpCeceppaML;
 
-  //Controllo se il post Ã¨ dotato di traduzione ;)
+  //Controllo se il post è dotato di traduzione ;)
   $id = isset( $attrs[ 'id' ] ) ? intval( $attrs( $id ) ) : get_the_ID();
 
   if( $wpCeceppaML->has_translations( $id ) )
