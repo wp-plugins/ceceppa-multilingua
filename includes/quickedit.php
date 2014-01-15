@@ -77,9 +77,15 @@ function cml_expand_quick_edit_link($actions, $post) {
     //json encode doesn't works: "Uncaught SyntaxError: Unexpected token ILLEGAL " -.-"
 //     $linked = json_encode( $posts  );
     $posts = cml_get_linked_posts( $post->ID );
-    if( is_array( $posts ) ) $posts = $posts[ 'indexes' ];
-    $keys = join(",", array_keys( $posts ) );
-    $vals = join(",", array_values( $posts ) );
+    $keys = "";
+    $vals = "";
+
+    if( is_array( $posts ) && isset( $posts[ 'indexes' ] ) ) {
+      $posts = $posts[ 'indexes' ];
+
+      $keys = join(",", array_keys( $posts ) );
+      $vals = join(",", array_values( $posts ) );
+    } 
 
     $widget_id = get_post_meta( $post->ID, 'post_widget', TRUE); 
     $actions['inline hide-if-no-js'] = '<a href="#" class="editinline" title="';

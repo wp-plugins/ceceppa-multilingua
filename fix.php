@@ -201,7 +201,7 @@ function cml_fix_rebuild_posts_info() {
   }
 
   foreach( $_cml_language_columns as $key => $l ) {
-    update_option( "cml_posts_of_lang_" . $key, array_unique( $pids[ $key ] ) );
+    @update_option( "cml_posts_of_lang_" . $key, array_unique( $pids[ $key ] ) );
   }
 
   /*
@@ -223,7 +223,7 @@ function cml_fix_rebuild_posts_info() {
   
   //Indexes to hide
   foreach( $_cml_language_columns as $key => $l ) {
-    update_option( "cml_hide_posts_for_lang_" . $key,  $translations[ $key ] );    
+    @update_option( "cml_hide_posts_for_lang_" . $key,  $translations[ $key ] );    
   }
 }
 

@@ -18,9 +18,11 @@
  */
 global $_cml_settings;
 
-if( get_option( "cml_migration_done", 0 ) < 2 ) {
+if( get_option( "cml_migration_done", 0 ) < 2 || isset( $_GET[ "cml-migrate" ] ) ) {
   add_action( 'admin_init', 'cml_migrate_database', 99 );
 }
+
+add_action( 'admin_notices', 'cml_migrate_notice' );
 
 function cml_migrate_database() {
   global $wpdb, $wpCeceppaML, $_cml_language_columns;
@@ -129,4 +131,26 @@ function cml_migrate_create_table() {
 
   $wpdb->query( $query );
 }
+
+function cml_migrate_notice() {
+  global $wpdb;
+  
+  $query = "SELECT COUNT(*) FROM " . CECEPPA_ML_RELATIONS;
+  $results = $wpdb->get_results( $query );
+  
+  if( empty( $results ) ||  $wpdb->num_rows == 0 ) {
+?>
+    <div class="updated">
+      <strong>
+	Ceceppa Multilingua
+      </strong>
+      <br /><br />
+      <a href="<?php echo add_query_arg( array( 'cml-migrate' => 1 ) ) ?>">
+	<?php _e('Update required, click here for update posts relations', 'ceceppaml') ?>
+      </a>
+    </div>
+<?php
+  }
+}
+
 ?>
