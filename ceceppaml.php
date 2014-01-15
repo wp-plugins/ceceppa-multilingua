@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.50
+Version: 1.3.51
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -1366,26 +1366,28 @@ class CeceppaML {
     return $wpdb->get_var($query);
   }
   
-  function get_language_id_by_post_id($post_id) {
+  function get_language_id_by_post_id( $post_id ) {
     global $wpdb;
 
-    //Cerco prima nella lingua corrente
-    $array = $this->_posts_of_lang[$this->_current_lang_id];
-    if(is_array($array) && in_array($post_id, $array)) 
-      return $this->_current_lang_id;
+    if( isset( $this->_current_lang_id ) ) {
+      //Cerco prima nella lingua corrente
+      $array = $this->_posts_of_lang[$this->_current_lang_id];
+      if(is_array($array) && in_array($post_id, $array)) 
+	return $this->_current_lang_id;
 
-    //Evito di cercare 2 volte nello stesso posto :)
-    $tmp = $this->_posts_of_lang;
-    unset($tmp[$this->_current_lang_id]);
-    $keys = array_keys($tmp);
-    foreach($keys as $key) :
-      $val = @in_array($post_id, $tmp[$key]);
-      if(!empty($val)) :
-	return $key > 0 ? $key : $this->_current_lang_id;
-      endif;
-    endforeach;
+      //Evito di cercare 2 volte nello stesso posto :)
+      $tmp = $this->_posts_of_lang;
+      unset($tmp[$this->_current_lang_id]);
+      $keys = array_keys($tmp);
+      foreach($keys as $key) :
+	$val = @in_array($post_id, $tmp[$key]);
+	if(!empty($val)) :
+	  return $key > 0 ? $key : $this->_current_lang_id;
+	endif;
+      endforeach;
+    }
 
-    $lang = get_option( "cml_page_lang_" . $pid, $this->_current_lang_id );
+    $lang = get_option( "cml_page_lang_" . $post_id, $this->_current_lang_id );
     
     return ( $lang > 0 ) ? $lang : $this->_current_lang_id;
   }
@@ -3339,10 +3341,10 @@ class CeceppaML {
   }
 
   function translate_archives_link( $link ) {
-    $url = preg_match('/href=\'(.+)\' /', $link, $match);
-    $href = $match[0];
-    $url = substr($href, 0, strlen($href) - 2);
-    $url .= "?lang=$this->_current_lang_slug'";
+    $url = preg_match('/href=[\"\'](.*)[\"\']/', $link, $match);
+
+    $href = end( $match );
+    $url = "$href?lang=$this->_current_lang_slug'";
     
     $link = str_replace($href, $url, $link);
     return $link;
