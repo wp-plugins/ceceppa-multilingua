@@ -207,7 +207,7 @@ img.not-available {
 }
 
 @media screen and (-webkit-min-device-pixel-ratio:0) {  
-.tab-strings p.submit { margin-top: -40px; }  
+/* .tab-strings p.submit { margin-top: -40px; }   */
 }  
 
 dl.cml_options dd {

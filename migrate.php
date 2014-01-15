@@ -18,8 +18,8 @@
  */
 global $_cml_settings;
 
-if( ! get_option( "cml_migration_done", 0 ) ) {
-  add_action( 'plugins_loaded', 'cml_migrate_database' );
+if( get_option( "cml_migration_done", 0 ) < 2 ) {
+  add_action( 'admin_init', 'cml_migrate_database', 99 );
 }
 
 function cml_migrate_database() {
@@ -37,6 +37,7 @@ function cml_migrate_database() {
    */
   $types = array_merge( array( 'post' => 'post', 'page' => 'page' ), 
 				get_post_types( array( '_builtin' => false ), 'names' ) );
+				
   $args = array('numberposts' => -1, 'posts_per_page' => 999999,
 		  'post_type' => $types,
 		  'status' => 'publish,draft,private,future' );
@@ -49,7 +50,7 @@ function cml_migrate_database() {
     $p->next_post();
 
     $pid = $p->post->ID;
-    $lang = get_option( "cml_page_lang_" . $pid, 0 );
+    $lang = $wpCeceppaML->get_language_id_by_post_id( $pid ); // get_option( "cml_page_lang_" . $pid, 0 );
 
     if( $lang == 0 ) $lang = $wpCeceppaML->get_language_id_by_post_id( $pid );
 //     echo "$pid: $lang<br />";
@@ -58,32 +59,35 @@ function cml_migrate_database() {
     /*
      * For migrate I need to retrive info about linked posts with cml_get_linked_post
      */
-    $linked = cml_get_linked_posts( $pid );
-    foreach( $langs as $l ) {
-      $_linked = ( ! empty( $linked ) && isset( $linked->indexes[ $l->id ] ) ) ? $linked->indexes[ $l->id ] : 0;
-      $_llang = ( $_linked > 0 ) ? $l->id : 0;
-
-      if( $lang > 0 ) {
-        if( $_linked > 0 ) {
-          cml_migrate_database_add_item( $_llang, $_linked, $lang, $pid );
-        } else {
-          cml_migrate_database_add_item( $lang, $pid, 0, 0 );
-        }
-      } else {
-        /*
-         * Post withouth language exists in all languages
-         */
-        cml_migrate_database_add_item( $l->id, $pid, $_linked, $_llang );
+    $query = sprintf( "SELECT * FROM %s WHERE ( cml_post_id_1 = %d OR cml_post_id_2 = %d ) AND ( cml_post_lang_1 > 0 AND cml_post_lang_2 > 0 )",
+		      CECEPPA_ML_POSTS, $pid, $pid );
+    $linked = $wpdb->get_results( $query );
+    if( empty ( $linked ) ) {
+	cml_migrate_database_add_item( $lang, $pid, 0, 0 );
+    } else {
+      foreach( $linked as $result ) {
+	$lpid = ( $result->cml_post_id_1 == $pid ) ? $result->cml_post_id_2 : $result->cml_post_id_1;
+	$llang = ( $result->cml_post_id_1 == $pid ) ? $result->cml_post_lang_2 : $result->cml_post_lang_1;
+	
+	cml_migrate_database_add_item( $lang, $pid, $llang, $lpid );
       }
     }
   }
   
-  update_option( "cml_migration_done", 1 );
+  update_option( "cml_migration_done", 2 );
   
   cml_fix_rebuild_posts_info();
 }
 
-function cml_migrate_database_add_item( $lang, $pid, $lid, $linked ) {
+/*
+ * Add relation in CECEPPA_ML_RELATIONS table
+ *
+ * @aram $lang - of the post
+ * @param $pid  - id of the post
+ * @param $llang - lang of linked post
+ * @param $lpid - id of linked post
+ */
+function cml_migrate_database_add_item( $lang, $pid, $llang, $lpid ) {
   global $wpdb;
 
   //Values
@@ -91,8 +95,8 @@ function cml_migrate_database_add_item( $lang, $pid, $lid, $linked ) {
   $data = array( "%d", "%d", "%d", "%d" );
 
   //Linked?
-  if( $linked > 0 ) {
-    $values = array_merge( $values, array( "lang_$lid" => $linked ) );
+  if( $lpid > 0 ) {
+    $values = array_merge( $values, array( "lang_$llang" => $lpid ) );
   }
 
   //Record Exists?
