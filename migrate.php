@@ -94,15 +94,19 @@ function cml_migrate_database() {
  * @param $lpid - id of linked post
  */
 function cml_migrate_database_add_item( $lang, $pid, $llang, $lpid ) {
-  global $wpdb;
+  global $wpdb, $_cml_language_columns;
 
   //Values
-  $values = array( "lang_$lang" => $pid );
-  $data = array( "%d", "%d", "%d", "%d" );
+  foreach( $_cml_language_columns as $col ) {
+    $values[ $col ] = 0;
+  }
+
+  $values[ "lang_$lang" ] = $pid;
+  $data = array_fill( 0, count( $values ), "%d" );
 
   //Linked?
   if( $lpid > 0 ) {
-    $values = array_merge( $values, array( "lang_$llang" => $lpid ) );
+    $values[ "lang_$llang" ] = $lpid;
   }
 
   //Record Exists?
