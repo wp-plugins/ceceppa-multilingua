@@ -18,7 +18,7 @@
  */
 global $_cml_settings;
 
-if( get_option( "cml_migration_done", 0 ) < 2 || isset( $_GET[ "cml-migrate" ] ) ) {
+if( isset( $_GET[ "cml-migrate" ] ) ) {
   add_action( 'admin_init', 'cml_migrate_database', 99 );
 }
 
@@ -27,7 +27,11 @@ add_action( 'admin_notices', 'cml_migrate_notice' );
 function cml_migrate_database() {
   global $wpdb, $wpCeceppaML, $_cml_language_columns;
   
-  cml_table_language_columns();
+  //Create table?
+  $table_name = CECEPPA_ML_RELATIONS;
+  if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
+    cml_migrate_create_table();
+  }
 
   /*
    * create the table where store indexes of each post
@@ -132,13 +136,13 @@ function cml_migrate_create_table() {
   $wpdb->query( $query );
 }
 
-function cml_migrate_notice() {
+function cml_migrate_notice( $force = false ) {
   global $wpdb;
   
   $query = "SELECT COUNT(*) FROM " . CECEPPA_ML_RELATIONS;
   $results = $wpdb->get_results( $query );
   
-  if( empty( $results ) ||  $wpdb->num_rows == 0 ) {
+  if( CECEPPA_ML_MIGRATED < 2 ||  $wpdb->num_rows == 0 || $force ) {
 ?>
     <div class="updated">
       <strong>
