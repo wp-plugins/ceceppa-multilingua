@@ -56,9 +56,9 @@ function cml_migrate_database() {
     $p->next_post();
 
     $pid = $p->post->ID;
-    $lang = $wpCeceppaML->get_language_id_by_post_id( $pid ); // get_option( "cml_page_lang_" . $pid, 0 );
+    $lang = get_option( "cml_page_lang_" . $pid, 0 );
 
-    if( $lang == 0 ) $lang = $wpCeceppaML->get_language_id_by_post_id( $pid );
+//     if( $lang == 0 ) $lang = $wpCeceppaML->get_language_id_by_post_id( $pid );
 //     echo "$pid: $lang<br />";
     if( ! in_array( $lang, $avlangs ) ) $lang = 0;
 
