@@ -17,11 +17,26 @@ function cml_show_flags_on() {
 	  <label for="flags-on-pages"><?php _e('Pages', 'ceceppaml') ?></label><br />
 	  <input type="checkbox" id="flags-on-custom" name="flags-on-custom" value="1" <?php echo ((get_option('cml_option_flags_on_custom_type', '0') == 1) ? 'checked' : '') ?> />
 	  <label for="flags-on-custom"><?php _e('Custom posts type', 'ceceppaml') ?></label><br />
+      <label>
+        <input type="checkbox" id="flags-on-loop" name="flags-on-loop" value="1" <?php echo ( ( get_option( 'cml_option_flags_on_the_loop', '0' ) == 1 ) ? 'checked' : '' ) ?> />
+        <?php _e( 'Loop', 'ceceppaml' ); ?>
+      </label>
       </blockquote>
       <strong><?php _e('Where:', 'ceceppaml') ?></strong>
       <blockquote>
+	<label>
+	  <input type="radio" name="flags_on_pos" value="before" id="flags_on_top" <?php echo ((get_option('cml_option_flags_on_pos', 'before') == 'before') ? 'checked' : '') ?> />
+	  <?php _e('Before the title', 'ceceppaml') ?>
+	</label>
+	<br>
+	<label>
+	  <input type="radio" name="flags_on_pos" value="after" id="flags_on_top" <?php echo ((get_option('cml_option_flags_on_pos', 'after') == 'after') ? 'checked' : '') ?> />
+	  <?php _e('After the title', 'ceceppaml') ?>
+	</label><br>
+	<label>
 	  <input type="radio" name="flags_on_pos" value="top" id="flags_on_top" <?php echo ((get_option('cml_option_flags_on_pos', 'top') == 'top') ? 'checked' : '') ?> />
-	  <label for="flags_on_top"><?php _e('On the top of page/post/category', 'ceceppaml') ?></label><br>
+	  <?php _e('On the top of post/page/category', 'ceceppaml') ?>
+	</label><br>
 	  <input type="radio" name="flags_on_pos" value="bottom" id="flags_on_bottom" <?php echo ((get_option('cml_option_flags_on_pos') == 'bottom') ? 'checked' : '') ?> />
 	  <label for="flags_on_bottom"><?php _e('On the bottom of post/page/category', 'ceceppaml') ?></label><br>
       </blockquote>

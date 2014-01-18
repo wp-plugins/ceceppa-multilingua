@@ -15,72 +15,59 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
+function cml_get_linked_post( $post_id, $lang_id = null ) {
+  global $wpdb, $wpCeceppaML;
 
-/**
- * @param $lang_id - id della lingua corrente
- * @param $result - result della query (facoltativo)
- * @param $post_id - id del post
- * @param $browser_lang - id della lingua per la quale si cerca l'articolo collegato
- * 
- *      [ A ] <--> [ B ] <--> [ C ]
- *
- * Ipotesi 1: Stò visualizzando l'articolo B, ovvero quello della lingua predefinita.
- *	Da B posso ricavare il link della lingua che voglio tramite l'identificativo della stessa ($result->id)
- *
- * Ipotesi 2: Da A voglio ricavare i link di B e C
- *	Dato che ogni articolo può essere collegato a uno soltanto e che gli articoli collegati li trovo nella prima colonna della tabella (...)_id_1
- *	Per ottenere il link di B basta che recupero l'id_2 utilizzando come condizione l'id_1
- *	Se da A voglio recuperare l'articolo C devo passare prima per A e poi recuperare l'articolo C abbinato ad A
- *
- * Caso 2:
- *	[ A ] <--> [ C ]
- *
- *
- */
-function cml_get_linked_post($lang_id, $result, $post_id, $browser_lang = null) {
-  global $wpdb;
+  if( ! CECEPPA_ML_MIGRATED ) {
+    return cml_old_get_linked_post( $wpCeceppaML->get_language_id_by_post_id( $post_id ), null, $post_id, $lang_id );
+  }
 
   $link = null;
 
-  if(empty($result)) :
-    if(empty($browser_lang)) $browser_lang = cml_get_current_language_id();
-    $result = $wpdb->get_row(sprintf("SELECT * FROM %s WHERE id = %d", CECEPPA_ML_TABLE, $browser_lang));
-  endif;
+  if( empty( $lang_id ) ) $lang_id = cml_get_current_language_id();
+  $lang = "lang_" . $lang_id;
 
-  //Non confronto la lingua con se stessa :D
-  if(is_object($result) && $result->id != $lang_id) {
-      /*
-	* Devo cercare sia in cml_post_id_1 che in cml_post_id_2, xkè posso avere
-	* degli articoli collegati tra di loro, ma non a quella predefinita, e considerando
-	* solo cml_post_id_1 perderei questa informazione :(
-	*/
-      $query = sprintf("SELECT *, cml_post_id_2 as post_id FROM %s WHERE (cml_post_id_1 = %d OR cml_post_id_2 = %d) AND (cml_post_id_1 > 0 AND cml_post_id_2 > 0)",
-			CECEPPA_ML_POSTS, $post_id, $post_id);
-      $new_id = $wpdb->get_row($query);
-
-      if(!empty($new_id)) :
-	if($new_id->cml_post_lang_2 != $result->id && $new_id->post_id > 0) {
-	  //Se la lingua che ho recuperato è diversa da quella attuale verifico se c'è un altro
-	  //post in un'altra lingua collegato a questo
-	  $query = sprintf("SELECT *, cml_post_id_1 as post_id FROM %s WHERE cml_post_id_2 = %d AND cml_post_lang_1 = %d",
-			    CECEPPA_ML_POSTS, $new_id->post_id, $result->id);
-
-	  $new_id = $wpdb->get_row($query);
-	} else {
-	  $new_id = $new_id->post_id;
-	}
-      endif;
-
-      if(is_object($new_id)) $new_id = $new_id->post_id;
-  } else
-    $link = $post_id;
-
-  if(!empty($new_id))
-    $link = $new_id;
-
-  return $link;
+  $linked = cml_get_linked_posts( $post_id );
+  
+  return ( ! array_key_exists( $lang, $linked) ) ? 0 : $linked[ $lang ];
 }
 
+function cml_get_linked_posts( $id = null ) {
+  global $wpCeceppaML, $_cml_language_columns, $wpdb;
+
+  if( ! CECEPPA_ML_MIGRATED ) return cml_old_get_linked_posts( $id );
+
+  if( empty( $_cml_language_columns ) ) {
+    $_cml_language_columns = cml_table_language_columns();
+  }
+
+  $query = "SELECT * FROM " . CECEPPA_ML_RELATIONS . " WHERE ";
+  foreach( $_cml_language_columns as $l ) {
+    $where[] = "$l = $id";
+  }
+  $query .= join( " OR ", $where );
+
+  $row = $wpdb->get_row( $query, ARRAY_A );
+  unset( $row[ "id" ] );
+
+  $others = array_filter( is_array( $row ) ? $row : array() );
+  unset( $others[ $wpCeceppaML->get_language_id_by_post_id( $id ) ] );
+
+  $row = @array_merge( (array) $row, array( "indexes" => array_filter( $row ), "others" => $others ) );
+  return $row;
+}
+
+function cml_table_language_columns() {
+  $langs = cml_get_languages( 0, 1 );
+
+  foreach( $langs as $lang ) {
+    $_cml_language_columns[ $lang->id ] = "lang_" . $lang->id;
+  }
+  
+  update_option( "cml_languages_ids", $_cml_language_columns );
+
+  return $_cml_language_columns;
+}
 
 /**
  * http://www.cult-f.net/detect-crawlers-with-php/
@@ -145,6 +132,7 @@ function cml_get_page_by_path($page_path, $output = OBJECT, $post_type = array('
 	    if ( $page->post_name == $revparts[0] ) {
 		    $count = 0;
 		    $p = $page;
+
 		    while ( $p->post_parent != 0 && isset( $pages[ $p->post_parent ] ) ) {
 			    $count++;
 			    $parent = $pages[ $p->post_parent ];
@@ -208,5 +196,18 @@ if (!defined('PHP_VERSION_ID')) {
   $version = explode('.', PHP_VERSION);
 
   define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));
+}
+
+class MyDateTime extends DateTime
+{
+    public static function createFromFormat($format, $time, $timezone = null)
+    {
+        if(!$timezone) $timezone = new DateTimeZone(date_default_timezone_get());
+        $version = explode('.', phpversion());
+        if(((int)$version[0] >= 5 && (int)$version[1] >= 2 && (int)$version[2] > 17)){
+            return parent::createFromFormat($format, $time, $timezone);
+        }
+        return new DateTime(date($format, strtotime($time)), $timezone);
+    }
 }
 ?>
