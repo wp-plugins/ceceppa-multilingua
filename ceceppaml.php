@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.54
+Version: 1.3.55
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -1517,7 +1517,8 @@ class CeceppaML {
 
     //Lingua dell'articolo
     echo "<h4>" . __( 'Language of this post', 'ceceppaml' ) . "</h4>";
-    $lang_id = empty( $post_lang ) ? $this->get_language_id_by_post_id( $tag->ID) : $post_lang;
+    $lang_id = get_option( "cml_page_lang_" . $tag->ID, $this->_current_lang_id );
+
     cml_dropdown_langs("post_lang", $lang_id, false, true, null, "", 0);
 
     echo "<h4>" . __('This is a translation of', 'ceceppaml') . "</h4>";
@@ -1566,7 +1567,7 @@ class CeceppaML {
     /*
       * Check if this post is translation of default language...
       */
-    $true = $linked_posts[ 'indexes' ][ "lang_" . $this->_default_language_id ];
+    $linked_ids = array_values( $linked_posts[ 'indexes' ] );
     while($posts->have_posts()) :
       $posts->next_post();
 
@@ -1575,22 +1576,11 @@ class CeceppaML {
 	if( is_numeric( $linked_to ) ) {
 	  $selected = ( $id == $linked_to );
 	} else {
-	  //Default language is preferred
-	  if( $this->_default_language_id != $lang_id && $true > 0 ) {
-	    $selected = ( $id == $true );
-	  } else {
-	    if( in_array( $t_id, $linked_posts[ 'indexes' ] ) ) {
-	      foreach( $linked_posts[ 'indexes' ] as $key => $value ) {
-		$selected = ( $value == $id );
-		
-		if( $selected ) break;
-	      }
-	    }
-	  } 
+	  $selected = in_array( $id, $linked_ids );
 	}
 	$selected = ( $selected ) ? "selected" : "";
 
-	$lang_id = $this->get_language_id_by_post_id($id);
+	$lang_id = get_option( "cml_page_lang_" . $id, $this->_current_lang_id );
 	$flag = cml_get_flag_by_lang_id($lang_id);
 	echo "<option value=\"$lang_id@$id\" data-image=\"$flag\" $selected>&nbsp;&nbsp;&nbsp;" . get_the_title($id) . "</option>";
       endif;
@@ -2022,41 +2012,8 @@ class CeceppaML {
     
   function set_language_of_post( $post_id, $post_lang, $linked_lang, $linked_post ) {
     global $wpdb, $_cml_language_columns;
-
-    /*
-     * Set to 0
-     */
-    $langs = cml_get_languages( 0 );
-    foreach( $langs as $lang ) {
-      $query = sprintf( "UPDATE %s SET lang_%d = 0 WHERE lang_%d = %d", 
-			CECEPPA_ML_RELATIONS,
-			$lang->id,
-			$lang->id,
-			$post_id );
-
-      $wpdb->query( $query );
-    }
-    if( empty( $_cml_language_columns ) ) cml_table_language_columns();
-    
-    foreach( $_cml_language_columns as $l ) {
-      $where[] = "$l = 0";
-    }
-    $query = sprintf( "DELETE FROM %s WHERE %s", CECEPPA_ML_RELATIONS, join( " AND ", $where ) );
-    $wpdb->query( $query );
-
-    if( $linked_lang > 0 && $linked_post > 0 && $post_lang > 0 ) {
-      cml_migrate_database_add_item( $linked_lang, $linked_post, $post_lang, $post_id );
-    } else {
-      if( $post_lang > 0 ) {
-	cml_migrate_database_add_item( $post_lang, $post_id, 0, 0 );
-      } else {
-	$langs = cml_get_languages( 0 );
-	
-	foreach( $langs as $lang ) {
-	  cml_migrate_database_add_item( $lang->id, $post_id, 0, 0 );
-	}
-      }
-    }
+   
+    cml_migrate_database_add_item( $post_lang, $post_id, $linked_lang, $linked_post );
 
     update_option("cml_page_${post_id}", $linked_post);
     update_option("cml_page_lang_${post_id}", $post_lang);

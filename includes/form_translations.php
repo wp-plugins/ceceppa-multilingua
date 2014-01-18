@@ -73,7 +73,7 @@ $tab = ( $_GET['page'] == 'ceceppaml-translations-plugins-themes' ) ? 3 : $tab;
       </tr>
       </thead>
 <?php 
-  $results = $wpdb->get_results("SELECT min(id) as id, UNHEX(cml_text) as cml_text FROM " . CECEPPA_ML_TRANS . " WHERE cml_type='S' GROUP BY cml_text");
+  $results = $wpdb->get_results( "SELECT min(id) as id, UNHEX(cml_text) as cml_text FROM " . CECEPPA_ML_TRANS . " WHERE cml_type='S' GROUP BY cml_text");
 
   $c = 0;
   $size = 100 / (count($langs) + 1);

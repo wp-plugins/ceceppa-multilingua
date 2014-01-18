@@ -72,7 +72,8 @@ function cml_do_shortcode($attrs) {
 
   $shortcode = $attrs['shortcode'];
   $params = @$attrs['params'];
-  $lang = $attrs[$wpCeceppaML->get_current_lang()];
+  
+  $lang = @$attrs[$wpCeceppaML->get_current_lang()];
 
   return do_shortcode("[$shortcode $params $lang]");
 }

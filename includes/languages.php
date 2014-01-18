@@ -142,6 +142,8 @@ class CeceppaMLLanguages {
       
       //Remove the column from CECEPPA_ML_RELATIONS table
       $wpdb->query( "ALTER TABLE " . CECEPPA_ML_RELATIONS . " DROP lang_" . $delete );
+      
+      cml_table_language_columns();
     endif;
   }
 }
