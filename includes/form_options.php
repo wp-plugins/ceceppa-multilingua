@@ -280,7 +280,7 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 	</td>
 	</tr>
 <!-- Filtra query -->
-	<tr class="alternate">
+	<tr>
 	<td><center>
 	    <strong><?php _e('Filter query', 'ceceppaml') ?></strong><br /><br /><br />
 	    <img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/filter.png" />
@@ -299,18 +299,15 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 	    </blockquote>
 	</td>
 	</tr>
-	<tr>
+	<tr class="alternate">
 <!-- Filtra ricerca -->
 	<td><center>
 	    <strong><?php _e('Filter search', 'ceceppaml') ?></strong><br /><br /><br />
 	    <img src="<?php echo WP_PLUGIN_URL ?>/ceceppa-multilingua/images/search.png" />
 	</center></td>
 	<td>
-	    <strong><?php _e('Allows you to filter the result of the search for show only the posts relating to the current language.', 'ceceppaml') ?></strong>
+	    <strong><?php _e('Allows you to filter the result of the search in according with "Filter posts" option.', 'ceceppaml') ?></strong>
 	    <blockquote>
-		<labelf for="filter-form"><strong><?php _e('Form html class:') ?></strong></label>
-		<input id="filter-form" type="text" name="filter-form" value="<?php echo get_option('cml_option_filter_form_class', 'searchform') ?>" />
-		<br /><br />
 		<input id="filter-search" type="checkbox" value="1" name="filter-search" <?php echo ((get_option('cml_option_filter_search') == 1) ? 'checked' : '') ?> />
 		<label for="filter-search"><?php _e('Enable') ?></label>
 	    </blockquote>

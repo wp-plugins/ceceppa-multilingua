@@ -209,21 +209,24 @@ function cml_fix_rebuild_posts_info() {
    */
   $hide = array();
   $translations = array();
-  foreach( $apids as $pids ) {
-    foreach( $_cml_language_columns as $key => $l ) {
-      if( !isset( $pids[ $key ] ) || $pids[ $key ] == 0 ) continue;
+  foreach( $_cml_language_columns as $key => $l ) {
+    $langs = $_cml_language_columns;
+    unset( $langs[ $key ] );
 
-      $hide = $pids;
-      unset( $hide[ $key ] );
+    foreach( $results as $result ) {
+      $r = ( Array ) $result;
 
-      if( empty( $translations[ $key ] ) ) $translations[ $key ] = array();
-      $translations[ $key ] = array_merge( $hide, $translations[ $key ] );
+      foreach( $langs as $k => $lang ) {
+	if( $r[ $lang ] > 0 && $r[ $l ] != $r[ $lang ] ) {
+	  $hide[ $key ] = $r[ $lang ];
+	}
+      }
     }
   }
   
   //Indexes to hide
   foreach( $_cml_language_columns as $key => $l ) {
-    @update_option( "cml_hide_posts_for_lang_" . $key,  $translations[ $key ] );    
+    @update_option( "cml_hide_posts_for_lang_" . $key,  $hide[ $key ] );    
   }
 }
 

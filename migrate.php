@@ -185,7 +185,7 @@ function cml_migrate_notice( $force = false ) {
   $query = "SELECT COUNT(*) FROM " . CECEPPA_ML_RELATIONS;
   $results = $wpdb->get_results( $query );
 
-  if( CECEPPA_ML_MIGRATED < 3 ) {
+  if( CECEPPA_ML_MIGRATED == 2 ) {
     cml_table_language_columns();
 
     update_option( "cml_migration_done", 3 );
