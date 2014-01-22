@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.58
+Version: 1.3.59
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -315,7 +315,7 @@ class CeceppaML {
       //E' stata utilizzata una pagina statica come homepage?
       if( cml_use_static_page() && $this->is_homepage() ) :
         //is_home a questo "punto" non funziona :(
-        $this->update_current_lang();
+//         $this->update_current_lang();
 
         add_filter( 'pre_get_posts', array( &$this, 'get_static_page' ), 0 );
       endif;
@@ -2499,36 +2499,35 @@ class CeceppaML {
      * Modifico l'id della query in modo che punti all'articolo tradotto
      */
     function get_static_page($query) {
+      global $wpdb;
+
       if( isset( $this->_static_page ) ) return;
 
       //Recupero l'id della lingua
       $lang_id = $this->_current_lang_id;
 
-      //Id attuale
-      $id = $query->query_vars['page_id'];
+      //Page id
+      $id = $query->query_vars[ 'page_id' ];
+      
+      //uhm... on website happend that page_id is always empty when use static page
+      if( $id == 0 ) $id = get_option( 'page_on_front' );
 
-      //Recupero l'id collegato
+      //Id of linked post
       $nid = cml_get_linked_post( $id, $lang_id );
 
-      if( isset( $_GET[ "cdb" ] ) ) {
-	echo "<pre>";
-
-	echo "lang_id: $this->_current_lang_id\n";
-	echo "id: $id\n";
-	echo "nid: $nid\n";
-
-	echo "</pre>";
+      /*
+       * Change the id of "page_on_front", so wordpress will add "home" to body_class :)
+       */
+      $post_exists = $wpdb->get_row( "SELECT * FROM $wpdb->posts WHERE id = '$nid'", 'ARRAY_A' );
+      if( $post_exists ) {
+	update_option( 'page_on_front', $nid );
+      } else {
+	$nid = $id;
       }
 
-      if( empty( $nid ) ) $nid = $id;
       $query->query_vars['page_id'] = $nid;
       $query->query_vars['is_home'] = 1;
 
-      /*
-       * Change the id of "page_on_front", so wordpress will add "home" to body_class
-       */
-      if( $nid > 0 ) 
-	update_option( 'page_on_front', $nid );
 
       $this->_static_page = true;
     }
@@ -3363,14 +3362,15 @@ class CeceppaML {
   function is_homepage() {
     switch( $this->_url_mode ) :
     case PRE_PATH:
-      return ( strlen( $this->_request_url ) <= 3 );
+      $url = remove_query_arg( "cdb", $this->_request_url );
+      return ( strlen( $url ) <= 3 );
       break;
     case PRE_DOMAIN:
       break;
     case PRE_LANG:
     default:
       $url = remove_query_arg( "lang", $this->_url );
-      $url = remove_query_arg( "cdb", $url );
+      $url = remove_query_arg( "cdb", $this->_request_url );
       return $url == $this->_homeUrl;
       break;
     endswitch;
