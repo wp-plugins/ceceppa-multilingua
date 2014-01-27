@@ -102,6 +102,12 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 		    <?php _e('Flag only', 'ceceppaml') ?>
 		</label>
 	      </li>
+	      <li>
+		<label>
+		    <input type="radio" name="float-as" id="float-as" value="4" <?php checked(get_option("cml_show_float_items_as", 1), 4) ?> />
+		    <?php _e('Language slug', 'ceceppaml') ?>
+		</label>
+	      </li>
 	    </ul>
 	  </blockquote>
 	</div>
@@ -161,6 +167,12 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 		    <label>
 			<input type="radio" name="show-items-as" id="show-items-as" value="3" <?php checked(get_option("cml_show_items_as", 1), 3) ?> />
 			<?php _e('Flag only', 'ceceppaml') ?>
+		    </label>
+		  </li>
+		  <li>
+		    <label>
+			<input type="radio" name="show-items-as" id="show-items-as" value="4" <?php checked(get_option("cml_show_items_as", 1), 4) ?> />
+			<?php _e('Language slug', 'ceceppaml') ?>
 		    </label>
 		  </li>
 		</ul>
@@ -252,6 +264,12 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 		  <label>
 		      <input type="radio" name="show-as" id="show-as" value="3" <?php checked(get_option("cml_show_in_menu_as", 1), 3) ?> />
 		      <?php _e('Flag only', 'ceceppaml') ?>
+		  </label>
+		</li>
+		<li>
+		  <label>
+		      <input type="radio" name="show-as" id="show-as" value="4" <?php checked(get_option("cml_show_in_menu_as", 1), 4) ?> />
+		      <?php _e('Language slug', 'ceceppaml') ?>
 		  </label>
 		</li>
 	      </ul>

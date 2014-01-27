@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.59
+Version: 1.3.60
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -336,7 +336,7 @@ class CeceppaML {
       if( $_cml_settings[ "cml_add_flags_to_menu" ] == 1) :
         add_filter( 'wp_nav_menu_items', array(&$this, "add_flags_to_menu"), 10, 2 );
       endif;
-      add_filter('wp_nav_menu_objects', array(&$this, 'get_nav_menu_items'));
+      add_filter( 'wp_nav_menu_objects', array(&$this, 'get_nav_menu_items'), 0, 2 );
 
       //Devo accodare le bandiere?
       if( $_cml_settings[ "cml_append_flags" ] == true ) :
@@ -1517,8 +1517,10 @@ class CeceppaML {
 
     //Lingua dell'articolo
     echo "<h4>" . __( 'Language of this post', 'ceceppaml' ) . "</h4>";
-    $lang_id = get_option( "cml_page_lang_" . $tag->ID, $this->_current_lang_id );
-
+    
+    $lang_id = (empty($post_lang) || $post_lang < 0) ? 
+		get_option( "cml_page_lang_" . $tag->ID, $this->_current_lang_id ) : 
+		$post_lang;
     cml_dropdown_langs("post_lang", $lang_id, false, true, null, "", 0);
 
     echo "<h4>" . __('This is a translation of', 'ceceppaml') . "</h4>";
@@ -1649,7 +1651,9 @@ class CeceppaML {
 
     //Lingua dell'articolo
     echo "<h4>" . __('Language of this page', 'ceceppaml') . "</h4>";
-    $lang_id = (empty($post_lang) || $post_lang < 0) ? $this->get_language_id_by_page_id($tag->ID) : $post_lang;
+    $lang_id = (empty($post_lang) || $post_lang < 0) ? 
+		get_option( "cml_page_lang_" . $tag->ID, $this->_current_lang_id ) : 
+		$post_lang;
     cml_dropdown_langs("post_lang", $lang_id, false, true, null, "", 0);
 
     echo "<h4>" . __('This is a translation of', 'ceceppaml') . "</h4>";
@@ -1673,7 +1677,6 @@ class CeceppaML {
     foreach ($pages as $page) :
       if($page->ID != $tag->ID) :
 	$page_lang = $this->get_language_id_by_page_id($page->ID);
-
 	if( is_array( $linked_to ) ) {
 	  $selected = in_array( $page->ID, $linked_to[ 'indexes' ] );
 	} else
@@ -1988,12 +1991,6 @@ class CeceppaML {
     else
       $post_lang = intval( $_POST['post_lang'] );
 
-    /* If is a page check the parent_id */
-    if( @$_POST[ 'post_type' ] == 'page' && intval( $_POST[ 'parent_id' ] ) > 0 ) {
-      //Recover the language of parent
-      $post_lang = $this->get_language_id_by_page_id( intval( $_POST[ 'parent_id' ] ) );
-    }
-
     //Set language of current post
     $this->set_language_of_post( $post_id, $post_lang, $linked_lang, $linked_post );
 
@@ -2257,15 +2254,15 @@ class CeceppaML {
       $key = get_option( "cml_primary_menu_name" );
 
       if( ! empty( $key ) ) {
-	$this->switch_menu( $key, $locations );
+        $this->switch_menu( $key, $locations );
       } else {
-	foreach( $locations as $key => $value ) {
-	  if( ! empty( $key ) && substr( $key, 0, 4 ) != "cml_" ) {
-	    $this->switch_menu( $key, $locations );
-
-	    break;
-	  }
-	} //foreach
+        foreach( $locations as $key => $value ) {
+          if( ! empty( $key ) && substr( $key, 0, 4 ) != "cml_" ) {
+            $this->switch_menu( $key, $locations );
+    
+            break;
+          }
+        } //foreach
       }
     }
   }
@@ -2518,8 +2515,7 @@ class CeceppaML {
       /*
        * Change the id of "page_on_front", so wordpress will add "home" to body_class :)
        */
-      $post_exists = $wpdb->get_row( "SELECT * FROM $wpdb->posts WHERE id = '$nid'", 'ARRAY_A' );
-      if( $post_exists ) {
+      if( $nid > 0 ) {
 	update_option( 'page_on_front', $nid );
       } else {
 	$nid = $id;
@@ -2556,7 +2552,7 @@ class CeceppaML {
       unset( $this->_force_category_lang );
 
       $slug = $this->get_language_slug_by_id( $lang_id );
-      return $this->convert_url( $slug, $permalink );
+      return $this->convert_url( $slug, $permalink, false, false, $post );
     }
     
     function translate_page_link( $permalink, $id, $sample ) {
@@ -2586,7 +2582,7 @@ class CeceppaML {
       else
         $slug = $this->_current_lang_slug;
 
-      return $this->convert_url( $slug, $permalink );
+      return $this->convert_url( $slug, $permalink, false, false, get_post( $id )  );
     }
 
     function translate_menu_item($item) {
@@ -2598,45 +2594,46 @@ class CeceppaML {
         return $item;
       endif;
 
-      if($this->_current_lang_id != $this->_default_language_id) :
-	    switch($item->object) :
-	    case 'page':
-	    case 'post':
-	      $page_id = cml_get_linked_post( $item->object_id, $this->_current_lang_id );
+      //if($this->_current_lang_id != $this->_default_language_id) :
+      switch($item->object) :
+      case 'page':
+      case 'post':
+        $page_id = cml_get_linked_post( $item->object_id, $this->_current_lang_id );
 
-	      if( ! empty($page_id) ) :
-		//Su un sito mi è capitato che get_the_title() restituisse una stringa vuota, nonstante l'id della pagina fosse corretto
-		$page = get_post( $page_id );
-		if( empty( $page ) || ! is_object( $page ) ) return $item;
+        if( ! empty($page_id) ) :
+          //Su un sito mi è capitato che get_the_title() restituisse una stringa vuota, nonstante l'id della pagina fosse corretto
+          $page = get_post( $page_id );
+          if( empty( $page ) || ! is_object( $page ) ) return $item;
 
-		$item->ID = $page_id;
-		$item->title = $page->post_title;
-		$item->post_title = $page->post_title;
-		$item->object_id = $page_id;
-		$item->url = get_permalink( $page_id );
-	      endif;
+          $item->ID = $page_id;
+          $item->title = $page->post_title;
+          $item->post_title = $page->post_title;
+          $item->object_id = $page_id;
+          $item->url = get_permalink( $page_id );
+        endif;
 
-	      break;
-	    case 'category':
-	      $id = $item->object_id;
-	      if(!empty($id)) :
+      break;
+      case 'category':
+	    $id = $item->object_id;
+
+	    if(!empty($id)) :
 		  $lang = $this->_current_lang_id;
 
 		  $item->title = get_option("cml_category_" . $id . "_lang_" . $lang, $item->title);
-	      endif;
-	      break;
-	    case 'custom':
-	      $item->title = cml_translate($item->title, $this->_current_lang_id);
+        endif;
+      break;
+      case 'custom':
+        $item->title = cml_translate($item->title, $this->_current_lang_id);
 
-	      if( trailingslashit( $item->url ) == trailingslashit( $this->_homeUrl ) ) :
-            $item->url = add_query_arg( array("lang" => $this->get_language_slug_by_id($this->_current_lang_id)), $this->_homeUrl);
-	      endif;
+        if( trailingslashit( $item->url ) == trailingslashit( $this->_homeUrl ) ) :
+          $item->url = add_query_arg( array("lang" => $this->get_language_slug_by_id($this->_current_lang_id)), $this->_homeUrl);
+        endif;
 
-	      break;
-	    default:
-	      return $item;
-	    endswitch;
-      endif;
+        break;
+      default:
+        return $item;
+      endswitch;
+      //endif;
 
       return $item;
     }
@@ -2816,19 +2813,24 @@ class CeceppaML {
      *
      * For category I have to check _category_url_mode instead of _url_mode
      */
-    function convert_url( $slug, $permalink, $is_category_url = false, $force_language = false ) {
+    function convert_url( $slug, $permalink, $is_category_url = false, $force_language = false, $post = null ) {
       if( isset( $this->_force_category_lang ) ) $slug = $this->get_language_slug_by_id( $this->_force_category_lang );
 
       $switch = ( ! $is_category_url ) ? $this->_url_mode : $this->_category_url_mode;
       if( $force_language && $this->_url_mode == PRE_NONE ) $switch = PRE_LANG;
 
-      //Remove last "/"
-      $url = untrailingslashit( $permalink );
+      if( ! empty( $post ) ) {
+	//Remove last "/"
+	$url = untrailingslashit( $permalink );
 
-      //Check if url contain "-##", if no do nothing
-      preg_match( "/-\d*$/", $url, $out );
-      if( ! empty( $out ) ) {
-	$permalink = trailingslashit( preg_replace( "/-\d*$/", "", $url ) );
+	//Post end with number?
+	preg_match_all( "/\d+/", $post->post_title, $pout );
+	preg_match_all( "/-\d+/", $url, $out );
+
+	//Remove autoinserted -## from url
+	if( count( $pout[0] ) < count( $out[ 0 ] ) ) {
+	  $permalink = trailingslashit( preg_replace( "/-\d*$/", "", $url ) );
+	}
       }
 
       switch( $switch ):
@@ -3224,7 +3226,7 @@ class CeceppaML {
     $size = $_cml_settings["cml_show_in_menu_size"];
 
     //Lingua corrente
-    $items .= $this->add_item_to_menu($this->get_current_language(), false, $size);
+    $items .= $this->add_item_to_menu( $this->get_current_language(), false, $size );
     
     //Submenu
     $items .= '<ul class="sub-menu">';
@@ -3250,7 +3252,7 @@ class CeceppaML {
 
     $item = '<li class="menu-item menu-cml-flag">';
 
-    $url = cml_get_the_link( $lang );
+    $url = cml_get_the_link( $lang, true, false, true );
 
     $item .= '<a href="' . $url . '">';
 
@@ -3262,6 +3264,10 @@ class CeceppaML {
       $item .= " " . $lang->cml_language;
     endif;
     
+    if( $display == 4 ) {
+      $item .= " " . $lang->cml_language_slug;
+    }
+
     $item .= "</a>";
     
     if($close) $item .= "</li>";
@@ -3275,7 +3281,7 @@ class CeceppaML {
     $appendTo = $_cml_settings[ "cml_append_flags_to" ];
     if(empty($appendTo)) return;
 
-    $show = array("", "both", "text", "flag");
+    $show = array("", "both", "text", "flag", "slug");
     $as = intval( $_cml_settings[ "cml_show_items_as" ] );
     $size = $_cml_settings[ "cml_show_items_size" ];
 
@@ -3290,7 +3296,7 @@ class CeceppaML {
   function add_flying_flags() {
     global $_cml_settings;
 
-    $show = array("", "both", "text", "flag");
+    $show = array("", "both", "text", "flag", "slug");
     $as = intval( $_cml_settings[ "cml_show_float_items_as" ] );
     $size = $_cml_settings[ "cml_show_float_items_size" ];
 
@@ -3516,7 +3522,7 @@ class CeceppaML {
           $new[] = $clone;
         }
         
-        unset( $item );
+        if( isset( $item ) ) unset( $item );
       }
 
       $new[] = $item;
@@ -3641,6 +3647,9 @@ class CeceppaML {
 	    
       $query->query_vars[ 'name' ] = $name;
     }
+    
+    unset( $this->_looking_id_post );
+    remove_action( 'pre_get_posts', array( &$this, 'check_duplicated_permalink' ) );
   }
 }
 

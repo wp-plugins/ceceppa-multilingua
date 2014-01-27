@@ -3,7 +3,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate, international, .mo file, .po file, localization, widget, post
 Requires at least: 3.4.1
 Tested up to: 3.8
-Stable tag: 1.3.59
+Stable tag: 1.3.60
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG
@@ -166,6 +166,10 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/it/pillole
 8. Translate your theme
 
 == Changelog ==
+
+= 1.3.60 =
+* Now page language is stored correctly
+* Added "Language slug" as "show flag" method
 
 = 1.3.59 =
 * Fixed "loop" on homepage when use "static page"

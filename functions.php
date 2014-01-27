@@ -162,7 +162,8 @@ function cml_is_default_lang($lang = null) {
  *
  * @param $show - indica se visualizzare anche il nome della lingua. I valori possibili sono:
  *			"flag" - visualizza solo la bandiera
-*      			"text" - visualizza solo il nome della lingua
+ *     			"text" - visualizza solo il nome della lingua
+ *			"slug" - show only language slug
  *			"both" - visualizza sia la bandiera che il nome della lingua
  * @param $size - dimensione della bandierina da visualizzare. I valori possibili sono:
  *			"tiny" - 20x12
@@ -182,19 +183,21 @@ function cml_show_flags( $show = "flag", $size = "tiny", $class_name = "cml_flag
 
   $r = "<ul class=\"$class_name\">";
   
+  die();
   //Post language...
   $lang_id = ( ! $sort ) ? -1 : $wpCeceppaML->get_language_id_by_post_id( get_the_ID() );
   $items = array();
   foreach($results as $result) :
     $lang = ($show == "flag") ? "" : $result->cml_language;
+    $lang = ( $show == "slug" ) ? $result->cml_language_slug : $lang;
 
     $link = cml_get_the_link( $result, $linked, $only_existings );
     if( empty( $link) ) continue;
 
     $img = "<img class=\"$size $image_class\" src='" . cml_get_flag_by_lang_id( $result->id, $size ) . "' title='$result->cml_language' width=\"$width\"/>";
-    if($show == "text") $img = "";
+    if( $show == "text" ) $img = "";
 
-    $li = "<li><a href=\"$link\">$img$lang</a></li>";
+    $li = "<li><a href=\"$link\">{$img}{$lang}</a></li>";
     if( $sort && is_array( $items ) && $result->id == $lang_id )
       array_unshift( $items, $li );
     else
@@ -500,14 +503,27 @@ function cml_get_posts_by_language( $lang_id = null ) {
  * @param $result - language information ( i.e. cml_get_language() )
  * @param $linked - must return linked post ( = true ), or homepage ( = false )?
  * @param $only_existings - return linked post only if it exists, otherwise return blank link
+ * @param $queried - use get_queried_object_id instead of get_the_ID
  */
-function cml_get_the_link( $result, $linked = true, $only_existings = false ) {
+function cml_get_the_link( $result, $linked = true, $only_existings = false, $queried = false ) {
   global $wpCeceppaML, $_cml_settings;
 
   if( cml_is_homepage() ) { //&& cml_use_static_page() ) {
     //Se stò nella home vuol dire che ho scelto come metodo di reindirizzamento &lang
     $link = $wpCeceppaML->get_home_url( $result->cml_language_slug );
   } else {
+    if( $queried ) {
+      $queried = get_queried_object();
+      
+      $is_category = isset( $queried->term_id );
+      $is_single = isset( $queried->ID );
+      $is_page = $is_single;
+    } else {
+      $is_category = is_category();
+      $is_single = is_single();
+      $is_page = is_page();
+    }
+
     /* Collego la categoria della lingua attuale con quella della linga della bandierina */
     $link = "";
 
@@ -521,13 +537,13 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false ) {
      * if wp display 404, is_single is true also for category and in this case
      * the plugin will return wrong link
      */
-    if( ( ( is_single() || is_page() ) ||  $linked ) && ! is_category() ):
+    if( ( ( $is_single || $is_page ) ||  $linked ) && ! $is_category ):
       $link = cml_get_linked_post( get_the_ID(), $result->id );
 
       if( !empty( $link ) ) $link = get_permalink( $link );
     endif;
 
-    if( is_archive() && !is_category() ) :
+    if( is_archive() && ! is_category() ) :
       global $wp;
 
       $link = home_url( $wp->request ) . "/";
@@ -535,7 +551,7 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false ) {
     endif;
 
     //Collego le categorie delle varie lingue
-    if( is_category() ) :
+    if( $is_category ) :
       $cat = get_the_category();
 
       if( is_array( $cat ) ) :
