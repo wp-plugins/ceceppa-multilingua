@@ -183,7 +183,6 @@ function cml_show_flags( $show = "flag", $size = "tiny", $class_name = "cml_flag
 
   $r = "<ul class=\"$class_name\">";
   
-  die();
   //Post language...
   $lang_id = ( ! $sort ) ? -1 : $wpCeceppaML->get_language_id_by_post_id( get_the_ID() );
   $items = array();
@@ -551,8 +550,10 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
     endif;
 
     //Collego le categorie delle varie lingue
-    if( $is_category ) :
-      $cat = get_the_category();
+    if( $is_category ) {
+//       if( ! $_cml_settings[ 'cml_option_translate_categories_by_link' ] )
+	$cat = get_the_category();
+//       }
 
       if( is_array( $cat ) ) :
         $cat_id = $cat[count($cat) - 1]->term_id;
@@ -565,7 +566,7 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
       endif;
 
       $wpCeceppaML->unset_category_lang();
-    endif;
+    }
     
     if( is_paged() ) :
       $link = add_query_arg( array( "lang" => $result->cml_language_slug ) );

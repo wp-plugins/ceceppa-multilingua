@@ -156,10 +156,19 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 		<br />
 		<input type="checkbox" id="categories" name="categories" value="1" <?php checked(get_option('cml_option_translate_categories'), true) ?> />
 		<label for="categories"><?php _e('Translate the url for categories', 'ceceppaml') ?>&nbsp;</label><br>
+		<br />
+		<label>
+		  <input type="checkbox" id="categories" name="categories-link" value="1" <?php checked(get_option('cml_option_translate_categories_by_link'), true) ?> />
+		  <?php _e('Use url for translate category link', 'ceceppaml') ?>&nbsp;<br />
+		  <strong style="color: #898989">
+		    
+		    <?php _e( 'Enable this option only if the plugin return wrong link for current category', 'ceceppaml' ) ?>
+		  </strong>
+		</label>
 	    </td>
 	    </tr>
 <!-- Translate menu -->
-	    <tr>
+	    <tr class="alternate">
 	    <td id="cats-tags" style="vertical-align: middle">
 		<div id="icon-themes" class="icon32" style=""></div>
 		<strong style="line-height: 50px;"><?php _e( 'Translate menu', 'ceceppaml' ); ?></strong>

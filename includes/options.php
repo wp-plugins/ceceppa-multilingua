@@ -111,7 +111,8 @@ class CeceppaMLOptions {
     update_option("cml_modification_mode", sanitize_title( $_POST['url-mode'] ) );
     
     //Traduzione categorie
-    @update_option('cml_option_translate_categories', sanitize_title( $_POST['categories'] ) );
+    @update_option('cml_option_translate_categories', intval( $_POST['categories'] ) );
+    @update_option('cml_option_translate_categories_by_link', intval( $_POST['categories-link'] ) );
 
     //Redirect
     update_option("cml_option_redirect", sanitize_title( $_POST['redirect'] ) );
