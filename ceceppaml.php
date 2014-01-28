@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.60
+Version: 1.3.61
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -321,6 +321,7 @@ class CeceppaML {
       endif;
   
       //Filtro il link degli archivi :)
+      add_filter('getarchives_where', array(&$this, 'get_archives_where'), 10, 2);
       add_filter('get_archives_link', array(&$this, 'translate_archives_link'));
 
       //Translate menu items    
@@ -350,7 +351,7 @@ class CeceppaML {
     
       //La funzione clean_url si occupa di eliminare lo slug della lingua dal link,
       //affinché wp processi il link correttamente
-      add_filter( 'pre_get_posts', array(&$this, 'clear_url') );
+      add_filter( 'pre_get_posts', array(&$this, 'clear_url'), 0 );
 
       //Titolo del blog/sito
       add_filter( 'bloginfo', array( &$this, 'bloginfo' ), 0 );
@@ -368,6 +369,9 @@ class CeceppaML {
       */
       if( ! empty( $this->_permalink_structure ) )
 	add_action( 'pre_get_posts', array( &$this, 'check_duplicated_permalink' ) );
+	
+      //Add language info to homeUrl
+//       add_filter( 'home_url', array( &$this, 'translate_home_url' ), 0, 4 );
     }
 
     //Update current language
@@ -402,7 +406,7 @@ class CeceppaML {
     //hide_category_translations si occupa anche di "sistemare" il link alla categoria "originale"
     if( $_cml_settings[ "cml_option_filter_translations" ] || array_key_exists( "ht", $_GET) || $this->_translate_term_link ) {
       //Se l'utente non vuole nascondere le traduzioni non vedo perché lo devo "forzare"? :)
-      add_action('pre_get_posts', array(&$this, 'hide_category_translations'));
+      add_action('pre_get_posts', array(&$this, 'hide_category_translations'), 0);
     }
 
     //Aggiungo lo switch delle lingue nella barra dell'amministratore
@@ -1807,6 +1811,12 @@ class CeceppaML {
       $location = $this->get_home_url( $this->_default_language_slug );
     }
 
+    if( $this->_redirect_browser == "others" ) {
+      if( $lang == $this->_default_language_id ) return;	//Default language, do nothing
+
+      $location = $this->get_home_url( $slug );
+    }
+
     if( ! empty( $location ) ) {
       $this->_redirect_browser = 'nothing';
 
@@ -1897,11 +1907,6 @@ class CeceppaML {
     $browser_langs = explode(";", $_SERVER['HTTP_ACCEPT_LANGUAGE']);
     $lang = null;
 
-// //     if( is_user_logged_in() ) {
-//       echo "Browser: ";
-//       print_r( $browser_langs );
-// //     }
-
     //Se la lingua del browser coincide con una di quella attuale della pagina, ignoro tutto
     foreach($browser_langs as $blang) :
       @list( $code1, $code2 ) = explode( ",", $blang );
@@ -1919,9 +1924,8 @@ class CeceppaML {
 	if(strlen($l) > 2) {
 	  $lang = $this->get_language_id_by_locale($l);
 	} else {
-	    //Se ho solo 2 caratteri, cerco negli "slug"
-// 	    $query = sprintf("SELECT id FROM %s WHERE cml_language_slug = '%s'", CECEPPA_ML_TABLE, $l);
-// 	    $lang = $wpdb->get_var($query);
+	  //Se ho solo 2 caratteri, cerco negli "slug"
+	  $lang = $this->get_language_id_by_slug( $l );
 	}
 
 	$i++;
@@ -2675,7 +2679,6 @@ class CeceppaML {
         if( ( isset( $this->_force_current_language ) && $this->_force_current_language != $this->_default_language_id ) 
           || isset($this->_force_category_lang) || $this->_translate_term_link == 1) :
 
-          $id = get_the_ID();
           if( !empty( $id ) )
             $lang_id = $this->get_language_id_by_page_id( get_the_ID() );
 
@@ -2746,9 +2749,9 @@ class CeceppaML {
       return $link;
     }
 
-    function translate_category_url($url) {
-      $homeUrl = home_url();
-      $plinks = explode("/", str_replace($homeUrl, "", $url));
+    function translate_category_url( $url ) {
+      $homeUrl = untrailingslashit( $this->_homeUrl );
+      $plinks = explode("/", str_replace( $homeUrl, "", $this->_request_url ) );
 
       //Se sto nel loop recupero la lingua dall'articolo
       if( in_the_loop() ) :
@@ -3104,7 +3107,7 @@ class CeceppaML {
   
   function hide_category_translations($wp_query) {
     //Se non è una categoria è inutile che viene qui :)
-    if(!is_category()) return;
+    if( ! is_category() ) return;
 
     /*
       * Wow, ho trovato un modo per tradurre il link delle categorie :D :D :
@@ -3149,14 +3152,15 @@ class CeceppaML {
 	    $name = (!empty($name)) ? strtolower($name->cml_cat_name) : "";
 	  endif;
 	  
-	  $new[] = empty($name) ? $cat : $name;
+	  $n = empty( $name ) ? $cat : $name;
+	  $new[] = sanitize_title( $n );
 	endforeach;
 	
-	$wp_query->query['category_name'] = join("/", $new);
-	$wp_query->query_vars['category_name'] = end($new);
+	$wp_query->query['category_name'] = join( "/", $new );
+	$wp_query->query_vars['category_name'] = end( $new );
 	
 	$taxquery = array("taxonomy" => "category",
-			    "terms" => array(join("/", $new)),
+			    "terms" => array( join( "/", $new ) ),
 			    "include_children" => 1,
 			    "field" => "slug",
 			    "operator" => "IN");
@@ -3317,6 +3321,12 @@ class CeceppaML {
 
   function unset_category_lang() {
     unset($this->_force_category_lang);
+  }
+
+  function get_archives_where( $where, $r ) {
+    $where .= " AND ID IN ( " . join( ",", $this->get_posts_by_language() ) . ") ";
+    
+    return $where;
   }
 
   function translate_archives_link( $link ) {
@@ -3650,6 +3660,10 @@ class CeceppaML {
     
     unset( $this->_looking_id_post );
     remove_action( 'pre_get_posts', array( &$this, 'check_duplicated_permalink' ) );
+  }
+  
+  function translate_home_url( $url, $path, $orig_scheme, $blog_id ) {
+    return $this->convert_url( $this->_current_lang_slug, $url );
   }
 }
 

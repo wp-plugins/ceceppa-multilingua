@@ -102,7 +102,12 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 		    <br /><br />
             <label>
               <input type="radio" id="redirect" name="redirect" value="default" <?php echo ((get_option('cml_option_redirect', 'auto') == 'default') ? 'checked' : '') ?> />
-		      <?php _e('Automatically redirects the default language.', 'ceceppaml'); ?>
+		      <?php _e('Automatically redirects to default language.', 'ceceppaml'); ?>
+            </label>
+		    <br /><br />
+            <label>
+              <input type="radio" id="redirect" name="redirect" value="others" <?php echo ((get_option('cml_option_redirect', 'auto') == 'others') ? 'checked' : '') ?> />
+		      <?php _e('Redirect only if user language is different from default one', 'ceceppaml'); ?>
             </label>
 		    <br /><br />
 		    <label>

@@ -36,6 +36,8 @@ function cml_get_linked_posts( $id = null ) {
   global $wpCeceppaML, $_cml_language_columns, $wpdb;
 
   if( ! CECEPPA_ML_MIGRATED ) return cml_old_get_linked_posts( $id );
+  if( $id == null ) $id = get_the_ID();
+  if( empty( $id ) ) return array();
 
   if( empty( $_cml_language_columns ) ) {
     $_cml_language_columns = cml_table_language_columns();
