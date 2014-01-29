@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.62
+Version: 1.3.63
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -1839,8 +1839,8 @@ class CeceppaML {
 
       $url = substr( $url, 3 );
 
-      $this->_clean_request = $this->_base_url . "/" . $url;
       $this->_clean_url = $this->_homeUrl . $url;
+      $this->_clean_request = str_replace( $this->_homeUrl, "", $this->_clean_url );
 
       //Inganno wordpress :D
       $_SERVER['REQUEST_URI'] = $this->_clean_request;
@@ -2598,46 +2598,46 @@ class CeceppaML {
         return $item;
       endif;
 
-      //if($this->_current_lang_id != $this->_default_language_id) :
-      switch($item->object) :
-      case 'page':
-      case 'post':
-        $page_id = cml_get_linked_post( $item->object_id, $this->_current_lang_id );
+      if($this->_current_lang_id != $this->_default_language_id) {
+	switch($item->object) :
+	case 'page':
+	case 'post':
+	  $page_id = cml_get_linked_post( $item->object_id, $this->_current_lang_id );
 
-        if( ! empty($page_id) ) :
-          //Su un sito mi è capitato che get_the_title() restituisse una stringa vuota, nonstante l'id della pagina fosse corretto
-          $page = get_post( $page_id );
-          if( empty( $page ) || ! is_object( $page ) ) return $item;
+	  if( ! empty($page_id) ) {
+	    //Su un sito mi è capitato che get_the_title() restituisse una stringa vuota, nonstante l'id della pagina fosse corretto
+	    $page = get_post( $page_id );
+	    if( empty( $page ) || ! is_object( $page ) ) return $item;
 
-          $item->ID = $page_id;
-          $item->title = $page->post_title;
-          $item->post_title = $page->post_title;
-          $item->object_id = $page_id;
-          $item->url = get_permalink( $page_id );
-        endif;
+	    $item->ID = $page_id;
+	    $item->title = $page->post_title;
+	    $item->post_title = $page->post_title;
+	    $item->object_id = $page_id;
+	    $item->url = get_permalink( $page_id );
+	  }
 
-      break;
-      case 'category':
-	$id = $item->object_id;
+	break;
+	case 'category':
+	  $id = $item->object_id;
 
-	if(!empty($id)) :
-	  $lang = $this->_current_lang_id;
+	  if(!empty($id)) :
+	    $lang = $this->_current_lang_id;
 
-	  $item->title = get_option("cml_category_" . $id . "_lang_" . $lang, $item->title);
-        endif;
-      break;
-      case 'custom':
-        $item->title = cml_translate($item->title, $this->_current_lang_id);
+	    $item->title = get_option("cml_category_" . $id . "_lang_" . $lang, $item->title);
+	  endif;
+	break;
+	case 'custom':
+	  $item->title = cml_translate($item->title, $this->_current_lang_id);
 
-        if( trailingslashit( $item->url ) == trailingslashit( $this->_homeUrl ) ) :
-          $item->url = add_query_arg( array("lang" => $this->get_language_slug_by_id($this->_current_lang_id)), $this->_homeUrl);
-        endif;
+	  if( trailingslashit( $item->url ) == trailingslashit( $this->_homeUrl ) ) :
+	    $item->url = add_query_arg( array("lang" => $this->get_language_slug_by_id($this->_current_lang_id)), $this->_homeUrl);
+	  endif;
 
-        break;
-      default:
-        return $item;
-      endswitch;
-      //endif;
+	  break;
+	default:
+	  return $item;
+	endswitch;
+      } //endif;
 
       return $item;
     }
@@ -3664,6 +3664,21 @@ class CeceppaML {
   
   function translate_home_url( $url, $path, $orig_scheme, $blog_id ) {
     return $this->convert_url( $this->_current_lang_slug, $url );
+  }
+  
+
+  /*
+   * Return current url
+   */
+  function get_url() {
+    return $this->_url;
+  }
+
+  /*
+   * Return current url withouth any information about current language.
+   */
+  function get_clean_request() {
+    return $this->_clean_request;
   }
 }
 

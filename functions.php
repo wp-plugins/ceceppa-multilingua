@@ -551,12 +551,15 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
 
     //Collego le categorie delle varie lingue
     if( $is_category ) {
-//       if( ! $_cml_settings[ 'cml_option_translate_categories_by_link' ] )
+      $q = get_queried_object();
+
+      if( $queried && isset( $q->term_id ) ) {
+	$cat = array( "term_id" => $q->term_id );
+      } else
 	$cat = get_the_category();
-//       }
 
       if( is_array( $cat ) ) :
-        $cat_id = $cat[count($cat) - 1]->term_id;
+        $cat_id = ( isset( $cat[ 'term_id' ] ) ) ? $cat[ 'term_id' ] : ( $cat[ count($cat) - 1 ]->term_id );
 
         //Mi serve a "forzare" lo slug corretto nel link
         $wpCeceppaML->force_category_lang( $result->id );
