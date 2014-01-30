@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.63
+Version: 1.3.65
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -1826,7 +1826,8 @@ class CeceppaML {
   }
 
  function clear_url() {
-    if( $this->_url_mode != PRE_PATH || isset( $this->_clean_applied ) ) return;
+    if( $this->_url_mode != PRE_PATH 
+	|| isset( $this->_clean_applied ) ) return;
 
     //Se è un articolo non rimuovo lo slug della lingua, altrimenti scompare anche dall'url :O
     $id = cml_get_page_id_by_path( $this->_url, array('post') );
@@ -1840,15 +1841,16 @@ class CeceppaML {
       $url = substr( $url, 3 );
 
       $this->_clean_url = $this->_homeUrl . $url;
-      $this->_clean_request = str_replace( $this->_homeUrl, "", $this->_clean_url );
+      $this->_clean_request = $this->_base_url . "/" . $url;
+//       $this->_clean_request = str_replace( $this->_homeUrl, "", $this->_clean_url );
 
       //Inganno wordpress :D
       $_SERVER['REQUEST_URI'] = $this->_clean_request;
-      
-      $this->_clean_applied = true;
 
       return $this->_clean_request;
     endif;
+    
+    $this->_clean_applied = true;
   }
 
   /**
@@ -2116,7 +2118,7 @@ class CeceppaML {
 
     //Ho già identificato la lingua corretta, è inutile fare ulteriori elaborazioni ;)
     if( isset( $this->_language_detected ) ) return $this->_current_lang_id;
-  
+
     if( array_key_exists( "lang", $_GET ) ) {
       $lang = $_GET['lang'];
 
@@ -2502,7 +2504,7 @@ class CeceppaML {
     function get_static_page($query) {
       global $wpdb;
 
-      if( isset( $this->_static_page ) ) return;
+      if( isset( $this->_static_page ) ) return $this->_static_page;
 
       //Recupero l'id della lingua
       $lang_id = $this->_current_lang_id;
@@ -2529,7 +2531,7 @@ class CeceppaML {
       $query->query_vars['is_home'] = 1;
 
 
-      $this->_static_page = true;
+      $this->_static_page = $nid;
     }
     
     /*
@@ -2613,7 +2615,20 @@ class CeceppaML {
 	    $item->title = $page->post_title;
 	    $item->post_title = $page->post_title;
 	    $item->object_id = $page_id;
-	    $item->url = get_permalink( $page_id );
+	    
+	    //If using static page, ensure that isn't a translation of it...
+	    if( !cml_use_static_page() )
+	      $item->url = get_permalink( $page_id );
+	    else {
+	      if( ! isset( $this->_static_page_translations ) )
+		$this->_static_page_translations = cml_get_linked_posts( $this->get_static_page( get_queried_object() ) );
+
+	      //Is a translation of home page?
+	      if( in_array( $page_id, $this->_static_page_translations[ 'indexes' ] ) )
+		$item->url = $this->get_home_url( $this->_current_lang_slug );
+	      else
+		$item->url = get_permalink( $page_id );
+	    }
 	  }
 
 	break;
@@ -3351,7 +3366,7 @@ class CeceppaML {
   }
   
   //Restituisco l'url della homepage in base alle impostazioni de "url_mode"
-  function get_home_url( $slug ) {
+  function get_home_url( $slug = null ) {
     if( empty( $slug) ) $slug = $this->_default_language_slug;
 
     switch( $this->_url_mode ) :
