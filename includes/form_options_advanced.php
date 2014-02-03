@@ -20,6 +20,9 @@ global $wpCeceppaML;
 //Non posso richiamare lo script direttamente dal browser :)
 if(!is_object($wpCeceppaML)) die("Access denied");
 
-
 $wpCeceppaML->admin_notices( true );
+cml_migrate_notice( true );
 ?>
+
+<a href="<?php echo add_query_arg( array( 'cml-remove' => 1 ) ) ?>">Rimuovi informazioni sui collegamenti dei post</a>
+
