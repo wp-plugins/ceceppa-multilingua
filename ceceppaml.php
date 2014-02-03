@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.65
+Version: 1.3.66
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -2501,10 +2501,11 @@ class CeceppaML {
     /*
      * Modifico l'id della query in modo che punti all'articolo tradotto
      */
-    function get_static_page($query) {
+    function get_static_page( $query ) {
       global $wpdb;
 
       if( isset( $this->_static_page ) ) return $this->_static_page;
+      if( ! isset( $query->query_vars[ 'page_id' ] ) ) return;
 
       //Recupero l'id della lingua
       $lang_id = $this->_current_lang_id;
@@ -2563,8 +2564,10 @@ class CeceppaML {
     
     function translate_page_link( $permalink, $id, $sample ) {
       global $page;
-      
-      if( $page >= 2 ) return $permalink;   //Fix: "La pagina web ha generato un loop di reindirizzamento"
+
+      /* if current page > 1, I have return the permalink, or I'll get "loop error"  */
+      if( preg_match( "/\/\d*$/", $permalink, $out ) ) 
+	return $permalink;
 
       //Se è stata scelta la modalità suffix: ?lang=## lo slug è quello della lingua attuale?
       if( ! empty( $id ) ) {
@@ -2832,6 +2835,8 @@ class CeceppaML {
      * For category I have to check _category_url_mode instead of _url_mode
      */
     function convert_url( $slug, $permalink, $is_category_url = false, $force_language = false, $post = null ) {
+      global $_cml_settings;
+
       if( isset( $this->_force_category_lang ) ) $slug = $this->get_language_slug_by_id( $this->_force_category_lang );
 
       $switch = ( ! $is_category_url ) ? $this->_url_mode : $this->_category_url_mode;
@@ -2857,10 +2862,16 @@ class CeceppaML {
         return add_query_arg( array( "lang" => $slug ), $permalink );
       break;
       case PRE_PATH: 
+	if( $slug == $this->_default_language_slug &&
+	    $_cml_settings[ 'url_mode_remove_default' ] ) 
+	  $slug = "";
+	else
+	  $slug = trailingslashit( $slug );
+
         //Aggiungo il suffisso /%lang%/
         $plinks = explode("/", str_replace( $this->_homeUrl, "", $permalink ));
 
-        $permalink = $this->_homeUrl . $slug . "/" . join( "/", $plinks );
+        $permalink = $this->_homeUrl . $slug . join( "/", $plinks );
         break;
       case PRE_DOMAIN :
         //##.example.com
@@ -3367,10 +3378,15 @@ class CeceppaML {
   
   //Restituisco l'url della homepage in base alle impostazioni de "url_mode"
   function get_home_url( $slug = null ) {
+    global $_cml_settings;
     if( empty( $slug) ) $slug = $this->_default_language_slug;
 
     switch( $this->_url_mode ) :
     case PRE_PATH:
+      if( $slug == $this->_default_language_slug &&
+	  $_cml_settings[ 'url_mode_remove_default' ] ) 
+	$slug = "";
+
       $link = $this->_homeUrl . $slug;
       break;
     case PRE_DOMAIN:

@@ -18,7 +18,7 @@
   $_cml_settings[ 'default_language_slug' ] = $wpdb->get_var("SELECT cml_language_slug FROM " . CECEPPA_ML_TABLE . " WHERE cml_default = 1");
   $_cml_settings[ 'default_language_locale' ] = $wpdb->get_var("SELECT cml_locale FROM " . CECEPPA_ML_TABLE . " WHERE cml_default = 1");
   $_cml_settings[ 'url_mode' ] = get_option( "cml_modification_mode", 1 );
-
+  $_cml_settings[ 'url_mode_remove_default' ] = get_option( "cml_modification_mode_default", false );
   
   $_cml_settings[ 'cml_show_admin_notice' ] = get_option( 'cml_show_admin_notice', 1 );
   $_cml_settings[ 'cml_code_optimization' ] = get_option( 'cml_code_optimization', 1 );

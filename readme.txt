@@ -167,6 +167,10 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/it/pillole
 
 == Changelog ==
 
+= 1.3.66 =
+* Fixed "Warning"
+* You can "Remove Pre-Path Mode for default language"
+
 = 1.3.65 =
 * Fixed some bugs
 

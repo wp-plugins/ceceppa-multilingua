@@ -109,10 +109,10 @@ class CeceppaMLOptions {
     //Add slug & url mode
 //     update_option("cml_add_slug_to_link", sanitize_title( $_POST['add-slug'] ) );
     update_option("cml_modification_mode", sanitize_title( $_POST['url-mode'] ) );
-    
+    @update_option( 'cml_modification_mode_default', intval( $_POST[ 'url-mode-default' ] ) );
+
     //Traduzione categorie
     @update_option('cml_option_translate_categories', intval( $_POST['categories'] ) );
-    @update_option('cml_option_translate_categories_by_link', intval( $_POST['categories-link'] ) );
 
     //Redirect
     update_option("cml_option_redirect", sanitize_title( $_POST['redirect'] ) );

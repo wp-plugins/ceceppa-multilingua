@@ -517,10 +517,12 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
       $is_category = isset( $queried->term_id );
       $is_single = isset( $queried->ID );
       $is_page = $is_single;
+      $the_id = ( $is_single ) ? $queried->ID : 0;
     } else {
       $is_category = is_category();
       $is_single = is_single();
       $is_page = is_page();
+      $the_id = get_the_ID();
     }
 
     /* Collego la categoria della lingua attuale con quella della linga della bandierina */
@@ -529,7 +531,7 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
     if( ! in_the_loop() ) {
       $lang_id = $wpCeceppaML->get_current_lang_id();
     } else
-      $lang_id = $wpCeceppaML->get_language_id_by_post_id( get_the_ID() );
+      $lang_id = $wpCeceppaML->get_language_id_by_post_id( $the_id );
 
     /*
      * I must check that is_category is false, because
@@ -537,9 +539,9 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
      * the plugin will return wrong link
      */
     if( ( ( $is_single || $is_page ) ||  $linked ) && ! $is_category ):
-      $link = cml_get_linked_post( get_the_ID(), $result->id );
+      $linked_id = cml_get_linked_post( $the_id, $result->id );
 
-      if( !empty( $link ) ) $link = get_permalink( $link );
+      if( ! empty( $linked_id ) ) $link = get_permalink( $linked_id );
     endif;
 
     if( is_archive() && ! is_category() ) :
@@ -585,7 +587,7 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
       //If post doesn't exists in current language I'll return the link to default language, if exists :)
       if( $_cml_settings[ 'cml_force_languge' ] == 1 ) {
 	if( is_single() || is_page() ) {
-	  $l = cml_get_linked_post( get_the_ID(), cml_get_default_language_id() );
+	  $l = cml_get_linked_post( $the_id, cml_get_default_language_id() );
 	  if( ! empty( $l ) ) return get_permalink( $l );
 	}
 

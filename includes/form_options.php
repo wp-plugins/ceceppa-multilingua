@@ -130,7 +130,13 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 		    <?php _e('Use Pre-Path Mode (Default, puts /en/ in front of URL)', 'ceceppaml') ?><i>(www.example.com/en/)</i><br />
 		    <b style="padding-left:20px"><?php _e('This mode doesn\'t work with default permalink!!!', 'ceceppaml'); ?></b> (?p=##)
 		</label>
-		<br /><br />
+		<blockquote>
+		  <label for="url-mode-path-default">
+		      <input type="checkbox" name="url-mode-default" id="url-mode-path-default" value="1" <?php checked( get_option("cml_modification_mode_default", false ) ) ?> />
+		      <?php _e( 'Ignore for default language', 'ceceppaml') ?><br />
+		      <i><?php _e( 'Language slug will be added only to translations', 'ceceppaml' ) ?></i>
+		  </label>
+		</blockquote>
 		<label for="url-mode-domain">
 		    <input type="radio" name="url-mode" id="url-mode-domain" value="3" <?php checked(get_option("cml_modification_mode"), 3) ?> />
 		    <?php _e('Use Pre-Domain Mode', 'ceceppaml') ?><i>(en.example.com)</i>
@@ -157,14 +163,6 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 		<input type="checkbox" id="categories" name="categories" value="1" <?php checked(get_option('cml_option_translate_categories'), true) ?> />
 		<label for="categories"><?php _e('Translate the url for categories', 'ceceppaml') ?>&nbsp;</label><br>
 		<br />
-		<label>
-		  <input type="checkbox" id="categories" name="categories-link" value="1" <?php checked(get_option('cml_option_translate_categories_by_link'), true) ?> />
-		  <?php _e('Use url for translate category link', 'ceceppaml') ?>&nbsp;<br />
-		  <strong style="color: #898989">
-		    
-		    <?php _e( 'Enable this option only if the plugin return wrong link for current category', 'ceceppaml' ) ?>
-		  </strong>
-		</label>
 	    </td>
 	    </tr>
 <!-- Translate menu -->
