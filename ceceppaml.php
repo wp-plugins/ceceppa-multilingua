@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.66
+Version: 1.3.67
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -86,7 +86,7 @@ class CeceppaML {
   protected $_filter_search = true;
   protected $_filter_form_class = "searchform";
   protected $_no_translate_menu_item = false;
-  protected $_url_mode = PRE_PATH;
+  public $_url_mode = PRE_PATH;
   protected $_category_url_mode = PRE_PATH;
   protected $_posts_of_lang = array();	//Al fine di evitare chiamate continue al db precarico nella variabile i post associati ad ogni lingua
   protected $_translations_by_lang = array();  //Memorizzo gli id di tutte le traduzioni per ogni lingua
@@ -659,7 +659,7 @@ class CeceppaML {
             if( $link > 0 ) {
                 $title = "<br />" . get_the_title($link);
                 echo '<a href="' . get_edit_post_link($link) . '">';
-                echo '    <img class="_tipsy" src="' . cml_get_flag_by_lang_id($lang->id, "small") . '" title="' . __('Edit post: ', 'ceceppaml') . $title . '"/>';
+                echo '    <img class="_tipsy" src="' . cml_get_flag_by_lang_id($lang->id, "tiny") . '" title="' . __('Edit post: ', 'ceceppaml') . $title . '"/>';
                 echo '</a>';
             } else {
                 echo '<a href="' . get_bloginfo("url") . '/wp-admin/post-new.php?post_type=' . $post_type . '&link-to=' . $id . '&page-lang=' . $lang->id . '">';
@@ -2845,6 +2845,7 @@ class CeceppaML {
       if( ! empty( $post ) ) {
 	//Remove last "/"
 	$url = untrailingslashit( $permalink );
+	$url = str_replace( $this->_homeUrl, "", $url );
 
 	//Post end with number?
 	preg_match_all( "/\d+/", $post->post_title, $pout );
@@ -3445,11 +3446,9 @@ class CeceppaML {
   }
   
   function link_pages_link( $link, $i ) {
-    if( $i == 1 ) return $link;
-
-    if( strpos( "href", $link ) === FALSE ) :
+    if( strpos( $link, "href" ) === FALSE ) {
       return $link;
-    endif;
+    }
     
     $link = preg_replace( '/\?lang=[a-z]{2}/', '', $link );
     preg_match( '/\"(.+?)\"/', $link, $l );

@@ -140,7 +140,7 @@ class CeceppaMLOptions {
   function update_filters() {
     //Change locale
     update_option("cml_option_change_locale", intval($_POST['change-locale']));
-    update_option("cml_option_change_locale_admin", intval($_POST['change-locale-admin']));
+    update_option("cml_option_change_locale_admin", intval( @$_POST['change-locale-admin'] ) );
 
     //Filter posts
     @update_option("cml_option_filter_posts", intval($_POST['filter-posts']));
@@ -153,7 +153,7 @@ class CeceppaMLOptions {
 	  
     //Filter search
     @update_option("cml_option_filter_search", intval($_POST['filter-search']));
-    @update_option("cml_option_filter_form_class", sanitize_title($_POST['filter-form']));
+    @update_option("cml_option_filter_form_class", esc_html($_POST['filter-form']));
   }    
 }
 ?>

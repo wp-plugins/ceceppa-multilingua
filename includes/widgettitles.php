@@ -1,5 +1,5 @@
 <?php
-if( ! is_object( $wpCeceppaML ) ) die("Access denied");
+if ( ! defined( 'ABSPATH' ) ) die("Access denied");
 
 global $wpCeceppaML;
 ?>

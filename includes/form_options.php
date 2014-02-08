@@ -320,6 +320,11 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 	<td>
 	    <strong><?php _e('Allows you to filter the result of the search in according with "Filter posts" option.', 'ceceppaml') ?></strong>
 	    <blockquote>
+	      <label>
+		<input type="text" name="filter-form" id="filter-form" value="<?php echo get_option( "cml_option_filter_form_class", "" ) ?>" /><br />
+		<?php _e( 'Insert searchform element or className or id', 'ceceppaml' ); ?>
+	      </label>
+	      <br /><br />
 		<input id="filter-search" type="checkbox" value="1" name="filter-search" <?php echo ((get_option('cml_option_filter_search') == 1) ? 'checked' : '') ?> />
 		<label for="filter-search"><?php _e('Enable') ?></label>
 	    </blockquote>

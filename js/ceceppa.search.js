@@ -3,6 +3,7 @@ function isEmpty( inputStr ) { if ( null == inputStr || "" == inputStr ) { retur
 
 jQuery(document).ready(function() {
   var input = jQuery('<input type="hidden" name="lang" value="' + cml_object.lang + '" />');
-  $form = jQuery('.' + cml_object.form_class);
+
+  $form = jQuery( cml_object.form_class );
   $form.append(input);
 });
