@@ -142,6 +142,7 @@
 	if( strcasecmp( $ret, $string ) == 0 ) $ret = __( $string );  //Cerco anche tra le traduzioni di wordpress
 	$done = !( strcasecmp( $ret, $string ) == 0 );
 
+	if( empty( $ret ) ) $ret = $string;
 	$trans[ $lang->id ][] = array( "string" => stripslashes( $ret ), "done" => $done );
       endforeach;
 

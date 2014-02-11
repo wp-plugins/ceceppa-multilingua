@@ -65,7 +65,7 @@ $small = cml_get_flag_by_lang_id($wpCeceppaML->get_default_lang_id(), "small");
 	  <?php _e( 'Switch always to flag language', 'ceceppaml' ) ?>
 	</label>
 	<label>
-	  <input type="radio" name="go-home" value="1" <?php echo checked( get_option( "cml_force_languge", 2 ), 1, false ) ?>>
+	  <input type="radio" name="force" value="1" <?php echo checked( get_option( "cml_force_languge", 2 ), 1, false ) ?>>
 	  <?php _e( 'Go to homepage', 'ceceppaml' ) ?>
 	</label>
     </dd>

@@ -13,6 +13,10 @@ function cml_fix_database() {
 
   $dbVersion = get_option( "cml_db_version", CECEPPA_DB_VERSION );
 
+  if( $dbVersion < 24 ) {
+    add_action( 'admin_init', 'cml_fix_rebuild_posts_info' );
+  }
+
   if( $dbVersion < 23 ) {
     add_action( 'plugins_loaded', 'cml_fix_insert_post_info' );
   }
@@ -218,12 +222,12 @@ function cml_fix_rebuild_posts_info() {
 
       foreach( $langs as $k => $lang ) {
 	if( $r[ $lang ] > 0 && $r[ $l ] != $r[ $lang ] ) {
-	  $hide[ $key ] = $r[ $lang ];
+	  $hide[ $key ][] = $r[ $lang ];
 	}
       }
     }
   }
-  
+
   //Indexes to hide
   foreach( $_cml_language_columns as $key => $l ) {
     @update_option( "cml_hide_posts_for_lang_" . $key,  $hide[ $key ] );    

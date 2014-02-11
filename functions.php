@@ -184,12 +184,15 @@ function cml_show_flags( $show = "flag", $size = "tiny", $class_name = "cml_flag
   $r = "<ul class=\"$class_name\">";
   
   //Post language...
-  $lang_id = ( ! $sort ) ? -1 : $wpCeceppaML->get_language_id_by_post_id( get_the_ID() );
+  $lang_id = ( ! $sort ) ? -1 : $wpCeceppaML->get_language_id_by_post_id( get_the_ID(), false );
   $items = array();
   foreach($results as $result) :
     $lang = ($show == "flag") ? "" : $result->cml_language;
     $lang = ( $show == "slug" ) ? $result->cml_language_slug : $lang;
 
+    //Force link in according to current $result language
+//     if( $lang_id == 0 ) 
+    $wpCeceppaML->force_current_language( $result->id );
     $link = cml_get_the_link( $result, $linked, $only_existings );
     if( empty( $link) ) continue;
 
@@ -203,6 +206,8 @@ function cml_show_flags( $show = "flag", $size = "tiny", $class_name = "cml_flag
       $items[] = $li;
 
   endforeach;
+
+  $wpCeceppaML->force_current_language( null );
 
   $r .= join( "\n", $items );
   $r .= "</ul>";

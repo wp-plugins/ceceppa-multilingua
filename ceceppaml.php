@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.3.67
+Version: 1.3.68
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $wpdb;
 
-define( 'CECEPPA_DB_VERSION', 23 );
+define( 'CECEPPA_DB_VERSION', 24 );
 
 define('CECEPPA_ML_TABLE', $wpdb->base_prefix . 'ceceppa_ml');
 define('CECEPPA_ML_CATS', $wpdb->base_prefix . 'ceceppa_ml_cats');
@@ -238,7 +238,8 @@ class CeceppaML {
       * Filtro gli articoli per lingua
       * Filter posts by language
       */
-      if( $_cml_settings[ 'cml_option_filter_posts' ] <= 1 ) {
+      if( $_cml_settings[ 'cml_option_filter_posts' ] <= 1 ||
+      $_cml_settings[ 'cml_option_filter_posts' ] <= 3 ) {
         add_action( 'get_pages', array ( &$this, 'filter_get_pages' ), 0, 2 );
         add_action( 'pre_get_posts', array( &$this, 'filter_posts_by_language' ), 0 );
       }
@@ -1370,7 +1371,7 @@ class CeceppaML {
     return $wpdb->get_var($query);
   }
   
-  function get_language_id_by_post_id( $post_id ) {
+  function get_language_id_by_post_id( $post_id, $return_current = true ) {
     global $wpdb;
 
     if( isset( $this->_current_lang_id ) ) {
@@ -3124,12 +3125,16 @@ class CeceppaML {
 
     $langs = cml_get_languages(0);
     $id = get_the_ID();
-    foreach( $langs as $lang ) :
+    foreach( $langs as $lang ) {
+      $this->force_current_language( $lang->id );
+
       $url = cml_get_the_link( $lang );
 
       $title = '<img src="' . cml_get_flag($lang->cml_flag) . '">&nbsp;' . $lang->cml_language;
       $wp_admin_bar->add_menu( array( 'id' => 'cml_lang' . $lang->id, 'title' => $title, 'href' => $url) );
-    endforeach;
+    }
+    
+    $this->force_current_language( null );
   }
   
   function hide_category_translations($wp_query) {
@@ -3446,7 +3451,9 @@ class CeceppaML {
   }
   
   function link_pages_link( $link, $i ) {
-    if( strpos( $link, "href" ) === FALSE ) {
+    global $page;
+
+    if( strpos( $link, "href" ) === FALSE || $page == 1 ) {
       return $link;
     }
     
@@ -3709,6 +3716,13 @@ class CeceppaML {
    */
   function get_clean_request() {
     return $this->_clean_request;
+  }
+  
+  function force_current_language( $id ) {
+    if( ! empty( $id ) ) 
+      $this->_force_category_lang = $id;
+    else
+      unset( $this->_force_category_lang );
   }
 }
 

@@ -54,6 +54,8 @@ class CeceppaMLOptions {
   }
   
   function update_flags_info() {
+    @update_option("cml_force_languge", intval($_POST['force']));
+
     //Flags
     @update_option("cml_option_flags_on_post", intval($_POST['flags-on-posts']));
     @update_option("cml_option_flags_on_page", intval($_POST['flags-on-pages']));
