@@ -210,20 +210,20 @@ function cml_fix_rebuild_posts_info() {
 
   /*
    * hide translations of current post..
+   * "Show all posts but hide their translations"
    */
   $hide = array();
-  $translations = array();
   foreach( $_cml_language_columns as $key => $l ) {
     $langs = $_cml_language_columns;
     unset( $langs[ $key ] );
-
-    foreach( $results as $result ) {
-      $r = ( Array ) $result;
-
-      foreach( $langs as $k => $lang ) {
-	if( $r[ $lang ] > 0 && $r[ $l ] != $r[ $lang ] ) {
-	  $hide[ $key ][] = $r[ $lang ];
-	}
+    
+    foreach( $langs as $lang ) {
+      $query = sprintf( "SELECT %s FROM %s WHERE %s > 0 AND $l > 0",
+			$lang, CECEPPA_ML_RELATIONS, $lang );
+      
+      $results = $wpdb->get_results( $query, ARRAY_N );
+      foreach( $results as $result ) {
+	$hide[ $key ][] = $result[0];
       }
     }
   }

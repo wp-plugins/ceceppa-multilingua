@@ -191,7 +191,7 @@ function cml_migrate_notice( $force = false ) {
     update_option( "cml_migration_done", 3 );
   }
   
-  if( CECEPPA_ML_MIGRATED < 2 ||  $wpdb->num_rows == 0 || $force ) {
+  if( CECEPPA_ML_MIGRATED < 2 || $force ) {
 ?>
     <div class="updated">
       <strong>
