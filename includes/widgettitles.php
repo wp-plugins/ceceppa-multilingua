@@ -1,34 +1,8 @@
 <?php
-/*  Copyright 2013  Alessandro Senese (email : senesealessandro@gmail.com)
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+if ( ! defined( 'ABSPATH' ) ) die("Access denied");
 
 global $wpCeceppaML;
-
-//Non posso richiamare lo script direttamente dal browser :)
-if(!is_object($wpCeceppaML)) die("Access denied");
-
 ?>
-<div class="wrap">
-  <div class="icon32">
-    <img src="<?php echo CECEPPA_PLUGIN_URL ?>images/logo.png" height="32"/>
-  </div>
-  <h2 class="nav-tab-wrapper">
-    <a class="nav-tab nav-tab-active" href="#"><?php _e('Widget titles', 'ceceppaml'); ?></a>
-  </h2>
 <?php
 function cml_widgets_title($wtitles) {
   global $wpdb;
