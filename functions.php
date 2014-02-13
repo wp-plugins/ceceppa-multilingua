@@ -199,7 +199,8 @@ function cml_show_flags( $show = "flag", $size = "tiny", $class_name = "cml_flag
     $img = "<img class=\"$size $image_class\" src='" . cml_get_flag_by_lang_id( $result->id, $size ) . "' title='$result->cml_language' width=\"$width\"/>";
     if( $show == "text" ) $img = "";
 
-    $li = "<li><a href=\"$link\">{$img}{$lang}</a></li>";
+    $class = ( $result->id == cml_get_current_language_id() ) ? "current" : "";
+    $li = "<li class=\"$class\"><a href=\"$link\">{$img}{$lang}</a></li>";
     if( $sort && is_array( $items ) && $result->id == $lang_id )
       array_unshift( $items, $li );
     else
@@ -505,7 +506,7 @@ function cml_get_posts_by_language( $lang_id = null ) {
  * Ritorno il link formattato in base alla pagina corrente
  *
  * @param $result - language information ( i.e. cml_get_language() )
- * @param $linked - must return linked post ( = true ), or homepage ( = false )?
+ * @param $linked - return linked post ( = true ), or homepage ( = false )
  * @param $only_existings - return linked post only if it exists, otherwise return blank link
  * @param $queried - use get_queried_object_id instead of get_the_ID
  */
@@ -549,7 +550,7 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
       if( ! empty( $linked_id ) ) $link = get_permalink( $linked_id );
     endif;
 
-    if( is_archive() && ! is_category() ) :
+    if( is_archive() && ! is_category() && ! is_post_type_archive() ) :
       global $wp;
 
       $link = home_url( $wp->request ) . "/";
