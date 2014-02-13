@@ -29,14 +29,19 @@
 
     //'valore', 'textdomain'
     $m = end( $matches );
+    $domain = 0;
     foreach( $m as $line ) :
-      preg_match_all( '/\'(.+?)\'/', $line, $string );
-      list( $text, $domain ) = end( $string );
+      preg_match_all( '/^[\'\"](.*)[\'\"][,](.*)[\'\"]$/', trim( $line ), $string );
 
-      //Rimuovo gli apici iniziali e finali :)
-      if( ! empty( $text ) ) :
-	$domains[ $domain ][] = $text;
-      endif;
+      if( count( $string ) > 1 ) {
+	$text = end( $string[ 1 ] );
+	$domain = end( $string[ 2 ] );
+
+	//Rimuovo gli apici iniziali e finali :)
+	if( ! empty( $text ) ) :
+	  $domains[ $domain ][] = $text;
+	endif;
+      }
     endforeach; //$m as $line
   endforeach;
 
@@ -137,6 +142,7 @@
 	if( strcasecmp( $ret, $string ) == 0 ) $ret = __( $string );  //Cerco anche tra le traduzioni di wordpress
 	$done = !( strcasecmp( $ret, $string ) == 0 );
 
+	if( empty( $ret ) ) $ret = $string;
 	$trans[ $lang->id ][] = array( "string" => stripslashes( $ret ), "done" => $done );
       endforeach;
 
@@ -145,9 +151,11 @@
   
   $i = 0;
   $total = count( $langs );
+
   foreach( $keys as $d ) :
 
-    foreach( $domains[ $d ] as $s ) :
+    $strings = $domains[ $d ];
+    foreach( $strings as $s ) :
       $originals[] = $s;
 
       $alternate = ( empty( $alternate ) ) ? "alternate" : "";
