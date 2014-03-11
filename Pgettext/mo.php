@@ -5,12 +5,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Pgettext;
-
 /**
  * Class for reading from and writing to MO files and strings in MO format.
  */
-class Mo
+class CMo
 {
     /**
      * Magic number indicating mo files.
@@ -48,7 +46,7 @@ class Mo
         if (!file_exists($file) || is_writable($file)) {
             file_put_contents($file, self::toString($set));
         } else {
-            throw new \Exception("Could not write output to file.");
+            throw new Exception("Could not write output to file.");
         }
     }
 
@@ -71,7 +69,9 @@ class Mo
      */
     public static function toString(Stringset $set, $add_hash_table = true)
     {
+      if (version_compare(phpversion(), '5.3.0', '>') ) {
         $set->sort();
+      }
 
         if ($add_hash_table) {
             $hash_table_size = self::nextPrime((int)(($set->size() * 4) / 3));
@@ -147,13 +147,13 @@ class Mo
         list(,$magic) = unpack('L', self::mergechars($data, $pos, 4));
 
         if ($magic !== self::MAGIC_NUMBER) {
-            throw new \Exception("This is not a MO string.");
+            throw new Exception("This is not a MO string.");
         }
 
         list(,$version) = unpack('L', self::mergechars($data, $pos, 4));
 
         if ($version !== self::REVISION) {
-            throw new \Exception("This file format revision is not supported.");
+            throw new Exception("This file format revision is not supported.");
         }
 
         list(,$nstrings) = unpack('L', self::mergechars($data, $pos, 4));
@@ -170,7 +170,7 @@ class Mo
             $value = self::mergechars($data, $translated['offset'], $translated['length'] + 1, false);
 
             if ($id[strlen($id) - 1] !== self::NUL || $value[strlen($value) - 1] !== self::NUL) {
-                throw new \Exception("String wasn't NUL-terminated");
+                throw new Exception("String wasn't NUL-terminated");
             }
 
             $result = array();
