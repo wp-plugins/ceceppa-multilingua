@@ -5,8 +5,6 @@
  * file that was distributed with this source code.
  */
 
-namespace Pgettext;
-
 include_once 'po.php';
 include_once 'mo.php';
 include_once 'Stringset.php';
@@ -29,7 +27,7 @@ class Pgettext
         if ($mo === null) {
             $mo = substr($po, 0, -3) . '.mo';
         }
-        Mo::toFile($stringset, $mo);
+        CMo::toFile($stringset, $mo);
     }
 
     /**
@@ -41,7 +39,7 @@ class Pgettext
      */
     public static function msgunfmt($mo, $po = null)
     {
-        $stringset = Mo::fromFile($mo);
+        $stringset = CMo::fromFile($mo);
         if ($po === null) {
             print Po::toString($stringset);
         } else {

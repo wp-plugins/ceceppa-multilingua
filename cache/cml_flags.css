@@ -1,0 +1,16 @@
+.cml-flag-tiny-it:before {
+    content: url(../flags/tiny/it_IT.png);
+    width: 16px;
+    height: 11px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+.cml-flag-small-it:before {
+    content: url(../flags/small/it_IT.png);
+    width: 32px;
+    height: 33px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 5px;
+}
