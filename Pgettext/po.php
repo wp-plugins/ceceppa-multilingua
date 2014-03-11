@@ -5,8 +5,6 @@
  * file that was distributed with this source code.
  */
 
-namespace Pgettext;
-
 /**
  * Class for handling po-type input files and strings.
  */
@@ -157,7 +155,7 @@ class Po
                 $entry['flags'] = array_map('trim', explode(',', substr($line, 2)));
             } else if ($line[0] !== '#') {
                 // non-comment
-                list($key, $rest) = explode(' ', $line, 2);
+                @list($key, $rest) = @explode(' ', $line, 2);
                 switch ($key) {
                     case 'msgid':
                     case 'msgid_plural':
@@ -192,7 +190,7 @@ class Po
     private static function parseString($str)
     {
         if ($str[0] !== '"' || $str[strlen($str) - 1] !== '"') {
-            throw new Exception("Invalid string delimiters");
+          throw new Exception( "Invalid string delimiters: " . $str );
         }
 
         $result = '';

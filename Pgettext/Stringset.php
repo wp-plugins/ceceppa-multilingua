@@ -5,8 +5,6 @@
  * file that was distributed with this source code.
  */
 
-namespace Pgettext;
-
 /**
  * Stringset is a simple class for storing a gettext catalog.
  */
@@ -110,5 +108,19 @@ class Stringset
     public function item($index)
     {
         return $this->set[$index];
+    }
+    
+    public function search( $string ) {
+      foreach( $this->set as $item ) {
+        //if( addslashes( $item[ 'id' ] ) == 'You can override flags style by creating new file in: <i>%s</i> named: <b>\"ceceppaml.css\"</b>' ) {
+        //print_r( $item );
+        //  die();
+        //}
+        if( $item[ 'id' ] == $string ) {
+          return $item[ 'strings' ][0];
+        }
+      }
+      
+      return $string;
     }
 }

@@ -5,12 +5,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Pgettext;
-
 /**
  * Class for reading from and writing to MO files and strings in MO format.
  */
-class Mo
+class CMo
 {
     /**
      * Magic number indicating mo files.
