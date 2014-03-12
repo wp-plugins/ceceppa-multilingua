@@ -1,0 +1,189 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: cml_translations\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-08-20 13:57+0100\n"
+"PO-Revision-Date: 2013-08-20 14:01+0100\n"
+"Last-Translator: Alessandro Senese <senesealessandro@gmail.com>\n"
+"Language-Team: \n"
+"Language: en_GB\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-KeywordsList: _;gettext;gettext_noop;__;_e\n"
+"X-Poedit-Basepath: .\n"
+"X-Generator: CeceppaMultilingua 1.4\n"
+"X-Poedit-SearchPath-0: ..\n"
+"X-Poedit-SearchPath-1: ../inc\n"
+
+msgid "_aioseo_aiosp_404_title_format"
+msgstr "Nothing found for %request_words%"
+
+msgid "_aioseo_aiosp_archive_title_format"
+msgstr "%date% | %blog_title%"
+
+msgid "_aioseo_aiosp_category_title_format"
+msgstr "%category_title% | %blog_title%"
+
+msgid "_aioseo_aiosp_description_format"
+msgstr "%description%"
+
+msgid "_aioseo_aiosp_home_description"
+msgstr "Benvenuto nel diario "
+
+msgid "_aioseo_aiosp_home_keywords"
+msgstr "wordpress, programmazione, tutorial, plugin, temi, libri, musica"
+
+msgid "_aioseo_aiosp_home_title"
+msgstr "diario di Ceceppa."
+
+msgid "_aioseo_aiosp_page_title_format"
+msgstr "%page_title% | %blog_title%"
+
+msgid "_aioseo_aiosp_paged_format"
+msgstr " - Part %page%"
+
+msgid "_aioseo_aiosp_post_title_format"
+msgstr "%post_title% | %blog_title%"
+
+msgid "_aioseo_aiosp_search_title_format"
+msgstr "%search% | %blog_title%"
+
+msgid "_aioseo_aiosp_tag_title_format"
+msgstr "%tag% | %blog_title%"
+
+msgid "_all-in-one-seo-pack_aiosp_404_title_format"
+msgstr "Nothing found for %request_words%"
+
+msgid "_all-in-one-seo-pack_aiosp_archive_title_format"
+msgstr "%date% | %blog_title%"
+
+msgid "_all-in-one-seo-pack_aiosp_category_title_format"
+msgstr "%category_title% | %blog_title%"
+
+msgid "_all-in-one-seo-pack_aiosp_description_format"
+msgstr "%description%"
+
+msgid "_all-in-one-seo-pack_aiosp_home_description"
+msgstr "Benvenuto nel "
+
+msgid "_all-in-one-seo-pack_aiosp_home_keywords"
+msgstr "wordpress, programmazione, tutorial, plugin, temi, libri, musica"
+
+msgid "_all-in-one-seo-pack_aiosp_home_title"
+msgstr "ppa"
+
+msgid "_all-in-one-seo-pack_aiosp_page_title_format"
+msgstr "%page_title% | %blog_title%"
+
+msgid "_all-in-one-seo-pack_aiosp_paged_format"
+msgstr " - Part %page%"
+
+msgid "_all-in-one-seo-pack_aiosp_post_title_format"
+msgstr "%post_title% | %blog_title%"
+
+msgid "_all-in-one-seo-pack_aiosp_search_title_format"
+msgstr "%search% | %blog_title%"
+
+msgid "_all-in-one-seo-pack_aiosp_tag_title_format"
+msgstr "%tag% | %blog_title%"
+
+msgid "Documentazione"
+msgstr "Documentazione"
+
+msgid "Punti di vista"
+msgstr "Points of view"
+
+msgid "Ultime ricette"
+msgstr "Ultime ricette"
+
+msgid "Ultime pillole"
+msgstr "Ultime pillole"
+
+msgid "Selettore"
+msgstr "Selector"
+
+msgid "Progetti"
+msgstr "Progetti"
+
+msgid "Discussioni"
+msgstr "Discussioni"
+
+msgid "Archivio"
+msgstr "Archivio"
+
+msgid "Condimenti"
+msgstr "Condimenti"
+
+msgid "Alessandro Senese"
+msgstr "Alessandro Senese"
+
+msgid "activity"
+msgstr "attivita"
+
+msgid "nuova"
+msgstr "new"
+
+msgid "_notice_page"
+msgstr ""
+
+msgid "_notice_post"
+msgstr ""
+
+msgid "_hueman_blog-date_format"
+msgstr "kkk"
+
+msgid "_hueman_footer-copyright"
+msgstr "kkk"
+
+msgid "_hueman_general-breadcrumb-home_name"
+msgstr "kkk"
+
+msgid "_hueman_general-home_slideshow-slider"
+msgstr "kkk"
+
+msgid "_hueman_general-ios_homescreen_popup-message"
+msgstr "kkk"
+
+msgid "_hueman_maintenance-message"
+msgstr "kkk"
+
+msgid "_hueman_maintenance-title"
+msgstr "kkk"
+
+msgid "_hueman_portfolio-date_format"
+msgstr "kkk"
+
+msgid "_yoast_rssafter"
+msgstr "The post %%POSTLINK%% appeared first on %%BLOGLINK%%."
+
+msgid "_yoast_title-404"
+msgstr "Page Not Found %%sep%% %%sitename%%"
+
+msgid "_yoast_title-archive"
+msgstr "%%date%% %%page%% %%sep%% %%sitename%%"
+
+msgid "_yoast_title-attachment"
+msgstr "%%title%% %%page%% %%sep%% %%sitename%%"
+
+msgid "_yoast_title-author"
+msgstr "%%name%%, Author at %%sitename%% %%page%% "
+
+msgid "_yoast_title-category"
+msgstr "%%term_title%% Archives %%page%% %%sep%% %%sitename%%"
+
+msgid "_yoast_title-home"
+msgstr "%%sitename%% %%page%% %%sep%% %%sitedesc%%"
+
+msgid "_yoast_title-page"
+msgstr "%%title%% %%page%% %%sep%% %%sitename%%"
+
+msgid "_yoast_title-post"
+msgstr "%%title%% %%page%% %%sep%% %%sitename%%"
+
+msgid "_yoast_title-post_tag"
+msgstr "%%term_title%% Archives %%page%% %%sep%% %%sitename%%"
+
+msgid "_yoast_title-search"
+msgstr "You searched for %%searchphrase%% %%page%% %%sep%% %%sitename%%"
+

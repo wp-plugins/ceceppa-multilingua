@@ -5,8 +5,6 @@
  * file that was distributed with this source code.
  */
 
-namespace Pgettext;
-
 /**
  * Stringset is a simple class for storing a gettext catalog.
  */
@@ -69,13 +67,31 @@ class Stringset
         );
     }
 
+    private function usortfn( $first, $second ) {
+            $ids = strcmp($first['id'], $second['id']);
+            if ($ids === 0) {
+                if ($first['context'] === null && $second['context'] === null) {
+                    return 0;
+                } else if ($first['context'] === null) {
+                    return -1;
+                } else if ($second['context'] === null) {
+                    return 1;
+                } else {
+                    return strcmp($first['context'], $second['context']);
+                }
+            } else {
+                return $ids;
+            }
+    }
+
     /**
      * Sort the entries in lexical order.
      * @return void
      */
     public function sort()
     {
-        usort($this->set, function ($first, $second) {
+      usort( $this->set, array( & $this, 'usortfn' ) );
+/*        usort($this->set, function ($first, $second) {
             $ids = strcmp($first['id'], $second['id']);
             if ($ids === 0) {
                 if ($first['context'] === null && $second['context'] === null) {
@@ -91,6 +107,7 @@ class Stringset
                 return $ids;
             }
         });
+*/
     }
 
     /**
@@ -110,5 +127,19 @@ class Stringset
     public function item($index)
     {
         return $this->set[$index];
+    }
+    
+    public function search( $string ) {
+      foreach( $this->set as $item ) {
+        //if( addslashes( $item[ 'id' ] ) == 'You can override flags style by creating new file in: <i>%s</i> named: <b>\"ceceppaml.css\"</b>' ) {
+        //print_r( $item );
+        //  die();
+        //}
+        if( $item[ 'id' ] == $string ) {
+          return $item[ 'strings' ][0];
+        }
+      }
+      
+      return $string;
     }
 }
