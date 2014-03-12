@@ -48,7 +48,9 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 
 = 3rd part compatible plugins =
 - Wordpress SEO by YOAST
+- All in one SEO pack
 - Google XML Sitemaps
+
 
 = Let's start =
 Ceceppa Multilingua supports infinite language, which can be easily added/modified/deleted via the comfortable Configuration Page.
