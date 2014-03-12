@@ -2,8 +2,8 @@
 Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate, international, .mo file, .po file, localization, widget, post
 Requires at least: 3.4.1
-Tested up to: 3.8
-Stable tag: 1.3.71
+Tested up to: 3.9
+Stable tag: 1.4.2
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG
@@ -20,23 +20,25 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 - Separated posts and pages for each languages, so you can use different SEO and url for each languages.
 - Translate your theme ( Plugin let you translate strings and will generate the .mo file for wordpress )
 - URLs pretty and SEO-friendly. ?lang=en, /en/foo/ or en.yoursite.com
-- Different menu for each language.
-- Translate widget's title.
+- Translate widgets title.
+- Filter widgets by language
 - Translate Site Title / Tagline
 - One-Click-Switching between the languages
 - One-Click-Switching between the translations
 - Category link translation
+- Different menu for each language.
 - Add flags to menu
-- Group/Ungroup comments for each post's languages.
-- Show notice when the post/page/category that user is viewing is available, based on the information provided by the browser, in their its language
-- Redirects the browser depending on the user's language. Append the suffix &lang= to the home url-
+- Customize "Navigation label" for each language
+- Group/Ungroup comments for each post languages.
+- Show notice when the post/page that user is viewing is available, based on the information provided by the browser, in their its language
 - Least Read Posts, Most Commented, Most Read Posts can show only the posts in user selected language
-- Filter search in accordingly to current language
 - Change wordpress locale according to current language, useful for localized themes
 - Show the list flag of available languages on top or bottom of page/post
-- Hide translations of posts of the current language
-- Show only posts of the current language
 - Plugin works also with custom post types :)
+- Redirects the browser depending on the user's language.
+- Different post filter method
+- Filter search in accordingly to current language
+- Compatible with wpml-config.xml ( experimental )
 
 = Widgets =
 
@@ -44,11 +46,16 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 - "CML: Recent Posts" - The most recent posts on your site
 - "CML: Text" - You can write arbitrary text or HTML separately for each language
 
+= 3rd part compatible plugins =
+- Wordpress SEO by YOAST
+- Google XML Sitemaps
+
+= Let's start =
 Ceceppa Multilingua supports infinite language, which can be easily added/modified/deleted via the comfortable Configuration Page.
 All you need to do is activate the plugin, configure categories and start writing the content!
 
 = About =
-For more Information visit the [Plugin Homepage](http://www.alessandrosenese.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/)
+For more Information visit the [Plugin Homepage](http://www.alessandrosenese.eu/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/)
 
 = Demo =
 [Plugin demo](http://www.youtube.com/watch?v=fAPIQonud-E).
@@ -57,12 +64,10 @@ For more Information visit the [Plugin Homepage](http://www.alessandrosenese.eu/
 Flags directory are downloaded from [Flags](http://blog.worldofemotions.com/danilka/)
 
 = Icons =
-Some icons from [Icons](http://www.iconfinder.com/)
-Directions icon from [Deviantart](http://emey87.deviantart.com/)
+Some icons from [Icons](http://www.iconmonstr.com/)
 
 = jQuery plugins =
 Tooltip plugin for Jquery [Tipsy](http://onehackoranother.com/projects/jquery/tipsy/)
-jQuery image dropdown [DD](http://www.marghoobsuleman.com/jquery-image-dropdown)
 
 = Php gettext =
 Php-gettext by Danilo Shegan [php-gettext] https://launchpad.net/php-gettext/
@@ -89,7 +94,7 @@ In "Ceceppa Multilingua" -> "Settings" set the option "Detect browser language:"
 = Where can I find full shortcode list =
 After installing the plugin you can find full shortcode list in "Ceceppa Multilingua" -> "Shortcode" page.
 
-= Can I translate also the Widget Text =
+= Can I also translate the Widget Text =
 
 Yes, you can translate text in the widget, page or post using the shortcode cml_text.
 The syntax is:
@@ -159,13 +164,36 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/it/pillole
 1. Language configuration
 2. List of all posts with their translations
 3. Translate widget's title
-4. Plugin configuration
-5. Link to the article
-6. Menus configuration
-7. Wordpress in your language
+4. Filter widget by language
+5. Plugin configuration
+6. Link posts
+7. Menus configuration
 8. Translate your theme
 
 == Changelog ==
+
+= 1.4.2 =
+* Added missing file "php-compatibility.php"
+
+= 1.4.1 =
+* Fixed compatibility with php <= 5.3.0
+
+= 1.4.0 =
+* New interface
+* Added help in Settings and Show flags pages
+* Now you can translate widget title from widget container itself
+* Now you can filter widgets by language
+* In menu, Now you can assign different "Navigation label" and "Title attribute" for each languages
+* In menu, for Link item, you can set different url for each language
+* Added uninstall tab in "Settings" page to uninstall all plugin data
+* Added new flags style "Combo"
+* Now you can group comments also for pages
+* You can translate the plugin in your language
+* The plugin will automatically set categories or page parent from original post/page.
+* Added compatibility with "Google XML Sitemap"
+* Added compatibility with "Wordpress SEO by YOAST"
+* Added compatibility with "All in One SEO pack"
+* Added experimental support to "wpml-config.xml" ( for plugins and themes )
 
 = 1.3.68 =
 * Fixed "Filter posts"
