@@ -57,10 +57,13 @@ Ceceppa Multilingua supports infinite language, which can be easily added/modifi
 All you need to do is activate the plugin, configure categories and start writing the content!
 
 = About =
-For more Information visit the [Plugin Homepage](http://www.alessandrosenese.eu/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/)
+For more Information visit the [Plugin Homepage](http://www.alessandrosenese.eu/myworks/ceceppa-multilingua/)
+[Setting up a WordPress multilingual site with Ceceppa Multilingua](http://www.alessandrosenese.eu/en/ceceppa-multilingua/documentation)
+[Contribute](http://www.alessandrosenese.eu/en/ceceppa-multilingua/contribute)
+[Developers](http://www.alessandrosenese.eu/en/ceceppa-multilingua/developers)
 
 = Demo =
-[Plugin demo](http://www.youtube.com/watch?v=fAPIQonud-E).
+(old version)[Plugin demo](http://www.youtube.com/watch?v=fAPIQonud-E).
 
 = Flags =
 Flags directory are downloaded from [Flags](http://blog.worldofemotions.com/danilka/)
