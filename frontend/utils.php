@@ -19,10 +19,10 @@ function cml_is_homepage( $url = null ) {
   //Controllo se è stata impostata una pagina "statica" se l'id di questa è = a quello della statica
   if( cml_use_static_page() ) {
     global $wp_query;
-    $static_id = get_option( "page_for_posts" ) + get_option( "page_on_front" );
+    $static_id = array( get_option( "page_for_posts" ), get_option( "page_on_front" ) );
 
     $lang_id = CMLLanguage::get_current_id();
-    
+
     /*
      * on some site get_queried_object_id isn't available on start
      * and I get:
@@ -48,18 +48,17 @@ function cml_is_homepage( $url = null ) {
           $GLOBALS[ '_cml_get_queried_object_id' ] = $the_id;
         }
       }
-      
     } else {
       $the_id = $GLOBALS[ '_cml_get_queried_object_id' ];
     }
 
     if( ! empty( $the_id ) ) {
-      if( $the_id == $static_id ) return true;	//Yes, it is :)
+      if( in_array( $the_id, $static_id ) ) return true;	//Yes, it is :)
 
       //Is a translation of front page?
       $linked = CMLPost::get_translation( CMLLanguage::get_current_id(), $the_id  );
-      if( !empty($linked) ) {
-        return $linked == $static_id;
+      if( ! empty( $linked ) ) {
+        return in_array( $linked, $static_id );
       }
     }
   }
@@ -189,7 +188,9 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
         $args[ 's' ] = esc_attr( $_GET[ 's' ] );
       }
 
-      $args[ 'lang' ] = $result->cml_language_slug;
+      if( CMLUtils::get_url_mode() <= PRE_LANG ) {
+        $args[ 'lang' ] = $result->cml_language_slug;
+      }
 
       $link = add_query_arg( $args, trailingslashit( $link ) );
     }
@@ -241,6 +242,14 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
 
       if( ! empty( $linked_id ) ) {
         $link = get_permalink( $linked_id );
+
+        if( CMLUtils::_get( '_real_language' ) != CMLLanguage::get_current_id()
+            && $linked_id == $the_id ) {
+
+          if( CMLUtils::get_url_mode() == PRE_PATH ) {
+            $link = $wpCeceppaML->convert_url( $link, $result->cml_language_slug );
+          }
+        }
       }
     }
 
@@ -365,7 +374,7 @@ function cml_get_browser_lang() {
 
   global $wpdb;
 
-  $browser_langs = explode( ";", $_SERVER['HTTP_ACCEPT_LANGUAGE'] );
+  $browser_langs = @explode( ";", $_SERVER['HTTP_ACCEPT_LANGUAGE'] );
   $lang = null;
 
   //Se la lingua del browser coincide con una di quella attuale della pagina, ignoro tutto

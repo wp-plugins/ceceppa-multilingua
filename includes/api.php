@@ -865,7 +865,7 @@ class CMLPost {
     
       $_cml_language_columns = & $GLOBALS[ '_cml_language_columns' ];
       $_conv = & $GLOBALS[ '_cml_language_keys' ];
-    
+
       $query = "SELECT ";
       foreach( $_conv as $key => $label ) {
         $select[] = "$key as $label";

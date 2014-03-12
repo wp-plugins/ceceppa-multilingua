@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.4.2
+Version: 1.4.3
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.ceceppa.eu/chi-sono
 License: GPL3
@@ -144,7 +144,7 @@ require_once( CML_PLUGIN_INCLUDES_PATH . "functions.php" );
 require_once CML_PLUGIN_INCLUDES_PATH . "widgets.php";
 
 //debug
-//require_once( "debug.php" );
+// require_once( "debug.php" );
 
 //3rd party compatibility
 require_once( CML_PLUGIN_INCLUDES_PATH . 'compatibility.php' );
@@ -192,9 +192,10 @@ class CeceppaML {
      */
     add_filter( 'pre_post_link', array( & $this, 'pre_post_link' ), 0, 3 );
     add_filter( 'post_link', array( & $this, 'translate_post_link' ), 0, 3 );
+    add_filter( 'post_type_link', array( & $this, 'translate_post_link' ), 0, 3 );
     
     if( $this->_url_mode > PRE_LANG ) {
-      add_filter( 'post_type_link', array( & $this, 'translate_page_link' ), 0, 3 );
+//       add_filter( 'post_type_link', array( & $this, 'translate_page_link' ), 0, 3 );
       add_filter( 'page_link', array ( & $this, 'translate_page_link' ), 0, 3 );
     }
 
@@ -545,40 +546,9 @@ EOT;
     }
     
     if( $this->_url_mode == PRE_LANG ) {
-      if( ! empty( $path ) && "?" == $path[ 0 ] ) {
-        $path = substr( $path, 1 );
-      }
-
-      $home = CMLUtils::home_url();
-      if( "/" === $path ) {
-        $path = "";
-      }
-
-      if( ! empty( $path ) ) {
-        if( "/" != $path[ 0 ] ) {
-          $home = trailingslashit( $home );
-        }
-        
-        $path = trailingslashit( $path );
-      } else {
-        $home = trailingslashit( $home );
-      }
-
-      /*
-       * for ?lang method I have no add language slug to page link or I'll
-       * get wrong url like:
-       *
-       * www.example.com/demo/?lang=en/2/
-       */
-      if( ! isset( $this->_numpage_slug ) ) {
-        $link = add_query_arg( array(
-                                    "lang" => untrailingslashit( $slug ),
-                                    ), $home . $path );
-      } else {
-        $link = $home . $path;
-      }
-      
-      return $link;
+      return add_query_arg( array( 
+                            'lang' => $slug,
+                            ), $url );
     }
     
     if( $this->_url_mode == PRE_DOMAIN ) {

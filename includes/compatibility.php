@@ -262,7 +262,7 @@ function cml_yoast_translate_options() {
   $names = get_option( "cml_translated_fields_yoast", array() );
   if( empty( $names ) ) return;
 
-  $name = explode( ",", $names );
+  $names = explode( ",", $names );
   foreach( get_wpseo_options() as $key => $opt ) {
     if( in_array( $key, $names ) ) {
       $value = CMLTranslations::get( CMLLanguage::get_current_id(),
@@ -325,7 +325,6 @@ function cml_aioseo_translate_options() {
   if( empty( $names ) ) return;
 
   $names = explode( ",", $names );
-
   foreach( $aioseop_options as $key => $opt ) {
     if( in_array( $key, $names ) ) {
       $value = CMLTranslations::get( CMLLanguage::get_current_id(),
