@@ -3,7 +3,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate, international, .mo file, .po file, localization, widget, post
 Requires at least: 3.4.1
 Tested up to: 3.9
-Stable tag: 1.4.3
+Stable tag: 1.4.4
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG
@@ -12,7 +12,7 @@ Adds userfriendly multilingual content management and translation support into W
 
 == Description ==
 
-I create Ceceppa Multilingua to let Wordpress have an easy to use interface for managing a fully multilingual web site.
+I created Ceceppa Multilingua to let Wordpress have an easy to use interface for managing a fully multilingual web site.
 With "Ceceppa Multilingua" you can write your posts and pages in multiple language. Here are some features:
 
 = Features =
@@ -176,6 +176,13 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/it/pillole
 8. Translate your theme
 
 == Changelog ==
+
+= 1.4.4 =
+* Fixed issue when category slug is different from name
+* Fixed custom menu url item for non default language
+* Fixed "Force language items"
+* Fixed post relations with more 2 languages
+* Fixed "remove extra -##" for all url mode 
 
 = 1.4.3 =
 * Fixed url mode "?lang"

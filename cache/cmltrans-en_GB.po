@@ -118,12 +118,6 @@ msgstr "Condimenti"
 msgid "Alessandro Senese"
 msgstr "Alessandro Senese"
 
-msgid "activity"
-msgstr "attivita"
-
-msgid "nuova"
-msgstr "new"
-
 msgid "_notice_page"
 msgstr ""
 
@@ -186,4 +180,13 @@ msgstr "%%term_title%% Archives %%page%% %%sep%% %%sitename%%"
 
 msgid "_yoast_title-search"
 msgstr "You searched for %%searchphrase%% %%page%% %%sep%% %%sitename%%"
+
+msgid "activity"
+msgstr "attivita"
+
+msgid "nuova"
+msgstr "new"
+
+msgid "ricette"
+msgstr "recepies"
 
