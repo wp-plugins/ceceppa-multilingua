@@ -26,14 +26,14 @@ Class CMLParser {
    * Parse php files in source path for search translable strings
    *
    * @param $name - title of theme/plugin
-   * @param $default_lang - default language id/slug
+   * @param $languages - array containing languages id in which translate current theme
    * @param $src_path - folder to search
    * @param $dest_path - folder where write generated .mo/.po file
    * @param $show_generated - show generated files
    */
-  function __construct( $name, $default_lang, $src_path, $dest_path, $domain = "", $show_generated = true, $form_name = "theme" ) {
+  function __construct( $name, $src_path, $dest_path, $domain = "", $show_generated = true, $form_name = "theme" ) {
     $this->_name = $name;
-    $this->_default_lang = is_numeric( $default_lang ) ? $default_lang : CMLLanguage::get_id_by_slug( $default_lang );
+    $this->_translate_in = get_option( 'cml_translate_' . $name . "_in", array() );
     $this->_src_path = trailingslashit( $src_path );
     $this->_dest_path = trailingslashit( $dest_path );
     $this->_show_generated = $show_generated;
@@ -70,28 +70,54 @@ Class CMLParser {
       $content = file_get_contents( $filename );
       
       //Scan for all l10n functions
-      preg_match_all ( '/(_e|__|_n|_x|_ex|_nx|esc_attr__|esc_attr_e|esc_attr_x|esc_html__|esc_html_e|esc_html_x)\((.*?)\)/', $content, $matches );
+      // preg_match_all ( '/(_e|__|_n|_x|_ex|_nx|esc_attr__|esc_attr_e|esc_attr_x|esc_html__|esc_html_e|esc_html_x)\((.*?)\)/', $content, $matches );
+      preg_match_all ( '/(_e|__|_n|_x|_ex|_nx|esc_attr__|esc_attr_e|esc_attr_x|esc_html__|esc_html_e|esc_html_x)(\(.*\))/', $content, $matches );
 
       //Preg_match return 'string', 'textdomain'
       $m = end( $matches );
       $domain = 0;
       foreach( $m as $line ) {
-        preg_match_all( '/^[\'\"](.*)[\'\"][,](.*)[\'\"]$/', trim( $line ), $string );
-    
-        if( count( $string ) > 1 ) {
-          $text = end( $string[ 1 ] );
-          $domain = end( $string[ 2 ] );
-          $domain = "x";
+        $this->extract_strings( $line );
+      }
+    }
+  }
 
-          //Add string to translable ones
-          if( ! empty( $text ) && ! @in_array( $text, $domains[ $domain ] ) ) {
-            $domains[ $domain ][] = $text;
-          }
+  private function extract_strings( $line ) {
+    if( preg_match_all ( '/(_e|__|_n|_x|_ex|_nx|esc_attr__|esc_attr_e|esc_attr_x|esc_html__|esc_html_e|esc_html_x)(\(.*\))/', $line, $out ) ) {
+      $this->extract_strings( end( $out )[0] );
+    }
+
+    /*
+     * To grab only text in __( ) I count brackets occourrencies
+     * each ( increase $brackets, while each ) decrease.
+     * When reach 0 means that extra text isn't rubbish
+     */
+    $brackets = 0;
+    for( $i = 0; $i < strlen( $line ); $i++ ) {
+      if( "(" == $line[ $i ] ) $brackets++;
+      if( ")" == $line[ $i ] ) {
+        $brackets--;
+
+        //Remove extra text after last function bracket
+        if( 0 == $brackets ) {
+          $line = substr( $line, 1, $i - 1 );
         }
-      }; //$m as $line
-    } //endforeach;
-    
-    $this->_domains = $domains;
+      }
+    }
+
+    //Divide "text" from "domain"
+    preg_match_all( '/^[\'\"](.*)[\'\"][,](.*)[\'\"]$/', trim( $line ), $string );
+
+    if( count( $string ) > 1 ) {
+      $text = end( $string[ 1 ] );
+      $domain = end( $string[ 2 ] );
+      $domain = "x";
+
+      //Add string to translable ones
+      if( ! empty( $text ) && ! @in_array( $text, $this->_domains[ $domain ] ) ) {
+        $this->_domains[ $domain ][] = $text;
+      }
+    }
   }
 
   /*
@@ -140,12 +166,14 @@ EOT;
 
   private function print_table() {
     //All languages
-    $langs = CMLLanguage::get_all();
-    unset( $langs[ $this->_default_lang ] );
+    $langs = array();
+    foreach( $this->_translate_in as $id ) {
+      $langs[$id] = CMLLanguage::get_by_id( $id );
+    }
 
     //Header
     $this->print_table_header( $langs );
-    
+
     //Body
     $this->print_table_body( $langs );
   }
@@ -158,8 +186,9 @@ EOT;
     $keys = array_filter( array_keys( $this->_domains ) );
 
     $available = __( 'Available languages: ', 'ceceppaml' );
-    $main = __( 'Main language:', 'ceceppaml' );
-    
+    $main = __( 'Translate in:', 'ceceppaml' );
+    $tipsy = __( 'Choose in which languages you want to translate: ', 'ceceppaml' ) . $this->_name;
+
     $self = $_SERVER['PHP_SELF'];
     $page = $_GET['page'];
     $tab = isset( $_GET[ 'tab' ] ) ? intval( $_GET[ 'tab' ] ) : 0;
@@ -183,10 +212,14 @@ echo <<< EOT
     $nonce
 
     <div class="cml-tablenav">
-      <div class="alignleft">
+      <div class="alignleft tipsy-s" title="$tipsy">
         $main&nbsp;&nbsp;
 EOT;
-      cml_dropdown_langs( "shadow", $this->_default_lang, false, true, __( 'None', 'ceceppaml' ), "", false );
+$in = $this->_translate_in;
+  foreach( CMLLanguage::get_all() as $lang ) {
+    echo cml_utils_create_checkbox( $lang->cml_language, $lang->id, 
+                                "cml-lang[$lang->id]", null, 1, in_array( $lang->id, $in ) );
+  }
 ?>
       </div>
     </div>
@@ -203,6 +236,14 @@ EOT;
     </h2>
     <input type="hidden" name="textdomain" value="<?php echo $keys[ 0 ] ?>" />
 
+    <?php
+      if( empty( $this->_translate_in ) || ! is_array( $this->_translate_in ) ) {
+        _e( 'You have to choose in which language you want to translate: ', 'ceceppaml' );
+        echo $this->_name;
+        echo '<input type="hidden" name="nolang" value="1" />';
+        return;
+      }
+    ?>
     <div class="search">
       <label  style="float:right">
         <?php _e( 'Search', 'ceceppaml' ) ?>:
@@ -213,11 +254,7 @@ EOT;
       <thead>
         <tr>
           <th><?php _e( 'Text', 'ceceppaml' ) ?></th>
-          <?php
-            foreach( $langs as $lang ) {
-                echo "<th class=\"flag\">" . CMLLanguage::get_flag_img( $lang->id ) . "</th>";
-            }
-          ?>
+          <th><?php _e( 'Translation', 'ceceppaml' ) ?></th>
         </tr>
       </thead>
       <tbody>
@@ -226,6 +263,12 @@ EOT;
   
   private function print_table_body( $langs ) {
     $alternate = "";
+
+    if( empty( $this->_translate_in ) || ! is_array( $this->_translate_in ) ) {
+      echo '</form>';
+
+      return;
+    }
 
     //All domains
     $keys = array_filter( array_keys( $this->_domains ) );
@@ -273,7 +316,7 @@ EOT;
 
         //Search the translation for each language
         foreach( $strings as $string ) {
-          $ret = $string;
+          $ret = "";
 
           //try to get from $mo
           $s = stripslashes( $string );
@@ -285,11 +328,18 @@ EOT;
             $ret = $po->search( $s );
           }
 
-          if( strcasecmp( stripslashes( $ret ), stripslashes( $string ) ) == 0 ) $ret = __( $string );  //Cerco anche tra le traduzioni di wordpress
-          $done = !( strcasecmp( stripslashes( $ret ), stripslashes( $string ) ) == 0 );
+          if( empty( $ret ) ) {
+            $ret = __( $string );  //Cerco anche tra le traduzioni di wordpress 
+
+            if( strcasecmp( stripslashes( $ret ), stripslashes( $string ) ) == 0 ) 
+              $ret = "";
+          }
+
+          $done = ! empty( $ret );
 
           //Translation cannot be empty
-          if( empty( $ret ) ) $ret = $string;
+          // if( empty( $ret ) ) $ret = $string;
+          // if( ! $done ) $ret = "";
 
           $trans[ $lang->id ][] = array( "string" => stripslashes( $ret ), "done" => $done );
         } //$strings as $string
@@ -315,11 +365,11 @@ EOT;
           $done = $trans[ $lang->id ][ $i ][ 'done' ] == 1;
           $translated += intval( $done );
 
-          $td .= "<td>";
-          $not = ( $done ) ? "" : "not-available";
-          $msg = !empty( $not ) ? __( 'Translate', 'ceceppaml' ) : __( 'Translated', 'ceceppaml' );
-          $td .= '<img src="' . CMLLanguage::get_flag_src( $lang->id ) . '" class="available-lang ' . $not . ' tipsy-e" title="' . $msg . '" />';
-          $td .= "</td>";
+        //   $td .= "<td>";
+        //   $not = ( $done ) ? "" : "not-available";
+        //   $msg = !empty( $not ) ? __( 'Translate', 'ceceppaml' ) : __( 'Translated', 'ceceppaml' );
+        //   $td .= '<img src="' . CMLLanguage::get_flag_src( $lang->id ) . '" class="available-lang ' . $not . ' tipsy-e" title="' . $msg . '" />';
+        //   $td .= "</td>";
         }
   
         if( $translated == 0 )
@@ -331,9 +381,9 @@ EOT;
       
         echo "<tr class=\"$alternate row-domain string-$class\">";
         echo $td;
-        echo "</tr>";
+        // echo "</tr>";
   
-        echo "<tr class=\"$alternate row-details row-hidden \">";
+        // echo "<tr class=\"$alternate row-details row-hidden \">";
         echo "<td colspan=\"" . ( count( $langs ) + 1 ) ."\">";
       
         foreach( $langs as $lang ) {
@@ -341,7 +391,7 @@ EOT;
       
           echo "<div class=\"ceceppaml-trans-fields\">";
           echo '<img src="' . CMLLanguage::get_flag_src( $lang->id ) . '" class="available-lang" />';
-          echo "&nbsp;<textarea name=\"string[" . $lang->id . "][]\">" . esc_html( stripslashes( $trans[ $lang->id ][ $i ][ 'string' ] ) ) . "</textarea>";
+          echo "&nbsp;<textarea name=\"string[" . $lang->id . "][]\">" . esc_html( br2nl( stripslashes( $trans[ $lang->id ][ $i ][ 'string' ] ) ) ) . "</textarea>";
           
           $done = ( $done )  ? __( 'Translation complete', 'ceceppaml' ) : __( 'Translation not complete', 'ceceppaml' );
           echo "</div>";
@@ -392,14 +442,14 @@ EOT;
     $header = file_get_contents( CML_PLUGIN_ADMIN_PATH . "header.po" );
 
     //Escludo la lingua principale del tema 
-    $langs = CMLLanguage::get_all(); // exclude_theme_language();
-    if( isset( $langs[ $this->_default_lang ] ) ) unset( $langs[ $this->_default_lang ] );
+    $langs = $this->_translate_in;
 
     $done = array(); //File completati
     $outfiles = array();
     
     $domain = empty( $this->_domain ) ? "" : "$this->_domain-";
-    foreach( $langs as $lang ) {
+    foreach( $langs as $id ) {
+      $lang = CMLLanguage::get_by_id( $id );
       $filename = "$this->_dest_path/$domain{$lang->cml_locale}.po";
       $shortname = $lang->cml_locale;
       $fp = @fopen( $filename, 'w' );
@@ -428,11 +478,12 @@ EOT;
 
       for( $i = 0; $i <= count( $originals ); $i++ ) {
         if( ! isset( $originals[ $i ] ) ) continue;
+        if( empty( $strings[ $i ] ) ) continue;
     
         $o = str_replace( "\"", '\"', stripslashes( $originals[$i] ) );
         $s = str_replace( "\"", '\"', stripslashes( $strings[$i] ) );
         $o = 'msgid "' . $o . '"' . PHP_EOL;
-        $s = 'msgstr "' . nl2br( $s ) . '"' . PHP_EOL . PHP_EOL;
+        $s = 'msgstr "' . nl2br2( $s ) . '"' . PHP_EOL . PHP_EOL;
     
         fwrite( $fp, $o );
         fwrite( $fp, $s );
@@ -485,6 +536,16 @@ EOT;
   function errors() {
     return ( isset( $this->_errors ) ) ? 1 : 0;
   }
+}
+
+function nl2br2($string) { 
+  $string = str_replace(array("\r\n", "\r", "\n"), "<br />", $string); 
+  return $string; 
+}
+
+function br2nl( $string )
+{
+  return preg_replace('/\<br(\s*)?\/?\>/i', "\r\n", $string );
 }
 
 wp_enqueue_script( 'ceceppaml-admin-translations', CML_PLUGIN_JS_URL . 'admin.ttheme.js' );

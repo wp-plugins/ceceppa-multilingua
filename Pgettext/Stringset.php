@@ -131,15 +131,11 @@ class Stringset
     
     public function search( $string ) {
       foreach( $this->set as $item ) {
-        //if( addslashes( $item[ 'id' ] ) == 'You can override flags style by creating new file in: <i>%s</i> named: <b>\"ceceppaml.css\"</b>' ) {
-        //print_r( $item );
-        //  die();
-        //}
         if( $item[ 'id' ] == $string ) {
           return $item[ 'strings' ][0];
         }
       }
-      
-      return $string;
+
+      return "";
     }
 }
