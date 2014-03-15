@@ -327,7 +327,7 @@ class CMLAdmin extends CeceppaML {
     cml_add_pointer( ".cml-box-right input[name=\"save-all\"]", __( 'Save languages', 'ceceppaml' ), __( 'Click here for save changes', 'ceceppaml' ), array( "edge" => "left", 'align' => 'middle' ) );
     
     //Theme main language
-    cml_add_pointer( ".ceceppa-form-translations.theme > .cml-tablenav #cml-lang", __( 'Theme language', 'ceceppaml' ), __( 'If theme language is one of your language, choose it so that plugin will exclude it from translation table.', 'ceceppaml' ), array( "edge" => "right", 'align' => 'middle' ) );
+    cml_add_pointer( ".ceceppa-form-translations.theme > .cml-tablenav #cml-lang", __( 'Theme language', 'ceceppaml' ), __( 'Choose in which languages translate:', 'ceceppaml' ), array( "edge" => "right", 'align' => 'middle' ) );
   }
   
   function add_pointers_to_settings_page() {
