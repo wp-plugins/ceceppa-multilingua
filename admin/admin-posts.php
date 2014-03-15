@@ -103,7 +103,7 @@ echo <<< EOT
       <input type="hidden" name="linked_post[$lang]" value="$linked_id" />
       <ul>
         <li class="no-hide">
-          <span><i>( $notrans )</i></span>
+          <i><span class="title">( $notrans )</span></i>
         </li>
 EOT;
   while( $posts->have_posts() ) {
