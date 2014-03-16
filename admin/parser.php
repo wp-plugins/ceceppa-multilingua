@@ -84,7 +84,10 @@ Class CMLParser {
 
   private function extract_strings( $line ) {
     if( preg_match_all ( '/(_e|__|_n|_x|_ex|_nx|esc_attr__|esc_attr_e|esc_attr_x|esc_html__|esc_html_e|esc_html_x)(\(.*\))/', $line, $out ) ) {
-      $this->extract_strings( end( $out )[0] );
+      $end = end( $out );
+      if( isset( $end[ 0 ] ) ) {
+        $this->extract_strings( $end[0] );
+      }
     }
 
     /*

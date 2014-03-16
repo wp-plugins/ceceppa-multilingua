@@ -1,5 +1,3 @@
-List of all available languages.<br /> Click on item to choose flag and add it to your languages
-Add language
 Shortcodes
 Translate strings in different languages
 How to use the translations saved in "My Translations" page
@@ -130,6 +128,8 @@ Click on flag for change or customize
 Click on heart for set default language
 Click on &#10004; for set enable/disable language
 Your languages
+List of all available languages.<br /> Click on item to choose flag and add it to your languages
+Add language
 Search the language from the availables and click for add it
 Search language
 Click here for add custom language
