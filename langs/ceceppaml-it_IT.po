@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: InSight\n"
+"Project-Id-Version: Hueman\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-08-20 13:57+0100\n"
 "PO-Revision-Date: 2013-08-20 14:01+0100\n"
@@ -15,12 +15,6 @@ msgstr ""
 "X-Generator: CeceppaMultilingua 1.4\n"
 "X-Poedit-SearchPath-0: ..\n"
 "X-Poedit-SearchPath-1: ../inc\n"
-
-msgid "List of all available languages.<br /> Click on item to choose flag and add it to your languages"
-msgstr "Elenco delle lingue disponibili.<br />Clicca su una voce per scegliere la bandiera e aggiungere la voce alle tue lingue."
-
-msgid "Add language"
-msgstr "Aggiungi lingua"
 
 msgid "Shortcodes"
 msgstr "Shortcode"
@@ -299,7 +293,7 @@ msgid "Page data"
 msgstr "Dati pagina"
 
 msgid "Tags"
-msgstr "Tags"
+msgstr "Tag"
 
 msgid "Language:"
 msgstr "Lingua:"
@@ -342,6 +336,9 @@ msgstr "Personalizzato"
 
 msgid "Ceceppa Multilingua"
 msgstr "Ceceppa Multilingua"
+
+msgid "Addons"
+msgstr "Addons"
 
 msgid "My translations"
 msgstr "Le mie traduzioni"
@@ -411,6 +408,12 @@ msgstr "Clicca su ✔ per abilitare/disabilitare la lingua"
 
 msgid "Your languages"
 msgstr "Le tue lingue"
+
+msgid "List of all available languages.<br /> Click on item to choose flag and add it to your languages"
+msgstr "Elenco delle lingue disponibili.<br />Clicca su una voce per scegliere la bandiera e aggiungere la voce alle tue lingue."
+
+msgid "Add language"
+msgstr "Aggiungi lingua"
 
 msgid "Search the language from the availables and click for add it"
 msgstr "Cerca tra le lingue disponibili e clicca per aggingerla"
@@ -590,7 +593,7 @@ msgid "this code will be used to build url. Example: it, en, ch, de"
 msgstr "questo codice è utilizzato per costruire l'url. Esempio: it, en, ch, de"
 
 msgid "WP Locale"
-msgstr "WP Locale"
+msgstr "WP Locale<br />"
 
 msgid "it is the code used by WordPress for each language."
 msgstr "è il codice utilizzato da Wordpress per ogni lingua."
@@ -700,6 +703,9 @@ msgstr "Se attivato il plugin filtra le query de \"Articoli più letti\" e \"Pi�
 msgid "The others widget will be filtered only if they use the WP_Query class."
 msgstr "Gli altri widget verranno filtrati solo se usano la classe WP_Query"
 
+msgid "Plugin will automatically filter search in according to current language."
+msgstr "Plugin filtra automaticamente la ricerca in accordo alla lingua corrente."
+
 msgid "Filter wordpress search query"
 msgstr "Filtra la query di ricerca di Wordpress"
 
@@ -786,6 +792,12 @@ msgstr "Se ti piace il plugin e vuoi tradurlo nella tua lingua, puoi farlo da qu
 
 msgid "After clicked on \"Save Changes\" button, follow the instructions and send me the translation, thanks"
 msgstr "Dopo aver cliccato il pulsante \"Salva le modifiche\", segui le istruzioni e inviami la traduzione, grazie"
+
+msgid "Available addons"
+msgstr "Addon disponibili"
+
+msgid "Update available addons list"
+msgstr "Aggiorna l'elenco degli addon disponibili"
 
 msgid "If you want to customize widget titles you have to assign a title for each of them in \"Appearance\" -> \"Widgets\""
 msgstr "Se vuoi personalizzare i titoli dei widget è necessario assegnargli un titolo in \"Aspetto\" -> \"Widgets\""
@@ -923,7 +935,7 @@ msgid "Choose the style of your links. Example:"
 msgstr "Scegli lo stile dei tuoi link. Esempio:"
 
 msgid "Pre-Path"
-msgstr "Pre-Path"
+msgstr "Pre-Percorso"
 
 msgid "Default, puts /[language slug]/ in front of URL"
 msgstr "Predefinito, pone /[abbreviazione lingua]/ davanti all'URL"
@@ -938,7 +950,7 @@ msgid "Default"
 msgstr "Predefinito"
 
 msgid "Pre-Domain"
-msgstr "Pre-Domain"
+msgstr "Pre-Dominio"
 
 msgid "Append suffix"
 msgstr "Aggiungi suffisso"

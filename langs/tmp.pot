@@ -105,6 +105,7 @@ Delete
 Restore
 Custom
 Ceceppa Multilingua
+Addons
 My translations
 Plugin
 Theme
@@ -226,6 +227,9 @@ Most commented
 Enable
 If enabled the plugin filter the query of Least reads posts and Most commented
 The others widget will be filtered only if they use the WP_Query class.
+Plugin will automatically filter search in according to current language.
+You have to set html form element only if \"?lang\" argument will not be added to your search.
+Insert html element with className or id of your searchform
 Filter wordpress search query
 Group
 Ungroup
@@ -255,6 +259,8 @@ If translation is complete and you want to share it with us, download it:
 and send it <%s>to me</a>, add also your name or nickname
 If you like the plugin and you want translate it in your language, you can do from this page.
 After clicked on \"Save Changes\" button, follow the instructions and send me the translation, thanks
+Available addons
+Update available addons list
 If you want to customize widget titles you have to assign a title for each of them in "Appearance" -> "Widgets"
 Title
 Reset titles

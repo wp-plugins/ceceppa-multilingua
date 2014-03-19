@@ -298,10 +298,10 @@ $in = $this->_translate_in;
           if( file_exists( $po_filename ) )
             $po = Po::fromFile( $po_filename );
         } catch( Exception $e ) {
-          echo "<div class=\"error\"><p>";
-          echo $this->_dest_path . $domain . $lang->cml_locale . ".po";
-          echo "<pre>$e</pre>";
-          echo "</p></div>";
+          // echo "<div class=\"error\"><p>";
+          // echo $this->_dest_path . $domain . $lang->cml_locale . ".po";
+          // echo "<pre>$e</pre>";
+          // echo "</p></div>";
         }
 
         //Mo
@@ -311,10 +311,10 @@ $in = $this->_translate_in;
           if( file_exists( $mo_filename ) ) 
             $mo = CMo::fromFile( $mo_filename );
         } catch( Exception $e ) {
-          echo "<div class=\"error\"><p>";
-          echo $this->_dest_path . $domain . $lang->cml_locale . ".mo";
-          echo "<pre>$e</pre>";
-          echo "</p></div>";
+          // echo "<div class=\"error\"><p>";
+          // echo $this->_dest_path . $domain . $lang->cml_locale . ".mo";
+          // echo "<pre>$e</pre>";
+          // echo "</p></div>";
         }
 
         //Search the translation for each language
