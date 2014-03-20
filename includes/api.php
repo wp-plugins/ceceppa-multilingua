@@ -488,11 +488,12 @@ class CMLTranslations {
    *
    * @return void
    */
-  public static function add( $key, $default, $group ) {
+  public static function add( $key, $default, $group, $no_default = false ) {
     global $wpdb;
 
     $default = bin2hex( $default );
-    foreach( CMLLanguage::get_all() as $lang ) {
+    $langs = ( $no_default ) ? CMLLanguage::get_no_default() : CMLLanguage::get_all();
+    foreach( $langs as $lang ) {
       $query = sprintf( "SELECT id FROM %s WHERE cml_text = '%s' AND cml_lang_id = %d AND cml_type = '%s'",
                         CECEPPA_ML_TRANSLATIONS,
                         bin2hex( strtolower( $key ) ),
@@ -986,7 +987,7 @@ class CMLPost {
     if( null === $post_lang ) $post_lang = CMLPost::get_language_id_by_id( $post_id );
 
     foreach( $translations as $key => $id ) {
-      if( ! is_numeric( $key ) ) $key = CMLLanguage::get_by_slug( $key );
+      if( ! is_numeric( $key ) ) $key = CMLLanguage::get_id_by_slug( $key );
 
       cml_migrate_database_add_item( $post_lang, $post_id, $key, $id );
     }

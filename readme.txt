@@ -46,7 +46,8 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 - "CML: Recent Posts" - The most recent posts on your site
 - "CML: Text" - You can write arbitrary text or HTML separately for each language
 
-= Supported plugin =
+= Addons =
+- [Ceceppa Multilingua support to Customizr](http://www.alessandrosenese.eu/en/ceceppa-multilingua/contribute)
 
 = 3rd part compatible plugins =
 - Wordpress SEO by YOAST
@@ -81,7 +82,7 @@ Pgettext by Ruben Nijveld
 
 == Installation ==
 
-For more detailed instructions, take a look at the [Installation Guide](http://www.alessandrosenese.eu/it/pillole/wp-guide/ceceppa-multilingua-configurare-e-utilizzare-il-plugin/)
+For more detailed instructions, take a look at the [Installation Guide](http://www.alessandrosenese.eu/en/ceceppa-multilingua/installation/)
 
 Installation of this plugin is fairly easy:
 
@@ -161,9 +162,9 @@ If the directory "ceceppaml" doesn't exists, create it
 
 = How to configure the plugin, and support page =
 
-The FAQ is available at the [Plugin Homepage](http://www.alessandrosenese.eu/it/pillole/wp-guide/ceceppa-multilingua-configurare-e-utilizzare-il-plugin/)
+The FAQ is available at the [Plugin Homepage](http://www.alessandrosenese.eu/en/ceceppa-multilingua/documentation)
 
-For Problems visits the [Support page](http://www.alessandrosenese.eu/it/pillole/wp-guide/ceceppa-multilingua-configurare-e-utilizzare-il-plugin/)
+For Problems visits the [Support page](http://www.alessandrosenese.eu/en/ceceppa-multilingua/documentation)
 
 == Screenshots ==
 
@@ -177,6 +178,9 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/it/pillole
 8. Translate your theme
 
 == Changelog ==
+
+= 1.4.10 =
+* Fixed quick edit
 
 = 1.4.9 =
 * Optimized query requests

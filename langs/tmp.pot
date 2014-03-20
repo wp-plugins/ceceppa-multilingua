@@ -16,6 +16,7 @@ Debug
 Languages
 Post relations
 Translations
+Available addons
 Manage your languages
 Choose filter and url style
 Translate your site
@@ -105,12 +106,12 @@ Delete
 Restore
 Custom
 Ceceppa Multilingua
-Addons
 My translations
 Plugin
 Theme
 Show flags
 Settings
+Addons
 Documentation
 Shortcode
 Api
@@ -259,7 +260,6 @@ If translation is complete and you want to share it with us, download it:
 and send it <%s>to me</a>, add also your name or nickname
 If you like the plugin and you want translate it in your language, you can do from this page.
 After clicked on \"Save Changes\" button, follow the instructions and send me the translation, thanks
-Available addons
 Update available addons list
 If you want to customize widget titles you have to assign a title for each of them in "Appearance" -> "Widgets"
 Title

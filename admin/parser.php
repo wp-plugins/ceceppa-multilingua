@@ -327,7 +327,7 @@ $in = $this->_translate_in;
             $ret = $mo->search( $s );
           }
 
-          if( $ret == $string && isset( $po ) ) {
+          if( ! isset( $mo ) && isset( $po ) ) {
             $ret = $po->search( $s );
           }
 

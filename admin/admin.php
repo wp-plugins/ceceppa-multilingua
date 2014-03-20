@@ -193,8 +193,6 @@ class CMLAdmin extends CeceppaML {
   function add_menu_pages() {
     $page[] = add_menu_page('Ceceppa ML Options', __('Ceceppa Multilingua', 'ceceppaml'), 'administrator', 'ceceppaml-language-page', array(&$this, 'form_languages'), CML_PLUGIN_IMAGES_URL . 'logo-mini.png');
 
-    $page[] = add_submenu_page('ceceppaml-language-page', __('Addons', 'ceceppaml'), __('Addons', 'ceceppaml'), 'manage_options', 'ceceppaml-language-page&tab=3', array( & $this, 'form_translations'));
-
     $page[] = add_submenu_page( 'ceceppaml-language-page', '<div class="separator" /></div>', '<div class="cml-separator" />' . __( 'Translate', 'ceceppaml' ) . '</div>', 'administrator', '', null );
 
     $page[] = add_submenu_page('ceceppaml-language-page', __('My translations', 'ceceppaml'), __('My translations', 'ceceppaml'), 'manage_options', 'ceceppaml-translations-page', array(&$this, 'form_translations'));
@@ -211,8 +209,26 @@ class CMLAdmin extends CeceppaML {
 
     $page[] = add_submenu_page('ceceppaml-language-page', __('Settings', 'ceceppaml'), __('Settings', 'ceceppaml'), 'manage_options', 'ceceppaml-options-page', array(&$this, 'form_options'));
 
-    $page[] = add_submenu_page( 'ceceppaml-language-page', '<div class="separator" /></div>', '<div class="cml-separator" />' . __( 'Documentation', 'ceceppaml' ) . '</div>', 'administrator', '', null );
+    //Addons
+    $page[] = add_submenu_page( 'ceceppaml-language-page', '<div class="separator" /></div>', '<div class="cml-separator" />' . __( 'Addons', 'ceceppaml' ) . '</div>', 'administrator', '', null );
 
+    $page[] = add_submenu_page('ceceppaml-language-page', __('Available addons', 'ceceppaml'), __('Available addons', 'ceceppaml'), 'manage_options', 'ceceppaml-addons-page', array( & $this, 'form_addons' ) );
+
+    //filter all installe addons
+    $addons = apply_filters( 'cml_addons', array() );
+    $tab = 1;
+    foreach( $addons as $addon ) {
+      $page[] = add_submenu_page( 'ceceppaml-language-page', 
+                                  $addon[ 'title' ], 
+                                  $addon[ 'title' ], 'manage_options', 
+                                  'ceceppaml-addons-page&tab=' . $tab, 
+                                  array( & $this, 'form_addons' ) );
+
+      $tab++;
+    }
+
+    //Documentation
+    $page[] = add_submenu_page( 'ceceppaml-language-page', '<div class="separator" /></div>', '<div class="cml-separator" />' . __( 'Documentation', 'ceceppaml' ) . '</div>', 'administrator', '', null );
     $page[] = add_submenu_page( 'ceceppaml-language-page', __('Shortcodes', 'ceceppaml'), __('Shortcode', 'ceceppaml'), 'manage_options', 'ceceppaml-shortcode-page', array( & $this, 'shortcode_page' ) );
     $page[] = add_submenu_page( 'ceceppaml-language-page', __('Api', 'ceceppaml'), __('Api', 'ceceppaml'), 'manage_options', 'ceceppaml-api-page', array( & $this, 'api_page' ) );
     
@@ -255,21 +271,21 @@ class CMLAdmin extends CeceppaML {
   function form_languages() {
     wp_enqueue_script( 'ceceppaml-admin-languages' );
 
-    require_once ( CML_PLUGIN_ADMIN_PATH . '/admin-languages.php' );
+    require_once ( CML_PLUGIN_ADMIN_PATH . 'admin-languages.php' );
   }
   
   /*
    * Manage options
    */
   function form_options() {
-    require_once ( CML_PLUGIN_ADMIN_PATH . '/admin-options.php' );
+    require_once ( CML_PLUGIN_ADMIN_PATH . 'admin-options.php' );
   }
 
   /*
    * Flags options
    */
   function form_flags() {
-    require_once ( CML_PLUGIN_ADMIN_PATH . '/admin-flags.php' );
+    require_once ( CML_PLUGIN_ADMIN_PATH . 'admin-flags.php' );
   }
 
   /*
@@ -278,8 +294,16 @@ class CMLAdmin extends CeceppaML {
   function form_translations() {
     wp_enqueue_script( 'ceceppaml-admin-mytrans', CML_PLUGIN_JS_URL . 'admin.mytrans.js' );
 
-    require_once ( CML_PLUGIN_ADMIN_PATH . '/admin-translations.php' );
+    require_once ( CML_PLUGIN_ADMIN_PATH . 'admin-translations.php' );
   }
+
+  /*
+   * Addons
+   */
+  function form_addons() {
+    require_once ( CML_PLUGIN_ADMIN_PATH . 'admin-addons.php' );
+  }
+
 
   /*
    * Add "pointer" 

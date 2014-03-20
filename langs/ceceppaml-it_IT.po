@@ -70,6 +70,9 @@ msgstr "Relazioni tra i post"
 msgid "Translations"
 msgstr "Traduzioni"
 
+msgid "Available addons"
+msgstr "Addon disponibili"
+
 msgid "Manage your languages"
 msgstr "Gestisci le tue lingue"
 
@@ -337,9 +340,6 @@ msgstr "Personalizzato"
 msgid "Ceceppa Multilingua"
 msgstr "Ceceppa Multilingua"
 
-msgid "Addons"
-msgstr "Addons"
-
 msgid "My translations"
 msgstr "Le mie traduzioni"
 
@@ -354,6 +354,9 @@ msgstr "Visualizza bandiere"
 
 msgid "Settings"
 msgstr "Impostazioni"
+
+msgid "Addons"
+msgstr "Addons"
 
 msgid "Documentation"
 msgstr "Documentazione"
@@ -792,9 +795,6 @@ msgstr "Se ti piace il plugin e vuoi tradurlo nella tua lingua, puoi farlo da qu
 
 msgid "After clicked on \"Save Changes\" button, follow the instructions and send me the translation, thanks"
 msgstr "Dopo aver cliccato il pulsante \"Salva le modifiche\", segui le istruzioni e inviami la traduzione, grazie"
-
-msgid "Available addons"
-msgstr "Addon disponibili"
 
 msgid "Update available addons list"
 msgstr "Aggiorna l'elenco degli addon disponibili"

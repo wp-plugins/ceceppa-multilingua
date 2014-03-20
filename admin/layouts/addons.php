@@ -56,7 +56,7 @@ function cml_admin_box_addons() {
 					$out .= '<span>|</span>';
 
 					$git = end( $gits );
-					if( ! empty( $url ) ) {
+					if( ! empty( $git ) ) {
 						$out .= '<a href="' . $git . '" target="_blank">';
 						$out .= 'Git';
 						$out .= '</a>';
@@ -73,5 +73,5 @@ function cml_admin_box_addons() {
 <?php
 }
 
-add_meta_box( 'cml-box-addons', __( 'Addons', 'ceceppaml' ), 'cml_admin_box_addons', 'cml_box_languages' );
+add_meta_box( 'cml-box-addons', __( 'Addons', 'ceceppaml' ), 'cml_admin_box_addons', 'cml_box_addons' );
 ?>

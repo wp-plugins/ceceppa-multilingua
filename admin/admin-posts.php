@@ -166,7 +166,6 @@ function cml_admin_save_extra_post_fields( $term_id ) {
       $linkeds[ $lang->id ] = @$_POST[ 'linked_post' ][ $lang->id ];
     }
 
-    CMLPost::set_translations( $post_id, $linkeds, $post_lang );
   } else {
     $langs = CMLLanguage::get_all();
 
@@ -175,15 +174,11 @@ function cml_admin_save_extra_post_fields( $term_id ) {
       if( $lang->id == $current ) continue;
 
       $key = "linked_$lang->cml_language_slug";
-
-      if( isset( $_POST[ $key ] ) ) {
-        $lid = intval( $_POST[ $key ] );
-        $linked_lang = CMLLanguage::get_id_by_post_id( $lid );
-
-        CMLPost::set_translation( $post_id, $linked_lang, $lid, $post_lang );
-      }
+      $linkeds[ $lang->id ] = intval( @$_POST[ $key ] );
     }
   }
+
+  CMLPost::set_translations( $post_id, $linkeds, $post_lang );
 
 }
 
