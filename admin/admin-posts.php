@@ -52,7 +52,7 @@ function cml_admin_post_meta_box( $tag ) {
     $not = array();
   }
 
-  $translations = CMLPost::get_translations( ( $link_id > 0 ) ? $link_id : $tag->ID );
+  $translations = CMLPost::get_translations( ( $link_id > 0 ) ? $link_id : $tag->ID, true );
 
   echo '<ul class="cml-post-translations">';
   foreach( CMLLanguage::get_all() as $lang ) {
@@ -179,7 +179,6 @@ function cml_admin_save_extra_post_fields( $term_id ) {
   }
 
   CMLPost::set_translations( $post_id, $linkeds, $post_lang );
-
 }
 
 /*
@@ -356,6 +355,9 @@ function cml_admin_filter_all_posts_query( $query ) {
 function cml_admin_delete_extra_post_fields( $id ) {
   global $wpdb, $_cml_language_columns;
 
+  //All translations
+  $translations = CMLPost::get_translations( $id );
+
   foreach( $_cml_language_columns as $col ) {
     $sql = sprintf( "UPDATE %s SET $col = 0 WHERE $col = %d", CECEPPA_ML_RELATIONS, $id );
 
@@ -364,6 +366,13 @@ function cml_admin_delete_extra_post_fields( $id ) {
 
   if( get_post_status( $id ) != "trash" ) {
     delete_post_meta( $id, "_cml_meta" );
+  }
+
+  if( ! empty( $translations[ 'linked' ] ) ) {
+    $l = end( $translations[ 'linked' ] );
+
+    //Rebuild meta
+    CMLPost::get_translations( $l, true );
   }
 
   //Ricreo la struttura degli articoli, questo metodo rallenterà soltanto chi scrive l'articolo... tollerabile :D

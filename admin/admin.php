@@ -78,17 +78,19 @@ class CMLAdmin extends CeceppaML {
 
     if( in_array( $pagenow, array( "post.php", "post-new.php", "edit.php" ) )
         || CMLUtils::_get( "translate_home", 1 ) ) {
-      /*
-       * I need to force home url to post language or
-       * wp show permalink in according to current language :O
-       */
-      if( isset( $_GET[ 'post' ] ) ) {
-        $post = intval( $_GET[ 'post' ] );
-        $lang = CMLLanguage::get_id_by_post_id( $post );
-        $this->_force_category_lang = $lang;
-      }
+        if( ! ( isset( $_GET[ 'post_type' ] ) && 'page' == $_GET[ 'post_type' ] ) ) {
+        /*
+         * I need to force home url to post language or
+         * wp show permalink in according to current language :O
+         */
+        if( isset( $_GET[ 'post' ] ) ) {
+          $post = intval( $_GET[ 'post' ] );
+          $lang = CMLLanguage::get_id_by_post_id( $post );
+          $this->_force_category_lang = $lang;
+        }
 
-      add_filter( 'home_url', array( & $this, 'translate_home_url' ), 0, 4 );
+        add_filter( 'home_url', array( & $this, 'translate_home_url' ), 0, 4 );
+      }
     }
 
     if( $pagenow == "widgets.php" ) {
@@ -442,7 +444,6 @@ class CMLAdmin extends CeceppaML {
     $path = get_template_directory();	//Path del tema
     $info = pathinfo( $mofile );
   
-    //die();
     if( strcasecmp( $info[ 'dirname' ], $path ) > 0 ) {
       $GLOBALS[ '_cml_theme_locale_path' ] = $info[ 'dirname' ];
   

@@ -157,7 +157,7 @@ EOT;
         } else {
           $info = pathinfo( "$dir\/$file" );
   
-          if( strtolower( $info['extension'] ) == strtolower( $ext ) ) { 
+          if( isset( $info[ 'extension' ] ) && strtolower( $info['extension'] ) == strtolower( $ext ) ) { 
             $files[] = "${dir}${file}";
           }
         }//endif;
@@ -230,7 +230,9 @@ $in = $this->_translate_in;
       &nbsp;
       <a class="nav-tab  nav-tab-active" href="javascript:showStrings( 0 )"><?php _e( 'All strings', 'ceceppaml' ) ?><span></span></a>
       <a class="nav-tab" href="javascript:showStrings( 1, 'to-translate' )"><?php _e( 'To translate', 'ceceppaml' ) ?><span></span></a>
+      <?php if( count( $in ) > 1 ) : ?>
       <a class="nav-tab" href="javascript:showStrings( 2, 'incomplete' )"><?php _e( 'Incomplete', 'ceceppaml' ) ?><span></span></a>
+      <?php endif; ?>
       <a class="nav-tab" href="javascript:showStrings( 3, 'translated' )"><?php _e( 'Translated', 'ceceppaml' ) ?><span></span></a>
       <p class="submit">
         <span class="spinner"></span>

@@ -848,7 +848,7 @@ class CMLPost {
    *       )
    *    </li>
    *    <li>
-   *   [others] => Array
+   *   [linked] => Array
    *       (
    *       <ul>
    *        <li>[en] => 541</li>
@@ -868,7 +868,7 @@ class CMLPost {
     if( empty( $post_id ) ) return array();
 
     if( ! isset( self::$_posts_meta[ $post_id ] ) || $force ) {
-      $row = get_post_meta( $post_id, "_cml_meta", true );
+      $row = ""; //get_post_meta( $post_id, "_cml_meta", true );
 
       if( empty( $row ) || empty( $row[ 'lang' ] ) || $force ) {
         if( empty( $GLOBALS[ '_cml_language_columns' ] ) ) {
@@ -990,6 +990,9 @@ class CMLPost {
       if( ! is_numeric( $key ) ) $key = CMLLanguage::get_id_by_slug( $key );
 
       cml_migrate_database_add_item( $post_lang, $post_id, $key, $id );
+
+      //I have to update meta for $post_id and its translation
+      self::update_meta( $key, $post_id );
     }
 
     //Update info
@@ -1004,8 +1007,6 @@ class CMLPost {
    * @ignore
    */
   public static function update_meta( $lang, $post_id, $translations = null ) {
-    if( $lang == "" ) return;
-
     /*
      * I just updated post relation, so I have to rebuild meta :)
      */
@@ -1013,11 +1014,14 @@ class CMLPost {
     if( null == $translations ) {
       $translations = CMLPost::get_translations( $post_id, true );
     }
-
     $meta = array( "lang" => $lang,
                     "translations" => $translations );
 
+    // if( ! isset( $meta[ 'lang' ] ) || empty( $translations ) ) {
+      // delete_post_meta( $post_id, "_cml_meta" );
+    // } else {
     update_post_meta( $post_id, "_cml_meta", $meta );
+    // }
   }
 
   /**
