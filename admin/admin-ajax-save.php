@@ -63,6 +63,7 @@ if ( ! defined( 'ABSPATH' ) ) die( "Access denied" );
                   );
     $data_format = array( "%d", "%d", "%d", "%d", "%d", "%s", "%s", "%s", "%s", "%s" );
   
+    // error_log( "Data: " . print_r( $data, true ) );
     $id = intval( $form[ 'id' ] );
 
     //Remove?
@@ -76,7 +77,9 @@ if ( ! defined( 'ABSPATH' ) ) die( "Access denied" );
     } else {
       if( $id > 0 ) {
         //Avoid that more languages are sets as "default"
-        if( $is_default ) $wpdb->query( "UPDATE " . CECEPPA_ML_TABLE . " SET cml_default = 0 " );
+        if( $is_default ) {
+          $wpdb->query( "UPDATE " . CECEPPA_ML_TABLE . " SET cml_default = 0 " );
+        }
 
         $wpdb->update( CECEPPA_ML_TABLE, $data, array(
                                                       "id" => $id,
@@ -381,23 +384,31 @@ function cml_admin_generate_mo() {
   $tab = isset( $_POST[ 'tab' ] ) ? intval( $_POST[ 'tab' ] ) : 1;
 
   $name = $_POST[ 'name' ];
-  $default_locale = $_POST[ 'locale' ];
+  $translate_in = @$_POST[ 'cml-lang' ];
   $src_path = $_POST[ 'src_path' ];
   $dest_path = $_POST[ 'dest_path' ];
   $domain = $_POST[ 'domain' ];
 
-  if( isset( $_POST[ 'cml-lang' ] ) ) {
-    update_option( "cml_theme_language_" . sanitize_title(  wp_get_theme()->name ),
-                  sanitize_title( $_POST[ 'cml-lang' ] ) );
+
+  if( ! empty( $translate_in ) ) {
+    $translate_in = array_keys( $translate_in );
+  } else {
+    $translate_in = array();
   }
 
-  //$parser = new CMLParser( "Ceceppa Multilingua", "en", CML_PLUGIN_PATH, CML_PLUGIN_LANGUAGES_PATH, "ceceppaml", false );
-  $parser = new CMLParser( $name, $default_locale, $src_path, $dest_path, $domain, false );
+  update_option( 'cml_translate_' . $name . "_in", $translate_in );
 
-  $generated = "[" . join( ", ", $parser->generated() ) . "]";
-  $error = $parser->errors();
+  if( ! empty( $translate_in ) ) {
+    //$parser = new CMLParser( "Ceceppa Multilingua", "en", CML_PLUGIN_PATH, CML_PLUGIN_LANGUAGES_PATH, "ceceppaml", false );
+    $parser = new CMLParser( $name, $src_path, $dest_path, $domain, false );
 
-  $return = array( "url" => admin_url( 'admin.php?page=' . $page . '&tab=' . $tab . '&updated=true&generated=' . $generated . '&error=' . $error ) );
+    $generated = "[" . join( ", ", $parser->generated() ) . "]";
+    $error = $parser->errors();
+
+    $return = array( "url" => admin_url( 'admin.php?page=' . $page . '&tab=' . $tab . '&updated=true&generated=' . $generated . '&error=' . $error ) );
+  } else {
+    $return = array( "url" => admin_url( 'admin.php?page=' . $page . '&tab=' . $tab ) );
+  }
 
   die( json_encode( $return ) );
 }
