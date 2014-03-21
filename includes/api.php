@@ -227,7 +227,7 @@ class CMLLanguage {
     if( empty( self::$_default_language ) ) self::get_default();
     if( ! is_numeric( $lang ) ) $lang = self::get_id_by_slug( $lang );
 
-    return self::$_all_languages[ $lang ]->cml_language;
+    return isset( self::$_all_languages[ $lang ] ) ? self::$_all_languages[ $lang ]->cml_language : "";
   }
 
   /**
@@ -343,6 +343,10 @@ class CMLLanguage {
     if( empty( self::$_default_language ) ) self::get_default();
     if( $lang == null ) $lang = self::get_default_id();
     if( ! is_numeric( $lang ) ) $lang = self::get_id_by_slug( $lang );
+
+    if( ! isset( self::$_all_languages[ $lang ] ) ) {
+      return "";
+    }
 
     $lang = self::$_all_languages[ $lang ];
     $flag = $lang->cml_flag;
@@ -870,6 +874,20 @@ class CMLPost {
       foreach( $_conv as $key => $label ) {
         $select[] = "$key as $label";
       }
+
+      /*
+       * something happend that $_conv is empty and that couse a warning
+       * and I can't store post relations properly.
+       */
+      if( empty( $select ) ) {
+        $keys = array_keys( CMLLanguage::get_all() );
+        $langs = array_keys( CMLLanguage::get_slugs() );
+
+        foreach( $keys as $k => $v ) {
+          $select[] = "lang_{$v} as " . $langs[ $k ];
+        }
+      }
+
       $query .= join( ",", $select ) . " FROM " . CECEPPA_ML_RELATIONS . " WHERE ";
       foreach( $_cml_language_columns as $l ) {
         $where[] = "$l = $post_id";
@@ -975,8 +993,6 @@ class CMLPost {
     $meta = array( "lang" => $lang,
                     "translations" => CMLPost::get_translations( $post_id, true ) );
 
-    //print_r( $meta );
-    //die();
     update_post_meta( $post_id, "_cml_meta", $meta );
   }
 
@@ -1056,6 +1072,20 @@ class CMLPost {
     return ! empty( self::$_posts_meta[ $post_id ][ 'linked' ] );
   }
 
+  /**
+   * check if $post1 is translation of $post2
+   *
+   * @param int $post1 post id
+   * @param int $post2 post id
+   *
+   * @return boolean
+   */
+  public static function is_translation( $post1, $post2 ) {
+    $translations = CMLPost::get_translations( $post1 );
+
+    return in_array( $post2, $translations[ 'indexes' ] );
+  }
+
   /** @ignore */
   private static function _load_indexes() {
     $langs = cml_get_languages( false );
@@ -1065,6 +1095,73 @@ class CMLPost {
     }
   }
 
+  /**
+   * @ignore
+   *
+   * Remove extra "-##" add by wordpress when more than one post has
+   * same titles, but ONLY on translations.
+   */
+  public static function remove_extra_number( $permalink, $post ) {
+    global $wpdb;
+
+    $removed = false;
+
+    if( is_object( $post ) && CMLPost::has_translations( $post->ID ) ) {
+      //Remove last "/"
+      $url = untrailingslashit( $permalink );
+      $url = str_replace( CMLUtils::home_url(), "", $url );
+  
+      /*
+       * Post/page link contains "-d"
+       */
+      preg_match_all( "/-\d+/", $url, $out );
+  
+      /*
+       * if true I have to check if it was added by "wordpress" :)
+       */
+      if( count( $out[ 0 ] ) > 0 ) {
+        /*
+         * when hook get_page_link, wordpress pass me only post id, not full object
+         */
+        $post_title = $post->post_title; //( ! isset( $post->post_name ) ) ?
+          //$post->post_title : $post->post_name;
+          // $a = $wpdb->get_var( "SELECT post_title FROM $wpdb->posts WHERE id = $post->ID" );
+
+        /*
+         * got how many number occourrences ( -d ) are in the "real title"
+         */
+        preg_match_all( "/\d+/", $post_title, $pout );
+
+        /*
+         * compare occourrences between permalink and title,
+         * if title contains more one, I remove it :)
+         */
+        //Remove autoinserted -## from url
+        if( count( $pout[0] ) < count( $out[ 0 ] ) ) {
+          $permalink = trailingslashit( preg_replace( "/-\d*$/", "",
+                                                     untrailingslashit( $permalink ) ) );
+
+          $removed = true;
+        }
+      }
+
+      if( $removed &&
+          CMLUtils::get_url_mode() == PRE_NONE ) {
+        $post_id = is_object( $post ) ? $post->ID : $post;
+
+        $lang = CMLLanguage::get_by_post_id( $post_id );
+        if( empty( $lang ) ) {
+          $lang = CMLLanguage::get_current();
+        }
+
+        $permalink = add_query_arg( array(
+                                          "lang" => $lang->cml_language_slug,
+                                          ), $permalink );
+      }
+    }
+
+    return $permalink;
+  }
 }
 
 /**

@@ -15,9 +15,9 @@ jQuery( document ).ready( function( $ ) {
       url: ajaxurl,
       data: $( this ).serialize(),
       success: function( data ) {
+        // console.log( "Data", data );
         $form.find( '.cml-submit-button > .wpspinner > .spinner' ).fadeOut();
 
-        console.log( data );
         $data = null;
 
         if ( data == "-1" ) {
@@ -47,23 +47,16 @@ jQuery( document ).ready( function( $ ) {
   
   jQuery( 'body' ).on( 'change keyup keypress', '.search input.s', function() {
     $table = $( 'table.ceceppaml-theme-translations' );
-    $val = $( this ).val();
+    $val = $( this ).val().toLowerCase();
 
     $table.find( 'tr > td.item' ).each( function() {
       html = $( this ).html();
-      
+
       var display = html.toLowerCase().indexOf( $val );
+      display = ( display >= 0 ) ? "table-row" : "none"
 
-      $( this ).parent().css( "display", ( display >= 0 ) ? "table-row" : "none" );
+      $( this ).parent().css( "display",  display );
     });
-  });
-
-  $('table.ceceppaml-theme-translations tr.row-domain').click( function() {
-    $( this ).removeClass( 'row-open' );
-
-    $next = $( this ).next();
-    $next.toggle();
-    if( $next.is(":visible") ) $( this ).addClass( 'row-open' );
   });
 });
 
@@ -78,7 +71,6 @@ function showStrings( id, what ) {
   jQuery( 'h2.tab-strings a' ).removeClass( 'nav-tab-active' );
   jQuery( jQuery( 'h2.tab-strings a' ).get( id ) ).addClass( 'nav-tab-active' );
 
-  console.log( what );
   jQuery( 'table.ceceppaml-theme-translations tbody tr' + what ).show();
   
   if( what != undefined || what != "" ) {
