@@ -199,6 +199,8 @@ The order of language items will be used for sort generated flags.
 When you choose to upload custom flags the plugin will create two copy of image Small ( 32x23 ) and Tiny ( 16x11 ).
 If you don't like the quality of genearted images you can do manually for both size, and store it in %s, and later choose it from list.
 Custom flags will be stored in: %s path.
+You are using IE <= 9
+If you need to use custom flags you hate to <%s>upload them manually</a>.
 Security error
 Invalid image: 
 Language files

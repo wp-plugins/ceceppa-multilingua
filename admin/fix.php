@@ -111,6 +111,11 @@ function cml_do_update() {
     }//foreach
   }//if
 
+  if( $dbVersion < 29 ) {
+    $wpdb->query( sprintf( "ALTER TABLE  %s CHANGE cml_language cml_language TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL",
+                       CECEPPA_ML_TABLE ) );
+  }
+
   //CML < 1.4
   cml_do_update_old();
 

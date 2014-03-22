@@ -864,7 +864,7 @@ EOT;
           $this->_force_post_lang = $lang_id;
 
           //If using static page, ensure that isn't a translation of it...
-          $url = get_permalink( $page_id );
+          $item->url = get_permalink( $page_id );
           // $url = CMLPost::remove_extra_number( $url, $item );
 
           unset( $this->_force_category_lang );

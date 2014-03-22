@@ -986,6 +986,11 @@ class CMLPost {
     //$_cml_language_columns = & $GLOBALS[ '_cml_language_columns' ];
     if( null === $post_lang ) $post_lang = CMLPost::get_language_id_by_id( $post_id );
 
+    $tot = count( $translations );
+    if( $tot < count( CMLLanguage::get_no_default() ) ) {
+
+    }
+
     foreach( $translations as $key => $id ) {
       if( ! is_numeric( $key ) ) $key = CMLLanguage::get_id_by_slug( $key );
 

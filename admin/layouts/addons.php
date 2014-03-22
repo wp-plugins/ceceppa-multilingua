@@ -13,8 +13,10 @@ function cml_admin_box_addons() {
 	<?php
 		$filename = CML_UPLOAD_DIR . "cmladdons.txt" ;
 		//Download available addons list
+		$mtime = @filemtime( $filename ) * ( 60 * 60 * 24 );
 		if( isset( $_GET[ 'update' ] ) ||
-			! file_exists( $filename ) ) {
+			! file_exists( $filename ) ||
+			$mtime < mktime() ) {
 			$addons = file_get_contents( 'http://alessandrosenese.eu/cmladdons.txt' );
 
 			file_put_contents( $filename, $addons );

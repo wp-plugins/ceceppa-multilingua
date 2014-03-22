@@ -24,15 +24,18 @@ if ( ! defined( 'ABSPATH' ) ) die( "Access denied" );
    * Save language item
    */
   function cml_admin_save_language_item( $data = null, $die = true ) {
+    error_log( print_r( $_POST, true ) );
+
     if( ! check_ajax_referer( "ceceppaml-nonce", "security" ) ) {
       echo json_encode( array( "html" => "",
                         "error" => __( "Security error", "ceceppaml" ) ) );
 
+      echo "-1";
       die();
     }
 
     global $wpdb;
-  
+
     //Extract data
     if( $data == null ) $data = $_POST[ 'data' ];
     parse_str( $data, $form );
@@ -63,7 +66,6 @@ if ( ! defined( 'ABSPATH' ) ) die( "Access denied" );
                   );
     $data_format = array( "%d", "%d", "%d", "%d", "%d", "%s", "%s", "%s", "%s", "%s" );
   
-    // error_log( "Data: " . print_r( $data, true ) );
     $id = intval( $form[ 'id' ] );
 
     //Remove?
