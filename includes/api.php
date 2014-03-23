@@ -1290,6 +1290,10 @@ class CMLUtils {
     return self::$_url_mode;
   }
   
+  public static function get_category_url_mode() {
+    return CMLUtils::_get( 'cml_category_mode' );
+  }
+
   /**
    * get wordpress date format option
    * @ignore

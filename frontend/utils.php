@@ -285,6 +285,11 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
         
         CMLUtils::_del( '_force_category_lang' );
       } //endif;
+
+      if( CMLUtils::get_category_url_mode() == PRE_LANG &&
+          CMLUtils::get_url_mode() == PRE_NONE ) {
+        $link = add_query_arg( array( 'lang' => $result->cml_language_slug ), $link );
+      }
     }
     
     if( $queried && $is_tag ) { //&& false !== strpos( CMLUtils::get_clean_url(), "/tag/" ) ) ) {

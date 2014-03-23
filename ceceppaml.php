@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/portfolio/ceceppa-multilingua/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.4.11
+Version: 1.4.12
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.alessandrosenese.eu/
 License: GPL3
@@ -117,8 +117,8 @@ require_once( CML_PLUGIN_INCLUDES_PATH . 'php-compatibility.php' );
  */
 if( ! isset( $_GET[ 'cml-settings-updated' ] ) &&
    get_option( "cml_use_settings_gen", 0 ) &&
-   file_exists( CML_PLUGIN_CACHE_URL . "settings.gen.php" ) ) {
-  define( '_CML_SETTINGS_PHP', CML_PLUGIN_CACHE_PATH . "settings.gen.php" );
+   file_exists( CML_UPLOAD_DIR . "settings.gen.php" ) ) {
+  define( '_CML_SETTINGS_PHP', CML_UPLOAD_DIR . "settings.gen.php" );
 } else {
   define( '_CML_SETTINGS_PHP', CML_PLUGIN_PATH . "settings.php" );
 }
@@ -147,7 +147,7 @@ require_once CML_PLUGIN_INCLUDES_PATH . "widgets.php";
 // if( file_exists( CML_PLUGIN_PATH . "debug.php" ) &&
 //     1 == get_option( "cml_debug_enabled" ) ) {
 //   define( 'CML_DEBUG', 1 );
-// 
+
 //   require_once( "debug.php" );
 // }
 
@@ -212,8 +212,11 @@ class CeceppaML {
 
     //Category doesn't works correctly with "none" of "Url Modification mode"
     $this->_category_url_mode = $this->_url_mode;
-    if( $this->_category_url_mode == PRE_NONE ) //&& ! $_cml_settings[ 'cml_option_translate_categories' ] )
+    if( $this->_category_url_mode == PRE_NONE || ! $_cml_settings[ 'cml_option_translate_category_url' ] ) {
       $this->_category_url_mode = PRE_LANG;
+    }
+
+    CMLUtils::_set( 'cml_category_mode', $this->_category_url_mode );
   }
 
   /*

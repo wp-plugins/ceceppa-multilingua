@@ -200,8 +200,8 @@ function cml_admin_save_options_actions() {
     update_option( "cml_modification_mode", intval( $_POST[ 'url-mode' ] ) );
     update_option( "cml_modification_mode_default", intval( @$_POST[ 'url-mode-default' ] ) );
 
-    //Translate categories url
-    //@update_option('cml_option_translate_categories', intval( $_POST['categories'] ) );
+    //Translate category url
+    @update_option( 'cml_option_translate_category_url', @intval( $_POST[ 'categories' ] ) );
 
     //Notices
     @update_option("cml_option_notice", sanitize_title( $_POST['notice'] ) );

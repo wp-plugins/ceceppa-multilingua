@@ -187,7 +187,7 @@ jQuery(document).ready( function($) {
     $p = jQuery( this ).parents( '.lang' ).find( 'p.submit' );
 
     //Total ajax requests
-    var requests = $( '#cml-box-languages #cml-languages .lang' ).length - 1;
+    var requests = $( '#cml-box-languages #cml-languages .lang' ).length;
 
     $( document ).ajaxComplete(function() {
       requests--;
