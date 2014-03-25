@@ -86,6 +86,8 @@ function cml_install_create_tables() {
   }
   
   if( $first_time ) {
+    update_option( "cml_db_version", CECEPPA_DB_VERSION );
+
     update_option( "cml_show_wizard", 1 );
   }
 

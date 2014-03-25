@@ -24,8 +24,6 @@ if ( ! defined( 'ABSPATH' ) ) die( "Access denied" );
    * Save language item
    */
   function cml_admin_save_language_item( $data = null, $die = true ) {
-    error_log( print_r( $_POST, true ) );
-
     if( ! check_ajax_referer( "ceceppaml-nonce", "security" ) ) {
       echo json_encode( array( "html" => "",
                         "error" => __( "Security error", "ceceppaml" ) ) );

@@ -172,7 +172,7 @@ class CML_WPML_Parser {
  */
 function cml_admin_scan_plugins_folders() {
   $plugins = WP_CONTENT_DIR . "/plugins";
-  
+
   $old = get_option( '_cml_wpml_config_paths', "" );
 
   $xmls = @glob( "$plugins/*/wpml-config.xml" );
@@ -202,7 +202,8 @@ function cml_admin_scan_plugins_folders() {
   $not = join( ",", $not );
   update_option( '_cml_wpml_config_paths', $not );
 
-  if( $not == $old ) {
+  $displayed = get_option( '_cml_wpml_config', 1 );
+  if( ! $displayed && $not == $old ) {
     return;
   }
 
