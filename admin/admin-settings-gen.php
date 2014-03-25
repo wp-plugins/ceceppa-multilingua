@@ -93,7 +93,8 @@ function cml_generate_mo_from_translations( $type = null, $echo = true ) {
    * I generate translation for each type for avoid that different translations
    * of same word cause wrong "return"
    */
-  foreach( CMLLanguage::get_no_default() as $lang ) {
+  $langs = ( $type == "_X_" ) ? CMLLanguage::get_all() : CMLLanguage::get_no_default();
+  foreach( $langs as $lang ) {
     //$filename = CML_PLUGIN_CACHE_PATH . "cmltrans-" . strtolower( $type ) . "-{$lang->cml_locale}.po";
     $filename = CML_PLUGIN_CACHE_PATH . "cmltrans-{$lang->cml_locale}.po";
 

@@ -371,7 +371,7 @@ function cml_admin_save_site_title() {
     $i++;
   }
 
-  cml_generate_mo_from_translations( "T" );
+  cml_generate_mo_from_translations( "_X_" );
 
   $return = array( "url" => admin_url( 'admin.php?page=' . $page . '&tab=' . $tab . '&cml-generate-settings=true' ) );
 

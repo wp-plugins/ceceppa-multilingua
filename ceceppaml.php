@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/portfolio/ceceppa-multilingua/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.4.12
+Version: 1.4.13
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.alessandrosenese.eu/
 License: GPL3
@@ -148,7 +148,7 @@ require_once CML_PLUGIN_INCLUDES_PATH . "widgets.php";
 //     1 == get_option( "cml_debug_enabled" ) ) {
 //   define( 'CML_DEBUG', 1 );
 
-//   require_once( "debug.php" );
+// require_once( "debug.php" );
 // }
 
 //3rd party compatibility
@@ -181,6 +181,9 @@ class CeceppaML {
     $this->_request_url = str_replace($this->_homeUrl, "", $this->_url);
     $this->_permalink_structure = get_option( "permalink_structure" );
 
+    /* I can't use PRE_PATH with default permalink structure ( ?p=## ) */
+    $this->_url_mode = CMLUtils::get_url_mode();
+
     //Activate?
     register_activation_hook( __FILE__, array( & $this, 'activated' ) );
 
@@ -206,9 +209,6 @@ class CeceppaML {
 
     //Switch language in menu
     add_action( 'admin_bar_menu', array( & $this, 'add_bar_menu' ), 1000 );
-
-    /* I can't use PRE_PATH with default permalink structure ( ?p=## ) */
-    $this->_url_mode = CMLUtils::get_url_mode();
 
     //Category doesn't works correctly with "none" of "Url Modification mode"
     $this->_category_url_mode = $this->_url_mode;
@@ -385,6 +385,7 @@ EOT;
       $page_id = $page->ID;
     } else {
       $page_id = $page;
+
       $page = get_post( $page );
     }
 
@@ -405,6 +406,7 @@ EOT;
     unset( $GLOBALS[ '_cml_force_home_slug' ] );
 
     $permalink = CMLPost::remove_extra_number( $permalink, $page );
+
     return $this->convert_url( $permalink, $slug );
   }
   
@@ -418,9 +420,8 @@ EOT;
       break;
     case PRE_PATH:
       $url = CMLUtils::home_url();
-
       $clean_url = CMLUtils::clear_url( $permalink );
-    
+
       //Change slug in url instead of append ?lang arg
       $link = str_replace( trailingslashit( $url ), "", $clean_url );
   

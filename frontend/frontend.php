@@ -315,7 +315,7 @@ class CMLFrontend extends CeceppaML {
       return $this->add_flags_in_submenu( $items, $args );
 
     //In which menu add flags?
-    $to = $_cml_settings[ 'cml_add_items_to' ];
+    $to = @$_cml_settings[ 'cml_add_items_to' ];
 
     if( ! empty( $to ) && ! is_array( $to ) ) $to = array( $to );
     if( ! empty( $to ) && ! in_array( $args->theme_location, $to ) ) return $items;
@@ -673,7 +673,7 @@ EOT;
       if( null === $post_id ) {
         $lang_id = CMLLanguage::get_current_id();
       } else {
-        $lang_id = CMLPost::get_language_id_by_id( $post_id, true );
+        $lang_id = CMLPost::get_language_id_by_id( $post_id );
       }
 
       if( isset( $this->_fake_language_id ) &&
@@ -708,6 +708,7 @@ EOT;
     if( CMLLanguage::is_default( $lang_id ) ) {
       //I have not translate "slug" for default language
       CMLUtils::_set( '_no_translate_term', 1 );
+
       return $term_name;
     }
 
@@ -721,6 +722,7 @@ EOT;
     }
 
     if( ! CMLLanguage::is_current( $lang_id ) ) {
+      print_r( $post_id );
       //If post language != current language I can't get translation from ".mo"
       $name = CMLTranslations::get( $lang_id, $term_name, "C", false, true );
     } else {
