@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Check if current url ( or $url ) is the homepage
  *
@@ -179,6 +178,10 @@ function cml_get_page_by_path($page_path, $output = OBJECT, $post_type = array('
 function cml_get_the_link( $result, $linked = true, $only_existings = false, $queried = false ) {
   global $wpCeceppaML, $_cml_settings;
 
+  if( defined( 'CML_DEBUG' ) && isset( $_GET[ 'cdb' ] ) ) {
+    echo "queried: $queried<br />";
+    echo "is_home: " . cml_is_homepage() . "<br />";
+  }
   if( $queried && ( cml_is_homepage() || is_search() ) ) { //&& cml_use_static_page() ) {
     //current page is homepage?
     $link = CMLUtils::get_home_url( $result->cml_language_slug );
@@ -196,7 +199,7 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
     }
   } else {
     $GLOBALS[ '_cml_force_home_slug' ] = $result->cml_language_slug;
-    
+
     //I have to force language to $result one
     $wpCeceppaML->force_category_lang( $result->id );
 
@@ -242,6 +245,7 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
 
       if( ! empty( $linked_id ) ) {
         $link = get_permalink( $linked_id );
+        $link = CMLPost::remove_extra_number( $link, get_post( $linked_id ) );
 
         if( CMLUtils::_get( '_real_language' ) != CMLLanguage::get_current_id()
             && $linked_id == $the_id ) {
@@ -281,6 +285,11 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
         
         CMLUtils::_del( '_force_category_lang' );
       } //endif;
+
+      if( CMLUtils::get_category_url_mode() == PRE_LANG &&
+          CMLUtils::get_url_mode() == PRE_NONE ) {
+        $link = add_query_arg( array( 'lang' => $result->cml_language_slug ), $link );
+      }
     }
     
     if( $queried && $is_tag ) { //&& false !== strpos( CMLUtils::get_clean_url(), "/tag/" ) ) ) {
@@ -307,10 +316,10 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
     $wpCeceppaML->unset_category_lang();
 
     /* Controllo se è stata impostata una pagina statica,
-	perché così invece di restituire il link dell'articolo collegato
-	aggiungo il più "bello" ?lang=## alla fine della home.
+      	perché così invece di restituire il link dell'articolo collegato
+      	aggiungo il più "bello" ?lang=## alla fine della home.
 
-	Se non ho trovato nesuna traduzione per l'articolo, la bandiera punterà alla homepage
+      	Se non ho trovato nesuna traduzione per l'articolo, la bandiera punterà alla homepage
     */
     if( empty( $link ) && ! $only_existings ) {
       if( 1 === CMLUtils::_get( "is_crawler" ) ) {
@@ -323,8 +332,8 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
          * return translation, if exists :)
          */
         if( is_single() || is_page() ) {
-          $l = cml_get_linked_post( $the_id, cml_get_default_language_id() );
-          //if( ! empty( $l ) ) return get_permalink( $l );
+          $l = cml_get_linked_post( $the_id, CMLLanguage::get_default_id() );
+          // if( ! empty( $l ) ) return get_permalink( $l );
         }
 
         /*

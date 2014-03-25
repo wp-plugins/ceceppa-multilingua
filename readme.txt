@@ -3,7 +3,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate, international, .mo file, .po file, localization, widget, post
 Requires at least: 3.4.1
 Tested up to: 3.9
-Stable tag: 1.4.3
+Stable tag: 1.4.14
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG
@@ -12,7 +12,7 @@ Adds userfriendly multilingual content management and translation support into W
 
 == Description ==
 
-I create Ceceppa Multilingua to let Wordpress have an easy to use interface for managing a fully multilingual web site.
+I created Ceceppa Multilingua to let Wordpress have an easy to use interface for managing a fully multilingual web site.
 With "Ceceppa Multilingua" you can write your posts and pages in multiple language. Here are some features:
 
 = Features =
@@ -46,8 +46,12 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 - "CML: Recent Posts" - The most recent posts on your site
 - "CML: Text" - You can write arbitrary text or HTML separately for each language
 
+= Addons =
+- [Ceceppa Multilingua support to Customizr](http://www.alessandrosenese.eu/en/ceceppa-multilingua/contribute)
+
 = 3rd part compatible plugins =
 - Wordpress SEO by YOAST
+- All in one SEO pack
 - Google XML Sitemaps
 
 = Let's start =
@@ -55,10 +59,13 @@ Ceceppa Multilingua supports infinite language, which can be easily added/modifi
 All you need to do is activate the plugin, configure categories and start writing the content!
 
 = About =
-For more Information visit the [Plugin Homepage](http://www.alessandrosenese.eu/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/)
+For more Information visit the [Plugin Homepage](http://www.alessandrosenese.eu/portfolio/ceceppa-multilingua/)
+[Setting up a WordPress multilingual site with Ceceppa Multilingua](http://www.alessandrosenese.eu/en/ceceppa-multilingua/documentation)
+[Contribute](http://www.alessandrosenese.eu/en/ceceppa-multilingua/contribute)
+[Developers](http://www.alessandrosenese.eu/en/ceceppa-multilingua/developers)
 
 = Demo =
-[Plugin demo](http://www.youtube.com/watch?v=fAPIQonud-E).
+(old version)[Plugin demo](http://www.youtube.com/watch?v=fAPIQonud-E).
 
 = Flags =
 Flags directory are downloaded from [Flags](http://blog.worldofemotions.com/danilka/)
@@ -75,7 +82,7 @@ Pgettext by Ruben Nijveld
 
 == Installation ==
 
-For more detailed instructions, take a look at the [Installation Guide](http://www.alessandrosenese.eu/it/pillole/wp-guide/ceceppa-multilingua-configurare-e-utilizzare-il-plugin/)
+For more detailed instructions, take a look at the [Installation Guide](http://www.alessandrosenese.eu/en/ceceppa-multilingua/installation/)
 
 Installation of this plugin is fairly easy:
 
@@ -155,9 +162,9 @@ If the directory "ceceppaml" doesn't exists, create it
 
 = How to configure the plugin, and support page =
 
-The FAQ is available at the [Plugin Homepage](http://www.alessandrosenese.eu/it/pillole/wp-guide/ceceppa-multilingua-configurare-e-utilizzare-il-plugin/)
+The FAQ is available at the [Plugin Homepage](http://www.alessandrosenese.eu/en/ceceppa-multilingua/documentation)
 
-For Problems visits the [Support page](http://www.alessandrosenese.eu/it/pillole/wp-guide/ceceppa-multilingua-configurare-e-utilizzare-il-plugin/)
+For Problems visits the [Support page](http://www.alessandrosenese.eu/en/ceceppa-multilingua/documentation)
 
 == Screenshots ==
 
@@ -171,6 +178,60 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/it/pillole
 8. Translate your theme
 
 == Changelog ==
+
+= 1.4.14 =
+* Category translation in backend when using non default language
+* Fixed "Yoast" and "All in one SEO" compatibility notice
+
+= 1.4.13 =
+* Queries optimized
+* Added "is_unique" function to CMLPost class
+* Fixed "page" link
+
+= 1.4.12 =
+* Added new option in "Actions" tab to disable category url translation
+
+= 1.4.11 =
+* Fixed "save post relations"
+* The plugin will automatically copy tags from original post when click on "+" or "pencil" link
+* Added IE 9 compatibility
+* Fixed wrong page link in menu
+
+= 1.4.10 =
+* Fixed quick edit
+* Fixed post relations
+* Added timeout error in "Translate your theme" page
+
+= 1.4.9 =
+* Optimized query requests
+* Fixed "Ceceppa Multilingua in your languages" in Firefox
+* Added "Addons" tab
+
+= 1.4.8 =
+* Fixed "syntax error"
+
+= 1.4.7 = 
+* Improved parser
+* Fixed Italian translation
+
+= 1.4.6 =
+* Fixed theme translation layout
+* Fixed compatibility with php < 5.3
+* Fixed homepage url when using "forced" language
+
+= 1.4.5 =
+* Fixed Georgian flag
+* Fixed language change in "quick edit"
+* Fixed custom "Navigation label" 
+* Fixed dropdown menu style with Customizr
+* Improved "parser" to translate "Theme" and "Plugin"
+
+= 1.4.4 =
+* Fixed issue when category slug is different from name
+* Fixed custom menu url item for non default language
+* Fixed "Force language items"
+* Fixed post relations with more 2 languages
+* Fixed "remove extra -##" for all url mode 
 
 = 1.4.3 =
 * Fixed url mode "?lang"

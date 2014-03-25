@@ -91,6 +91,36 @@ function cml_do_update() {
     }
   }
 
+  if( $dbVersion < 28 ) {
+    $query = sprintf( "SELECT * FROM %s", CECEPPA_ML_RELATIONS );
+    $results = $wpdb->get_results( $query, ARRAY_N );
+
+    /*
+     * Remove "_cml_meta", becase for CML <= 1.4.9, meta tags will be updated only to 
+     * edited page/post not its translations :(
+     * They will be rebuilded when "get_translations" will be called
+     */
+    foreach( $results as $rec ) {
+      unset( $rec[ 'id' ] );
+
+      foreach( $rec as $key => $value ) {
+        if( $value == 0 ) continue;
+
+        delete_post_meta( $value, "_cml_meta" );
+      }//foreach
+    }//foreach
+  }//if
+
+  if( $dbVersion < 29 ) {
+    $wpdb->query( sprintf( "ALTER TABLE  %s CHANGE cml_language cml_language TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL",
+                       CECEPPA_ML_TABLE ) );
+  }
+
+  if( $dbVersion < 30 ) {
+    //Get all unique posts from database
+    cml_fix_rebuild_posts_info();
+  }
+
   //CML < 1.4
   cml_do_update_old();
 
@@ -267,14 +297,26 @@ function cml_fix_rebuild_posts_info() {
   $apids = array(); //All pids
   $i = 0;
   $results = $wpdb->get_results( "SELECT * FROM " . CECEPPA_ML_RELATIONS );
+
+  $uniques = array();
   foreach( $results as $result ) {
     $r = ( Array ) $result;
 
+    unset( $r[ 'id' ] );
+
+    $first = reset( $r );
+    $is_unique = 1;
     foreach( $_cml_language_columns as $key => $l ) {
+      $is_unique = $is_unique && ( $r[ $l ] == $first );
+
       if( $r[ $l ] > 0 ) {
         $pids[ $key ][] = $r[ $l ];
         $apids[ $i ][ $key ] = $r[ $l ];
       }
+    }
+
+    if( $is_unique ) {
+      $uniques[] = $first;
     }
 
     $i++;
@@ -283,6 +325,9 @@ function cml_fix_rebuild_posts_info() {
   foreach( $_cml_language_columns as $key => $l ) {
     @update_option( "cml_posts_of_lang_" . $key, array_unique( $pids[ $key ] ) );
   }
+
+  //unique posts
+  @update_option( "cml_unique_posts", array_unique( $uniques ) );
 
   /*
    * hide translations of current post..
