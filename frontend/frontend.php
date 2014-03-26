@@ -722,7 +722,6 @@ EOT;
     }
 
     if( ! CMLLanguage::is_current( $lang_id ) ) {
-      print_r( $post_id );
       //If post language != current language I can't get translation from ".mo"
       $name = CMLTranslations::get( $lang_id, $term_name, "C", false, true );
     } else {
