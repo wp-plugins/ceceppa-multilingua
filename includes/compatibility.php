@@ -172,7 +172,7 @@ class CML_WPML_Parser {
  */
 function cml_admin_scan_plugins_folders() {
   $plugins = WP_CONTENT_DIR . "/plugins";
-  
+
   $old = get_option( '_cml_wpml_config_paths', "" );
 
   $xmls = @glob( "$plugins/*/wpml-config.xml" );
@@ -202,12 +202,13 @@ function cml_admin_scan_plugins_folders() {
   $not = join( ",", $not );
   update_option( '_cml_wpml_config_paths', $not );
 
-  if( $not == $old ) {
+  $displayed = get_option( '_cml_wpml_config', 1 );
+  if( ! $displayed && $not == $old ) {
     return;
   }
 
   $txt .= "</ul>";
-  $txt .= sprintf( _( "Now you can translate Admin texts / wp_options in <%s>\"My Translations\"</a> page", "ceceppaml" ),
+  $txt .= sprintf( __( "Now you can translate Admin texts / wp_options in <%s>\"My Translations\"</a> page", "ceceppaml" ),
           'a href="' . $link . '"' );
   $txt .= "<br /><b>";
   $txt .= __( "Support to wpml-config.xml is experimental and could not works correctly", "ceceppaml" );
@@ -221,7 +222,6 @@ function cml_admin_scan_plugins_folders() {
  *
  * http://wordpress.org/plugins/google-sitemap-generator/
  */
-add_filter( 'cml_translate_home_url', 'cml_yoast_translate_home_url', 10, 2 );
 CMLUtils::_append( "_seo", array(
                                 'pagenow' => "options-general.php",
                                 'page' => "google-sitemap-generator/sitemap.php",
@@ -434,6 +434,8 @@ function cml_change_wpml_settings_values( $group, $name ) {
   }
 
   $options = & $GLOBALS[ $options ];
+  if( ! is_array( $options ) ) return;
+
   $names = explode( "/", $names );
   foreach( $options as $key => $value ) {
     if( ! in_array( $key, $names ) ) continue;

@@ -98,7 +98,7 @@ class CML_Nav_Menu_Item_Custom_Fields {
 //       add_filter( 'wp_edit_nav_menu_walker', function () {
 //           return 'CML_Walker_Nav_Menu_Edit';
 //       });
-      add_filter( 'wp_edit_nav_menu_walker', 'cml_return_nav_walker' );
+      add_filter( 'wp_edit_nav_menu_walker', 'cml_return_nav_walker', 99, 2 );
       add_filter( 'cml_nav_menu_item_additional_fields', array( __CLASS__, '_add_fields' ), 10, 5 );
       add_action( 'save_post', array( __CLASS__, '_save_post' ) );
 	}
@@ -230,11 +230,15 @@ function cml_admin_select_menu() {
 
       echo "<br />";
   
+			if( isset( $_GET[ 'cml-name' ] ) ) {
+				update_option( "cml_primary_menu_name", esc_attr( $_GET[ 'cml-name' ] ) );
+			}
+
       $name = get_option( "cml_primary_menu_name", "" );
-  
+
       //Se non inizia per cml_ allora sarà quella definito dal tema :)
       if( is_array( $menus ) ) : ?>
-      <select name="name" class="cml-select-menu">
+      <select name="cml-name" class="cml-select-menu">
         <?php foreach( $menus as $key => $n ) {
           if( substr( $key, 0, 4 ) == "cml_" ) continue;
   
@@ -266,7 +270,7 @@ class CML_Walker_Nav_Menu_Edit extends Walker_Nav_Menu_Edit {
 
 //Added for compatibility with php < 5.3.0
 function cml_return_nav_walker() {
-  return 'CML_Walker_Nav_Menu_Edit';
+	return 'CML_Walker_Nav_Menu_Edit';
 }
 
 CML_Nav_Menu_Item_Custom_Fields::setup();
