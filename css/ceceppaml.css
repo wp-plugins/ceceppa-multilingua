@@ -30,7 +30,7 @@
     border:1px solid #ccc;
     color: #444;
     display: inline-block;
-    width: 150px;
+    width: 149px;
     height: 18px;
     overflow: hidden;
     padding: 5px;
@@ -60,7 +60,7 @@
       line-height: 18px;
     }
 
-    #cml-lang > li > ul a:hover {
+    #cml-lang > li > ul li:hover {
       background: #eee;
     }
 
