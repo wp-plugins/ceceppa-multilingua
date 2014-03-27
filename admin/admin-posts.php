@@ -185,7 +185,6 @@ function cml_admin_save_extra_post_fields( $term_id ) {
       //Set language of current post
       $linkeds[ $lang->id ] = @$_POST[ 'linked_post' ][ $lang->id ];
     }
-
   } else {
     $langs = CMLLanguage::get_all();
 
@@ -241,12 +240,13 @@ function cml_admin_add_flag_column( $col_name, $id ) {
   $xid = CMLPost::get_language_id_by_id( $id );
   
   $langs = cml_get_languages( false );
-  $linked = cml_get_linked_posts( $id );
-  
+  $linked = CMLPost::get_translations( $id, true );
+
   $GLOBALS[ '_cml_no_translate_home_url' ] = 1;
 
   foreach( $langs as $lang ) {
     $link = isset( $linked[ $lang->cml_language_slug ] ) ? $linked[ $lang->cml_language_slug ] : 0;
+
     if( $link > 0 ) {
       $title = "<br />" . get_the_title($link);
       echo '<a href="' . get_edit_post_link($link) . '">';
@@ -366,7 +366,7 @@ function cml_admin_filter_all_posts_query( $query ) {
   if( is_admin() && $pagenow == "edit.php" ) {
     if($id > 0) {
       $posts = CMLPost::get_posts_by_language( $id );
-      
+
       $query->query_vars[ 'post__in' ] = $posts;
     }
   }

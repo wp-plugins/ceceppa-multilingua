@@ -125,8 +125,9 @@ class CMLFrontend extends CeceppaML {
      * Used static page?
      * If yes I change the id of page with its translation
      */
-    if( cml_is_homepage() && cml_use_static_page() )
+    if( cml_is_homepage() && cml_use_static_page() && ! isset( $_GET[ 'preview' ] ) ) {
       add_filter( 'pre_get_posts', array( & $this, 'change_static_page' ), 0 );
+    }
 
     //Archive links
     add_filter( 'getarchives_where', array( & $this, 'get_archives_where' ), 10, 2 );
@@ -1651,14 +1652,11 @@ EOT;
       $this->_looking_id_post = true;
       $id = cml_get_page_id_by_path( $this->_clean_url );
 
-      unset( $this->_looking_id_post );
+      if( $id > 0 ) {
+        $posts[] = $id;
 
-      $key = array_search( $id, $posts );
-      if( false !== $key ) {
-        unset( $posts[ $key ] );
+        CMLPost::_update_posts_by_language( CMLLanguage::get_current_id(), $posts );
       }
-
-      CMLPost::_update_posts_by_language( CMLLanguage::get_current_id(), $posts );
 
       $this->_include_current = true;
     }

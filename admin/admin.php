@@ -645,8 +645,6 @@ EOT;
    * scan plugins folders
    */
   function plugin_activated() {
-    delete_option( '_cml_wpml_config' );
-
     update_option( '_cml_scan_folders', 1 );
   }
 
