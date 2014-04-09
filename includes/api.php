@@ -696,7 +696,7 @@ class CMLTranslations {
     T_bind_textdomain_codeset( $domain, 'UTF-8' );
     T_textdomain( $domain );
 
-    if( path !== null ) $string = strtolower( $string );
+    if( $path !== null ) $string = strtolower( $string );
 
     return T_gettext( $string );
 
