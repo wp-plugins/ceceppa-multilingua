@@ -48,7 +48,7 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 
 = Addons =
 - [Ceceppa Multilingua support to Customizr](http://www.alessandrosenese.eu/en/ceceppa-multilingua/ceceppa-multilingua-for-customizr)
-- [Ceceppa Multilingua support to Woocommercehttp://www.alessandrosenese.eu/en/ceceppa-multilingua/ceceppa-multilingua-for-woocommerce)
+- [Ceceppa Multilingua support to Woocommerce](http://www.alessandrosenese.eu/en/ceceppa-multilingua/ceceppa-multilingua-for-woocommerce)
 
 = 3rd part compatible plugins =
 - Wordpress SEO by YOAST
