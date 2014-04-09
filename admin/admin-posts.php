@@ -322,7 +322,7 @@ function cml_admin_add_meta_boxes() {
   // remove_meta_box('tagsdiv-post_tag','post','side');
   // add_meta_box( 'ceceppaml-tags-meta-box', __('Tags', 'ceceppaml'), 'cml_admin_tags_meta_box', 'post', 'side', 'core' );
 
-  $post_types = apply_filters( 'cml_remove_post_type', $post_types );
+  $post_types = apply_filters( 'cml_manage_post_types', $post_types );
 
   foreach( $post_types as $post_type ) {
     if( ! in_array( $post_type, $posts ) ) {
@@ -332,6 +332,12 @@ function cml_admin_add_meta_boxes() {
 }
 
 function cml_admin_filter_all_posts_page() {
+  $post_types = get_post_types('','names');
+  $post_types = apply_filters( 'cml_manage_post_types', $post_types );
+
+  if( isset( $_GET[ 'post_type' ] ) &&
+     ! in_array( $_GET[ 'post_type' ], $post_types ) ) return;
+
   //Se sto nel cestino di default visualizzo tutti gli articoli :)
   $d = CMLLanguage::get_default_id();
 
@@ -404,6 +410,7 @@ function cml_admin_delete_extra_post_fields( $id ) {
 function cml_manage_posts_columns() {
   //Show flags in list for all registered post types ( so also custom posts )
   $post_types = get_post_types('','names');
+  $post_types = apply_filters( 'cml_manage_post_types', $post_types );
 
   foreach ($post_types as $type ) {
     add_action( "manage_${type}_posts_custom_column", 'cml_admin_add_flag_column', 10, 2);
@@ -431,5 +438,4 @@ add_action('delete_page', 'cml_admin_delete_extra_post_fields' );
 //Filters
 add_filter( 'parse_query', 'cml_admin_filter_all_posts_query' );
 add_action( 'restrict_manage_posts', 'cml_admin_filter_all_posts_page' );
-
 ?>
