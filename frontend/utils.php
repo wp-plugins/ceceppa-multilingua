@@ -565,7 +565,7 @@ function cml_show_flags( $args ) {
     if( empty( $link) ) continue;
 
     if( $show_flag ) {
-      $img = sprintf( '<img class="%s %s" src="%s" title="%s" alt="%s" width="%s"',
+      $img = sprintf( '<img class="%s %s" src="%s" title="%s" alt="%s" width="%s">',
                      $size, $image_class, CMLLanguage::get_flag_src( $result->id, $size ),
                      $result->cml_language,
                      sprintf( __( "%1$s's flag", 'ceceppaml' ), $result->cml_language_slug ),

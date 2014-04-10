@@ -1888,7 +1888,8 @@ EOT;
   /*
    * get translated title
    */
-  function get_translated_title( $title, $id ) {
+  function get_translated_title( $title, $id = null ) {
+    if( null == $id ) return $title;
     if( 'attachment' !== get_post_type( $id ) ) return $title;
 
     $meta = get_post_meta( $id, '_cml_media_meta', true );
