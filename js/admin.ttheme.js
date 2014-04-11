@@ -2,6 +2,8 @@ jQuery( document ).ready( function( $ ) {
   //Update info about untranslated rows
   if( $( '.ceceppaml-theme-translations' ).length > 0 ) updateInfo();
 
+  if( $( 'input[name="error"]' ).length > 0 ) $( 'input[type="submit"]' ).hide();
+
   /*
    * file .mo is generated after "load_plugin_textdomain", so I send data via ajax
    * and when done refresh page :)
@@ -13,15 +15,17 @@ jQuery( document ).ready( function( $ ) {
     $.ajax( {
       type: 'POST',
       url: ajaxurl,
+      timeout: 60000,
       data: $( this ).serialize(),
       success: function( data ) {
+        // console.log( "Data", data );
         $form.find( '.cml-submit-button > .wpspinner > .spinner' ).fadeOut();
 
-        console.log( data );
         $data = null;
 
         if ( data == "-1" ) {
-          console.log( "Failed" );
+          $form.find( '.spinner' ).fadeOut();
+
           alert( 'Failed!!!' );
           return;
         }
@@ -29,16 +33,20 @@ jQuery( document ).ready( function( $ ) {
         try {
           $data = $.parseJSON( data );
         } catch(e) {
+          $form.find( '.spinner' ).fadeOut();
+
+          alert( 'Failed!!!' );
           return;
         }
-        
+
         if ( $data == null) return;
-        
+
         if ( $data.url ) window.location = $data.url;
       },
       error: function (xhr, ajaxOptions, thrownError) {
-        //console.log( xhr.status );
-        //console.log( thrownError );
+        alert( "Something goes wrong :'(" );
+
+        window.location.reload();
       }
     });
 
@@ -47,23 +55,16 @@ jQuery( document ).ready( function( $ ) {
   
   jQuery( 'body' ).on( 'change keyup keypress', '.search input.s', function() {
     $table = $( 'table.ceceppaml-theme-translations' );
-    $val = $( this ).val();
+    $val = $( this ).val().toLowerCase();
 
     $table.find( 'tr > td.item' ).each( function() {
       html = $( this ).html();
-      
+
       var display = html.toLowerCase().indexOf( $val );
+      display = ( display >= 0 ) ? "table-row" : "none"
 
-      $( this ).parent().css( "display", ( display >= 0 ) ? "table-row" : "none" );
+      $( this ).parent().css( "display",  display );
     });
-  });
-
-  $('table.ceceppaml-theme-translations tr.row-domain').click( function() {
-    $( this ).removeClass( 'row-open' );
-
-    $next = $( this ).next();
-    $next.toggle();
-    if( $next.is(":visible") ) $( this ).addClass( 'row-open' );
   });
 });
 
@@ -78,7 +79,6 @@ function showStrings( id, what ) {
   jQuery( 'h2.tab-strings a' ).removeClass( 'nav-tab-active' );
   jQuery( jQuery( 'h2.tab-strings a' ).get( id ) ).addClass( 'nav-tab-active' );
 
-  console.log( what );
   jQuery( 'table.ceceppaml-theme-translations tbody tr' + what ).show();
   
   if( what != undefined || what != "" ) {

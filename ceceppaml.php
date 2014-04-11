@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: Ceceppa Multilingua
-Plugin URI: http://www.ceceppa.eu/it/interessi/progetti/wp-progetti/ceceppa-multilingua-per-wordpress/
+Plugin URI: http://www.ceceppa.eu/portfolio/ceceppa-multilingua/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.4.3
+Version: 1.4.20
 Author: Alessandro Senese aka Ceceppa
-Author URI: http://www.ceceppa.eu/chi-sono
+Author URI: http://www.alessandrosenese.eu/
 License: GPL3
 Tags: multilingual, multi, language, admin, tinymce, qTranslate, Polyglot, bilingual, widget, switcher, professional, human, translation, service, multilingua
 */
@@ -39,7 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $wpdb;
 
-define( 'CECEPPA_DB_VERSION', 27 );
+define( 'CECEPPA_DB_VERSION', 31 );
 
 define( 'CECEPPA_ML_TABLE', $wpdb->base_prefix . 'ceceppa_ml' );
 define( 'CECEPPA_ML_CATS', $wpdb->base_prefix . 'ceceppa_ml_cats' );
@@ -117,8 +117,8 @@ require_once( CML_PLUGIN_INCLUDES_PATH . 'php-compatibility.php' );
  */
 if( ! isset( $_GET[ 'cml-settings-updated' ] ) &&
    get_option( "cml_use_settings_gen", 0 ) &&
-   file_exists( CML_PLUGIN_CACHE_URL . "settings.gen.php" ) ) {
-  define( '_CML_SETTINGS_PHP', CML_PLUGIN_CACHE_PATH . "settings.gen.php" );
+   file_exists( CML_UPLOAD_DIR . "settings.gen.php" ) ) {
+  define( '_CML_SETTINGS_PHP', CML_UPLOAD_DIR . "settings.gen.php" );
 } else {
   define( '_CML_SETTINGS_PHP', CML_PLUGIN_PATH . "settings.php" );
 }
@@ -144,7 +144,12 @@ require_once( CML_PLUGIN_INCLUDES_PATH . "functions.php" );
 require_once CML_PLUGIN_INCLUDES_PATH . "widgets.php";
 
 //debug
-// require_once( "debug.php" );
+// if( file_exists( CML_PLUGIN_PATH . "debug.php" ) &&
+//     1 == get_option( "cml_debug_enabled" ) ) {
+//   define( 'CML_DEBUG', 1 );
+
+ //require_once( "debug.php" );
+// }
 
 //3rd party compatibility
 require_once( CML_PLUGIN_INCLUDES_PATH . 'compatibility.php' );
@@ -176,11 +181,15 @@ class CeceppaML {
     $this->_request_url = str_replace($this->_homeUrl, "", $this->_url);
     $this->_permalink_structure = get_option( "permalink_structure" );
 
+    /* I can't use PRE_PATH with default permalink structure ( ?p=## ) */
+    $this->_url_mode = CMLUtils::get_url_mode();
+
     //Activate?
     register_activation_hook( __FILE__, array( & $this, 'activated' ) );
 
     //Initialize the plugin
     add_action( 'init', array( &$this, 'init' ), 0 );
+    add_filter( 'plugin_locale', array( & $this, 'plugin_locale' ), 10, 2 );
 
     //Scripts & Styles
     add_action( 'wp_enqueue_scripts', array( &$this, 'register_scripts' ) );
@@ -193,7 +202,7 @@ class CeceppaML {
     add_filter( 'pre_post_link', array( & $this, 'pre_post_link' ), 0, 3 );
     add_filter( 'post_link', array( & $this, 'translate_post_link' ), 0, 3 );
     add_filter( 'post_type_link', array( & $this, 'translate_post_link' ), 0, 3 );
-    
+
     if( $this->_url_mode > PRE_LANG ) {
 //       add_filter( 'post_type_link', array( & $this, 'translate_page_link' ), 0, 3 );
       add_filter( 'page_link', array ( & $this, 'translate_page_link' ), 0, 3 );
@@ -202,13 +211,13 @@ class CeceppaML {
     //Switch language in menu
     add_action( 'admin_bar_menu', array( & $this, 'add_bar_menu' ), 1000 );
 
-    /* I can't use PRE_PATH with default permalink structure ( ?p=## ) */
-    $this->_url_mode = CMLUtils::get_url_mode();
-
     //Category doesn't works correctly with "none" of "Url Modification mode"
     $this->_category_url_mode = $this->_url_mode;
-    if( $this->_category_url_mode == PRE_NONE ) //&& ! $_cml_settings[ 'cml_option_translate_categories' ] )
+    if( $this->_category_url_mode == PRE_NONE || ! $_cml_settings[ 'cml_option_translate_category_url' ] ) {
       $this->_category_url_mode = PRE_LANG;
+    }
+
+    CMLUtils::_set( 'cml_category_mode', $this->_category_url_mode );
   }
 
   /*
@@ -240,10 +249,29 @@ class CeceppaML {
   }
 
   /*
+   * change cmltrans locale
+   */
+  function plugin_locale( $locale, $domain ) {
+    if( 'cmltrans' == $domain ) {
+      return CMLLanguage::get_default_locale();
+    }
+
+    return $locale;
+  }
+
+  /*
    * script required by frontend
    */
   function register_scripts() {
-    wp_enqueue_script( 'ceceppaml-style', CML_PLUGIN_JS_URL . 'ceceppaml.js', array( 'jquery' ) );
+    wp_enqueue_script( 'ceceppaml-script', CML_PLUGIN_JS_URL . 'ceceppaml.js', array( 'jquery' ) );
+
+    //Language information
+    wp_localize_script( 'ceceppaml-script', 'ceceppa_ml', array(
+                                                                  'id' => CMLLanguage::get_current_id(),
+                                                                  'lang' => json_encode( ( array ) CMLLanguage::get_current() ),
+                                                                  'slug' => CMLLanguage::get_current_slug(),
+                                                                  'clear' => 1,
+                                                                  ) );
 
     wp_enqueue_style( 'ceceppaml-style', CML_PLUGIN_URL . 'css/ceceppaml.css' );
     
@@ -309,7 +337,7 @@ EOT;
     }
 
 	//Force "get_term" to return translation of category
-    if( ! isset( $GLOBALS[ '_cml_force_home_slug' ] ) ) {
+    if( null == CMLUtils::_get( "_forced_language_slug" ) ) {
       $lang_id =  CMLPost::get_language_id_by_id( $post->ID, true );
       if( $lang_id == 0 ) $lang_id = CMLLanguage::get_current_id();
 
@@ -318,8 +346,13 @@ EOT;
       /*
        * already forced by cml_get_the_link
        */
-      $this->_force_category_lang = CMLLanguage::get_by_slug( $GLOBALS[ '_cml_force_home_slug' ] )->id;
+      //$this->_force_category_lang = CMLLanguage::get_by_slug( $GLOBALS[ '_cml_force_home_slug' ] )->id;
+      $this->_force_category_lang = CMLLanguage::get_by_slug( CMLUtils::_get( "_forced_language_slug" ) )->id;
     }
+
+    $this->unset_category_lang();
+    unset( $this->_force_post_lang );
+    unset( $GLOBALS[ '_cml_force_home_slug' ] );
 
     return $permalink;
   }
@@ -329,6 +362,10 @@ EOT;
    */
   function translate_post_link( $permalink, $post, $leavename ) {
     global $wpdb, $page;
+
+    if( is_preview() ) {
+      return $permalink;
+    }
 
     if( $this->_url_mode == PRE_LANG &&
         $page > 1 &&
@@ -343,69 +380,11 @@ EOT;
       $permalink = preg_replace( "/\?lang.*/", "", $permalink );
 
       $slug = CMLPost::get_language_slug_by_id( $post->ID );
+
       return add_query_arg( array(
                                   "lang" => $slug,
                                   ),
                             "$permalink/$page/" );
-    }
-
-    if( is_preview() ) {
-      return $permalink;
-    }
-
-    /*
-     * I have to unforce category lang
-     */
-    //Remove extra "-##" add by wordpress but ONLY on translations
-    if( is_object( $post ) && CMLPost::has_translations( $post->ID ) ) {
-      //Remove last "/"
-      $url = untrailingslashit( $permalink );
-      $url = str_replace( $this->_homeUrl, "", $url );
-  
-      /*
-       * Post/page link contains "-d"
-       */
-      preg_match_all( "/-\d+/", $url, $out );
-  
-      /*
-       * if true I have to check if it was added by "wordpress" :)
-       */
-      if( count( $out[ 0 ] ) > 0 ) {
-        /*
-         * when hook get_page_link, wordpress pass me only post id, not full object
-         */
-        $post_title = ( ! isset( $post->post_name ) ) ?
-          $post->post_title : $post->post_name;
-          //: $wpdb->get_var( "SELECT post_title FROM $wpdb->posts WHERE id = $post" );
-
-        /*
-         * got how many number occourrences ( -d ) are in the "real title"
-         */
-        preg_match_all( "/\d+/", $post_title, $pout );
-
-        /*
-         * compare occourrences between permalink and title,
-         * if title contains more one, I remove it :)
-         */
-        //Remove autoinserted -## from url
-        if( count( $pout[0] ) < count( $out[ 0 ] ) ) {
-          $permalink = trailingslashit( preg_replace( "/-\d*$/", "",
-                                                     untrailingslashit( $permalink ) ) );
-        }
-      }
-
-      if( $this->_url_mode == PRE_NONE ) {
-        $post_id = is_object( $post ) ? $post->ID : $post;
-
-        $lang = CMLLanguage::get_by_post_id( $post_id );
-        if( empty( $lang ) ) {
-          $lang = CMLLanguage::get_current();
-        }
-
-        $permalink = add_query_arg( array(
-                                          "lang" => $lang->cml_language_slug,
-                                          ), $permalink );
-      }
     }
 
     if( $this->_url_mode == PRE_LANG ) {
@@ -420,12 +399,20 @@ EOT;
     unset( $this->_force_post_lang );
     unset( $GLOBALS[ '_cml_force_home_slug' ] );
 
-    return $permalink;
+    return CMLPost::remove_extra_number( $permalink, $post );
   }
 
-  function translate_page_link( $permalink, $page_id, $leavename ) {
-    if( is_object( $page_id ) ) {
-      $page_id = $page_id->ID;
+  function translate_page_link( $permalink, $page, $leavename ) {
+    if( is_preview() ) {
+      return $permalink;
+    }
+
+    if( is_object( $page ) ) {
+      $page_id = $page->ID;
+    } else {
+      $page_id = $page;
+
+      $page = get_post( $page );
     }
 
     $lang = CMLLanguage::get_by_post_id( $page_id );
@@ -434,15 +421,16 @@ EOT;
       $lang = CMLLanguage::get_default();
     }
 
-    if( CMLLanguage::is_current( $lang->id ) ) {
-      return $permalink;
-    }
-
-    $slug = ( empty( $lang ) ) ? CMLLanguage::get_default_slug() : $lang->cml_language_slug;
-
     $this->unset_category_lang();
     unset( $this->_force_post_lang );
     unset( $GLOBALS[ '_cml_force_home_slug' ] );
+
+    if( CMLLanguage::is_current( $lang->id ) ) {
+      return CMLPost::remove_extra_number( $permalink, $page );
+    }
+
+    $slug = ( empty( $lang ) ) ? CMLLanguage::get_default_slug() : $lang->cml_language_slug;
+    $permalink = CMLPost::remove_extra_number( $permalink, $page );
 
     return $this->convert_url( $permalink, $slug );
   }
@@ -457,9 +445,8 @@ EOT;
       break;
     case PRE_PATH:
       $url = CMLUtils::home_url();
-
       $clean_url = CMLUtils::clear_url( $permalink );
-    
+
       //Change slug in url instead of append ?lang arg
       $link = str_replace( trailingslashit( $url ), "", $clean_url );
   
@@ -479,6 +466,8 @@ EOT;
       return $url;
       break;
     }
+
+    return $permalink;
   }
   
   function translate_category_url( $url ) {
@@ -528,13 +517,18 @@ EOT;
       return $url;
     }
 
-    $slug = ( ! isset( $GLOBALS[ '_cml_force_home_slug' ] ) ) ?
-                    CMLLanguage::get_current_slug() : $GLOBALS[ '_cml_force_home_slug' ];
+    if( is_admin() && "?p=" == substr( $path, 0, 3 ) ) {
+      return $url;
+    }
 
-    if( isset( $this->_force_category_lang ) )
+    $slug = CMLUtils::_get( "_forced_language_slug", 
+                    CMLLanguage::get_slug( CMLUtils::_get( '_real_language' ) ) );
+
+    if( isset( $this->_force_category_lang ) ) {
       $slug = CMLLanguage::get_slug( $this->_force_category_lang );
-    else if( isset( $this->_force_language_slug ) )
+    } else if( isset( $this->_force_language_slug ) ) {
       $slug = $this->_force_language_slug;
+    }
 
     if( $this->_url_mode == PRE_PATH ) {
       /*
