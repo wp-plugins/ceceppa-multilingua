@@ -1133,7 +1133,7 @@ EOT;
         }
 
         if( $what % 2 ) {
-          $item->title = '<img src="' . CMLLanguage::get_flag_src( $lang->id, $size ) . '" />&nbsp;&nbsp;' . $item->title;
+          $item->title = '<img src="' . CMLLanguage::get_flag_src( $lang->id, $size ) . '" title="' . $lang->cml_language . '"/>&nbsp;&nbsp;' . $item->title;
         }
 
         $this->_force_post_lang = $lang->id;
@@ -1164,7 +1164,8 @@ EOT;
           }
 
           if( $what == 1 || $what == 3 || $what == 5 ) {
-            $clone->title = '<img src="' . CMLLanguage::get_flag_src( $linfo->id, $size ) . '" />&nbsp;&nbsp;' . $clone->title;
+            $clone->title = '<img src="' . CMLLanguage::get_flag_src( $linfo->id, $size ) . '" title="' . $linfo->cml_language . '"/>&nbsp;&nbsp;' . $clone->title;
+            //$clone->title = '<img src="' . CMLLanguage::get_flag_src( $linfo->id, $size ) . '" />&nbsp;&nbsp;' . $clone->title;
           }
 
           $this->_force_post_lang = $l->id;
