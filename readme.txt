@@ -66,7 +66,7 @@ For more Information visit the [Plugin Homepage](http://www.alessandrosenese.eu/
 [Developers](http://www.alessandrosenese.eu/en/ceceppa-multilingua/developers)
 
 = Demo =
-(old version)[Plugin demo](http://www.youtube.com/watch?v=fAPIQonud-E).
+[Plugin demo](https://www.youtube.com/watch?v=QoF8IQCZccw).
 
 = Flags =
 Flags directory are downloaded from [Flags](http://blog.worldofemotions.com/danilka/)
