@@ -3,7 +3,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate, international, .mo file, .po file, localization, widget, post
 Requires at least: 3.4.1
 Tested up to: 3.9
-Stable tag: 1.4.20
+Stable tag: 1.4.21
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG
@@ -66,7 +66,7 @@ For more Information visit the [Plugin Homepage](http://www.alessandrosenese.eu/
 [Developers](http://www.alessandrosenese.eu/en/ceceppa-multilingua/developers)
 
 = Demo =
-[Plugin demo](https://www.youtube.com/watch?v=QoF8IQCZccw).
+[Plugin demo](https://www.youtube.com/watch?v=QoF8IQCZccw)
 
 = Flags =
 Flags directory are downloaded from [Flags](http://blog.worldofemotions.com/danilka/)
@@ -179,6 +179,9 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/en/ceceppa
 8. Translate your theme
 
 == Changelog ==
+
+= 1.4.21 =
+* fixed translation when edit category
 
 = 1.4.20 =
 * Fixed post language/permalink when using not enabled language
