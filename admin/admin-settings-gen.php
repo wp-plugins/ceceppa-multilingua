@@ -116,6 +116,8 @@ function cml_generate_mo_from_translations( $type = null, $echo = false ) {
     $h = str_replace( '%PROJECT%', "cml_translations", $h );
     $h = str_replace( '%AUTHOR%', $user->user_firstname . " " . $user->user_lastname, $h );
     $h = str_replace( '%EMAIL%', $user->user_email, $h );
+    $h = str_replace( '%TIME%', date( "h:i", time() ), $h );
+    $h = str_replace( '%DATE%', date( "Y-m-d", time() ), $h );
     //$h = str_replace( '%LOCALE%', $lang->cml_locale, $h );
     fwrite( $fp, $h . PHP_EOL );
 

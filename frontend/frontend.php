@@ -545,6 +545,7 @@ EOT;
 
     if( isset( $this->_static_page ) ) return $this->_static_page;
     if( ! isset( $query->query_vars[ 'page_id' ] ) ) return;
+    if( is_search() ) return;
 
     //Recupero l'id della lingua
     $lang_id = CMLLanguage::get_current_id();
