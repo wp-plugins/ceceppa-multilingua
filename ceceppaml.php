@@ -213,7 +213,8 @@ class CeceppaML {
 
     //Category doesn't works correctly with "none" of "Url Modification mode"
     $this->_category_url_mode = $this->_url_mode;
-    if( $this->_category_url_mode == PRE_NONE || ! $_cml_settings[ 'cml_option_translate_category_url' ] ) {
+    if( $this->_category_url_mode == PRE_NONE ||
+       ( ! $_cml_settings[ 'cml_option_translate_category_url' ] && $this->_category_url_mode != PRE_PATH ) ) {
       $this->_category_url_mode = PRE_LANG;
     }
 

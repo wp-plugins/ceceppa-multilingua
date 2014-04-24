@@ -404,6 +404,8 @@ class CMLLanguage {
   /**
    * get language object by post id
    *
+   * <i>This function is equivalent to CMLPost::get_language_by_id()</i>
+   *
    * @param int $post_id - id of post/page
    *
    * @return stdObject
@@ -415,6 +417,8 @@ class CMLLanguage {
   /**
    * get language id by post id
    *
+   * <i>This function is equivalent to CMLPost::get_language_id_by_id()</i>
+   * 
    * @param int $post_id - id of post
    *
    * @return int
@@ -423,6 +427,19 @@ class CMLLanguage {
     return CMLPost::get_language_id_by_id( $post_id );
   }
   
+  /**
+   * get language slug by post id
+   *
+   * <i>This function is equivalent to CMLPost::get_language_slug_by_id();</i>
+   * 
+   * @param int $post_id - id of post
+   *
+   * @return string
+   */
+  public static function get_slug_by_post_id( $post_id ) {
+    return CMLPost::get_language_slug_by_id( $post_id );
+  }
+
   /**
    * Is $lang the default one?
    *

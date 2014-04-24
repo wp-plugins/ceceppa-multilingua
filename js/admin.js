@@ -26,7 +26,6 @@ jQuery(document).ready( function($) {
       url: ajaxurl,
       data: $( this ).serialize(),
       success: function( data ) {
-        console.log( data );
         $form.find( '.cml-submit-button > .wpspinner > .spinner' ).fadeOut();
 
         $data = null;

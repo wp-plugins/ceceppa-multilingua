@@ -180,6 +180,10 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/en/ceceppa
 
 == Changelog ==
 
+= 14.23 =
+* Fixed "mb_detect_encoding" not found error
+* Fixed Widget titles translation
+
 = 1.4.22 =
 * Added warning when upgrading from CML 1.4 was failed
 * Fixed search result when using static page
