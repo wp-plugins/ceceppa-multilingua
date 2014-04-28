@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-
 class CeceppaMLWidgetRecentPosts extends WP_Widget {
   public function __construct() {
     parent::__construct(
@@ -325,7 +324,9 @@ class CeceppaMLWidgetText extends WP_Widget {
     $title = apply_filters('widget_title', $instance['title'] );
 
     echo $before_widget;
-      echo $before_title . $title . $after_title;
+      if( ! empty( $title ) ) {   /* JGR don't show empty title*/
+        echo $before_title . $title . $after_title;
+      }
 
       $lang_id = CMLLanguage::get_current_id();
       if( isset( $instance['text-' . $lang_id] ) )
