@@ -564,7 +564,8 @@ EOT;
      */
     if( $nid > 0 ) {
       if( ! is_preview() ) {
-	update_option( 'page_on_front', $nid );
+        add_filter( 'body_class', array( & $this, 'add_home_class' ) );
+    	//update_option( 'page_on_front', $nid );
       }
     } else {
       $nid = $id;
@@ -574,6 +575,12 @@ EOT;
     $query->query_vars[ 'is_home' ] = 1;
 
     $this->_static_page = $nid;
+  }
+
+  function add_home_class( $classes ) {
+    $classes[] = " home";
+    
+    return $classes;
   }
 
   function get_archives_where( $where, $r ) {

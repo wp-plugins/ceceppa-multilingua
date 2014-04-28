@@ -681,4 +681,5 @@ function cml_get_menu() {
 
   return "cml_menu_" . $lang->cml_language_slug;
 }
+
 ?>

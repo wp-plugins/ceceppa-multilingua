@@ -4,6 +4,10 @@ add_action( 'admin_notices', 'cml_show_admin_notices' );
 function cml_show_admin_notices() {
   global $wpdb;
 
+  if( ! current_user_can( 'manage_optios' ) ) {
+    return;
+  }
+
   if( isset( $_GET[ 'fix-upgrade' ] ) ) {
     update_option( "cml_db_version", 22 );
     

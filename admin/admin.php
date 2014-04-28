@@ -650,6 +650,8 @@ class CMLAdmin extends CeceppaML {
       return;
     }
 
+    if( ! current_user_can( 'manage_options' ) ) return;
+
     require_once ( CML_PLUGIN_ADMIN_PATH . 'wizard.php' );
   }
   
