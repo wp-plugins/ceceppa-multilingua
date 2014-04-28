@@ -26,7 +26,6 @@ jQuery(document).ready( function($) {
       url: ajaxurl,
       data: $( this ).serialize(),
       success: function( data ) {
-        console.log( data );
         $form.find( '.cml-submit-button > .wpspinner > .spinner' ).fadeOut();
 
         $data = null;
@@ -73,14 +72,16 @@ jQuery(document).ready( function($) {
     
     $( this ).parents( 'ul.cml-dropdown-me' ).find( 'ul > li' ).show();
   }).keyup( function() {
-    $li = $( this ).parents( 'ul.cml-dropdown-me' ).find( 'ul li' );
+    $li = $( this ).parents( 'ul.cml-dropdown-me' ).find( 'ul > li' );
     $val = $( this ).val();
 
-    $li.each( function() {
-      $span = $( this ).find( "span" );
-      var display = $span.html().toLowerCase().indexOf( $val );
+    $li.each( function( $i ) {
+      $span = $( this ).find( ".title" );
+      if( $span.length > 0 ) {
+        var display = $span.html().toLowerCase().indexOf( $val );
 
-      $( this ).css( "display", ( display >= 0 ) ? "block" : "none" );
+        $( this ).css( "display", ( display >= 0 ) ? "block" : "none" );
+      }
     });
   });
   
@@ -94,9 +95,11 @@ jQuery(document).ready( function($) {
 
   $( '.cml-dropdown-me > li ul li' ).click( function() {
     $ul = $( this ).parents( 'ul.cml-dropdown-me' );
-    $ul.find( 'input[type="text"]' ).val( $( this ).find( 'span' ).html() );
+
+    title = $( this ).hasClass( 'no-hide' ) ? "" : $( this ).find( 'span.title' ).html();
+    $ul.find( 'input[type="text"]' ).val( title );
     
-    $ul.find( 'input[type="text"]' ).attr( "original", $( this ).find( 'span' ).html() );
+    $ul.find( 'input[type="text"]' ).attr( "original", title );
     $ul.find( '> li input[type="hidden"]' ).val( $( this ).attr( 'cml-trans' ) );
 
     $ul.find( 'ul' ).hide();
@@ -124,6 +127,80 @@ jQuery(document).ready( function($) {
   });
   
   $( 'iframe.cml-iframe' ).height( $( document ).height() - 100 );
+
+  //Post tags
+  if( $( '#ceceppaml-tags-meta-box input[name="search"]' ).length > 0 ) {
+    $( '#ceceppaml-tags-meta-box input[name="search"]' ).autocomplete( {
+      source: $.parseJSON( ceceppaml_admin.tags ), minLength : 0,
+      select: function( event, ui ) {
+        $clone = $( '#ceceppaml-tags-meta-box .cml-tagslist li.cml-first' ).clone();
+        $clone.removeClass( 'cml-hidden cml-first' );
+        $clone.find( '.title' ).html( ui.item.label.toLowerCase() );
+  
+        $clone.find( 'input.field' ).val( ui.item.id );
+        $clone.find( 'input.cml-input' ).val( ui.item.label );
+  
+        $( '#ceceppaml-tags-meta-box .cml-tagslist' ).append( $clone );
+        $clone.focus();
+        $clone.find( '.tipsy-s' ).tipsy( { gravity: 's', html: true, fade: false, offset: 5 } );
+  
+        setTimeout( function() {
+          $( '#ceceppaml-tags-meta-box input[name="search"]' ).val( "" );
+          $( '#ceceppaml-tags-meta-box input[name="search"]' ).trigger( 'focus' );
+        }, 100);
+      }
+    }).on('focus', function(event) {
+      $(this).autocomplete("search", "");
+    });
+  }
+
+  $( 'body' ).on( 'click', '#ceceppaml-tags-meta-box .ntdelbutton', function() {
+    $( this ).parents( 'li' ).remove();
+  });
+
+  $( 'body' ).on( 'click', '#ceceppaml-tags-meta-box ul li span.title', function() {
+    $li = $( this ).parents( 'li' );
+
+    $li.find( '.title' ).hide();
+    $li.find( '.cml-input' ).removeClass( 'cml-hidden' );
+    $li.find( '.cml-input' ).select();
+    $li.find( '.button-confirm' ).show();
+    $li.find( '.button-add' ).hide();
+  });  
+
+  $( 'body' ).on( 'click', '#ceceppaml-tags-meta-box .button-confirm', function() {
+    $li = $( this ).parents( 'li' );
+
+    $li.find( '.title' ).html( $li.find( '.cml-input' ).val() );
+    $li.find( '.title' ).show();
+    $li.find( '.cml-input' ).addClass( 'cml-hidden' );
+    $li.find( '.button-confirm' ).hide();
+    $li.find( '.button-add' ).show();
+  });
+
+  $( '.cml-titlewrap' ).insertAfter( $( '#titlediv > #titlewrap' ) );
+  $( '.cml-titlewrap' ).removeClass( 'cml-hidden' );
+
+  //Hide label if value is not empty
+  $( '.cml-title' ).each( function() {
+    if( $( this ).val() != "" ) {
+      $( this ).prev().fadeOut( 0 );
+    }
+  });
+
+  $( '.cml-title' ).focus( function() {
+    $( this ).prev().fadeOut( 'fast' );
+  });
+
+  $( '.cml-titlewrap input' ).focusout( function() {
+    $this = $( this );
+
+    if( $this.val() != "" ) return;
+
+    $this.prev().fadeIn( 'fast' );
+  });
+  
+  $( 'form#post table.compat-attachment-fields tr[class*="compat-field-cml-media-title"]' ).remove();
 });
 
 
