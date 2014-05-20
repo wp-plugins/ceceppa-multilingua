@@ -29,14 +29,15 @@ $others = apply_filters( 'cml_my_translations', array() );
 
 <h2 class="nav-tab-wrapper cml-tab-wrapper tab-strings">
   &nbsp;
-  <a class="nav-tab nav-tab-active" href="javascript:showStrings(0)"><?php _e( 'All strings', 'ceceppaml' ) ?></a>
-  <a class="nav-tab" href="javascript:showStrings( 1, 'S' )"><?php _e( 'My translations', 'ceceppaml' ) ?></a>
-  <a class="nav-tab" href="javascript:showStrings( 2, '_cml_' )"><?php _e( 'Plugin strings', 'ceceppaml' ) ?></a>
+  <a class="nav-tab <?php echo ( ! isset( $_GET[ 'tab' ] ) ) ? "nav-tab-active" : "" ?>" href="javascript:showStrings(0)"><?php _e( 'All strings', 'ceceppaml' ) ?></a>
+  <a class="nav-tab" href="#" onclick="showStrings( 1, 'S' )"><?php _e( 'My translations', 'ceceppaml' ) ?></a>
+  <a class="nav-tab" href="#" onclick="showStrings( 2, '_cml_' )"><?php _e( 'Plugin strings', 'ceceppaml' ) ?></a>
   <?php
   $i = 3;
   foreach( $others as $key => $type ) {
+    $active = ( @$_REQUEST[ 'tab' ] == $key ) ? "nav-tab-active" : "";
 echo <<< EOT
-  <a class="nav-tab" href="javascript:showStrings( $i, '$key' )">$type</a>
+  <a class="nav-tab $active" href="#" onclick="showStrings( $i, '$key' )">$type</a>
 EOT;
 
     $i++;
@@ -49,13 +50,13 @@ EOT;
       <input type="hidden" name="add" value="1" />
       <?php wp_nonce_field( "security", "ceceppaml-nonce" ) ?>
       <input type="hidden" name="form" value="1" />
-
+      <input type="hidden" name="tab" value="<?php echo @$_REQUEST[ 'tab' ] ?>" />
       <?php
         $table = new MyTranslations_Table( $types );
         $table->prepare_items();
-      
+
         $table->display();
-        
+
         $lkeys = array_keys( CMLLanguage::get_all() );
       ?>
       <div style="text-align:right">
@@ -72,6 +73,9 @@ EOT;
   function cml_admin_update_my_translations() {
     global $wpdb;
 
+    //Check for what language I have to hide translation field for default language
+    $hide_for = apply_filters( "cml_my_translations_hide_default", array( 'S' ) );
+
     CMLTranslations::delete( "N" );
     CMLTranslations::delete( "S" );
 
@@ -87,8 +91,8 @@ EOT;
       foreach( $langs as $lang ) {
         $value = esc_attr( $_POST[ 'values' ][ $lang->id ][ $i ] );
 
-        if( $group == "S" &&
-           $lang->id == CMLLanguage::get_default_id() ) {
+        if( $lang->id == CMLLanguage::get_default_id() &&
+            in_array( $group, $hide_for ) ) {
           continue;
         }
 
@@ -114,6 +118,6 @@ EOT;
     }
 
     //generate .po
-    cml_generate_mo_from_translations( "S", true );
+    cml_generate_mo_from_translations( "_X_", true );
   }
 ?>
