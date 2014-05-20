@@ -185,8 +185,8 @@ class CMLFrontend extends CeceppaML {
     add_filter( 'sidebars_widgets', array( & $this, 'filter_widgets' ), 0, 1 );
     
     //Next and Prev post
-    // add_filter( 'get_previous_post_where', array( &$this, 'get_previous_next_post_where' ) );
-    // add_filter( 'get_next_post_where', array( &$this, 'get_previous_next_post_where' ) );
+     add_filter( 'get_previous_post_where', array( &$this, 'get_previous_next_post_where' ) );
+     add_filter( 'get_next_post_where', array( &$this, 'get_previous_next_post_where' ) );
 
     /*
      * I can't translate home in backed because if user change permalink got
@@ -565,7 +565,7 @@ EOT;
     if( $nid > 0 ) {
       if( ! is_preview() ) {
         add_filter( 'body_class', array( & $this, 'add_home_class' ) );
-    	//update_option( 'page_on_front', $nid );
+    	update_option( 'page_on_front', $nid );
       }
     } else {
       $nid = $id;
