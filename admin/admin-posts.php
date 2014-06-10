@@ -376,7 +376,7 @@ function cml_admin_filter_all_posts_query( $query ) {
       $query->query_vars[ 'post__in' ] = $posts;
     }
   }
-  
+
   return $query;
 }
 

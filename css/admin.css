@@ -47,7 +47,7 @@ label.cml-disabled {
   text-transform: uppercase;
 }
 
-  .cml-separator-li {
+  li .cml-separator-li {
     background: #222;
     min-height: 24px;
   }

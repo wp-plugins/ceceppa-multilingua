@@ -96,7 +96,8 @@ class CMLAdmin extends CeceppaML {
         }
 
         if( 'options-permalink.php' != $pagenow &&
-            'themes.php' != $pagenow ) {
+            'themes.php' != $pagenow &&
+            ! defined( 'DOING_AJAX' ) ) {
           add_filter( 'home_url', array( & $this, 'translate_home_url' ), 0, 4 );
         }
       }

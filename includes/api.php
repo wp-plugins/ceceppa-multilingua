@@ -577,24 +577,37 @@ class CMLTranslations {
    *
    * @return string
    */
-  public static function set( $lang, $original, $translated, $type ) {
+  public static function set( $lang, $original, $translated, $type, $record_id = 0 ) {
     global $wpdb;
 
     if( ! is_numeric( $lang ) ) $lang = CMLLanguage::get_id_by_slug( $lang );
     $original = trim( $original );
 
-    $wpdb->delete( CECEPPA_ML_TRANSLATIONS,
-                    array( "cml_text" => bin2hex( $original ),
-                           "cml_type" => $type,
-                           "cml_lang_id" => $lang ),
-                    array( "%s", "%s", "%d" ) );
+    if( $record_id == 0 ) {
+      $wpdb->delete( CECEPPA_ML_TRANSLATIONS,
+                      array( "cml_text" => bin2hex( $original ),
+                             "cml_type" => $type,
+                             "cml_lang_id" => $lang ),
+                      array( "%s", "%s", "%d" ) );
+  
+      return $wpdb->insert( CECEPPA_ML_TRANSLATIONS, 
+                            array( 'cml_text' => bin2hex( $original ),
+                                  'cml_lang_id' => $lang,
+                                  'cml_translation' => bin2hex( $translated ),
+                                  'cml_type' => $type ),
+                            array( '%s', '%d', '%s', '%s' ) );
+    } else {
+      $wpdb->update( CECEPPA_ML_TRANSLATIONS, 
+                    array( 'cml_text' => bin2hex( $original ),
+                          'cml_lang_id' => $lang,
+                          'cml_translation' => bin2hex( $translated ),
+                          'cml_type' => $type ),
+                    array( 'id' => $record_id ),
+                    array( '%s', '%d', '%s', '%s' ),
+                    array( '%d' ) );
 
-    return $wpdb->insert( CECEPPA_ML_TRANSLATIONS, 
-                          array( 'cml_text' => bin2hex( $original ),
-                                'cml_lang_id' => $lang,
-                                'cml_translation' => bin2hex( $translated ),
-                                'cml_type' => $type ),
-                          array( '%s', '%d', '%s', '%s' ) );
+      return $record_id;
+    }
   }
   
   /**
