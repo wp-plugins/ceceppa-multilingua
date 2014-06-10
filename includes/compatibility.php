@@ -172,7 +172,7 @@ class CML_WPML_Parser {
  */
 function cml_admin_scan_plugins_folders() {
   $plugins = WP_CONTENT_DIR . "/plugins";
-  
+
   $old = get_option( '_cml_wpml_config_paths', "" );
 
   $xmls = @glob( "$plugins/*/wpml-config.xml" );
@@ -183,7 +183,7 @@ function cml_admin_scan_plugins_folders() {
   }
   
   $link = add_query_arg( array( "lang" => "ceceppaml-translations-page" ), admin_url() );
-  $txt  = __( 'Current plugins contains WPML Language Configuration Files ( wpml-config.xml )', 'ceceppaml' );
+  $txt  = __( "Current plugins contains WPML Language Configuration Files ( wpml-config.xml )", 'ceceppaml' );
   $txt .= '<br /><ul class="cml-ul-list">';
   
   $not = array();
@@ -202,12 +202,15 @@ function cml_admin_scan_plugins_folders() {
   $not = join( ",", $not );
   update_option( '_cml_wpml_config_paths', $not );
 
-  if( $not == $old ) {
+  $displayed = get_option( '_cml_wpml_config', 1 );
+  if( ! $displayed && $not == $old ) {
     return;
+  } else {
+    delete_option( '_cml_wpml_config' );
   }
 
   $txt .= "</ul>";
-  $txt .= sprintf( _( "Now you can translate Admin texts / wp_options in <%s>\"My Translations\"</a> page", "ceceppaml" ),
+  $txt .= sprintf( __( "Now you can translate Admin texts / wp_options in <%s>\"My Translations\"</a> page", "ceceppaml" ),
           'a href="' . $link . '"' );
   $txt .= "<br /><b>";
   $txt .= __( "Support to wpml-config.xml is experimental and could not works correctly", "ceceppaml" );
@@ -221,7 +224,6 @@ function cml_admin_scan_plugins_folders() {
  *
  * http://wordpress.org/plugins/google-sitemap-generator/
  */
-add_filter( 'cml_translate_home_url', 'cml_yoast_translate_home_url', 10, 2 );
 CMLUtils::_append( "_seo", array(
                                 'pagenow' => "options-general.php",
                                 'page' => "google-sitemap-generator/sitemap.php",
@@ -292,9 +294,22 @@ function cml_yoast_translate_home_url( $translate, $url ) {
   return $translate;
 }
 
+function cml_yoast_message() {
+  if( ! defined( 'WPSEO_VERSION' ) ) return;
+  if( ! isset( $_GET[ 'page' ] ) ||
+     'wpseo_titles' != $_GET[ 'page' ] ) return;
+
+  $txt = sprintf( __( "Go to <%s>My Translations</a> page to translate \"Titles & Metadata\"", 'ceceppaml' ),
+                  'a href="' . admin_url() . 'admin.php?page=ceceppaml-translations-page&stab=aioseo" class="button"' );
+
+  cml_admin_print_notice( "_cml_aioseo_msg", $txt );
+}
+
 add_filter( 'cml_my_translations', 'cml_yoast_seo_strings' );
 add_action( 'wp_loaded', 'cml_yoast_translate_options' );
 add_filter( 'cml_translate_home_url', 'cml_yoast_translate_home_url', 10, 2 );
+add_action( 'admin_notices', 'cml_yoast_message' );
+
 
 /*
  * All in one seo
@@ -352,9 +367,23 @@ function cml_aioseo_translate_home_url( $translate, $url ) {
   return $translate;
 }
 
+function cml_aioseo_message() {
+  global $pagenow;
+
+  if( ! defined( 'AIOSEOP_VERSION' ) ) return;
+  if( ! isset( $_GET[ 'page' ] ) ||
+     'all-in-one-seo-pack/aioseop_class.php' != $_GET[ 'page' ] ) return;
+
+  $txt = sprintf( __( "Go to <%s>My Translations</a> page to translate \"Title Settings\"", 'ceceppaml' ),
+                  'a href="' . admin_url() . 'admin.php?page=ceceppaml-translations-page&stab=aioseo" class="button"' );
+
+  cml_admin_print_notice( "_cml_aioseo_msg", $txt );
+}
+
 add_filter( 'cml_my_translations', 'cml_aioseo_strings' );
 add_action( 'wp_loaded', 'cml_aioseo_translate_options' );
 add_filter( 'cml_translate_home_url', 'cml_aioseo_translate_home_url', 10, 2 );
+add_action( 'admin_notices', 'cml_aioseo_message' );
 
 /*
  * Theme contains wpml-config.xml?
@@ -434,6 +463,8 @@ function cml_change_wpml_settings_values( $group, $name ) {
   }
 
   $options = & $GLOBALS[ $options ];
+  if( ! is_array( $options ) ) return;
+
   $names = explode( "/", $names );
   foreach( $options as $key => $value ) {
     if( ! in_array( $key, $names ) ) continue;
@@ -450,4 +481,5 @@ function cml_change_wpml_settings_values( $group, $name ) {
 
 add_filter( 'cml_my_translations', 'cml_get_strings_from_wpml_config', 99 );
 add_action( 'wp_loaded', 'cml_translate_wpml_strings', 10 );
+
 ?>
