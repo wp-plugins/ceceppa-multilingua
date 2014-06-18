@@ -379,7 +379,14 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
          */
         $link = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
         if( CMLPost::get_language_by_id( $the_id ) != $result->id ) {
-          $link = add_query_arg( array( "lang" => $result->cml_language_slug ), $link );
+          //Is internal link?
+          //if( strpos( $link, CMLUtils::get_home_url() ) === FALSE ) {
+            //$link = add_query_arg( array( "lang" => $result->cml_language_slug ), $link );
+          //} else {
+            $link = str_replace( CMLUtils::get_home_url( CMLLanguage::get_current_slug() ),
+                                 CMLUtils::get_home_url( $result->cml_language_slug ),
+                                 $link );
+          //}
         }
       } else {
         $link = CMLUtils::get_home_url( $result->cml_language_slug );

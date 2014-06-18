@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.ceceppa.eu/portfolio/ceceppa-multilingua/
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.4.26
+Version: 1.4.27
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.alessandrosenese.eu/
 License: GPL3
@@ -72,14 +72,14 @@ define( 'CML_WIDGET_HIDE', 'hide' );
  * Plugin path & url
  */
 define( 'CML_PLUGIN_URL', trailingslashit( plugin_dir_url( __FILE__ ) ) );
-define( 'CML_PLUGIN_CACHE_URL', CML_PLUGIN_URL . trailingslashit ( 'cache' ) );
+//define( 'CML_PLUGIN_CACHE_URL', CML_PLUGIN_URL . trailingslashit ( 'cache' ) );
 define( 'CML_PLUGIN_FLAGS_URL', CML_PLUGIN_URL . trailingslashit ( 'flags' ) );
 define( 'CML_PLUGIN_IMAGES_URL', CML_PLUGIN_URL . trailingslashit ( 'images' ) );
 define( 'CML_PLUGIN_JS_URL', CML_PLUGIN_URL . trailingslashit( 'js' ) );
 define( 'CML_PLUGIN_DOC_URL', CML_PLUGIN_URL . trailingslashit( 'doc' ) );
 
 define( 'CML_PLUGIN_PATH', trailingslashit( plugin_dir_path( __FILE__ ) ) );
-define( 'CML_PLUGIN_CACHE_PATH', CML_PLUGIN_PATH . trailingslashit( 'cache' ) );
+//define( 'CML_PLUGIN_CACHE_PATH', CML_PLUGIN_PATH . trailingslashit( 'cache' ) );
 define( 'CML_PLUGIN_LANGUAGES_PATH', CML_PLUGIN_PATH . trailingslashit( 'langs' ) );
 define( 'CML_PLUGIN_FLAGS_PATH', CML_PLUGIN_PATH . trailingslashit ( 'flags' ) );
 define( 'CML_PLUGIN_ADMIN_PATH', CML_PLUGIN_PATH . trailingslashit ( 'admin' ) );
@@ -102,6 +102,11 @@ define( 'CECEPPA_WP_LANGUAGES', WP_CONTENT_DIR . "/languages" );
 $upload_dir = wp_upload_dir();
 define( 'CML_UPLOAD_DIR', trailingslashit( $upload_dir[ 'basedir' ] ) . trailingslashit( "ceceppaml" ) );
 define( 'CML_UPLOAD_URL', trailingslashit( $upload_dir[ 'baseurl' ] ) . trailingslashit ( "ceceppaml" ) );
+
+//Cache
+define( 'CML_PLUGIN_CACHE_PATH', CML_UPLOAD_DIR . trailingslashit( 'cache' ) );
+define( 'CML_PLUGIN_CACHE_URL', CML_UPLOAD_URL . trailingslashit ( 'cache' ) );
+//define( 'CML_PLUGIN_PUBLIC_CACHE_URL', CML_UPLOAD_URL . trailingslashit ( 'cache' ) );
 
 //WP locale dir
 define( 'CML_WP_LOCALE_DIR', WP_CONTENT_DIR . "/languages" );
@@ -434,6 +439,23 @@ EOT;
     $slug = ( empty( $lang ) ) ? CMLLanguage::get_default_slug() : $lang->cml_language_slug;
     $permalink = CMLPost::remove_extra_number( $permalink, $page );
 
+    /*
+     * Remove extra "number" from page parent
+     */
+    //if( $page->post_parent > 0 ) {
+    //  $p = get_page( $page->post_parent );
+    //
+    //  //Check if numbers in page slug is > than in page title
+    //  preg_match_all( "/\d+/", $p->post_title, $pout );
+    //  preg_match_all( "/-\d+/", $p->post_name, $out );
+    //
+    //  if( count( $pout[0] ) < count( $out[ 0 ] ) && CMLPost::has_translations( $p->ID ) ) {
+    //    $ppermalink = get_permalink( $page->post_parent );
+    //    
+    //    die();
+    //  }
+    //}
+
     return $this->convert_url( $permalink, $slug );
   }
   
@@ -599,4 +621,5 @@ if( is_admin() ) {
   
   $wpCeceppaML = new CMLFrontend();
 }
+
 ?>

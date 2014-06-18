@@ -873,7 +873,7 @@ EOT;
       return $item;
     }
 
-    if( ! CMLLanguage::is_default() || isset( $this->_fake_language_id ) ) {
+    //if( isset( $this->_fake_language_id ) ) {
       $lang_id = ( ! isset( $this->_fake_language_id ) ) ?
                     CMLLanguage::get_current_id() :
                     $this->_fake_language_id;
@@ -999,7 +999,7 @@ EOT;
       default:
         return $item;
       } //endswitch;
-    } //endif;
+    //} //endif;
 
     unset( $this->_force_post_lang );
 
@@ -1013,7 +1013,15 @@ EOT;
     global $post;
 
     $format = CMLLanguage::get_current()->cml_date_format;
-    if( empty( $format ) ) $format = CMLUtils::get_date_format();
+    
+    if( empty( $format ) ) {
+      $format = CMLUtils::get_date_format();
+    } else {
+      if( ! empty( $d ) )
+        $format = $d;
+      else
+        $format = CMLUtils::get_date_format();
+    }
 
     $the_date = mysql2date( $format, $post->post_date );
     
@@ -1285,12 +1293,12 @@ EOT;
     }
 
     if( isset( $_REQUEST[ 'lang' ] ) ) {
-      $l = CMLLanguage::get_id_by_locale( $_REQUEST[ 'lang' ] );
+      $l = CMLLanguage::get_id_by_slug( $_REQUEST[ 'lang' ] );
       
-      if( ! empty( $lang ) ) {
-        $this->_fake_language_id = CMLLanguage::get_id_by_slug( $l );
+      if( ! cml_is_homepage() && ! empty( $lang ) ) {
+        $this->_fake_language_id = $l;
       } else {
-        $lang = CMLLanguage::get_id_by_slug( $l );
+        $lang = $l;
       }
     }
 

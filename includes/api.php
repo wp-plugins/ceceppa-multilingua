@@ -820,8 +820,7 @@ class CMLPost {
    * return language id by post id
    *
    * @param int $post_id - id of post/page
-   * @param boolean $unique check if $post_id exists in all languages, if true return
-   *                        0, otherwise return 
+   * @param boolean $unique check if $post_id exists in all languages, if true return 0
    *                        In backend I need to get information by post meta, or I'll lost
    *                        "all languages" ( = 0 ) information.
    *
@@ -1279,10 +1278,8 @@ class CMLPost {
         /*
          * when hook get_page_link, wordpress pass me only post id, not full object
          */
-        $post_title = $post->post_title; //( ! isset( $post->post_name ) ) ?
-          //$post->post_title : $post->post_name;
-          // $a = $wpdb->get_var( "SELECT post_title FROM $wpdb->posts WHERE id = $post->ID" );
-
+        $post_title = $post->post_title;
+        
         /*
          * got how many number occourrences ( -d ) are in the "real title"
          */
@@ -1296,7 +1293,7 @@ class CMLPost {
         if( count( $pout[0] ) < count( $out[ 0 ] ) && CMLPost::has_translations( $post->ID ) ) {
           $permalink = trailingslashit( preg_replace( "/-\d*$/", "",
                                                      untrailingslashit( $permalink ) ) );
-
+          
           $removed = true;
         }
       }
@@ -1537,7 +1534,13 @@ class CMLUtils {
    * @return string
    */
   public static function get_clean_url() {
-    return self::$_clean_url;
+    if( ! empty( self::$_clean_url ) ) {
+      return self::$_clean_url;
+    } else {
+      $_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+      
+      return preg_replace( "/\?.*/", "", $_url );
+    }
   }
   
   /**

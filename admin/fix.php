@@ -243,9 +243,9 @@ function cml_do_update_old() {
     $wpdb->query($sql);
   endif;
 
-  if($dbVersion <= 15) :
-    cml_fix_widget_titles();
-  endif;
+  //if($dbVersion <= 15) :
+    //cml_fix_widget_titles();
+  //endif;
   
   //Controllo se esiste una pagina con lo slug "/##/", perché nelle versioni < 1.2.6
   //per avere la pagina iniziale in stile www.example.com/it dovevo modificare lo slug della
@@ -253,8 +253,8 @@ function cml_do_update_old() {
   //si occuperà del resto...
   if($dbVersion <= 16) :
     $id = cml_get_default_language_id();
-    $info = cml_get_language_info( $id );
-    
+    $info = CMLLanguage::get_by_id( $id );
+
     $slug = $info->cml_language_slug;
     $the_id = cml_get_page_id_by_path ( $slug, array('page') );
     
