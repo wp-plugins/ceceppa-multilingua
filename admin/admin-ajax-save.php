@@ -28,11 +28,12 @@ if ( ! defined( 'ABSPATH' ) ) die( "Access denied" );
       echo json_encode( array( "html" => "",
                         "error" => __( "Security error", "ceceppaml" ) ) );
 
+      echo "-1";
       die();
     }
 
     global $wpdb;
-  
+
     //Extract data
     if( $data == null ) $data = $_POST[ 'data' ];
     parse_str( $data, $form );
@@ -76,7 +77,9 @@ if ( ! defined( 'ABSPATH' ) ) die( "Access denied" );
     } else {
       if( $id > 0 ) {
         //Avoid that more languages are sets as "default"
-        if( $is_default ) $wpdb->query( "UPDATE " . CECEPPA_ML_TABLE . " SET cml_default = 0 " );
+        if( $is_default ) {
+          $wpdb->query( "UPDATE " . CECEPPA_ML_TABLE . " SET cml_default = 0 " );
+        }
 
         $wpdb->update( CECEPPA_ML_TABLE, $data, array(
                                                       "id" => $id,
@@ -105,7 +108,7 @@ if ( ! defined( 'ABSPATH' ) ) die( "Access denied" );
                                                 "id" => $id,
                                                 "custom_flag" => $data[ 'cml_custom_flag' ],
                                               ) );
-      
+
       //Try to download language pack
       cml_download_mo_file( @$form[ 'wp-locale' ] );
     }
@@ -119,6 +122,12 @@ if ( ! defined( 'ABSPATH' ) ) die( "Access denied" );
     if( ! empty( $error ) ) { 
       $out = array( "error" => $error );
     }
+
+    /*
+     * if user change default language I need to generate settings again
+     */
+    update_option( 'cml_need_update_settings', 1 );
+    update_option( 'cml_get_translation_from_po', 0 );
 
     die();
   }
@@ -183,34 +192,43 @@ function cml_admin_save_options_actions() {
   $page = $_POST[ 'page' ];
   $tab = isset( $_POST[ 'tab' ] ) ? intval( $_POST[ 'tab' ] ) : 1;
 
-  //Redirect
-  $redirect = array( "auto", "default", "others", "nothing" );
-  $redirect = ( in_array( $_POST[ 'redirect' ], $redirect ) ) ? $_POST[ 'redirect' ] : "auto";
-  update_option("cml_option_redirect", $redirect );
+  if( $tab == 2 ) {
+    update_option( "cml_debug_enabled", intval( @$_POST[ 'cml-debug' ] ) );
+    update_option( "cml_update_static_page", intval( @$_POST[ 'cml-static' ] ) );
+  } else {
+    //Redirect
+    $redirect = array( "auto", "default", "others", "nothing" );
+    $redirect = ( in_array( $_POST[ 'redirect' ], $redirect ) ) ? $_POST[ 'redirect' ] : "auto";
+    update_option("cml_option_redirect", $redirect );
 
-  //Url mode
-  update_option( "cml_modification_mode", intval( $_POST[ 'url-mode' ] ) );
-  update_option( "cml_modification_mode_default", intval( @$_POST[ 'url-mode-default' ] ) );
+    //Url mode
+    update_option( "cml_modification_mode", intval( $_POST[ 'url-mode' ] ) );
+    update_option( "cml_modification_mode_default", intval( @$_POST[ 'url-mode-default' ] ) );
 
-  //Translate categories url
-  //@update_option('cml_option_translate_categories', intval( $_POST['categories'] ) );
+    //Translate category url
+    @update_option( 'cml_option_translate_category_url', @intval( $_POST[ 'categories' ] ) );
 
-  //Notices
-  @update_option("cml_option_notice", sanitize_title( $_POST['notice'] ) );
-  @update_option("cml_option_notice_pos", sanitize_title( $_POST['notice_pos'] ) );
-  @update_option("cml_option_notice_after", $_POST['notice_after'] );
-  @update_option("cml_option_notice_before", $_POST['notice_before'] );
-  @update_option("cml_option_notice_post", intval( $_POST['notice-post'] ) );
-  @update_option("cml_option_notice_page", intval( $_POST['notice-page'] ) );
+    //Notices
+    @update_option("cml_option_notice", sanitize_title( $_POST['notice'] ) );
+    @update_option("cml_option_notice_pos", sanitize_title( $_POST['notice_pos'] ) );
+    @update_option("cml_option_notice_after", $_POST['notice_after'] );
+    @update_option("cml_option_notice_before", $_POST['notice_before'] );
+    @update_option("cml_option_notice_post", intval( $_POST['notice-post'] ) );
+    @update_option("cml_option_notice_page", intval( $_POST['notice-page'] ) );
 
-  //I don't have to save this settings in "wizard" mode
-  if( ! isset( $_POST[ 'wstep' ] ) ) {
-    //Date format
-    @update_option('cml_change_date_format', intval( $_POST['date-format'] ) );
-  
-    //Change locale
-    update_option("cml_option_change_locale", intval( @$_POST['change-locale'] ) );
+    //I don't have to save this settings in "wizard" mode
+    if( ! isset( $_POST[ 'wstep' ] ) ) {
+      //Date format
+      @update_option('cml_change_date_format', intval( $_POST['date-format'] ) );
+    
+      //Change locale
+      update_option("cml_option_change_locale", intval( @$_POST['change-locale'] ) );
+
+      //translate media?
+      update_option("cml_option_translate_media", intval( @$_POST['translate-media'] ) );
+    }
   }
+
 
   $lstep = "";
   if( isset( $_POST[ 'wstep' ] ) ) {
@@ -361,7 +379,7 @@ function cml_admin_save_site_title() {
     $i++;
   }
 
-  cml_generate_mo_from_translations( "T" );
+  cml_generate_mo_from_translations( "_X_", false );
 
   $return = array( "url" => admin_url( 'admin.php?page=' . $page . '&tab=' . $tab . '&cml-generate-settings=true' ) );
 
@@ -375,30 +393,38 @@ function cml_admin_generate_mo() {
   if( ! wp_verify_nonce( $_POST[ "ceceppaml-nonce" ], "security" ) ) die( "-1" );
 
     //CML parser, used for translate theme and plugin
-  require_once ( CML_PLUGIN_ADMIN_PATH . 'parser.php' );
+  require_once ( CML_PLUGIN_ADMIN_PATH . 'po-parser.php' );
 
   $page = $_POST[ 'page' ];
   $tab = isset( $_POST[ 'tab' ] ) ? intval( $_POST[ 'tab' ] ) : 1;
 
   $name = $_POST[ 'name' ];
-  $default_locale = $_POST[ 'locale' ];
+  $translate_in = @$_POST[ 'cml-lang' ];
   $src_path = $_POST[ 'src_path' ];
   $dest_path = $_POST[ 'dest_path' ];
   $domain = $_POST[ 'domain' ];
 
-  if( isset( $_POST[ 'cml-lang' ] ) ) {
-    update_option( "cml_theme_language_" . sanitize_title(  wp_get_theme()->name ),
-                  sanitize_title( $_POST[ 'cml-lang' ] ) );
+
+  if( ! empty( $translate_in ) ) {
+    $translate_in = array_keys( $translate_in );
+  } else {
+    $translate_in = array();
   }
 
-  //$parser = new CMLParser( "Ceceppa Multilingua", "en", CML_PLUGIN_PATH, CML_PLUGIN_LANGUAGES_PATH, "ceceppaml", false );
-  $parser = new CMLParser( $name, $default_locale, $src_path, $dest_path, $domain, false );
+  update_option( 'cml_translate_' . $name . "_in", $translate_in );
 
-  $generated = "[" . join( ", ", $parser->generated() ) . "]";
-  $error = $parser->errors();
+  if( ! empty( $translate_in ) && ! isset( $_POST[ 'nolang' ] ) ) {
+    //$parser = new CMLParser( "Ceceppa Multilingua", "en", CML_PLUGIN_PATH, CML_PLUGIN_LANGUAGES_PATH, "ceceppaml", false );
+    $parser = new CMLParser( $name, $src_path, $dest_path, $domain, false );
 
-  $return = array( "url" => admin_url( 'admin.php?page=' . $page . '&tab=' . $tab . '&updated=true&generated=' . $generated . '&error=' . $error ) );
+    $generated = "[" . join( ", ", $parser->generated() ) . "]";
+    $error = $parser->errors();
 
+    $return = array( "url" => admin_url( 'admin.php?page=' . $page . '&tab=' . $tab . '&updated=true&generated=' . $generated . '&error=' . $error ) );
+  } else {
+    $return = array( "url" => admin_url( 'admin.php?page=' . $page . '&tab=' . $tab ) );
+  }
+  
   die( json_encode( $return ) );
 }
 

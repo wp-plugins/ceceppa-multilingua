@@ -47,7 +47,7 @@ $page = $_GET[ 'page' ];
             }
           }
 
-          cml_generate_mo_from_translations( "W" );
+          cml_generate_mo_from_translations( "_X_" );
         }
 
         require_once ( CML_PLUGIN_FRONTEND_PATH . 'utils.php' );
@@ -81,7 +81,7 @@ EOT;
         break;
       case 3:
         //CML parser, used for translate theme and plugin
-        require_once ( CML_PLUGIN_ADMIN_PATH . 'parser.php' );
+        require_once ( CML_PLUGIN_ADMIN_PATH . 'po-parser.php' );
 
         require_once ( CML_PLUGIN_LAYOUTS_PATH . 'translate-theme.php' );
         break;

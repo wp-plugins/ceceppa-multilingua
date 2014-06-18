@@ -2,13 +2,18 @@
 if ( ! defined( 'ABSPATH' ) ) die( "Access denied" );
 
 function cml_admin_post_meta_box( $tag ) {
-  global $wpdb;
-  
-  $langs = cml_get_languages( false );
+  global $wpdb, $pagenow;
+
+  $langs = CMLLanguage::get_all();
 
   //I have clicked on "+" symbol for add translation?
   if( array_key_exists( "post-lang", $_GET) ) {
     $post_lang = intval( $_GET[ 'post-lang' ] );
+  }
+
+  if( ! isset( $post_lang ) &&
+      "post-new.php" == $pagenow ) {
+    $post_lang = CMLLanguage::get_default_id();
   }
 
   //Language of post/page
@@ -17,8 +22,12 @@ function cml_admin_post_meta_box( $tag ) {
   echo '<span class="cml-help cml-pointer-help cml-post-help"></span>';
   echo "</h4>";
   
+  //Fix "All languages" issue
+  $meta_lang = get_post_meta( $tag->ID, "_cml_lang_id", true );
+  if( empty( $meta_lang ) ) $meta_lang = CMLPost::get_language_id_by_id( $tag->ID, true );
+
   $post_lang = ( ! isset( $post_lang ) || $post_lang < 0 ) ?
-    CMLPost::get_language_id_by_id( $tag->ID, true ) : $post_lang;
+    $meta_lang : $post_lang;
 
   cml_dropdown_langs( "post_lang", $post_lang, false, true, __( "All languages", "ceceppaml" ), "", 0 );
 
@@ -35,12 +44,26 @@ function cml_admin_post_meta_box( $tag ) {
       wp_set_post_categories( $tag->ID, $categories );
     }
     
+    /* recover tags */
+    $tags = wp_get_post_tags( $link_id );
+    if( ! empty( $tags ) ) {
+      $ltags = array();
+      foreach( $tags as $t ) {
+        $ltags[] = $t->name;
+      }
+
+      wp_set_post_tags( $tag->ID, $ltags );
+    }
+
     //for page get parent
     $post = get_post( $link_id );
     
     //Has translation?
     $parent_t = CMLPost::get_translation( $post_lang, $post->post_parent );
     $tag->post_parent = ( ! empty( $parent_t ) ) ? $parent_t : $post->post_parent;
+    
+    //Clone post meta
+    _cml_clone_post_meta( $link_id, $tag->ID ); 
   } else {
     $link_id = 0;
   }
@@ -52,7 +75,7 @@ function cml_admin_post_meta_box( $tag ) {
     $not = array();
   }
 
-  $translations = CMLPost::get_translations( ( $link_id > 0 ) ? $link_id : $tag->ID );
+  $translations = CMLPost::get_translations( ( $link_id > 0 ) ? $link_id : $tag->ID, true );
 
   echo '<ul class="cml-post-translations">';
   foreach( CMLLanguage::get_all() as $lang ) {
@@ -73,7 +96,7 @@ function cml_admin_post_meta_box( $tag ) {
     unset( $GLOBALS[ '_cml_no_translate_home_url' ] );
 
     echo "<li class=\"$class\">";
-    _cml_admin_post_meta_translation( $tag->post_type, $lang->id, $t_id );
+    _cml_admin_post_meta_translation( $tag->post_type, $lang->id, $t_id, $tag->ID );
     echo "<a href=\"$link\" class=\"button cml-button-$bclass tipsy-s\" title=\"$msg\"></a>";
     echo " </li>";
   }
@@ -81,15 +104,18 @@ function cml_admin_post_meta_box( $tag ) {
   echo "</ul>";
 }
 
-function _cml_admin_post_meta_translation( $type, $lang, $linked_id ) {
+function _cml_admin_post_meta_translation( $type, $lang, $linked_id, $post_id ) {
+  CMLUtils::_set( '_cml_no_filter_query', 1 );
+
   $args = array('numberposts' => -1, 'order' => 'ASC', 'orderby' => 'title', 'posts_per_page' => -1,
       'post_type' => $type,
-      'post__not_in' => CMLPost::get_posts_by_language( $lang ),
+      // 'post__not_in' => CMLPost::get_posts_by_language( $lang ),
       'status' => 'publish,inherit,pending,private,future,draft');
   
   $posts = new WP_Query( $args );
 
-  $notrans = __( 'None', 'ceceppaml' );
+  $notrans = ""; 
+  $none = __( 'None', 'ceceppaml' );
   $title = ( ! empty( $linked_id ) ) ? get_the_title( $linked_id ) : $notrans;
   $src = CMLLanguage::get_flag_src( $lang );
 
@@ -101,7 +127,7 @@ echo <<< EOT
       <input type="hidden" name="linked_post[$lang]" value="$linked_id" />
       <ul>
         <li class="no-hide">
-          <span>$notrans</span>
+          <i><span class="title">( $none )</span></i>
         </li>
 EOT;
   while( $posts->have_posts() ) {
@@ -109,10 +135,24 @@ EOT;
 
     $id = $posts->post->ID;
 
+    $current = ( $id == $post_id ) ? "current" : "";
+
 	$lang_id = CMLPost::get_language_id_by_id( $id );
 
 	echo "<li cml-trans=\"$id\">";
-    echo "<span>" . get_the_title( $id ) . "</span>";
+    echo '<span class="img">';
+    echo CMLLanguage::get_flag_img( $lang_id );
+    echo '</span>';
+    echo '<span class="title ' . $current . '">';
+    echo get_the_title( $id );
+    echo "</span>";
+    if( ! empty( $current ) ) {
+      echo '<span class="current">';
+      echo "&nbsp;&nbsp;(";
+      printf( __( 'current %s', 'ceceppaml' ), $type );
+      echo ")";
+      echo '</span>';
+    }
     echo "</li>";
   }
 
@@ -122,7 +162,9 @@ echo <<< EOT
   </ul>
 EOT;
 
+  CMLUtils::_del( '_cml_no_filter_query', 1 );
 }
+
 /* 
  * Salvo il collegamento tra i post
  */
@@ -137,24 +179,25 @@ function cml_admin_save_extra_post_fields( $term_id ) {
   $post_id = is_object( $term_id ) ? $term_id->ID : $term_id;
 
   //no language?
-  if( empty( $_POST['cml-lang'] ) )
+  if( empty( $_POST['cml-lang'] ) ) {
     $post_lang = 0;
-  else
+  } else {
     $post_lang = intval( $_POST[ 'cml-lang' ] );
-
-  foreach( CMLLanguage::get_all() as $lang ) {
-    if( $lang->id == $post_lang ) continue;
-
-    //Set language of current post
-    $linked = intval( @$_POST[ 'linked_post' ][ $lang->id ] );
-
-    CMLPost::set_translation( $post_id, $lang->id, $linked, $post_lang );
   }
 
   /*
    * Quickedit?
    */
-  if( isset( $_POST[ 'cml-quick' ] ) ) {
+  if( ! isset( $_POST[ 'cml-quick' ] ) ) {
+    $linkeds = array();
+
+    foreach( CMLLanguage::get_all() as $lang ) {
+      if( $lang->id == $post_lang ) continue;
+
+      //Set language of current post
+      $linkeds[ $lang->id ] = @$_POST[ 'linked_post' ][ $lang->id ];
+    }
+  } else {
     $langs = CMLLanguage::get_all();
 
     $current = CMLPost::get_language_id_by_id( $post_id );
@@ -162,22 +205,13 @@ function cml_admin_save_extra_post_fields( $term_id ) {
       if( $lang->id == $current ) continue;
 
       $key = "linked_$lang->cml_language_slug";
-
-      if( isset( $_POST[ $key ] ) ) {
-        $lid = $_POST[ $key ];
-        $linked_lang = CMLLanguage::get_id_by_post_id( $lid );
-
-        //Change also the language of linked lang
-        if( $linked_lang != $lang->id ) {
-          CMLPost::set_translation( $lid, 0, 0, $lang->id );
-          
-          $linked_lang = $lang->id;
-        }
-
-        CMLPost::set_translation( $post_id, $linked_lang, $lid, $post_lang );
-      }
+      $linkeds[ $lang->id ] = intval( @$_POST[ $key ] );
     }
   }
+
+  CMLPost::set_translations( $post_id, $linkeds, $post_lang );
+
+  update_post_meta( $post_id, "_cml_lang_id", $post_lang );
 }
 
 /*
@@ -220,12 +254,13 @@ function cml_admin_add_flag_column( $col_name, $id ) {
   $xid = CMLPost::get_language_id_by_id( $id );
   
   $langs = cml_get_languages( false );
-  $linked = cml_get_linked_posts( $id );
-  
+  $linked = CMLPost::get_translations( $id, true );
+
   $GLOBALS[ '_cml_no_translate_home_url' ] = 1;
 
   foreach( $langs as $lang ) {
     $link = isset( $linked[ $lang->cml_language_slug ] ) ? $linked[ $lang->cml_language_slug ] : 0;
+
     if( $link > 0 ) {
       $title = "<br />" . get_the_title($link);
       echo '<a href="' . get_edit_post_link($link) . '">';
@@ -233,13 +268,60 @@ function cml_admin_add_flag_column( $col_name, $id ) {
       echo '</a>';
       
     } else {
-      echo '<a href="' . get_bloginfo("url") . '/wp-admin/post-new.php?post_type=' . $post_type . '&link-to=' . $id . '&post-lang=' . $lang->id . '">';
-      echo '    <img class="add tipsy-me" src="' . CML_PLUGIN_URL . 'images/edit.png" title="' . __( 'Translate to:', 'ceceppaml' ) . ' ' . $lang->cml_language . '" />';
+      echo '<a href="' . get_bloginfo( "wpurl" ) . '/wp-admin/post-new.php?post_type=' . $post_type . '&link-to=' . $id . '&post-lang=' . $lang->id . '">';
+      echo '    <img class="add tipsy-me" src="' . CML_PLUGIN_URL . 'images/edit.png" title="' . __( 'Translate in:', 'ceceppaml' ) . ' ' . $lang->cml_language . '" />';
       echo '</a>';
     }
   }
   
   unset( $GLOBALS[ '_cml_no_translate_home_url' ] );
+}
+
+/*
+ * If post language is default one I show default "Tags" metabox,
+ * otherwise I need to hide it and let the user to translate existing tags.
+ */
+function cml_admin_tags_meta_box( $post ) {
+  $lang = CMLLanguage::get_id_by_post_id( $post->ID );
+
+  $hide = ( 0 == $lang || CMLLanguage::is_default( $lang ) );
+
+  echo '<div class="cml-tagsdiv ' . ( ! $hide ? "" : "acml-hidden" ) . '">';
+  _e( 'This post is a translations, you have to translate existing tag instead of add new one.', 'ceceppaml' );
+  echo '&nbsp;<a href="http://www.alessandrosenese.eu/en/ceceppa-multilingua/translate-categories-or-tags" target="_blank">';
+  _e( 'Help' );
+  echo '</a>';
+  echo '</div><br />';
+
+  _e( 'Search existing tag:', 'ceceppaml' );
+  echo '<input type="search" name="search" value="" />';
+  echo '<a href="#" class="button cml-button-add tipsy-s" title="' . __( 'Add new tag', 'ceceppaml' ) . '"></a>';
+
+  echo '<ul class="cml-tagslist tagchecklist">';
+  //Instead of create items via javascript I clone first <li> :)
+  _cml_admin_add_tag( 'cml-hidden cml-first' );
+  echo '</ul>';
+}
+
+function _cml_admin_add_tag( $class = "" ) {
+  $translate = __( 'Confirm translation', 'ceceppaml' );
+  $click = __( 'Click to translate', 'ceceppaml' );
+
+  $url = CML_PLUGIN_IMAGES_URL;
+echo <<< EOT
+    <li class="$class">
+      <input type="hidden" name="cml-tag-id[]" class="field" value="" />
+      <span>
+        <a id="post_tag-check-num-0" class="ntdelbutton">X</a>
+      </span>
+      &nbsp;
+      <input type="text" name="cml-trans[]" class="cml-input cml-hidden" value="" />
+      <span class="title tipsy-s" title="$click">ciao</span>
+      <a href="javascript:void(0)" class="button button-primary button-mini button-confirm" title="$translate" style="display: none">
+        <img src="{$url}confirm.png" />
+      </a>
+    </li>
+EOT;
 }
 
 function cml_admin_add_meta_boxes() {
@@ -251,6 +333,11 @@ function cml_admin_add_meta_boxes() {
   $post_types = get_post_types( array( '_builtin' => FALSE ), 'names'); 
   $posts = array( "post", "page" );
 
+  // remove_meta_box('tagsdiv-post_tag','post','side');
+  // add_meta_box( 'ceceppaml-tags-meta-box', __('Tags', 'ceceppaml'), 'cml_admin_tags_meta_box', 'post', 'side', 'core' );
+
+  $post_types = apply_filters( 'cml_manage_post_types', $post_types );
+
   foreach( $post_types as $post_type ) {
     if( ! in_array( $post_type, $posts ) ) {
       add_meta_box( 'ceceppaml-meta-box', __('Post data', 'ceceppaml'), 'cml_admin_post_meta_box', $post_type, 'side', 'high' );
@@ -259,6 +346,12 @@ function cml_admin_add_meta_boxes() {
 }
 
 function cml_admin_filter_all_posts_page() {
+  $post_types = get_post_types('','names');
+  $post_types = apply_filters( 'cml_manage_post_types', $post_types );
+
+  if( isset( $_GET[ 'post_type' ] ) &&
+     ! in_array( $_GET[ 'post_type' ], $post_types ) ) return;
+
   //Se sto nel cestino di default visualizzo tutti gli articoli :)
   $d = CMLLanguage::get_default_id();
 
@@ -277,8 +370,8 @@ function cml_admin_filter_all_posts_query( $query ) {
   global $pagenow, $wpdb;
   
   //$this->_no_filter_query is set when the function "quick_edit_box_posts" is called,
-  //I have to exit from that function all WP_Query return only items in current language...
-  if( isset( $GLOBALS[ '_cml_no_filter_query' ] ) ) return;
+  //I have to exit from that function or all WP_Query return only items in current language...
+  if( null !== CMLUtils::_get( '_cml_no_filter_query' ) ) return $query;
 
   if ( ! array_key_exists('post_type', $_GET) )
       $post_type = 'post';
@@ -293,16 +386,19 @@ function cml_admin_filter_all_posts_query( $query ) {
   if( is_admin() && $pagenow == "edit.php" ) {
     if($id > 0) {
       $posts = CMLPost::get_posts_by_language( $id );
-      
+
       $query->query_vars[ 'post__in' ] = $posts;
     }
   }
-  
+
   return $query;
 }
 
 function cml_admin_delete_extra_post_fields( $id ) {
   global $wpdb, $_cml_language_columns;
+
+  //All translations
+  $translations = CMLPost::get_translations( $id );
 
   foreach( $_cml_language_columns as $col ) {
     $sql = sprintf( "UPDATE %s SET $col = 0 WHERE $col = %d", CECEPPA_ML_RELATIONS, $id );
@@ -314,13 +410,44 @@ function cml_admin_delete_extra_post_fields( $id ) {
     delete_post_meta( $id, "_cml_meta" );
   }
 
+  if( ! empty( $translations[ 'linked' ] ) ) {
+    $l = end( $translations[ 'linked' ] );
+
+    //Rebuild meta
+    CMLPost::get_translations( $l, true );
+  }
+
   //Ricreo la struttura degli articoli, questo metodo rallenterà soltanto chi scrive l'articolo... tollerabile :D
   cml_fix_rebuild_posts_info();
+}
+
+/*
+ * When user start new post I clone meta from "original" to clone one.
+ */
+function _cml_clone_post_meta( $from, $new_post_id ) {
+  global $wpdb;
+
+  /*
+   * duplicate all post meta
+   */
+  $post_meta_infos = $wpdb->get_results( "SELECT meta_key, meta_value FROM $wpdb->postmeta WHERE post_id=$from" );
+
+  if ( count( $post_meta_infos ) != 0 ) {
+      $sql_query = "INSERT INTO $wpdb->postmeta (post_id, meta_key, meta_value) ";
+      foreach ($post_meta_infos as $meta_info) {
+          $meta_key = $meta_info->meta_key;
+          $meta_value = addslashes($meta_info->meta_value);
+          $sql_query_sel[]= "SELECT $new_post_id, '$meta_key', '$meta_value'";
+      }
+      $sql_query.= implode(" UNION ALL ", $sql_query_sel);
+      $wpdb->query($sql_query);
+  }
 }
 
 function cml_manage_posts_columns() {
   //Show flags in list for all registered post types ( so also custom posts )
   $post_types = get_post_types('','names');
+  $post_types = apply_filters( 'cml_manage_post_types', $post_types );
 
   foreach ($post_types as $type ) {
     add_action( "manage_${type}_posts_custom_column", 'cml_admin_add_flag_column', 10, 2);
@@ -348,5 +475,4 @@ add_action('delete_page', 'cml_admin_delete_extra_post_fields' );
 //Filters
 add_filter( 'parse_query', 'cml_admin_filter_all_posts_query' );
 add_action( 'restrict_manage_posts', 'cml_admin_filter_all_posts_page' );
-
 ?>

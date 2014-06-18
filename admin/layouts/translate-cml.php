@@ -2,7 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) die( "Access denied" );
 
 //CML parser, used for translate theme and plugin
-require_once ( CML_PLUGIN_ADMIN_PATH . 'parser.php' );
+require_once ( CML_PLUGIN_ADMIN_PATH . 'po-parser.php' );
 
 function cml_translate_cml() {
   //get generated files
@@ -11,8 +11,9 @@ function cml_translate_cml() {
 
     if( empty( $generated ) ) {
       echo '<div class="updated"><p>';
-      echo __( 'Something goes wring, cannot generate .mo files :(', 'ceceppaml' );
-      printf( __( 'Ensure that folder %s if writable', 'ceceppaml' ), CML_PLUGIN_LANGUAGES_PATH );
+      echo __( 'Something goes wrong, cannot generate .mo files :(', 'ceceppaml' );
+      echo '<br />';
+      printf( __( 'Ensure that folder <b>%s</b> is writable', 'ceceppaml' ), CML_PLUGIN_LANGUAGES_PATH );
       echo '</p></div>';
     } else {
       echo '<div class="updated"><p>';
@@ -24,7 +25,7 @@ function cml_translate_cml() {
         $lang = CMLLanguage::get_by_id( $gen );
 
         if( file_exists( CML_PLUGIN_LANGUAGES_PATH . "ceceppaml-$lang->cml_locale.mo" ) ) {
-          echo "<li><a href=\"" . CML_PLUGIN_URL . "langs/$lang->cml_locale.mo\" >$lang->cml_language</a></li>";
+          echo "<li><a href=\"" . CML_PLUGIN_URL . "langs/ceceppaml-$lang->cml_locale.mo\" >$lang->cml_language</a></li>";
         }
     
       } //endforeach;
@@ -36,7 +37,7 @@ function cml_translate_cml() {
 
   } else {
     $msg = __( "If you like the plugin and you want translate it in your language, you can do from this page.", "ceceppaml" ) . "<br />";
-    $msg .= __( "After clicked on \"Save Changes\" button, follow the instructions and send me the translation, thanks", "ceppaml" ) . " :)";
+    $msg .= __( "After clicked on \"Save Changes\" button, follow the instructions and send me the translation, thanks", "ceceppaml" ) . " :)";
 echo <<< EOT
     <div class="updated">
       <p>
@@ -46,7 +47,7 @@ echo <<< EOT
 EOT;
   }
   //Translate Ceceppa Multilingua :)
-  $parser = new CMLParser( "Ceceppa Multilingua", "en", CML_PLUGIN_PATH, CML_PLUGIN_LANGUAGES_PATH, "ceceppaml", false, "cml-plugin" );
+  $parser = new CMLParser( "Ceceppa Multilingua", CML_PLUGIN_PATH, CML_PLUGIN_LANGUAGES_PATH, "ceceppaml", false, "cml-plugin" );
 }
 
 add_meta_box( 'cml-translate-cml', __( 'Ceceppa Multilingua in your language', 'ceceppaml' ), 'cml_translate_cml', 'cml_box_languages' );
