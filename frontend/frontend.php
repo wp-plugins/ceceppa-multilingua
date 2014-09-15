@@ -1058,7 +1058,8 @@ EOT;
     global $wpdb;
 
     if( cml_is_homepage() ||
-      isset( $this->_looking_id_post ) ) {
+      isset( $this->_looking_id_post ) ||
+      CMLUtils::_get( '_is_sitemap'  ) ) {
       return;
     }
 
@@ -2012,4 +2013,3 @@ EOT;
     $GLOBALS[ 'text_direction' ] = ( CMLLanguage::get_current()->cml_rtl == 1 ) ? 'rtl' : 'ltr';
   }
 }
-?>
