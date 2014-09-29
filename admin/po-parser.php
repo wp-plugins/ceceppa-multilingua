@@ -255,8 +255,9 @@ $in = $this->_translate_in;
             $inputs .= "</div>";
           }
           
-          $id++;
         } //foreach
+
+        $id++;
 
         if( $translated == 0 ) {
           $class = "translated $class";

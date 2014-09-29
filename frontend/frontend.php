@@ -243,6 +243,10 @@ class CMLFrontend extends CeceppaML {
   function add_flags_on_title( $title, $id = -1 ) {
     global $_cml_settings;
 
+    if( ! is_singular() && ! cml_is_custom_post_type() ) {
+      return $title;
+    }
+
     //flags already applied
     if( isset( $this->_title_applied ) && is_singular() ) return $title;
     if( $id < 0 ) return $title;
@@ -1802,6 +1806,12 @@ EOT;
    */
   function hide_translations( $wp_query ) {
     global $wpdb, $_cml_settings;
+
+    if( is_feed() ) {
+      $wp_query = $this->filter_posts_by_language( $wp_query );
+
+      return;
+    }
 
     if( isset( $this->_looking_id_post ) ||
        CMLUtils::_get( '_is_sitemap' ) ) {
