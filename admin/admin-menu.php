@@ -98,10 +98,13 @@ class CML_Nav_Menu_Item_Custom_Fields {
 //       add_filter( 'wp_edit_nav_menu_walker', function () {
 //           return 'CML_Walker_Nav_Menu_Edit';
 //       });
-      add_filter( 'wp_edit_nav_menu_walker', 'cml_return_nav_walker', 99, 2 );
-      add_filter( 'cml_nav_menu_item_additional_fields', array( __CLASS__, '_add_fields' ), 10, 5 );
-      add_action( 'save_post', array( __CLASS__, '_save_post' ) );
-	}
+
+      if( isset( $_GET[ 'cml' ] ) ) {
+	add_filter( 'wp_edit_nav_menu_walker', 'cml_return_nav_walker', 99, 2 );
+	add_filter( 'cml_nav_menu_item_additional_fields', array( __CLASS__, '_add_fields' ), 10, 5 );
+	add_action( 'save_post', array( __CLASS__, '_save_post' ) );
+      }
+    }
  
 	static function get_fields_schema() {
 		$schema = array();
@@ -286,4 +289,3 @@ add_action( 'wp_update_nav_menu', 'cml_generate_mo_from_translations', 10 );
 add_meta_box( 'ceceppaml-menu-box', 'CeceppaML: ' . __('Flags', 'ceceppaml'), 'cml_menu_meta_box', 'nav-menus', 'side', 'default' );
 
 add_action( 'admin_notices', 'cml_admin_select_menu' );
-?>

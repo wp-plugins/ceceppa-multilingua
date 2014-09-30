@@ -171,7 +171,10 @@ EOT;
 function cml_admin_save_extra_post_fields( $term_id ) {
   global $wpdb, $pagenow;
 
-  //Dalla 3.5.2 questa funzione viene richiamata 2 volte :O, la seconda volta $_POST però è vuoto :O
+  //This function is also called on "comment" edit, and this will cause "language relations" lost...
+  if( ! isset( $_POST[ 'post_type' ] ) ) return;
+
+  //From Wp 3.5.2 this function is called twice, but second time $_POST is empty
   if( $pagenow == "nav-menus.php" || empty( $_POST ) ) {
     return;
   }
