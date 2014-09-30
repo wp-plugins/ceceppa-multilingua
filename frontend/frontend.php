@@ -243,7 +243,8 @@ class CMLFrontend extends CeceppaML {
   function add_flags_on_title( $title, $id = -1 ) {
     global $_cml_settings;
 
-    if( ! is_singular() && ! cml_is_custom_post_type() ) {
+    if( ( ! is_singular() && ! cml_is_custom_post_type() ) || 
+        is_archive() ) {
       return $title;
     }
 
