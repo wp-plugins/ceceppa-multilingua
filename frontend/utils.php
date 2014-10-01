@@ -328,13 +328,13 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
       if( is_array( $cat ) ) {
         $cat_id = ( isset( $cat[ 'term_id' ] ) ) ? $cat[ 'term_id' ] : ( $cat[ count($cat) - 1 ]->term_id );
 
-        if( CML_STORE_CATEGORY_AS == CML_CATEGORY_AS_STRING ) {
+//        if( CML_STORE_CATEGORY_AS == CML_CATEGORY_AS_STRING ) {
           //Mi recupererà il link tradotto dal mio plugin ;)
           CMLUtils::_set( '_force_category_lang', $result->id );
-        } else {
-          //Get translated category
-          $cat_id = (int) CMLTranslations::get_linked_category( $cat_id, $result->id );
-        }
+//        } else {
+//          //Get translated category
+//          $cat_id = (int) CMLTranslations::get_linked_category( $cat_id, $result->id );
+//        }
 
         $link = get_term_link( $cat_id, $cat[ 'taxonomy' ] );
 
