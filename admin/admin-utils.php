@@ -36,7 +36,6 @@ function _cml_restore_wp_pointers() {
   update_user_meta( get_current_user_id(), 'dismissed_wp_pointers', implode( ",", $misseds ) );
 }
 
-
 function _cml_no_tables_found() {
 echo <<< EOT
     <div class="error">
@@ -55,4 +54,3 @@ echo <<< EOT
     </div>
 EOT;
 }
-?>

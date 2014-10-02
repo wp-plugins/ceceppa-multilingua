@@ -1469,7 +1469,8 @@ class CMLUtils {
     }
 
     if( empty( self::$_url ) ) {
-      self::$_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+      $http = ( ! is_ssl() ) ? "http://" : "https://";
+      self::$_url = $http . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
       self::$_request_url = str_replace( trailingslashit( self::home_url() ),
                                         "", self::$_url );
     }
@@ -1490,7 +1491,8 @@ class CMLUtils {
     }
 
     $_url = $request_url;
-    $base_url = str_replace( "http://" . $_SERVER['HTTP_HOST'], "", get_option( 'home' ) );
+    $http = ( ! is_ssl() ) ? "http://" : "https://";
+    $base_url = str_replace( $http . $_SERVER['HTTP_HOST'], "", get_option( 'home' ) );
 
     if( preg_match( "#^([a-z]{2})(/.*)?$#i", $_url, $match ) ) {
       $lang = CMLLanguage::get_id_by_slug( $match[1] );
@@ -1537,7 +1539,8 @@ class CMLUtils {
     if( ! empty( self::$_clean_url ) ) {
       return self::$_clean_url;
     } else {
-      $_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+      $http = ( ! is_ssl() ) ? "http://" : "https://";
+      $_url = $http . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
       
       return preg_replace( "/\?.*/", "", $_url );
     }
@@ -1605,4 +1608,3 @@ class CMLUtils {
     return null;
   }
 }
-?>
