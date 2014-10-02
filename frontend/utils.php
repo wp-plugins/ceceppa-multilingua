@@ -1,4 +1,6 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) die( "Access denied" );
+
 /**
  * Check if current url ( or $url ) is the homepage
  *
@@ -184,6 +186,14 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
     $link = CMLUtils::get_home_url( $result->cml_language_slug );
 
     /*
+     * on mobile detect the language correctly only if the
+     * link end with "/"...
+     */
+    if( CMLUtils::get_url_mode() == PRE_PATH ) {
+      $link = trailingslashit( $link );
+    }
+
+    /*
      * If url mode == PRE_PATH and "Ignore for default language" option is enabled I have to ?lang slug to $link,
      * because I need to say the plugin that user choosed default language and I haven't redirect it to his browser
      * language...
@@ -251,6 +261,7 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
       $the_id = get_the_ID();
       $is_404 = is_404();
       $is_tag = is_tag();
+      $is_archive = is_archive();
     }
 
     /* Collego la categoria della lingua attuale con quella della linga della bandierina */
@@ -273,6 +284,15 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
         $link = get_permalink( $linked_id );
         $link = CMLPost::remove_extra_number( $link, get_post( $linked_id ) );
 
+        /*
+         * Ignore for default language mode doesn't works properly
+         * ( doesn't add /##/ to "translated" link )
+         */
+        if( CMLUtils::get_url_mode() == PRE_PATH &&
+            $_cml_settings[ 'url_mode_remove_default' ] == 1 ) {
+            $link = $wpCeceppaML->convert_url( $link, $result->cml_language_slug );
+        }
+
         if( CMLUtils::_get( '_real_language' ) != CMLLanguage::get_current_id()
             && $linked_id == $the_id ) {
 
@@ -283,7 +303,7 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
       }
     }
 
-    if( is_archive() && ! $is_category && ! is_post_type_archive() ) {
+    if( is_archive() && ! $is_category ) { //&& ! is_post_type_archive() ) {
       global $wp;
 
       $link = trailingslashit( home_url( $wp->request ) );
@@ -308,11 +328,16 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
       if( is_array( $cat ) ) {
         $cat_id = ( isset( $cat[ 'term_id' ] ) ) ? $cat[ 'term_id' ] : ( $cat[ count($cat) - 1 ]->term_id );
 
-        //Mi recupererà il link tradotto dal mio plugin ;)
-        CMLUtils::_set( '_force_category_lang', $result->id );
+//        if( CML_STORE_CATEGORY_AS == CML_CATEGORY_AS_STRING ) {
+          //Mi recupererà il link tradotto dal mio plugin ;)
+          CMLUtils::_set( '_force_category_lang', $result->id );
+//        } else {
+//          //Get translated category
+//          $cat_id = (int) CMLTranslations::get_linked_category( $cat_id, $result->id );
+//        }
 
         $link = get_term_link( $cat_id, $cat[ 'taxonomy' ] );
-        
+
         //if is object, it's an Error
         if( is_object( $link ) ) $link = "";
 
@@ -368,16 +393,20 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
         /*
          * return translation, if exists :)
          */
-        if( is_single() || is_page() ) {
+        if( $is_single || $is_page ) {
           $l = cml_get_linked_post( $the_id, CMLLanguage::get_default_id() );
-          // if( ! empty( $l ) ) return get_permalink( $l );
+          
+          if( $l == $the_id ) {
+            return add_query_arg( array( "lang" => $result->cml_language_slug ), get_permalink( $l ) );
+          }
         }
 
         /*
          * no translation found, and user choosed to force page to flag language,
          * I add parameter "lang=##" to url
          */
-        $link = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        $http = ( ! is_ssl() ) ? "http://" : "https://";
+        $link = $http . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
         if( CMLPost::get_language_by_id( $the_id ) != $result->id ) {
           //Is internal link?
           //if( strpos( $link, CMLUtils::get_home_url() ) === FALSE ) {
@@ -385,7 +414,7 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
           //} else {
             $link = str_replace( CMLUtils::get_home_url( CMLLanguage::get_current_slug() ),
                                  CMLUtils::get_home_url( $result->cml_language_slug ),
-                                 $link );
+                                 $link );            
           //}
         }
       } else {
@@ -411,6 +440,14 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
                                                     ),
                             $q, $result->id );
 
+  }
+
+  // Get the last character from the permalink structure definition
+  $permalink_structure = CMLUtils::get_permalink_structure();
+  if ( $permalink_structure !== '' ) {
+    if ( substr( $permalink_structure, -1 ) != '/' ) {
+      $link = untrailingslashit( $link );
+    }
   }
 
   return $link;
@@ -701,5 +738,3 @@ function cml_get_menu() {
 
   return "cml_menu_" . $lang->cml_language_slug;
 }
-
-?>

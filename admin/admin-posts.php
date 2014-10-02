@@ -2,7 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) die( "Access denied" );
 
 function cml_admin_post_meta_box( $tag ) {
-  global $wpdb, $pagenow;
+  global $wpdb, $pagenow, $_cml_settings;
 
   $langs = CMLLanguage::get_all();
 
@@ -31,7 +31,7 @@ function cml_admin_post_meta_box( $tag ) {
 
   cml_dropdown_langs( "post_lang", $post_lang, false, true, __( "All languages", "ceceppaml" ), "", 0 );
 
-    //Translations
+  //Translations
   echo "<h4>" . __( 'Translations', 'ceceppaml' ) . "</h4>";
 
   //Linked post?
@@ -41,15 +41,32 @@ function cml_admin_post_meta_box( $tag ) {
     /* recover category from linked id */
     $categories = wp_get_post_categories( $link_id );
     if( ! empty( $categories ) ) {
+      if( CML_STORE_CATEGORY_AS == CML_CATEGORY_CREATE_NEW &&
+         ! CMLLanguage::is_default( $post_lang ) ) {
+          $c = array();
+          foreach( $categories as $cat ) {
+            $query = sprintf( "SELECT cml_translated_cat_id FROM %s WHERE cml_cat_lang_id = %d AND cml_cat_id = %d",
+                                  CECEPPA_ML_CATS, $post_lang, $cat );
+  
+            $c[] = $wpdb->get_var( $query );
+          } //endforeach;
+  
+          if( ! empty( $c ) ) {
+            $categories = $c;
+          }
+        } //endif
+      
       wp_set_post_categories( $tag->ID, $categories );
-    }
-    
+    } // ! empty
+
     /* recover tags */
     $tags = wp_get_post_tags( $link_id );
     if( ! empty( $tags ) ) {
       $ltags = array();
       foreach( $tags as $t ) {
-        $ltags[] = $t->name;
+        $ltags[] = ( CML_STORE_CATEGORY_AS == CML_CATEGORY_AS_STRING ) ?
+                      $t->name :
+                      CMLTranslations::get( $lang, $t->taxonomy . "_" . $t->name, "C", true );
       }
 
       wp_set_post_tags( $tag->ID, $ltags );
@@ -102,6 +119,100 @@ function cml_admin_post_meta_box( $tag ) {
   }
   
   echo "</ul>";
+
+  /*
+   * Override show flags settings
+   * user can choose to override default show page settings for only this one
+   */
+    return;  //Still working on
+  echo "<h4>" . __( 'Show flags', 'ceceppaml' ) . "</h4>";
+
+  $override = get_post_meta( $tag->ID, "_cml_override_flags", true );
+
+  $show = ( isset( $override[ 'show' ] ) ) ? $override[ 'show' ] : "default";
+?>
+    <div class="cml-override-flags cml-override">
+      <label class="tipsy-me" title="<?php _e( "Use default 'Show flags' settings", 'ceceppaml' ) ?>">
+        <input type="radio" id="cml-showflags" name="cml-showflags" value="default" <?php checked( $show, "default" ) ?>/>
+        <span><?php _e( 'default', 'ceceppaml' ) ?></span>
+      </label>
+
+      <label class="tipsy-me" title="<?php _e( 'Always show flags in current page', 'ceceppaml' ) ?>">
+        <input type="radio" id="cml-showflags" name="cml-showflags" value="always"  <?php checked( $show, "always" ) ?>/>
+        <span><?php _e( 'always', 'ceceppaml' ) ?></span>
+      </label>
+
+      <label class="tipsy-me" title="<?php _e( "Don't show flags in this page", 'ceceppaml' ) ?>">
+        <input type="radio" id="cml-showflags" name="cml-showflags" value="never"  <?php checked( $show, "never" ) ?>/>
+        <span><?php _e( 'never', 'ceceppaml' ) ?></span>
+      </label>
+
+    </div>
+    <div class="cml-show-always <?php echo $show ?>">
+      <strong><?php _e( 'Size' ) ?></strong>
+
+      <?php
+        $size = ( isset( $override[ 'size' ] ) ) ? $override[ 'size' ] : $_cml_settings[ 'cml_option_flags_on_size' ];
+        $where = ( isset( $override[ 'where' ] ) ) ? $override[ 'where' ] : $_cml_settings[ 'cml_option_flags_on_pos'];
+
+      ?>
+      <div class="cml-override-flags cml-flag-size">
+        <label class="tipsy-me" title="<?php _e( "Small", 'ceceppaml' ) ?>">
+          <input type="radio" id="cml-flagsize[]" name="cml-flagsize" value="small"  <?php checked( $size, CML_FLAG_SMALL ) ?>/>
+          <span>
+            <?php echo CMLLanguage::get_flag_img( CMLLanguage::get_default_id(), CML_FLAG_SMALL ); ?>
+          </span>
+        </label>
+        
+        <label class="tipsy-me" title="<?php _e( "Tiny", 'ceceppaml' ) ?>">
+          <input type="radio" id="cml-flagsize[]" name="cml-flagsize" value="tiny"  <?php checked( $size, CML_FLAG_TINY ) ?>/>
+          <span>
+            <?php echo CMLLanguage::get_flag_img( CMLLanguage::get_default_id(), CML_FLAG_TINY ); ?>
+          </span>
+        </label>
+
+      </div>
+
+      <br />
+      <strong><?php _e('Where:', 'ceceppaml'); ?></strong>
+
+      <div class="cml-override-flags cml-flag-where">
+
+        <label class="tipsy-me" title="<?php _e( "Before the title", 'ceceppaml' ) ?>">
+          <input type="radio" id="cml-flagwhere" name="cml-flagwhere" value="before"  <?php checked( $where, 'before' ) ?>/>
+          <span>
+            <img src="<?php echo CML_PLUGIN_IMAGES_URL ?>btitle.png"/>
+          </span>
+        </label>
+
+
+        <label class="tipsy-me" title="<?php _e( "After the title", 'ceceppaml' ) ?>">
+          <input type="radio" id="cml-flagwhere" name="cml-flagwhere" value="after"  <?php checked( $where, 'after' ) ?>/>
+          <span>
+            <img src="<?php echo CML_PLUGIN_IMAGES_URL ?>atitle.png"/>
+          </span>
+        </label>
+
+
+        <label class="tipsy-me" title="<?php _e( "Before content", 'ceceppaml' ) ?>">
+          <input type="radio" id="cml-flagwhere" name="cml-flagwhere" value="top"  <?php checked( $where, 'top' ) ?>/>
+          <span>
+            <img src="<?php echo CML_PLUGIN_IMAGES_URL ?>bcontent.png"/>
+          </span>
+        </label>
+
+
+        <label class="tipsy-me" title="<?php _e( "After content", 'ceceppaml' ) ?>">
+          <input type="radio" id="cml-flagwhere" name="cml-flagwhere" value="bottom"  <?php checked( $where, 'bottom' ) ?>/>
+          <span>
+            <img src="<?php echo CML_PLUGIN_IMAGES_URL ?>acontent.png"/>
+          </span>
+        </label>
+
+      </div>
+
+    </div>
+<?php
 }
 
 function _cml_admin_post_meta_translation( $type, $lang, $linked_id, $post_id ) {
@@ -171,7 +282,10 @@ EOT;
 function cml_admin_save_extra_post_fields( $term_id ) {
   global $wpdb, $pagenow;
 
-  //Dalla 3.5.2 questa funzione viene richiamata 2 volte :O, la seconda volta $_POST però è vuoto :O
+  //This function is also called on "comment" edit, and this will cause "language relations" lost...
+  if( ! isset( $_POST[ 'post_type' ] ) ) return;
+
+  //From Wp 3.5.2 this function is called twice, but second time $_POST is empty
   if( $pagenow == "nav-menus.php" || empty( $_POST ) ) {
     return;
   }
@@ -185,10 +299,15 @@ function cml_admin_save_extra_post_fields( $term_id ) {
     $post_lang = intval( $_POST[ 'cml-lang' ] );
   }
 
+  if( CML_STORE_CATEGORY_AS == CML_CATEGORY_CREATE_NEW ) {
+    cml_fix_update_post_categories();
+  }
+
   /*
-   * Quickedit?
+   * Normal edit or quickedit?
    */
   if( ! isset( $_POST[ 'cml-quick' ] ) ) {
+    //Normal edit
     $linkeds = array();
 
     foreach( CMLLanguage::get_all() as $lang ) {
@@ -197,6 +316,14 @@ function cml_admin_save_extra_post_fields( $term_id ) {
       //Set language of current post
       $linkeds[ $lang->id ] = @$_POST[ 'linked_post' ][ $lang->id ];
     }
+
+    //Override flags settings
+    $override = array(
+                      'show' => @$_POST[ 'cml-showflags' ],
+                      'size' => @$_POST[ 'cml-flagsize' ],
+                      'where' => @$_POST[ 'cml-flagwhere' ],
+                    );
+    update_post_meta( $post_id, "_cml_override_flags", $override );
   } else {
     $langs = CMLLanguage::get_all();
 
@@ -224,7 +351,7 @@ function cml_admin_add_flag_columns( $columns ) {
   wp_enqueue_style('ceceppaml-style-all-posts', CML_PLUGIN_URL . 'css/all_posts.php?langs=' . count( $langs ) );
 
   $clang = isset( $_GET['cml-lang'] ) ? intval ( $_GET['cml-lang'] ) : CMLLanguage::get_default_id();
-  $img = "";
+  $img = '<span class="cml_enable_filter">' . __( 'Enable language filtering', 'ceceppaml' ) . '</span>';
   foreach( $langs as $lang ) {
     $class = ( $lang->id == $clang ) ? "cml-filter-current" : "";
 
@@ -316,7 +443,7 @@ echo <<< EOT
       </span>
       &nbsp;
       <input type="text" name="cml-trans[]" class="cml-input cml-hidden" value="" />
-      <span class="title tipsy-s" title="$click">ciao</span>
+      <span class="title tipsy-s" title="$click"></span>
       <a href="javascript:void(0)" class="button button-primary button-mini button-confirm" title="$translate" style="display: none">
         <img src="{$url}confirm.png" />
       </a>
@@ -325,23 +452,18 @@ EOT;
 }
 
 function cml_admin_add_meta_boxes() {
-  //Page and post meta box
-  add_meta_box( 'ceceppaml-meta-box', __('Post data', 'ceceppaml'), 'cml_admin_post_meta_box', 'post', 'side', 'high' );
-  add_meta_box( 'ceceppaml-meta-box', __('Page data', 'ceceppaml'), 'cml_admin_post_meta_box', 'page', 'side', 'high' );
-  
   //Add metabox to custom posts
   $post_types = get_post_types( array( '_builtin' => FALSE ), 'names'); 
-  $posts = array( "post", "page" );
+  $post_types[] = "post";
+  $post_type[] = "page";
 
   // remove_meta_box('tagsdiv-post_tag','post','side');
   // add_meta_box( 'ceceppaml-tags-meta-box', __('Tags', 'ceceppaml'), 'cml_admin_tags_meta_box', 'post', 'side', 'core' );
-
   $post_types = apply_filters( 'cml_manage_post_types', $post_types );
 
   foreach( $post_types as $post_type ) {
-    if( ! in_array( $post_type, $posts ) ) {
-      add_meta_box( 'ceceppaml-meta-box', __('Post data', 'ceceppaml'), 'cml_admin_post_meta_box', $post_type, 'side', 'high' );
-    }
+    //Exclude "post" and "page"
+    add_meta_box( 'ceceppaml-meta-box', __('Post data', 'ceceppaml'), 'cml_admin_post_meta_box', $post_type, 'side', 'high' );
   }
 }
 
@@ -352,18 +474,44 @@ function cml_admin_filter_all_posts_page() {
   if( isset( $_GET[ 'post_type' ] ) &&
      ! in_array( $_GET[ 'post_type' ], $post_types ) ) return;
 
-  //Se sto nel cestino di default visualizzo tutti gli articoli :)
+  //In the bin page I have to show all the posts :)
   $d = CMLLanguage::get_default_id();
 
   if( isset( $_GET[ 'post_status' ] ) && in_array( $_GET[ 'post_status' ],
                                                   array( "draft", "trash" ) ) )
   $d = 0;
   $d = isset( $_GET[ 'cml-lang' ] ) ? $_GET[ 'cml-lang' ] : $d;
+   
+  //Check if language filtering is disabled for this post type
+  $is_disabled = get_hidden_columns( get_current_screen() );
+    
+  //Ignored post list
+  $list = get_option( "_cml_ignore_post_type", array() );
 
-  //All languages
-  echo '<span class="cml-icon-wplang tipsy-s" title="' . __( 'Language:', 'ceceppaml' ) . '">';
-  cml_dropdown_langs( "cml_language", $d, false, true, __('Show all languages', 'ceceppaml'), -1, 0 );
-  echo '</span>';
+  //Add current post type to "ignore" list
+  $post_type = ( isset( $_GET[ 'post_type' ] ) ) ? $_GET[ 'post_type' ] : "post";
+  if( in_array( "cml_flags", $is_disabled ) ) {
+      if( ! in_array( $post_type, $list ) ) {
+          $list[] = $post_type;
+          
+          update_option( "_cml_ignore_post_type", $list );
+      }
+
+      return;
+  } else {
+      //Remove the current post from "ignore list"
+      $search = array_search( $post_type, $list );
+      if( $search !== FALSE ) {
+          unset( $list[ $search ] );
+
+          update_option( "_cml_ignore_post_type", $list );
+      }
+
+      //All languages
+      echo '<span class="cml-icon-wplang tipsy-s" title="' . __( 'Language:', 'ceceppaml' ) . '">';
+      cml_dropdown_langs( "cml_language", $d, false, true, __('Show all languages', 'ceceppaml'), -1, 0 );
+      echo '</span>';
+  }
 }
 
 function cml_admin_filter_all_posts_query( $query ) {
@@ -378,12 +526,24 @@ function cml_admin_filter_all_posts_query( $query ) {
   else
       $post_type = $_GET[ 'post_type' ];
 
+  $post_types = get_post_types( array( '_builtin' => TRUE ), 'names'); 
+  $post_types = apply_filters( 'cml_manage_post_types', $post_types );
+  if( ! in_array( $post_type, $post_types ) ) return $query;
+
   //In trash I don't filter any post
   $d = CMLLanguage::get_default_id();
   if( isset( $_GET[ 'post_status' ] ) && in_array( $_GET[ 'post_status' ], array( "draft", "trash" ) ) ) $d = 0;
   $id = array_key_exists('cml-lang', $_GET) ? intval($_GET['cml-lang']) : $d;
   
   if( is_admin() && $pagenow == "edit.php" ) {
+    //Show language filtering feature
+    if( isset( $_GET[ 'hide-filtering-notice' ] ) ) 
+        update_option( '_cml_hide_filtering_notice', 1 );
+
+    if( ! get_option( "_cml_hide_filtering_notice", 0 ) ) {
+        add_action( 'admin_notices', '_cml_show_filtering_notice' );
+    }
+
     if($id > 0) {
       $posts = CMLPost::get_posts_by_language( $id );
 
@@ -392,6 +552,25 @@ function cml_admin_filter_all_posts_query( $query ) {
   }
 
   return $query;
+}
+
+function _cml_show_filtering_notice() {
+    $msg = __( 'You can easily disable/enable language filtering for current post type, ', 'ceceppaml' );
+    $msg .= __( 'using the "Enable language filtering" in the "Screen Option" section', 'ceceppaml' );
+    $close = __( 'Close', 'ceceppaml' );
+    
+    $link = add_query_arg( array( "hide-filtering-notice" => 1 ) );
+
+echo <<< NOTICE
+    <div class="updated cml-notice">
+        <p>$msg</p>
+        <p class="submit">
+            <a class="button button-primary" style="float: right" href="$link">
+                $close
+            </a>
+        </p>
+    </div>
+NOTICE;
 }
 
 function cml_admin_delete_extra_post_fields( $id ) {
@@ -446,13 +625,29 @@ function _cml_clone_post_meta( $from, $new_post_id ) {
 
 function cml_manage_posts_columns() {
   //Show flags in list for all registered post types ( so also custom posts )
-  $post_types = get_post_types('','names');
-  $post_types = apply_filters( 'cml_manage_post_types', $post_types );
+  $all = get_post_types('','names');
+  $post_types = apply_filters( 'cml_manage_post_types', $all );
 
-  foreach ($post_types as $type ) {
+  /*
+   * In 1.4.33 I added "Enabled filter language" to easily allow user to disable language filtering
+   * on it own posts.
+   * I need to cycle $all because I need to show up the filtering option :)
+   */
+  foreach ($all as $type ) {
     add_action( "manage_${type}_posts_custom_column", 'cml_admin_add_flag_column', 10, 2);
     add_filter( "manage_${type}_posts_columns" , 'cml_admin_add_flag_columns' );
   }
+}
+
+function cml_disable_filtering( $types ) {
+  static $list = null;
+    
+  //Ignored post types
+  if( $list == null ) {
+    $list = get_option( "_cml_ignore_post_type", array() );
+  }
+
+  return array_diff( $types, $list );
 }
 
 //Manage all posts columns
@@ -475,4 +670,6 @@ add_action('delete_page', 'cml_admin_delete_extra_post_fields' );
 //Filters
 add_filter( 'parse_query', 'cml_admin_filter_all_posts_query' );
 add_action( 'restrict_manage_posts', 'cml_admin_filter_all_posts_page' );
-?>
+
+//Disable language filter for
+add_filter( 'cml_manage_post_types', 'cml_disable_filtering' );
