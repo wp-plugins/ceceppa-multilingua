@@ -314,7 +314,7 @@ function _cml_migrate_add_record( $lang, $pid, $linked = 0 ) {
 function cml_migrate_create_table() {
   global $wpdb;
 
-  $wpdb->query( "DROP TABLE " . CECEPPA_ML_RELATIONS );
+  $wpdb->query( "DROP TABLE IF EXISTS " . CECEPPA_ML_RELATIONS );
 
   $langs = cml_get_languages( false );
 
