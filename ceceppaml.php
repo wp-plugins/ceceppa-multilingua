@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: Ceceppa Multilingua
-Plugin URI: http://www.ceceppa.eu/portfolio/ceceppa-multilingua/
+Plugin URI: http://www.alessandrosenese.eu/portfolio/ceceppa-multilingua
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.4.35
+Version: 1.4.36
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.alessandrosenese.eu/
 License: GPL3
@@ -11,9 +11,9 @@ Tags: multilingual, multi, language, admin, tinymce, qTranslate, Polyglot, bilin
 */
 /**
  * Ceceppa Multilanguage Blog :)
- * 
+ *
  * Most of flags are downloaded from http://blog.worldofemotions.com/danilka/
- * 
+ *
  */
 /*  Copyright 2013  Alessandro Senese (email : senesealessandro@gmail.com)
 
@@ -50,7 +50,7 @@ define( 'CECEPPA_ML_RELATIONS', $wpdb->base_prefix . 'ceceppa_ml_relations');
  * From 1.4 the plugin will store translation in .mo file if PHP >= 5.2.4, othwerise
  * store strings into db
  */
-define('CECEPPA_ML_TRANSLATIONS', $wpdb->base_prefix . 'ceceppa_ml_trans');     
+define('CECEPPA_ML_TRANSLATIONS', $wpdb->base_prefix . 'ceceppa_ml_trans');
 
 /* Url modification mode */
 define( 'PRE_NONE', 0 );
@@ -177,7 +177,7 @@ class CeceppaML {
 
   public function __construct() {
     global $_cml_settings;
-    
+
       //Db
     $GLOBALS[ 'cml_db_version' ] = get_option( 'cml_db_version', CECEPPA_DB_VERSION );
 
@@ -236,7 +236,7 @@ class CeceppaML {
 
     cml_do_install();
   }
-  
+
   /*
    * initialize the plugin
    */
@@ -282,7 +282,7 @@ class CeceppaML {
                                                                   ) );
 
     wp_enqueue_style( 'ceceppaml-style', CML_PLUGIN_URL . 'css/ceceppaml.css' );
-    
+
     if( file_exists( CML_PLUGIN_CACHE_PATH . "cml_flags.css" ) )
         wp_enqueue_style( 'ceceppaml-flags', CML_PLUGIN_CACHE_URL . "cml_flags.css" );
 
@@ -290,7 +290,7 @@ class CeceppaML {
     if( file_exists( CML_UPLOAD_DIR . "ceceppaml.css" ) )
         wp_enqueue_style( 'ceceppaml-custom-style', CML_UPLOAD_URL . "ceceppaml.css" );
   }
-  
+
   function add_bar_menu() {
     $this->_add_bar_menu_item( cml_get_current_language(), "cml_lang_sel" );
 
@@ -300,7 +300,7 @@ class CeceppaML {
     foreach( $langs as $lang ) {
       $this->_add_bar_menu_item( $lang, 'cml_lang_sel' . $lang->id, "cml_lang_sel" );
     }
-    
+
     if( current_user_can( 'manage_options' ) ) {
       global $wp_admin_bar;
 
@@ -399,7 +399,7 @@ EOT;
       $permalink = untrailingslashit( $permalink );
     }
 
-    if( isset( $post->post_name ) ) {
+    if( isset( $post->post_name ) && $post->post_type == "page" ) {
       $permalink = $this->translate_page_link( $permalink, $post, $leavename );
     }
 
@@ -454,14 +454,14 @@ EOT;
     //
     //  if( count( $pout[0] ) < count( $out[ 0 ] ) && CMLPost::has_translations( $p->ID ) ) {
     //    $ppermalink = get_permalink( $page->post_parent );
-    //    
+    //
     //    die();
     //  }
     //}
 
     return $this->convert_url( $permalink, $slug );
   }
-  
+
   /*
    * change ( wrong? ) language slug in url
    */
@@ -476,9 +476,9 @@ EOT;
 
       //Change slug in url instead of append ?lang arg
       $link = str_replace( trailingslashit( $url ), "", $clean_url );
-  
+
       $home = CMLUtils::get_home_url( $slug );
-  
+
       return trailingslashit( $home ) . $link;
       break;
     case PRE_DOMAIN:
@@ -496,7 +496,7 @@ EOT;
 
     return $permalink;
   }
-  
+
   function translate_category_url( $url ) {
     $homeUrl = untrailingslashit( $this->_homeUrl );
     $plinks = explode( "/", str_replace( $homeUrl, "", $this->_request_url ) );
@@ -508,21 +508,21 @@ EOT;
     } else {
       $slug = CMLLanguage::get_slug( CMLLanguage::get_current_id() );
     }
-    
+
     if( empty( $slug ) ) $slug = CMLLanguage::get_slug( CMLLanguage::get_current_id() );
 
     return $url;
   }
 
   /*
-   * Questa funzione mi serve per poter passare tra le varie lingue della stessa 
+   * Questa funzione mi serve per poter passare tra le varie lingue della stessa
    * categoria, perché la funzione get_category_link mi restituisce il link
-   * rispetto alla lingua corrente, mentre a me serve il link per una 
+   * rispetto alla lingua corrente, mentre a me serve il link per una
    * lingua specifica.
    */
   function force_category_lang( $lang ) {
     $this->_force_category_lang = $lang;
-    
+
     if( isset( $this->_fake_language_id ) )
       $this->_force_category_lang = $this->_fake_language_id;
   }
@@ -530,7 +530,7 @@ EOT;
   function unset_category_lang() {
     unset( $this->_force_category_lang );
   }
-  
+
   function get_url() {
     return $this->_url;
   }
@@ -548,7 +548,7 @@ EOT;
       return $url;
     }
 
-    $slug = CMLUtils::_get( "_forced_language_slug", 
+    $slug = CMLUtils::_get( "_forced_language_slug",
                     CMLLanguage::get_slug( CMLUtils::_get( '_real_language' ) ) );
 
     if( isset( $this->_force_category_lang ) ) {
@@ -565,13 +565,13 @@ EOT;
 
       return CMLUtils::get_home_url( $slug ) . $path;
     }
-    
+
     if( $this->_url_mode == PRE_LANG ) {
-      return add_query_arg( array( 
+      return add_query_arg( array(
                             'lang' => $slug,
                             ), $url );
     }
-    
+
     if( $this->_url_mode == PRE_DOMAIN ) {
       if( preg_match( "/^(.*\/\/)([a-z]{2})\./", $url, $match ) ) {
         $url = preg_replace( "/^(.*\/\/)([a-z]{2})\./", $match[1] . "$slug.", $url );
@@ -596,7 +596,7 @@ if( "wp-login.php" == $pagenow ) return;
 //Admin?
 if( is_admin() ) {
   global $wpdb;
-  
+
   $table_name = CECEPPA_ML_TABLE;
   $first_time = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name;
   if( $wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name &&
@@ -621,6 +621,6 @@ if( is_admin() ) {
   }
 
   require_once( CML_PLUGIN_FRONTEND_PATH . 'frontend.php' );
-  
+
   $wpCeceppaML = new CMLFrontend();
 }

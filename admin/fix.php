@@ -257,7 +257,7 @@ function cml_do_update_old() {
 
     $slug = $info->cml_language_slug;
     $the_id = cml_get_page_id_by_path ( $slug, array('page') );
-    
+
     if( $the_id ) update_option( 'cml_need_use_static_page', 1 );
   endif;
   
@@ -390,7 +390,7 @@ function cml_update_all_posts_language() {
                             'numberposts' => -1,
                             'posts_per_page' => 999999,
                             'status' => 'publish, draft, private'));
-  
+
   $did = CMLLanguage::get_default_id();
   foreach($posts as $post) {
     echo "$post->ID,";

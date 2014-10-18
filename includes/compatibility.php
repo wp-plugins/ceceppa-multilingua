@@ -17,7 +17,7 @@ class CML_WPML_Parser {
   protected $group = null;
   protected $options = null;
 
-  function __construct( $filename, $group, $options = null, $generate_style = false ) { 
+  function __construct( $filename, $group, $options = null, $generate_style = false ) {
     $xml = file_get_contents( $filename );
 
     $parser = xml_parser_create();
@@ -46,7 +46,7 @@ class CML_WPML_Parser {
       if( $add_text && 'close' !== $value[ 'tag' ]  ) {
         if( null == $key && "key" == $value[ 'tag' ] ) {
           $key = $value[ 'attributes' ][ 'name' ];
-          
+
           if( ! is_array( $this->options ) ) {
             $this->options = get_option( $key );
           }
@@ -60,11 +60,11 @@ class CML_WPML_Parser {
               } else {
                 $v = "";
               }
-              
+
               $add = ! empty( $v );
 //             } else {
 //               $v = get_option( $name );
-              
+
 //               $add = true;
 //             }
             
@@ -472,10 +472,10 @@ function cml_change_wpml_settings_values( $group, $name ) {
     $v = CMLTranslations::get( CMLLanguage::get_current_id(),
                               "_{$group}_{$key}",
                               "_{$group}" );
-                              
+
     if( empty( $v ) ) continue;
 
-    $options[ $key ] = $v;                            
+    $options[ $key ] = $v;
   }
 }
 
