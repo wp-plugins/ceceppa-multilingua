@@ -282,6 +282,7 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
 
       if( ! empty( $linked_id ) ) {
         $link = get_permalink( $linked_id );
+
         $link = CMLPost::remove_extra_number( $link, get_post( $linked_id ) );
 
         /*
@@ -430,7 +431,6 @@ function cml_get_the_link( $result, $linked = true, $only_existings = false, $qu
         $link = CMLUtils::get_home_url( $result->cml_language_slug ) . $link;
       }
     }
-    
 
     $link = apply_filters( 'cml_get_the_link', $link, array(
                                                     "is_single" => $is_single,
