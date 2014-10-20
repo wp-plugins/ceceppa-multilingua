@@ -243,7 +243,7 @@ class CMLFrontend extends CeceppaML {
   function add_flags_on_title( $title, $id = -1 ) {
     global $_cml_settings;
 
-    if( ( ! is_singular() && ! cml_is_custom_post_type() ) || 
+    if( ( ! is_singular() && ! cml_is_custom_post_type() ) ||
         is_archive() ) {
       return $title;
     }
@@ -425,7 +425,7 @@ EOT;
     if( empty( $appendTo ) ) return;    //No element specified
 
     //what to shown
-    $show = array( "", "both", "text", "flag", "slug" );
+    $show = array( "", "text", "text", "flag", "slug", "slug" );
     $as = intval( $_cml_settings[ "cml_show_items_as" ] );
     $size = $_cml_settings[ "cml_show_items_size" ];
 
@@ -437,6 +437,7 @@ EOT;
       cml_show_flags( array(
                             "class" => "cml_append_flags_to",
                             "show" => $show[$as],
+                            "show_flag" => in_array( $as, array( 1, 3, 5 ) ),
                             "size" => $size,
                             "queried" => true,
                             ) );
@@ -461,7 +462,7 @@ EOT;
 
     wp_enqueue_style( 'ceceppaml-flying' );
 
-    $show = array( "", "both", "text", "flag", "slug" );
+    $show = array( "", "text", "text", "flag", "slug", "slug" );
     $as = intval( $_cml_settings[ "cml_show_float_items_as" ] );
     $size = $_cml_settings[ "cml_show_float_items_size" ];
     $style = $_cml_settings[ "cml_show_float_items_style" ];
@@ -470,6 +471,7 @@ EOT;
       if( $style == 1 ) {
         cml_show_flags( array(
                               "show" => $show[$as],
+                              "show_flag" => in_array( $as, array( 1, 3, 5 ) ),
                               "size" => $size,
                               "queried" => true,
                               ) );
@@ -774,10 +776,16 @@ EOT;
         continue;
       }
 
+      /*
+       * if translated name == original name I don't update the slug.
+       * Because if wp added -## to it I'll get an 404 page :(
+       */
+      $oname = $term->name;
       $term->name = $this->translate_term_name( $term->name, $lang_id, $post_id, $term->taxonomy );
 
       if( $this->_category_url_mode != PRE_LANG &&
-          null === CMLUtils::_get( '_no_translate_term' ) ) {
+          null === CMLUtils::_get( '_no_translate_term' ) &&
+          $term->name != $oname ) {
         $term->slug = sanitize_title( strtolower( $term->name ) );
       }
 
@@ -962,7 +970,7 @@ EOT;
           $term = get_term( $item->object_id, $item->object );
 
           $url = get_term_link( $term );
-          
+
           $item->title = ( ! @empty( $customs[ 'title' ] ) ) ? $customs[ 'title' ] :
                                                 $term->name;
           $item->attr_title = ( ! @empty( $customs[ 'attr_title' ] ) ) ? $customs[ 'attr_title' ] :
@@ -1208,7 +1216,7 @@ EOT;
         if( isset( $item ) ) unset( $item );
       }
 
-      if( substr( $item->url, 0, 10 ) == "#cml-lang-" ) {
+      if( isset( $item ) && substr( $item->url, 0, 10 ) == "#cml-lang-" ) {
         $lang = str_replace( "#cml-lang-", "", $item->url );
 
         $item->url = cml_get_the_link( CMLLanguage::get_by_id( $lang ), true, false, true );
@@ -1685,7 +1693,7 @@ EOT;
    */
   function filter_posts_by_language( $wp_query ) {
     global $wpdb, $_cml_settings;
- 
+
     if( isset( $this->_looking_id_post ) ||
        CMLUtils::_get( '_is_sitemap' ) ) {
       return;
@@ -1702,7 +1710,7 @@ EOT;
     }
 
     $use_language = array( CMLUtils::_get( '_real_language' ) ); //CMLLanguage::get_current_id();
-    
+
     //lang parameters
     if( isset( $wp_query->query[ 'lang' ] ) ) {
       $langs = explode( ",", $wp_query->query[ 'lang' ] );
@@ -1832,7 +1840,7 @@ EOT;
 
     //Al momento utilizzo la vecchia funzione non ottimizzata per la visualizzazione dei tag
     if( is_tag() ) {
-      cml_deprecated_hide_translations_for_tags( $wp_query );
+      cml_frontend_hide_translations_for_tags( $wp_query );
     }
 
     if( $wp_query != null && is_object( $wp_query ) && is_array( $this->_hide_posts ) ) {

@@ -87,7 +87,7 @@ function cml_admin_options_flags_show() {
               </div>
               <label for="flags-on-custom"><?php _e( 'Custom posts', 'ceceppaml' ) ?></label>
             </li>
-            
+
             <li>
               <div class="cml-checkbox">
                 <input type="checkbox" id="flags-on-loop" name="flags-on-loop" value="1" <?php checked( $_cml_settings[ 'cml_option_flags_on_the_loop' ], 1 ) ?> />
