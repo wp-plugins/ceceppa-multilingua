@@ -329,7 +329,7 @@ class CMLAdmin extends CeceppaML {
 
 
   /*
-   * Add "pointer" 
+   * Add "pointer"
    */
   function add_pointers() {
     global $pagenow;
