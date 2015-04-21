@@ -1,7 +1,6 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) die( "Access denied" );
 
-//die();
 function cml_admin_taxonomy_add_form_fields( $tag ) {
 ?>
   <div class="form-field cml-form-field">
@@ -37,10 +36,8 @@ function cml_admin_taxonomy_edit_form_fields( $tag ) {
         $img = CMLLanguage::get_flag_img( $lang->id );
 
         //$value = get_option( "cml_category_" . $t_id . "_lang_$id", $tag->name );
-        $tag->name = html_entity_decode( $tag->name );
         $tname = strtolower( $tag->taxonomy . "_" . $tag->name );
         $value = CMLTranslations::get( $lang->id, $tname, "C", true );
-
         if( empty( $value ) ) $value = $tag->name;
 echo <<< EOT
   <tr class="form-field cml-form-field">
@@ -213,3 +210,4 @@ function cml_admin_taxonomy_disable_quickedit( $actions, $tag ) {
 if( ! CMLLanguage::is_default() ) {
   add_filter( 'tag_row_actions', 'cml_admin_taxonomy_disable_quickedit', 10, 2 );
 }
+?>

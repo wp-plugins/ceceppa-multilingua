@@ -3,7 +3,7 @@ require_once( CML_PLUGIN_FRONTEND_PATH . "utils.php" );
 
 if( isset( $_GET[ 'cml-restore-wp' ] ) ) {
   _cml_restore_wp_pointers();
-  
+
   $msg = __( 'Helps restored succesfully', 'ceceppaml' );
 echo <<< EOT
   <div class="updated">
@@ -14,6 +14,45 @@ echo <<< EOT
 EOT;
 }
 
+
+function cml_admin_options_advanced_qem() {
+  ?>
+  <div id="minor-publishing">
+    <div class="inside <?php echo get_option( "cml_qem_enabled", 1 ) ? '' : 'disabled'; ?>">
+      <ul>
+      <?php
+
+        //I don't need all the builtin post type, like media...
+        $post_types = get_post_types( array( '_builtin' => FALSE ), 'names');
+        $post_types[] = "post";
+        $post_types[] = "page";
+
+        //Enabled post types ( by default all )
+        $enabled = get_option( 'cml_qem_enabled_post_types', $post_types );
+        foreach( $post_types as $post_type ) {
+
+          $checked = checked( in_array( $post_type, $enabled ), 1, false );
+echo <<< LI
+  <li>
+    <div class="cml-checkbox">
+      <input type="checkbox" id="cml-qem-{$post_type}" name="cml-qem-posttypes[]" value="$post_type" $checked />
+      <label for="cml-qem-{$post_type}"><span>||</span></label>
+    </div>
+    <label for="cml-qem-{$post_type}">$post_type</label>
+  </li>
+LI;
+      }
+      ?>
+      </ul>
+      <?php submit_button() ?>
+    </div>
+  </div>
+
+  <div id="major-publishing-actions" class="cml-description">
+    <?php _e( 'The Quick Edit Mode allow you to esily edit you post and its translations in the same page.', 'ceceppaml' ); ?>
+  </div>
+<?php
+}
 
 function cml_admin_options_advanced_wizard() {
   ?>
@@ -107,15 +146,57 @@ function cml_admin_options_update_static_page() {
 <?php
 }
 
+function cml_admin_remove_extra_slug() {
+  ?>
+  <div id="minor-publishing">
+    <div>
+        <?php echo cml_utils_create_checkbox( __( 'Remove the numeric append on duplicate wordpress titles', 'ceceppaml' ), "cml-extra", "cml-extra", null, 1, get_option( "cml_remove_extra_slug", 1 ) ) ?>
+        <?php submit_button() ?>
+    </div>
+  </div>
+
+  <div id="major-publishing-actions" class="cml-description">
+      <?php
+        _e( 'Wordpress automatically append a numeric flag in permalink when one or more post/page has the same name.', 'ceceppaml' );
+        _e( "The plugin will remove it, but you can disable this feature if doesn't works fine for you", 'ceceppaml' );
+      ?>
+  </div>
+<?php
+}
+
+function cml_admin_force_post_redirect() {
+  ?>
+  <div id="minor-publishing">
+    <div>
+        <?php echo cml_utils_create_checkbox( __( 'Force post redirect', 'ceceppaml' ), "cml-redirect", "cml-redirect", null, 1, get_option( "cml_force_redirect", false ) ) ?>
+        <?php submit_button() ?>
+    </div>
+  </div>
+
+  <div id="major-publishing-actions" class="cml-description">
+      <?php
+      ?>
+  </div>
+<?php
+}
+
+
 $help = __( 'Show/Hide help', 'ceceppaml' );
+
+add_meta_box( 'cml-box-quick-edit', cml_utils_create_checkbox( '', "cml-qem", "cml-qem", null, 1, get_option( "cml_qem_enabled", 1 ) ) . '<label for="cml-qem">' . __( 'Quick edit mode', 'ceceppaml' ) . "</label>:<span class=\"cml-help cml-help-wp tipsy-w\" title=\"$help\"></span>", 'cml_admin_options_advanced_qem', 'cml_box_options' );
 
 add_meta_box( 'cml-box-start-wizard', '<span class="cml-icon cml-icon-redirect "></span>' . __( 'Wizard', 'ceceppaml' ) . ":<span class=\"cml-help cml-help-wp tipsy-w\" title=\"$help\"></span>", 'cml_admin_options_advanced_wizard', 'cml_box_options' );
 add_meta_box( 'cml-box-assign-to', '<span class="cml-icon cml-icon-redirect "></span>' . __( 'Update language of existing posts', 'ceceppaml' ) . ":<span class=\"cml-help cml-help-wp tipsy-w\" title=\"$help\"></span>", 'cml_admin_options_update_language', 'cml_box_options' );
 add_meta_box( 'cml-box-restore-helps', '<span class="cml-icon cml-icon-redirect "></span>' . __( 'Restore helps', 'ceceppaml' ) . ":<span class=\"cml-help cml-help-wp tipsy-w\" title=\"$help\"></span>", 'cml_admin_options_advanced_pointers', 'cml_box_options' );
-add_meta_box( 'cml-box-update-relations', '<span class="cml-icon cml-icon-redirect "></span>' . __( 'Update post relations', 'ceceppaml' ) . ":<span class=\"cml-help cml-help-wp tipsy-w\" title=\"$help\"></span>", 'cml_admin_options_update_relations', 'cml_box_options' );
+// add_meta_box( 'cml-box-update-relations', '<span class="cml-icon cml-icon-redirect "></span>' . __( 'Update post relations', 'ceceppaml' ) . ":<span class=\"cml-help cml-help-wp tipsy-w\" title=\"$help\"></span>", 'cml_admin_options_update_relations', 'cml_box_options' );
 add_meta_box( 'cml-box-enable-static-change', '<span class="cml-icon cml-icon-redirect "></span>' . __( 'Static page', 'ceceppaml' ) . ":<span class=\"cml-help cml-help-wp tipsy-w\" title=\"$help\"></span>", 'cml_admin_options_update_static_page', 'cml_box_options' );
+
+//Disable extra slug remover
+add_meta_box( 'cml-box-disable-extra-slug', '<span class="cml-icon cml-icon-redirect "></span>' . __( 'Duplicated titles', 'ceceppaml' ) . ":<span class=\"cml-help cml-help-wp tipsy-w\" title=\"$help\"></span>", 'cml_admin_remove_extra_slug', 'cml_box_options' );
+
+//Force post/page redirect
+add_meta_box( 'cml-box-force-redirect', '<span class="cml-icon cml-icon-redirect "></span>' . __( 'Force post redirect', 'ceceppaml' ) . ":<span class=\"cml-help cml-help-wp tipsy-w\" title=\"$help\"></span>", 'cml_admin_force_post_redirect', 'cml_box_options' );
 
 if( file_exists( CML_PLUGIN_PATH . "debug.php" ) ) {
   add_meta_box( 'cml-box-enable-debug', '<span class="cml-icon cml-icon-redirect "></span>' . __( 'Debug', 'ceceppaml' ) . ":<span class=\"cml-help cml-help-wp tipsy-w\" title=\"$help\"></span>", 'cml_admin_options_enable_debug', 'cml_box_options' );
 }
-?>
