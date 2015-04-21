@@ -37,7 +37,7 @@ class CML_Nav_Menu_Item_Custom_Fields {
 		',
 		'custom_tpl' => '
 			<p class="cml-menu-field-{name} description description-wide">
-				<label for="edit-menu-item-{name}-{id}">
+				<label for="edit-menu-item-url-{name}-{id}">
 					<img src="{src}" alt="{label}"/> URL:
                     <br>
 					<input
@@ -98,11 +98,10 @@ class CML_Nav_Menu_Item_Custom_Fields {
 //       add_filter( 'wp_edit_nav_menu_walker', function () {
 //           return 'CML_Walker_Nav_Menu_Edit';
 //       });
-
-        add_filter( 'wp_edit_nav_menu_walker', 'cml_return_nav_walker', 99, 2 );
-        add_filter( 'cml_nav_menu_item_additional_fields', array( __CLASS__, '_add_fields' ), 10, 5 );
-        add_action( 'save_post', array( __CLASS__, '_save_post' ) );
-    }
+      add_filter( 'wp_edit_nav_menu_walker', 'cml_return_nav_walker', 99, 2 );
+      add_filter( 'cml_nav_menu_item_additional_fields', array( __CLASS__, '_add_fields' ), 10, 5 );
+      add_action( 'save_post', array( __CLASS__, '_save_post' ) );
+	}
  
 	static function get_fields_schema() {
 		$schema = array();

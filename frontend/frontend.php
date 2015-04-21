@@ -43,7 +43,13 @@ class CMLFrontend extends CeceppaML {
       } else {
         add_action( 'pre_get_posts', array( & $this, 'hide_translations' ), 0 );
       }
+    } else {
+      //If is_feed I need to force posts filtering
+      add_action( 'pre_get_posts', array( & $this, 'check_is_feed' ), 0 );
     }
+
+    //Posts to not filter
+    $this->_excluded_post_types = apply_filters( '_cml_ignore_post_type', array() );
 
     /*
     * If one or more post has same "title", wordpress add "-##" to end of permalink
@@ -53,7 +59,7 @@ class CMLFrontend extends CeceppaML {
     if( ! empty( $this->_permalink_structure ) ) {
       add_action( 'pre_get_posts', array( & $this, 'is_duplicated_post_title' ), 0, 1 );
     }
-	
+
     //Translate term
     add_filter( 'get_term', array( & $this, 'translate_term' ), 10, 2 );
     add_filter( 'get_terms', array( & $this, 'translate_terms' ), 10, 3 );
@@ -79,7 +85,7 @@ class CMLFrontend extends CeceppaML {
     $this->_show_notice_pos = $_cml_settings[ 'cml_option_notice_pos' ];
     if( $this->_show_notice != 'nothing' )
       add_action( 'the_content', array( &$this, 'show_notice' ) );
-      
+
     //Date format
     if( $_cml_settings[ 'cml_change_date_format' ] ) {
       add_filter( 'get_the_date', array( &$this, 'get_the_date' ), 0, 2 );
@@ -88,18 +94,12 @@ class CMLFrontend extends CeceppaML {
     }
 
     //Show flags on
-    if( $_cml_settings[ 'cml_option_flags_on_post' ] ||
-        $_cml_settings[ 'cml_option_flags_on_page' ] ||
-        $_cml_settings[ 'cml_option_flags_on_custom_type' ] ||
-        $_cml_settings[ 'cml_option_flags_on_the_loop' ] ) {
-
-      if( $_cml_settings[ 'cml_option_flags_on_pos' ] == "bottom" ||
-          $_cml_settings[ 'cml_option_flags_on_pos' ] == "top" ) {
-          add_filter( "the_content", array( & $this, 'add_flags_on_content' ), 10, 1 );
-      } else {
-          add_filter( "the_title", array( &$this, 'add_flags_on_title' ), 10, 2 );
-      }
-    } //endif;
+    /*
+     * From 1.5 user can override the flag setting for a single post, so I can't
+     * check it here, as I don't know the post id, yet...
+     */
+    add_filter( "the_content", array( & $this, 'add_flags_on_content' ), 10, 1 );
+    add_filter( "the_title", array( &$this, 'add_flags_on_title' ), 10, 2 );
 
     /*
      * filter search by language
@@ -122,7 +122,7 @@ class CMLFrontend extends CeceppaML {
       */
       add_filter( 'get_comments_number', array( & $this, 'get_comments_number' ) );
     } //endif;
-    
+
     /*
      * Used static page?
      * If yes I change the id of page with its translation
@@ -152,7 +152,7 @@ class CMLFrontend extends CeceppaML {
     if( $_cml_settings[ "cml_add_flags_to_menu" ] == 1 ) {
       add_filter( 'wp_nav_menu_items', array( & $this, "add_flags_to_menu" ), 10, 2 );
     }
-    
+
     /*
      * hide menu items that doesn't exists in current language
      * and replace "CeceppaML: Flags" items ( #cml-lang ) with
@@ -160,7 +160,7 @@ class CMLFrontend extends CeceppaML {
      */
     add_filter( 'wp_nav_menu_objects', array( & $this, 'get_nav_menu_items' ), 0, 2 );
 
-    //Translate menu items    
+    //Translate menu items
     if( $_cml_settings[ "cml_option_action_menu" ] ) {
       add_filter('wp_setup_nav_menu_item', array( &$this, 'translate_menu_item' ), 0, 1 );
     }
@@ -181,10 +181,10 @@ class CMLFrontend extends CeceppaML {
 
     //Site title & tagline
     add_filter( 'bloginfo', array( & $this, 'translate_bloginfo' ), 0, 1 );
-    
+
     //Filter widgets by language
     add_filter( 'sidebars_widgets', array( & $this, 'filter_widgets' ), 0, 1 );
-    
+
     //Next and Prev post
      add_filter( 'get_previous_post_where', array( &$this, 'get_previous_next_post_where' ) );
      add_filter( 'get_next_post_where', array( &$this, 'get_previous_next_post_where' ) );
@@ -199,6 +199,23 @@ class CMLFrontend extends CeceppaML {
     //Get translated media fields
     add_filter( 'wp_get_attachment_image_attributes', array( & $this, 'get_translated_media_fields' ), 10, 2 );
     add_filter( 'the_title', array( & $this, 'get_translated_title' ), 10, 2 );
+
+    //Add current language to the body classes
+    add_filter( 'body_class', array( & $this, 'add_current_language' ) );
+
+    //Add hreflang tag
+    add_action('wp_head', array( & $this, 'add_hreflang') );
+
+    /*
+     * Sometimes wp doesn't redirect a page to it's "correct" language link.
+     * And so, the page is available with and withouth the language slug...
+     * And even if the user choosed to translate the permalink, the page is "available"
+     * with original and translated permalink...
+     * This code jst check if a redirect if required, if so force it...
+     */
+     if( ! empty( $this->_permalink_structure ) && get_option( 'cml_force_redirect', false ) ) {
+       add_action( 'template_redirect', array( & $this, 'force_redirect' ), 99 );
+     }
   }
 
   /*
@@ -206,7 +223,7 @@ class CMLFrontend extends CeceppaML {
    */
   function get_search_form( $form ) {
     $slug = CMLLanguage::get_current_slug();
-    
+
     $input = '<div>';
     $input .= '<input type="hidden" name="lang" value="' . $slug . '" />';
 
@@ -231,7 +248,7 @@ class CMLFrontend extends CeceppaML {
 	  wp_register_style( 'ceceppaml-flying', CML_UPLOAD_URL . 'float.css' );
 	else
 	  wp_register_style( 'ceceppaml-flying', CML_PLUGIN_URL . 'css/float.css');
-      
+
     //wpml-config combo style
     if( file_exists( CML_UPLOAD_DIR . "combo_style.css" ) )
         wp_enqueue_style( 'ceceppaml-wpml-combo-style', CML_UPLOAD_URL . "combo_style.css" );
@@ -243,18 +260,44 @@ class CMLFrontend extends CeceppaML {
   function add_flags_on_title( $title, $id = -1 ) {
     global $_cml_settings;
 
+    //If SEO meta tag title is empty, yoast call the_title, so I have to avoid
+    //to put the flags in the header...
+    if( 1 !== CMLUtils::_get( '_after_wp_head') ) return $title;
+
     if( ( ! is_singular() && ! cml_is_custom_post_type() ) ||
-        is_archive() ) {
+        is_archive() || is_feed() ) {
       return $title;
     }
 
     //flags already applied
     if( isset( $this->_title_applied ) && is_singular() ) return $title;
+
+    //Where?
+    $where = $_cml_settings[ 'cml_option_flags_on_pos' ];
+
+    //The post override current flags settings?
+    $override = false;
+    if( is_singular() ) {
+      $o = get_post_meta( get_the_ID(), "_cml_override_flags", true );
+
+      if( is_array( $o ) ) {
+        if( $o['show'] == 'never' ) return $title;
+        if( $o['show'] == 'show' ) {
+          $where = $o[ 'where' ];
+          $override = true;
+        }
+      }
+    }
+
     if( $id < 0 ) return $title;
-    if( ! $_cml_settings['cml_option_flags_on_post'] && is_single() ) return $title;
-    if( ! $_cml_settings[ 'cml_option_flags_on_page' ] && is_page() ) return $title;
-    if( ! $_cml_settings[ 'cml_option_flags_on_custom_type' ] &&
-       cml_is_custom_post_type() ) return $title;
+
+    if( ! $override ) {
+      if( in_array( $_cml_settings[ 'cml_option_flags_on_pos' ], array( 'bottom', 'top' ) ) ) return $title;
+      if( ! $_cml_settings[ 'cml_option_flags_on_post' ] && is_single() ) return $title;
+      if( ! $_cml_settings[ 'cml_option_flags_on_page' ] && is_page() ) return $title;
+      if( ! $_cml_settings[ 'cml_option_flags_on_custom_type' ] &&
+         cml_is_custom_post_type() ) return $title;
+    }
 
     if( ( ! $_cml_settings[ 'cml_option_flags_on_the_loop' ] && ( in_the_loop() || is_home() ) )
           || is_category() ) return $title;
@@ -279,11 +322,13 @@ class CMLFrontend extends CeceppaML {
                               cml_shortcode_other_langs_available( $args ) :
                               cml_show_available_langs( $args );
 
-      if( 'after' == $_cml_settings[ 'cml_option_flags_on_pos' ] ) {
+      if( 'after' == $where ) {
         return $title . $flags;
-      }
-      else
+      } else {
         return $flags . $title;
+      }
+
+      die();
     } //endif;
 
     return $title;
@@ -294,11 +339,34 @@ class CMLFrontend extends CeceppaML {
    */
   function add_flags_on_content( $content ) {
     global $_cml_settings;
-    
-    if( ! $_cml_settings['cml_option_flags_on_post'] && is_single() ) return $content;
-    if( ! $_cml_settings[ 'cml_option_flags_on_page' ] && is_page() ) return $content;
-    if( ! $_cml_settings[ 'cml_option_flags_on_custom_type' ] &&
-       cml_is_custom_post_type() ) return $content;
+
+    //Avoid to put flags into the header meta description field, for a post with empty SEO...
+    if( is_feed() || 1 !== CMLUtils::_get( '_after_wp_head') ) return $content;
+
+    //The post override current flags settings?
+    $override = false;
+    if( is_singular() ) {
+      $o = get_post_meta( get_the_ID(), "_cml_override_flags", true );
+
+      if( is_array( $o ) ) {
+        if( $o['show'] == 'never' ) return $content;
+        if( $o['show'] == 'show' ) {
+          $where = $o[ 'where' ];
+          $override = true;
+        }
+      }
+    }
+
+    if( ! $override ) {
+      if( ! in_array( $_cml_settings[ 'cml_option_flags_on_pos' ], array( 'bottom', 'top' ) ) ) return $content;
+      if( ! $_cml_settings['cml_option_flags_on_post'] && is_single() ) return $content;
+      if( ! $_cml_settings[ 'cml_option_flags_on_page' ] && is_page() ) return $content;
+      if( ! $_cml_settings[ 'cml_option_flags_on_custom_type' ] &&
+         cml_is_custom_post_type() ) return $content;
+    }
+
+    if( ( ! $_cml_settings[ 'cml_option_flags_on_the_loop' ] && ( in_the_loop() || is_home() ) )
+          || is_category() ) return $content;
 
     $size = $_cml_settings['cml_option_flags_on_size'];
     $args = array(
@@ -341,7 +409,7 @@ class CMLFrontend extends CeceppaML {
 
     return $items;
   }
- 
+
   /*
    * create submenu menu
    *
@@ -354,7 +422,7 @@ class CMLFrontend extends CeceppaML {
 
     //Current language
     $items .= $this->add_item_to_menu( CMLLanguage::get_current(), false, $size );
-    
+
     //Submenu
     $items .= '<ul class="sub-menu">';
 
@@ -394,12 +462,12 @@ class CMLFrontend extends CeceppaML {
 $item = <<< EOT
     <li class="menu-item menu-cml-flag">
       <a href="$url">
-        $img 
+        $img
         <span>$name</span>
         $slug
       </a>
 EOT;
-    
+
     if( isset( $old ) ) {
       $this->_force_post_lang = $old;
     } else {
@@ -407,7 +475,7 @@ EOT;
     }
 
     if( $close ) $item .= "</li>";
-    
+
     return $item;
   }
 
@@ -497,11 +565,11 @@ EOT;
     $linked = CMLPost::get_translations( get_the_ID() );
 
     if( empty( $linked ) || ! isset( $linked[ 'indexes' ] ) ) return $query;
-    
+
     $replacement = 'comment_post_ID IN(' . implode( ',', $linked[ 'indexes' ] ) . ')';
     return preg_replace( '~comment_post_ID = \d+~', $replacement, $query );
   }
-  
+
   /*
    * get comments count from all posts
    */
@@ -541,7 +609,7 @@ EOT;
                                                ),
                                          $good_protocol_url );
     }
-    
+
     return $good_protocol_url;
   }
 
@@ -552,7 +620,7 @@ EOT;
     global $wpdb, $_cml_settings;
 
     if( isset( $this->_static_page ) ) return $this->_static_page;
-    if( ! isset( $query->query_vars[ 'page_id' ] ) ) return;
+    if( ! $query->is_main_query() || ! isset( $query->query_vars[ 'page_id' ] ) ) return;
     if( is_search() ) return;
 
     //Recupero l'id della lingua
@@ -560,7 +628,7 @@ EOT;
 
     //Page id
     $id = $query->query_vars[ 'page_id' ];
-    
+
     //uhm... on website happend that page_id is always empty when use static page
     if( $id == 0 ) $id = get_option( 'page_on_front' );
 
@@ -573,7 +641,7 @@ EOT;
     if( $nid > 0 ) {
       if( ! is_preview() ) {
         add_filter( 'body_class', array( & $this, 'add_home_class' ) );
-        
+
         if( $_cml_settings[ 'cml_update_static_page' ] == 1 ) {
           update_option( 'page_on_front', $nid );
         }
@@ -590,7 +658,16 @@ EOT;
 
   function add_home_class( $classes ) {
     $classes[] = " home";
-    
+
+    return $classes;
+  }
+
+  /*
+   * Add the "lang-##" to the body tag
+   */
+  function add_current_language( $classes ) {
+    $classes[] = " lang-" . CMLLanguage::get_current_slug();
+
     return $classes;
   }
 
@@ -599,7 +676,7 @@ EOT;
     if( empty( $posts ) ) return $where;
 
     $where .= " AND ID IN ( " . join( ",", CMLPost::get_posts_by_language() ) . ") ";
-    
+
     return $where;
   }
 
@@ -608,7 +685,7 @@ EOT;
 
     $href = end( $match );
     $url = "$href?lang=" . CMLLanguage::get_current()->cml_language_slug . "'";
-    
+
     $link = str_replace($href, $url, $link);
     return $link;
   }
@@ -621,7 +698,7 @@ EOT;
   function remove_language_slug() {
     $_SERVER['REQUEST_URI'] = $this->_clean_request;
   }
-  
+
   /*
    * remove language information from url.
    * I need that function for use url_to_postid, because with language
@@ -629,8 +706,8 @@ EOT;
    */
   function clear_url() {
     global $wp_rewrite;
-  
-    if( $this->_url_mode != PRE_PATH 
+
+    if( $this->_url_mode != PRE_PATH
         || isset( $this->_clean_applied ) ) {
       if( empty( $this->_clean_url ) ) {
         $this->_clean_url = $this->_url;
@@ -638,14 +715,14 @@ EOT;
 
       return;
     }
-  
+
     $id = CMLUtils::clear_url();
     $this->_clean_url = CMLUtils::get_clean_url();
 
     if( ! empty( $id ) ) {
       $this->_language_detected_id = $id;
     }
-    
+
     $this->_clean_applied = true;
   }
 
@@ -662,7 +739,7 @@ EOT;
 
     //Default language? no translation required ;)
     if( $lang == CMLLanguage::get_default_id() ) return $name;
-    
+
     if( $lang != CMLLanguage::get_current_id() ) {
       //If post language != current language I can't get translation from ".mo"
       $name = CMLTranslations::get( $lang, $name, "C", false, true );
@@ -693,13 +770,13 @@ EOT;
     if( 1 === CMLUtils::_get( '_no_translate_term' ) ) {
       return $term_name;
     }
- 
+
     if( isset( $this->_force_post_lang ) ) {
       $lang_id = $this->_force_post_lang;
     }
 
     if( empty( $lang_id ) ) {
-      if( null === $post_id ) {
+      if( null === $post_id || is_array( $post_id ) ) {
         $lang_id = CMLLanguage::get_current_id();
       } else {
         $lang_id = CMLPost::get_language_id_by_id( $post_id );
@@ -715,7 +792,7 @@ EOT;
           isset( $this->_fake_language_id ) ) {
         $lang_id = $this->_fake_language_id;
       }
-      
+
       if( ! isset( $this->_fake_language_id )
          && isset( $this->_force_category_lang ) ) {
         $lang_id = $this->_force_category_lang;
@@ -806,7 +883,7 @@ EOT;
   function translate_single_taxonomy_title( $title ) {
     $term = get_queried_object();
 
-    if( ! $term ) 
+    if( ! $term )
       return $title;
 
     unset( $this->_force_post_lang );
@@ -824,11 +901,11 @@ EOT;
     if( isset( $this->_fake_language_id ) ) {
       $home = CMLUtils::get_home_url();
       $chome = CMLUtils::get_home_url( CMLLanguage::get_slug( $this->_fake_language_id ) );
-      
+
       $link = str_replace( $home, $chome, $link );
     }
 
-    if( CMLLanguage::is_default( CMLUtils::_get( '_real_language' ) ) 
+    if( CMLLanguage::is_default( CMLUtils::_get( '_real_language' ) )
         || ( isset( $this->_force_category_lang ) &&
         $this->_force_category_lang == CMLLanguage::get_default_id() ) )
       return remove_query_arg( "lang", $link );
@@ -854,7 +931,7 @@ EOT;
   function pre_get_menu( $args ) {
     $this->_force_category_lang = CMLLanguage::get_current_id();
     $this->_force_menu_items = true;
-    
+
     if( isset( $this->_fake_language_id ) ) {
       $this->_force_category_lang = $this->_fake_language_id;
       $this->_force_post_lang = $this->_fake_language_id;
@@ -878,9 +955,10 @@ EOT;
   function translate_menu_item( $item ) {
     global $_cml_settings;
 
-    //Se l'utente ha scelto un menu differente per la lingua corrente
-    //non devo applicare nessun tipo di filtro agli elementi del menu, esco :)
-    //Questo è vero solo per le pagine... altrimenti non mi traduce il nome delle categorie
+    /*
+     * If the user selected a different for the current language I don't have to
+     * apply any filter to its items... quit :)
+     */
     if( $this->_no_translate_menu_item == true ) { //&& $item->object == 'page' ) {
       remove_filter( 'wp_setup_nav_menu_item', array( & $this, 'translate_menu_item') );
       return $item;
@@ -902,7 +980,7 @@ EOT;
 
         //custom label for
         $customs = CMLUtils::_get_translation( "_cml_menu_meta_{$slug}_{$item->ID}" );
-        
+
         if( null == $customs ) {
           $customs = get_post_meta( $item->ID, "_cml_menu_meta_" . $slug, true );
         }
@@ -955,13 +1033,13 @@ EOT;
       break;
       case 'category':
         $id = $item->object_id;
-    
+
         if( ! empty( $id ) ) {
           $lang = $lang_id;
-    
+
           //custom label for
           $customs = CMLUtils::_get_translation( "_cml_menu_meta_{$slug}_{$item->ID}" );
-          
+
           if( null == $customs ) {
             $customs = get_post_meta( $item->ID, "_cml_menu_meta_" . $slug, true );
           }
@@ -971,8 +1049,10 @@ EOT;
 
           $url = get_term_link( $term );
 
+          //Original category title
+          $title = ( empty( $item->post_title ) ) ? $term->name : $item->post_title;
           $item->title = ( ! @empty( $customs[ 'title' ] ) ) ? $customs[ 'title' ] :
-                                                $term->name;
+                                                $title;
           $item->attr_title = ( ! @empty( $customs[ 'attr_title' ] ) ) ? $customs[ 'attr_title' ] :
                                                 $item->attr_title;
 
@@ -1007,7 +1087,7 @@ EOT;
         if( trailingslashit( $item->url ) == trailingslashit( $this->_homeUrl ) ) {
           $item->url = CMLUtils::get_home_url( CMLLanguage::get_slug( $lang_id ) );
         }
-    
+
         break;
       default:
         return $item;
@@ -1026,7 +1106,7 @@ EOT;
     global $post;
 
     $format = CMLLanguage::get_current()->cml_date_format;
-    
+
     if( empty( $format ) ) {
       $format = CMLUtils::get_date_format();
     } else {
@@ -1037,7 +1117,7 @@ EOT;
     }
 
     $the_date = mysql2date( $format, $post->post_date );
-    
+
     return $the_date;
   }
 
@@ -1051,20 +1131,20 @@ EOT;
     if( empty( $format ) ) $format = CMLUtils::get_date_format();
 
     $the_date = mysql2date( $format, $comment->comment_date );
-    
+
     return $the_date;
   }
 
   function post_link_category( $cat0, $cats, $post ) {
     $lang = CMLLanguage::get_id_by_post_id( $post->ID );
-    
+
     $this->_force_post_lang = $lang;
-    
+
     return $cat0;
   }
 
   /*
-   * WP Trick: Change the "post_name" of $query object wich 
+   * WP Trick: Change the "post_name" of $query object wich
    * I need this function when i remove extra -## from permalink
    */
   function is_duplicated_post_title( $query ) {
@@ -1081,17 +1161,17 @@ EOT;
     if( ! isset( $this->_clean_applied ) ) {
       $this->clear_url();
     }
-    
+
     $url = remove_query_arg( "lang", $this->_clean_url );
     if( $this->_url_mode != PRE_LANG ) {
       $id = @url_to_postid( $url );
-    } 
+    }
 
     if( empty( $id ) ) {
       $id = @cml_get_page_id_by_path( $url );
     }
 
-    if( $id > 0 ) {      
+    if( $id > 0 ) {
       unset( $this->_looking_id_post );
       remove_action( 'pre_get_posts', array( &$this, 'is_duplicated_post_title' ), 0, 1 );
 
@@ -1112,9 +1192,9 @@ EOT;
         $query->queried_object->ID = $linked;
       }
 
-      $name = $wpdb->get_var( $wpdb->prepare( 
+      $name = $wpdb->get_var( $wpdb->prepare(
         "SELECT post_name FROM $wpdb->posts WHERE id = %d", $linked ) );
-        
+
       $query->query_vars[ 'name' ] = $name;
     }
 
@@ -1147,15 +1227,15 @@ EOT;
 
     foreach( $items as $item ) {
       if( $hide && $item->type == 'post_type' ) {
-        //Esiste nella lingua corrente?
+        //Exists in the current language?
         if( ! in_array( $item->object_id, CMLPost::get_posts_by_language( $current_id ) ) ) {
           unset( $item );
-          
+
           continue;
         }
       }
 
-      if( $item->url == '#cml-current' ) {
+      if( $item->url == '#cml-current' || substr( $item->url, 0, 10 ) == "#cml-lang-" ) {
         $lang = CMLLanguage::get_by_id( $current_id );
 
         $item->title = "";
@@ -1186,7 +1266,7 @@ EOT;
           if( isset( $lang ) && $l->id == $lang->id ) continue;
 
           $linfo = CMLLanguage::get_by_id( $l->id );
-          
+
           $clone = clone $item;
           $clone->title = "";
 
@@ -1212,15 +1292,15 @@ EOT;
 
           $new[] = $clone;
         }
-        
+
         if( isset( $item ) ) unset( $item );
       }
 
-      if( isset( $item ) && substr( $item->url, 0, 10 ) == "#cml-lang-" ) {
-        $lang = str_replace( "#cml-lang-", "", $item->url );
-
-        $item->url = cml_get_the_link( CMLLanguage::get_by_id( $lang ), true, false, true );
-      }
+//      if( isset( $item ) && substr( $item->url, 0, 10 ) == "#cml-lang-" ) {
+//        $lang = str_replace( "#cml-lang-", "", $item->url );
+//
+//        $item->url = cml_get_the_link( CMLLanguage::get_by_id( $lang ), true, false, true );
+//      }
 
       if( isset( $item ) )
         $new[] = $item;
@@ -1256,7 +1336,7 @@ EOT;
         }
       }
     }
-    
+
     return $sidebars_widgets;
   }
 
@@ -1269,7 +1349,7 @@ EOT;
   function filter_widget( $instance ) {
     global $post, $wp_query;
 
-    if ( empty( $instance['cml-conditions'] ) 
+    if ( empty( $instance['cml-conditions'] )
           || empty( $instance['cml-conditions']['langs'] ) ) {
       return true;
     }
@@ -1308,7 +1388,7 @@ EOT;
 
     if( isset( $_REQUEST[ 'lang' ] ) ) {
       $l = CMLLanguage::get_id_by_slug( $_REQUEST[ 'lang' ] );
-      
+
       if( ! cml_is_homepage() && ! empty( $lang ) ) {
         $this->_fake_language_id = $l;
       } else {
@@ -1331,7 +1411,7 @@ EOT;
     //Translate widget title
     if( ! CMLLanguage::is_default() || isset( $this->_fake_language_id ) ) {
       add_filter( 'widget_title', array( & $this, 'widget_title' ), 0, 1 );
-      
+
       if( isset( $this->_fake_language_id ) ) {
         add_filter( 'term_link', array( &$this, 'translate_term_link' ), 0, 3 );
       }
@@ -1368,7 +1448,7 @@ EOT;
 
       if( ! empty( $matches ) ) {
         $lang = end( $matches );
-        
+
         $lang = CMLLanguage::get_id_by_slug( $lang );
       } else {
         $lang = CMLLanguage::get_default_id();
@@ -1380,10 +1460,10 @@ EOT;
         return $this->_force_current_language;
       } else {
         //Se non sono riuscito a recuperare la lingua dal link, recupero l'info dall'articolo
-  
+
         //Funzione con alcuni tipi di permalink, quali ?p=##, archives/ e non nel pannello di admin (almeno in alcuni casi)
         $the_id = 0;
-  
+
         //Posso recuperare l'info dal numero dell'articolo?
         $the_id = $this->get_post_id_by_url( $this->_url );
 
@@ -1395,7 +1475,7 @@ EOT;
               $url = remove_query_arg( "lang", $this->_request_url );
             } else {
               $this->clear_url();
-              
+
               if( $this->_url_mode != PRE_NONE ) {
                 $url = CMLUtils::get_clean_request();
               }
@@ -1440,7 +1520,7 @@ EOT;
         foreach( $locations as $key => $value ) {
           if( ! empty( $key ) && substr( $key, 0, 4 ) != "cml_" ) {
             $this->switch_menu( $key, $locations );
-    
+
             break;
           }
         } //foreach
@@ -1582,7 +1662,7 @@ EOT;
 
         CMLUtils::_del( '_no_translate_term' );
       }
-      
+
       $n = empty( $name ) ? $cat : $name;
       $new[] = sanitize_title( $n );
     } //endforeach;
@@ -1644,7 +1724,7 @@ EOT;
 
       $link = cml_get_linked_post( get_the_ID(), $browser_lang_id );
     }
-    
+
     if( is_single() ) {
       if( $_cml_settings["cml_option_notice_post"] != 1) return $content;
 
@@ -1689,7 +1769,7 @@ EOT;
    * filter posts by language
    *
    * look $wp_query for "lang" parameter
-   * 
+   *
    */
   function filter_posts_by_language( $wp_query ) {
     global $wpdb, $_cml_settings;
@@ -1699,12 +1779,23 @@ EOT;
       return;
     }
 
+    //Check if the post_type is the ignore list
+    if( isset( $wp_query->query['post_type'] ) &&
+        in_array( $wp_query->query['post_type'], $this->_excluded_post_types ) ) {
+      return $wp_query;
+    }
+
     //Skip attachment type & nav_menu_item
     if( @$wp_query->query_vars[ 'post_type' ] == 'attachment' ||
         @$wp_query->query_vars[ 'post_type' ] == 'nav_menu_item' ) return $wp_query;
 
-    if( is_search() && $wp_query->is_main_query() ) {
-      if( ! $this->_filter_search ) {
+    // if( is_search() && $wp_query->is_main_query() ) {
+    if( $wp_query->is_main_query() ) {
+      if( is_search() && ! $this->_filter_search ) {
+        return;
+      }
+
+      if( is_singular() ) {
         return;
       }
     }
@@ -1732,22 +1823,41 @@ EOT;
           $_langs[] = $id;
         }
       }
-      
+
       if( isset( $_langs ) && ! empty( $_langs ) ) {
         $use_language = $_langs;
       }
     }
 
-    //Get all posts by language
-    if( ! is_array( $use_language ) ) {
-      $posts = CMLPost::get_posts_by_language( $use_language );
-    } else {
-      $posts = array();
+    /**
+     * On some website happens that wp ignore the limit...
+     * This is due because the plugin set the parameter post__in with all
+     * the posts available, ignoring the current post type...
+     * To avoid this I just change method.. Instead to set which posts belongs
+     * to the current language, I do the opposite. So I set which ones doesn't..
+     */
+    //Get all posts by language except the ones that exists in the use_language array
+    if( ! is_array( $use_language ) ) $use_language = array( $use_language );
 
-      foreach( $use_language as $lang ) {
-        $posts = array_merge( $posts, CMLPost::get_posts_by_language( $lang ) );
-      }
+    $posts = array();
+    foreach( CMLLanguage::get_all() as $lang ) {
+      //Ignore the use language...
+      $id = is_object( $lang ) ? $lang->id : $lang;
+      $key = array_search( $id, $use_language );
+      if( $key !== FALSE ) continue;
+
+      $posts = array_merge( $posts, CMLPost::get_posts_by_language( $id ) );
     }
+
+    // if( ! is_array( $use_language ) ) {
+    //   $posts = CMLPost::get_posts_by_language( $use_language );
+    // } else {
+    //   $posts = array();
+    //
+    //   foreach( $use_language as $lang ) {
+    //     $posts = array_merge( $posts, CMLPost::get_posts_by_language( $lang ) );
+    //   }
+    // }
 
     /*
      * If lang=## parameter exists in $_GET, probably I'm forcing language for current
@@ -1774,7 +1884,9 @@ EOT;
      */
     if ( $wp_query->query_vars[ 'post__not_in' ] &&
           is_array( $wp_query->query_vars[ 'post__not_in' ] ) ) {
-      $posts = array_diff( $posts,
+      // $posts = array_diff( $posts,
+      //                     $wp_query->query_vars[ 'post__not_in' ] );
+      $posts = array_merge( $posts,
                           $wp_query->query_vars[ 'post__not_in' ] );
     }
 
@@ -1782,27 +1894,28 @@ EOT;
     * add all posts in default language that has no translation in current
     */
     if( $_cml_settings[ 'cml_option_filter_posts' ] == FILTER_HIDE_EMPTY &&
-        ! CMLLanguage::is_default() && 
+        ! CMLLanguage::is_default() &&
         ! isset( $this->_hide_diff ) ) {
-      
+
       if( CMLLanguage::get_default_id() > 0 ) {
         $query = sprintf( "SELECT lang_%d FROM %s WHERE lang_%d > 0 AND lang_%d = 0",
-                CMLLanguage::get_default_id(), CECEPPA_ML_RELATIONS, 
+                CMLLanguage::get_default_id(), CECEPPA_ML_RELATIONS,
                 CMLLanguage::get_default_id(), CMLLanguage::get_current_id() );
 
         $results = $wpdb->get_results( $query, ARRAY_N );
-  
+
         foreach( $results as $id ) {
           $posts[] = $id[ 0 ];
         }
-  
+
         $this->_posts_of_lang[ CMLLanguage::get_current_id() ] = array_unique( $posts );
         $this->_hide_diff = true;
       }
     }
 
     if( ! empty ( $posts ) ) {
-      $wp_query->query_vars[ 'post__in' ] = $posts;
+      // $wp_query->query_vars[ 'post__in' ] = $posts;
+      $wp_query->query_vars[ 'post__not_in' ] = $posts;
     }
 
     if( $wp_query->is_main_query() ) {
@@ -1825,6 +1938,12 @@ EOT;
     if( isset( $this->_looking_id_post ) ||
        CMLUtils::_get( '_is_sitemap' ) ) {
       return;
+    }
+
+    //Check if the post_type is the ignore list
+    if( isset( $wp_query->query['post_type'] ) &&
+        in_array( $wp_query->query['post_type'], $this->_excluded_post_types ) ) {
+      return $wp_query;
     }
 
     if( $wp_query != null && ( is_page() || is_single() || isCrawler() ) ) return;
@@ -1853,6 +1972,15 @@ EOT;
     return $this->_hide_posts;
   }
 
+  /**
+   * is feed?
+   */
+  function check_is_feed( $wp_query ) {
+    if( ! is_feed() ) return;
+
+    $wp_query = $this->filter_posts_by_language( $wp_query );
+  }
+
   /*
    * filter previous and next post
    */
@@ -1860,16 +1988,16 @@ EOT;
     global $wpdb;
 
     $posts = CMLPost::get_posts_by_language();
-    
+
     if( empty( $posts ) ) return $where;
 
     if( ! empty( $posts ) )
       $where .= " AND p.ID IN (" . implode(", ", $posts) . ") ";
-    
+
     return $where;
   }
 
-  /*  
+  /*
    * Recupero l'id del post per i link di tipo "?p=##" oppure "/##"
    */
   function get_post_id_by_url( $url ) {
@@ -1925,7 +2053,7 @@ EOT;
   /*
    * redirect browser to user language, if exists
    *
-   */ 
+   */
   function redirect_browser() {
     global $_cml_settings;
 
@@ -1945,7 +2073,7 @@ EOT;
      */
     if( CMLLanguage::is_default( $slug ) &&
         $_cml_settings[ 'url_mode_remove_default' ] == 1 ) {
-      
+
       return;
     }
 
@@ -1969,6 +2097,39 @@ EOT;
 
       wp_redirect( $location );
       exit;
+    }
+  }
+
+  /**
+   * Force the permalink to be redirect to the corrent url
+   */
+  function force_redirect( $requested_url = null, $do_redirect = true ) {
+    /*
+     * For the custom post types the function get_permalink is not called, or anyway
+     * it isn't before this one...
+     */
+    if( ! is_singular() || cml_is_homepage() ) return;
+
+    if ( !$requested_url ) {
+  		// build the URL in the address bar
+  		$requested_url  = is_ssl() ? 'https://' : 'http://';
+  		$requested_url .= $_SERVER['HTTP_HOST'];
+  		$requested_url .= $_SERVER['REQUEST_URI'];
+      $original = $requested_url;
+  	}
+
+    $id = get_queried_object_id();
+    $translated = get_permalink( $id );
+
+    //No redirect
+    if( null == $original || null == $translated ) return;
+
+    //Remove all the parameters ?###
+    $original = preg_replace( '/\?.*/', '', $original );
+    $translated = preg_replace( '/\?.*/', '', $translated );
+
+    if( trailingslashit( $original ) != trailingslashit( $translated ) ) {
+      wp_redirect($translated, 301);
     }
   }
 
@@ -2030,5 +2191,24 @@ EOT;
    */
   function setup_rtl() {
     $GLOBALS[ 'text_direction' ] = ( CMLLanguage::get_current()->cml_rtl == 1 ) ? 'rtl' : 'ltr';
+  }
+
+  /**
+   * Add hreflang inside of <head> tag
+   */
+  function add_hreflang() {
+    $head_link = array();
+
+    foreach( CMLLanguage::get_others() as $lang ) {
+      $link = cml_get_the_link( $lang, true, true );
+
+      if( empty( $link ) ) continue;
+
+      $head_link[] = '<link rel="alternate" hreflang="'.$lang->cml_language_slug.'" href="'. $link.'" />';
+    }
+
+    echo join( "\n", $head_link ) . "\n";
+
+    CMLUtils::_set( '_after_wp_head', 1 );
   }
 }
