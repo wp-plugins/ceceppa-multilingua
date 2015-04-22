@@ -2,6 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) die( "Access denied" );
 
 require_once CML_PLUGIN_FRONTEND_PATH . "utils.php";
+require_once CML_PLUGIN_FRONTEND_PATH . "deprecated.php";
 
 //Shortcodes & Widgets
 require_once CML_PLUGIN_INCLUDES_PATH . "shortcodes.php";

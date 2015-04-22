@@ -3,7 +3,7 @@ Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate, international, .mo file, .po file, localization, widget, post
 Requires at least: 3.4.1
 Tested up to: 4.0
-Stable tag: 1.4.99
+Stable tag: 1.5.0
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG
@@ -96,6 +96,10 @@ Installation of this plugin is fairly easy:
 1. Manage desidered languages
 
 == Frequently Asked Questions ==
+
+= The home page is randomly change when a static one is set =
+For some template happens that static page is changed with a random one.
+If that happens just go to "Ceceppa Multilingua" -> "Settings" -> "Advanced" tab and uncheck the "Static page" option
 
 = Is it possible to not have a slug for the main language? =
 Yes, it is :).
@@ -198,6 +202,7 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/en/ceceppa
 * Fixed category translation issue when the names containing html special chars
 * Added possibility to search in all rows in my translations pages
 * Fixed issue with YOAST 2.x
+* Fixed issue with the cml_frontend_hide_translations_for_tags function
 
 = 1.4.37 =
 * Added warning in languages page if all the changes are not saved yet
