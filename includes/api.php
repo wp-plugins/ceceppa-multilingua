@@ -1312,9 +1312,9 @@ class CMLPost {
           $lang = CMLLanguage::get_current();
         }
 
-        $permalink = add_query_arg( array(
+        $permalink = esc_url( add_query_arg( array(
                                           "lang" => $lang->cml_language_slug,
-                                          ), $permalink );
+                                        ), $permalink ) );
       }
     }
 

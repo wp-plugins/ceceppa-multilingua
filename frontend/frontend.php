@@ -605,10 +605,10 @@ EOT;
 
   function wp_clean_url( $good_protocol_url, $original_url, $_context ) {
     if( isset( $this->_numpage_slug ) ) {
-      $good_protocol_url = add_query_arg( array(
+      $good_protocol_url = esc_url( add_query_arg( array(
                                                 "lang" => $this->_numpage_slug,
                                                ),
-                                         $good_protocol_url );
+                                         $good_protocol_url ) );
     }
 
     return $good_protocol_url;
@@ -912,8 +912,8 @@ EOT;
       return remove_query_arg( "lang", $link );
 
     $slug = CMLLanguage::get_slug( CMLUtils::_get( '_real_language' ) );
-    return add_query_arg( array( "lang" => $slug ),
-                                $link );
+    return esc_url( add_query_arg( array( "lang" => $slug ),
+                                $link ) );
   }
   /*
    * translate blog title and tagline
@@ -1018,7 +1018,7 @@ EOT;
           $item->url = $this->convert_url( $item->url, CMLLanguage::get_current_slug() );
 
           if( $_cml_settings[ 'cml_option_action_menu_force' ] ) {
-            $item->url = add_query_arg( array( 'lang' => CMLLanguage::get_current_slug() ), $item->url );
+            $item->url = esc_url( add_query_arg( array( 'lang' => CMLLanguage::get_current_slug() ), $item->url ) );
           }
         }
 
