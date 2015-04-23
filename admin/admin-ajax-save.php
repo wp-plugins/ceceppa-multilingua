@@ -451,7 +451,7 @@ function cml_backup_do() {
     $tab = isset( $_POST[ 'tab' ] ) ? intval( $_POST[ 'tab' ] ) : 1;
 
     $status = "1";
-    if( !_cml_check_backup_folder() ) {
+    if( ! _cml_check_backup_folder() ) {
         $status = "-2";
     } else {
         //Backup file

@@ -26,6 +26,7 @@ class CMLFrontend extends CeceppaML {
     //Change wordpress locale & right to left
     add_filter( 'locale', array( & $this, 'setlocale' ), 0, 1 );
     add_action( 'plugins_loaded', array( &$this, 'setup_rtl' ), 1 );
+    add_action( 'plugins_loaded', array( &$this, 'register_translated_taxonomies' ), 1 );
 
     //redirect browser
     $this->_redirect_browser = $_cml_settings[ 'cml_option_redirect' ];
@@ -217,6 +218,31 @@ class CMLFrontend extends CeceppaML {
      if( ! empty( $this->_permalink_structure ) && get_option( 'cml_force_redirect', false ) ) {
        add_action( 'template_redirect', array( & $this, 'force_redirect' ), 99 );
      }
+
+     /*
+     * Filtro alcune query per lingua (Articoli più letti/commentati)
+     */
+     if( $_cml_settings['cml_option_filter_query'] ) {
+       add_filter('query', array(&$this, 'filter_query'));
+     }
+
+     /*
+      * Unlike other multilingual plug-ins in ceceppa I don't create a new category
+      * when a user translate it. But store it as normal text in the ###_ceceppaml_cats table,
+      * and let the plug-in to replace the slug and the translation in accordin to the current language.
+      * Now this method has a big problem, when using the function get_term_by( 'slug' ), you'll get a
+      * WP_Error object instead of the WP_Term object.
+      *
+      * I tried to modify the plugin to let it create the new category, but I found it too complex
+      * to do, as I like easy stuffs...
+      *
+      * So I just figure out a great solution, so I think :D.
+      * I'll intercept all "queries" and wherever I'll find the string t.slug, I'm gonna replace
+      * the value with the untranslated ones, so everybody we'll be happy :)
+      */
+      if( ! CMLLanguage::is_default() ) {
+        add_filter( 'query', array( &$this, 'change_get_term_by_query' ) );
+      }
   }
 
   /*
@@ -2201,6 +2227,13 @@ EOT;
     $GLOBALS[ 'text_direction' ] = ( CMLLanguage::get_current()->cml_rtl == 1 ) ? 'rtl' : 'ltr';
   }
 
+  function register_translated_taxonomies() {
+    global $wp_taxonomies;
+
+    // print_r( $wp_taxonomies );
+    // die();
+  }
+
   /**
    * Add hreflang inside of <head> tag
    */
@@ -2219,4 +2252,93 @@ EOT;
 
     CMLUtils::_set( '_after_wp_head', 1 );
   }
+
+  /**
+    * Questa funzione si occupa di
+    * "Filtrare tutte le query WordPress allo scopo di filtrare automaticamente gli articoli più letti, più commentati, etc"
+    *
+    * Invece di:
+    *   1) recuperare tutte le categorie associate alla lingua
+    *   2) apportare modifiche alla query, per esempio modificando la voce post_id IN (....)
+    *
+    *
+    * preferisco aggiungere un'altra clausola alla query del tipo: category_id IN (....), evitando quindi di
+    * eseguire anche il punto 2
+  */
+  function filter_query($query) {
+    //Filtro la query "Articoli più letti" (Least Read Post)
+    $pos = strpos($query, 'ORDER BY m.meta_value');
+    if(FALSE === $pos)
+    {
+    } else {
+      return $this->filter_least_read_post($query, $pos);
+    }
+
+    //Articoli più commentati
+    $pos = strpos($query, 'ORDER BY comment_count');
+    if(FALSE === $pos)
+    {
+    } else {
+      return $this->filter_most_commented($query, $pos);
+    }
+
+    //Archivio
+    $pos = strpos($query, 'GROUP BY YEAR(post_date)');
+    if(FALSE === $pos)
+    {
+    } else {
+      return $this->filter_archives($query, $pos);
+    }
+
+    /*
+    //Tag cloud: don't work, query is too complex to manipulate :(
+    $pos = strpos($query, 'ORDER BY tt.count DESC');
+    if(FALSE === $pos) {
+    } else {
+      return $this->filter_tag_cloud($query, $pos);
+    }
+    */
+
+    //Non ho trovato niente (Nothing to do)
+    return $query;
+  }
+
+  /**
+   * For info about why this function have a look above, in the construct one
+   */
+   function change_get_term_by_query( $query ) {
+     static $_terms = array();
+     global $wpdb;
+
+     $pos = strpos($query, 'AND t.slug');
+     if( FALSE === $pos ) return $query;
+
+     if( ! preg_match( "/t.slug = '[^']*/", $query, $slug ) ) return $query;
+     if( ! preg_match( "/tt.taxonomy = '[^']*/", $query, $taxonomy ) ) return $query;
+
+     $slug = str_replace( "t.slug = '", '', $slug[0] );
+     if( ! array_key_exists( $slug, $_terms ) ) {
+       $taxonomy = str_replace( "tt.taxonomy = '", '', $taxonomy[0] );
+
+       //Retrive the original slug
+       /**
+        * The slug could be different by category name, so I can't just sanitize my original name
+        * I have to get the right slug from the database
+        */
+       $search = sprintf( "SELECT slug FROM %s INNER JOIN $wpdb->terms t2 ON cml_cat_id = t2.term_id WHERE cml_cat_translation_slug IN ('%s', '%s') AND cml_taxonomy = '%s' AND cml_cat_lang_id = %d",
+                        CECEPPA_ML_CATS, strtolower( bin2hex( $slug ) ),
+                        strtolower( bin2hex( sanitize_title( $slug ) ) ),
+                        $taxonomy, CMLLanguage::get_current_id() );
+
+       $original = $wpdb->get_var( $search );
+       $_terms[ $slug ] = $original;
+     } else {
+       $original = $_terms[ $slug ];
+     }
+     if( empty( $original ) ) return $query;
+
+     $query = preg_replace( "/t.slug = '[^']*/", "t.slug = '" . $original, $query );
+
+     return $query;
+   }
 }
