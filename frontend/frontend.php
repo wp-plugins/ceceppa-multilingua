@@ -1836,6 +1836,8 @@ EOT;
      * the posts available, ignoring the current post type...
      * To avoid this I just change method.. Instead to set which posts belongs
      * to the current language, I do the opposite. So I set which ones doesn't..
+     * But I have to remove the "unique" post ids from that array, otherwise the
+     * these we'll be hidden
      */
     //Get all posts by language except the ones that exists in the use_language array
     if( ! is_array( $use_language ) ) $use_language = array( $use_language );
@@ -1880,8 +1882,7 @@ EOT;
     }
 
     /*
-     * If user choosed to don't show some post with post__not_in, I have to diff $posts
-     * with them :)
+
      */
     if ( $wp_query->query_vars[ 'post__not_in' ] &&
           is_array( $wp_query->query_vars[ 'post__not_in' ] ) ) {
@@ -1889,6 +1890,12 @@ EOT;
       //                     $wp_query->query_vars[ 'post__not_in' ] );
       $posts = array_merge( $posts,
                           $wp_query->query_vars[ 'post__not_in' ] );
+    }
+
+    //Remove all the unique posts
+    $uniques = CMLPost::get_unique_posts();
+    if( is_array( $uniques ) ) {
+      $posts = array_diff( $posts, $uniques );
     }
 
     /*
