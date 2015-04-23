@@ -2,8 +2,8 @@
 Contributors: ceceppa
 Tags: multilingual, language, admin, tinymce, bilingual, widget, switcher, i18n, l10n, multilanguage, professional, translation, service, human, qtranslate, wpml, ztranslate, xtranslate, international, .mo file, .po file, localization, widget, post
 Requires at least: 3.4.1
-Tested up to: 4.0
-Stable tag: 1.4.39
+Tested up to: 4.2
+Stable tag: 1.5.3
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G22CM5RA4G4KG
@@ -17,6 +17,7 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 
 = Features =
 
+- Quick Edit mode. Allow you to edit the main content and its translations easily from one page/
 - Separated posts and pages for each languages, so you can use different SEO and url for each languages.
 - Translate your theme ( Plugin let you translate strings and will generate the .mo file for wordpress )
 - URLs pretty and SEO-friendly. ?lang=en, /en/foo/ or en.yoursite.com
@@ -38,6 +39,7 @@ With "Ceceppa Multilingua" you can write your posts and pages in multiple langua
 - Redirects the browser depending on the user's language.
 - Different post filter method
 - Filter search in according to current language
+- Allow you to translate your own custom post type slugs
 - Compatible with wpml-config.xml ( experimental )
 
 = Widgets =
@@ -79,7 +81,7 @@ Tooltip plugin for Jquery [Tipsy](http://onehackoranother.com/projects/jquery/ti
 
 = Php gettext =
 Php-gettext by Danilo Shegan [php-gettext] https://launchpad.net/php-gettext/
-Pgettext by Ruben Nijveld 
+Pgettext by Ruben Nijveld
 
 == Installation ==
 
@@ -87,13 +89,17 @@ For more detailed instructions, take a look at the [Installation Guide](http://w
 
 Installation of this plugin is fairly easy:
 
-1. Download the plugin from wordpress. 
-1. Extract all the files. 
+1. Download the plugin from wordpress.
+1. Extract all the files.
 1. Upload everything (keeping the directory structure) to the `/wp-content/plugins/` directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 1. Manage desidered languages
 
 == Frequently Asked Questions ==
+
+= The home page is randomly change when a static one is set =
+For some template happens that static page is changed with a random one.
+If that happens just go to "Ceceppa Multilingua" -> "Settings" -> "Advanced" tab and uncheck the "Static page" option
 
 = Is it possible to not have a slug for the main language? =
 Yes, it is :).
@@ -118,9 +124,9 @@ For complete shortcode list visit: [Shortcode] (http://www.alessandrosenese.eu/i
 = How can I show flags for switch between languages =
 
   1) editing your theme file and use the function:
-  
+
      <?php cml_show_flags() ?>
-     
+
   2) using the widget "CML Widget: Language Chooser"
 
   3) enabling option in "Ceceppa Multilingua" -> "Settings" page
@@ -128,11 +134,11 @@ For complete shortcode list visit: [Shortcode] (http://www.alessandrosenese.eu/i
 = What is the function to get current language =
 
   The function is:
- 
+
      cml_get_current_language();
-  
+
   This function return an object and Its fields are:
-  
+
     *) id           - id of language
     *) cml_default  - 1 if it is the default language
     *) cml_flag     - name of flag
@@ -170,18 +176,44 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/en/ceceppa
 == Screenshots ==
 
 1. Language configuration
-2. List of all posts with their translations
-3. Translate widget's title
-4. Filter widget by language
-5. Plugin configuration
-6. Link posts
-7. Menus configuration
-8. Translate your theme
+2. Quick edit mode
+3. List of all posts with their translations
+4. Translate widget's title
+5. Filter widget by language
+6. Plugin configuration
+7. Link posts
+8. Menus configuration
+9. Translate your theme
 
 == Changelog ==
 
-= 1.4.39 =
-* Fixed bug in CMLUtils::get_home_url function
+= 1.5.3 =
+* Added Chinese translation. Thanks to Henry Siu
+* Fixed issue when using the function get_term_by( 'slug' ), now wp will return the WP_Term object
+
+= 1.5.2 =
+* Fixed issue with woocommerce addon and with posts sets as "unique"
+
+= 1.5.1 =
+* Fixed compatibility with ceceppa's woocommerce addon
+* Security update
+
+= 1.5.0 =
+* Added function icl_get_languages
+* Added serbian thanks to ( http://www.webhostinghub.com )
+* Added support to hreflang tag
+* Fixed feed when "Do nothing" filter is selected
+* Added settings backup/restore
+* Fixed sitemap generation
+* various bug fixes
+* Now you can easily translate any custom post slug
+* forced redirect for translated post/page permalink
+* Added compatibility with WPML icl_get_languages function
+* Fixed issue with menu custom navigation label
+* Fixed category translation issue when the names containing html special chars
+* Added possibility to search in all rows in my translations pages
+* Fixed issue with YOAST 2.x
+* Fixed issue with the cml_frontend_hide_translations_for_tags function
 
 = 1.4.37 =
 * Added warning in languages page if all the changes are not saved yet
@@ -193,7 +225,7 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/en/ceceppa
 * Fixed "Float and append" flag styles
 * Fixed language "combo" switcher for touch devices
 
-= 1.4.35 = 
+= 1.4.35 =
 * Fixed "Post data" box in pages
 
 = 1.4.34 =
@@ -212,7 +244,7 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/en/ceceppa
 = 1.4.30 =
 * Fixed the "Editing comments resets post language" issue
 * Fixed bug in "Translate theme" page
-* Fixed feed issue 
+* Fixed feed issue
 
 = 1.4.29 =
 * Fixed issue with WooCommerce checkout page link
@@ -304,7 +336,7 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/en/ceceppa
 = 1.4.8 =
 * Fixed "syntax error"
 
-= 1.4.7 = 
+= 1.4.7 =
 * Improved parser
 * Fixed Italian translation
 
@@ -316,7 +348,7 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/en/ceceppa
 = 1.4.5 =
 * Fixed Georgian flag
 * Fixed language change in "quick edit"
-* Fixed custom "Navigation label" 
+* Fixed custom "Navigation label"
 * Fixed dropdown menu style with Customizr
 * Improved "parser" to translate "Theme" and "Plugin"
 
@@ -325,7 +357,7 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/en/ceceppa
 * Fixed custom menu url item for non default language
 * Fixed "Force language items"
 * Fixed post relations with more 2 languages
-* Fixed "remove extra -##" for all url mode 
+* Fixed "remove extra -##" for all url mode
 
 = 1.4.3 =
 * Fixed url mode "?lang"
@@ -526,7 +558,7 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/en/ceceppa
 * Translate Site Title / Tagline
 
 = 1.2.11 =
-* Added border to the active language on the "all posts" page 
+* Added border to the active language on the "all posts" page
 * Added checkbox for show also posts withouth translations in "all posts"
 
 = 1.2.8 =
@@ -583,7 +615,7 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/en/ceceppa
 * Fixed Archives link
 
 = 1.0.10 =
-* Fixed Warning: implode() 
+* Fixed Warning: implode()
 
 = 1.0.8 =
 * Fixed error "Wrong datatype for second argument"
@@ -642,13 +674,13 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/en/ceceppa
 * Plugin now work correctly with php < 5.4
 
 = 0.9.11 =
-* Fixed sort in widget "CML: Recent Posts" 
+* Fixed sort in widget "CML: Recent Posts"
 
 = 0.9.9 =
 * Now you can use any symbol in "Widget titles" and "My translation page".
 * Added documentation about shortcode in "Ceceppa Multilingua" -> "Shortcode"
 
-= 0.9.4 = 
+= 0.9.4 =
 * Fixed translation of widget titles.
 
 = 0.9.1 =
@@ -662,7 +694,7 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/en/ceceppa
 * Fixed the translation of widget titles
 * Added new widget: "CML: Text"
 
-= 0.8.4 = 
+= 0.8.4 =
 * Now you can translate also tag
 
 = 0.8.1 =
@@ -679,7 +711,7 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/en/ceceppa
 = 0.7.7 =
 * Now translate post link correctly
 
-= 0.7.5 = 
+= 0.7.5 =
 * Now post link is translated correctly
 
 = 0.7.4 =
@@ -694,7 +726,7 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/en/ceceppa
     Use Pre-Path Mode (Default, puts /%slug%/ in front of URL) (www.example.com/en/) (default)
     Use Pre-Domain Mode (en.example.com)
   It is enabled by default, you can change or disable in settings page
-    
+
 = 0.6.3 =
 * If you use "static page" as homepage, the plugin add ?lang=[]&sp=1 to url
 
@@ -714,7 +746,7 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/en/ceceppa
 * Set new language "enabled"
 
 = 0.5.0 =
-* Removed field "Main page" and "Main category" in "Languages settings" page. 
+* Removed field "Main page" and "Main category" in "Languages settings" page.
   Assign language to each categories (it's not necessary for subcategories).
 
 = 0.4.8 =
@@ -761,14 +793,14 @@ For Problems visits the [Support page](http://www.alessandrosenese.eu/en/ceceppa
 
 = 0.3 =
 * Different post/page for each language
-* Different menu for each language. (need to edit header.php)	 	
-* Translate widget's titles	 	
-* Group/Ungroup comments for this post/page/category that are available in each language	 	
-* Show notice when the post/page/category is available in the visitor's language	 	
-* Automatically redirects the browser depending on the user's language	 	
-* Widget for language chooser		
+* Different menu for each language. (need to edit header.php)
+* Translate widget's titles
+* Group/Ungroup comments for this post/page/category that are available in each language
+* Show notice when the post/page/category is available in the visitor's language
+* Automatically redirects the browser depending on the user's language
+* Widget for language chooser
 * Filter some wordpress widgets, as "Least and Reads Posts", "Most read post", "Most commented"
-* Filter search in according to current language		
-* Change wordpress locale according to current language, useful for localized themes		
-* Show the list flag of available languages on top or bottom of page/post		
+* Filter search in according to current language
+* Change wordpress locale according to current language, useful for localized themes
+* Show the list flag of available languages on top or bottom of page/post
 * Show list of all articles with their translatios, if exists
