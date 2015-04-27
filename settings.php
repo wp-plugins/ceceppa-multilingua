@@ -5,7 +5,7 @@
  *
  * In questo file le opzioni vengono recuperate dal database...
  */
-  global $wpdb;
+  global $wpdb, $_cml_settings;
 
  //Lingue
   $_cml_settings[ 'default_language' ] = $wpdb->get_var("SELECT cml_language FROM " . CECEPPA_ML_TABLE . " WHERE cml_default = 1");
@@ -70,6 +70,11 @@
   $_cml_settings[ 'cml_show_html_items_style' ] = get_option( "cml_show_html_items_style", 1 );
   
   $_cml_settings[ 'cml_update_static_page' ] = get_option( "cml_update_static_page", 1 );
+  $_cml_settings[ 'cml_remove_extra_slug' ] = get_option( "cml_remove_extra_slug", 1 );
+
+  //Translated slugs
+  $_cml_settings[ 'cml_translated_slugs' ] = get_option( "cml_translated_slugs", array() );
 
   $GLOBALS[ '_cml_settings' ] = & $_cml_settings;
-?>
+
+
