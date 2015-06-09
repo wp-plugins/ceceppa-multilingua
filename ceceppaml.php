@@ -3,7 +3,7 @@
 Plugin Name: Ceceppa Multilingua
 Plugin URI: http://www.alessandrosenese.eu/portfolio/ceceppa-multilingua
 Description: Adds userfriendly multilingual content management and translation support into WordPress.
-Version: 1.5.5
+Version: 1.5.7
 Author: Alessandro Senese aka Ceceppa
 Author URI: http://www.alessandrosenese.eu/
 License: GPL3
@@ -39,7 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $wpdb;
 
-define( 'CECEPPA_DB_VERSION', 32 );
+define( 'CECEPPA_DB_VERSION', 33 );
 
 define( 'CECEPPA_ML_TABLE', $wpdb->base_prefix . 'ceceppa_ml' );
 define( 'CECEPPA_ML_CATS', $wpdb->base_prefix . 'ceceppa_ml_cats' );
@@ -447,7 +447,7 @@ EOT;
     $lang = CMLLanguage::get_by_post_id( $page_id );
 
     if( ! is_object( $lang ) ) {
-      $lang = CMLLanguage::get_default();
+      $lang = CMLLanguage::get_current();
     }
 
     $this->unset_category_lang();
@@ -483,7 +483,7 @@ EOT;
         }
     }
 
-    $slug = ( empty( $lang ) ) ? CMLLanguage::get_default_slug() : $lang->cml_language_slug;
+    $slug = ( empty( $lang ) ) ? CMLLanguage::get_current_slug() : $lang->cml_language_slug;
     $permalink = CMLPost::remove_extra_number( $permalink, $page );
 
 		/**
@@ -491,7 +491,7 @@ EOT;
 		 * otherwise the default one will be always used...
 		 */
 		if( CMLPost::is_unique( $page_id ) ) {
-			$slug = CMLUtils::_get( '_forced_language_slug' );
+			$slug = CMLUtils::_get( '_forced_language_slug', $slug );
 		}
 
     return $this->convert_url( $permalink, $slug );
