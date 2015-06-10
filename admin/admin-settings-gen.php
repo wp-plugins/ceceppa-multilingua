@@ -12,13 +12,23 @@ if( isset( $_GET[ 'cml-settings-updated' ] ) ) {
 /*
  * Generate file "settings.php"
  * for reduce calls to database :)
- * 
+ *
  */
-function cml_generate_settings_php() {
-  $_cml_setttings = & $GLOBALS[ '_cml_settings' ];
+function cml_generate_settings_php( $filename = "",
+                                    $_cml_settings = null,
+                                    $var_name = '$_cml_settings',
+                                    $flag = 0 ) {
+
+  if( null == $_cml_settings ) {
+    $_cml_settings = & $GLOBALS[ '_cml_settings' ];
+  }
+
+  if( empty( $filename ) ) {
+      $filename = CML_UPLOAD_DIR . "settings.gen.php";
+  }
 
   update_option( "cml_use_settings_gen", false );
-  if( empty( $_cml_setttings ) ) {
+  if( empty( $_cml_settings ) ) {
     return;
   }
 
@@ -27,31 +37,39 @@ function cml_generate_settings_php() {
 
   cml_generate_lang_columns();
 
+  $row = array();
+  if( $flag == FILE_APPEND ) {
+    $row[] = "\n";
+  }
+
   $row[] = "<?php";
+  $row[] = "/**CML: SETTINGS**/";
   $row[] = "if ( ! defined( 'ABSPATH' ) ) die( \"Access denied\" );";
   $row[] = "//Genetared by Ceceppa Multilingua - " . date( "Y-m-d H:i" );
-  foreach( $_cml_setttings as $key => $value ) {
+  foreach( $_cml_settings as $key => $value ) {
     if( ! is_array( $value ) ) {
       $value = addslashes( $value );
       $val = is_numeric( $value ) ? $value : '"' . $value . '"';
 
-      $row[] = '$_cml_settings[ "' . $key . '"] = ' . $val . ';';
+      $row[] = $var_name . '[ "' . $key . '"] = ' . $val . ';';
     }
   }
-  
-  $row[] = "\n";
-  foreach( $GLOBALS[ '_cml_language_columns' ] as $key => $value ) {
-    $row[] = '$_cml_language_columns[' . $key . '] = "' . $value . '";';
+
+  if( $flag == 0 ) {
+      $row[] = "\n";
+      foreach( $GLOBALS[ '_cml_language_columns' ] as $key => $value ) {
+        $row[] = '$_cml_language_columns[' . $key . '] = "' . $value . '";';
+      }
+
+      $row[] = "\n";
+      foreach( $GLOBALS[ '_cml_language_keys' ] as $key => $value ) {
+        $row[] = '$_cml_language_keys["' . $key . '"] = "' . $value . '";';
+      }
+
+/*      $row[] = "?>"; */
   }
 
-  $row[] = "\n";
-  foreach( $GLOBALS[ '_cml_language_keys' ] as $key => $value ) {
-    $row[] = '$_cml_language_keys["' . $key . '"] = "' . $value . '";';
-  }
-
-  $row[] = "?>";
-
-  $ok = @file_put_contents( CML_UPLOAD_DIR . "settings.gen.php", join( "\n", $row ) );
+  $ok = @file_put_contents( $filename, join( "\n", $row ), $flag );
 
   if( $ok ) update_option( "cml_use_settings_gen", 1 );
 }
@@ -83,7 +101,7 @@ function cml_generate_lang_columns() {
  */
 function cml_generate_mo_from_translations( $type = null, $echo = false ) {
   global $wpdb;
-  
+
   if( CMLUtils::_get( 'no_generate', false ) ) return;
 
   require_once( CML_PLUGIN_ADMIN_PATH . 'php-mo.php' );
@@ -96,7 +114,7 @@ function cml_generate_mo_from_translations( $type = null, $echo = false ) {
    * of same word cause wrong "return"
    */
   $langs = CMLLanguage::get_all();
-  if( ! is_dir( CML_PLUGIN_CACHE_PATH ) ) mkdir( CML_PLUGIN_CACHE_PATH );
+  if( ! is_dir( CML_PLUGIN_CACHE_PATH ) ) @mkdir( CML_PLUGIN_CACHE_PATH );
 
   //foreach( $langs as $lang ) {
     $filename = CML_PLUGIN_CACHE_PATH . "cmltrans-" . CMLLanguage::get_default_locale() . ".po";
@@ -114,7 +132,7 @@ function cml_generate_mo_from_translations( $type = null, $echo = false ) {
 
     //.po header
     $h = file_get_contents( CML_PLUGIN_ADMIN_PATH . "header.po" );
-    
+
     $user = wp_get_current_user();
     $h = str_replace( '%PROJECT%', "cml_translations", $h );
     $h = str_replace( '%AUTHOR%', $user->user_firstname . " " . $user->user_lastname, $h );
@@ -143,19 +161,20 @@ function cml_generate_mo_from_translations( $type = null, $echo = false ) {
       fwrite( $fp, $s );
     }
 
-    //serialize post translations
+    //serialize post translations & override flags settings
     _cml_generate_translations( $fp );
+    _cml_generate_override_flags_settings( $fp );
 
     //menu meta
     _cml_generate_menu_meta( $fp );
 
     fclose( $fp );
-    
+
     //Convert .po in .mo
     try {
       //Tadaaaaa, file generato... genero il .mo
       phpmo_convert( $filename );
-      
+
       //update_option( "cml_get_translation_from_po_$type", true );
       update_option( "cml_get_translation_from_po", 1 );
     } catch (Exception $e) {
@@ -192,9 +211,31 @@ function _cml_generate_translations( & $fp ) {
         fwrite( $fp, $s );
       }
     }
-    
+
     $t = null;
   }
+}
+
+  /*
+   * for reduce database queries I store posts relations
+   * in .po serializing ::get_translations result
+   */
+function _cml_generate_override_flags_settings( & $fp ) {
+  global $wpdb;
+
+  $query = sprintf( "SELECT post_id, meta_value FROM %s WHERE meta_key = '_cml_override_flags'",
+                      $wpdb->postmeta );
+  $rows = $wpdb->get_results( $query );
+  foreach( $rows as $row ) {
+    $msgid = "__cml_override_flags_{$row->post_id}";
+
+    $o = 'msgid "' . $msgid . '"' . PHP_EOL;
+    $s = 'msgstr "' . addslashes( $row->meta_value ) . '"' . PHP_EOL . PHP_EOL;
+
+    fwrite( $fp, $o );
+    fwrite( $fp, $s );
+  }
+
 }
 
 function _cml_generate_menu_meta( & $fp ) {
@@ -202,7 +243,7 @@ function _cml_generate_menu_meta( & $fp ) {
 
   $query = "SELECT * FROM  $wpdb->postmeta WHERE  `meta_key` LIKE  '_cml_menu_meta_%'";
   $rows = $wpdb->get_results( $query );
-  
+
   foreach( $rows as $row ) {
     $msgid = "{$row->meta_key}_{$row->post_id}";
 
@@ -245,8 +286,7 @@ EOT;
   }
 
   if( ! is_dir( CML_PLUGIN_CACHE_PATH ) ) mkdir( CML_PLUGIN_CACHE_PATH );
-  
+
   $css = join( "\n", $tiny ) . "\n" . join( "\n", $small );
   @file_put_contents( CML_PLUGIN_CACHE_PATH . "cml_flags.css", $css );
 }
-?>
