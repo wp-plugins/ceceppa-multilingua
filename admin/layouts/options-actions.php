@@ -40,7 +40,7 @@ function cml_admin_options_redirect() {
       </li>
     </ul>
   </div>
-  
+
   <div id="major-publishing-actions" class="cml-description <?php echo isset( $_GET[ 'wstep' ] ) ? "active" : "" ?>">
     <?php _e( 'Choose what to do when user visit your homepage', 'ceceppaml' ); ?>:
     <dl class="cml-dl-list">
@@ -72,7 +72,7 @@ function cml_admin_options_redirect() {
         </dd>
 
     </dl>
-    
+
     <strong>
       <?php _e( 'Default language will be used if visitor language isn\'t available', 'ceceppaml' ) ?>
     </strong>
@@ -129,7 +129,7 @@ function cml_admin_options_url_mode() {
       </li>
     </ul>
   </div>
-  
+
   <div id="major-publishing-actions" class="cml-description <?php echo isset( $_GET[ 'wstep' ] ) ? "active" : "" ?>">
     <?php _e( 'Choose the style of your links. Example:', 'ceceppaml' ); ?>
     <dl class="cml-dl-list">
@@ -157,13 +157,13 @@ function cml_admin_options_url_mode() {
           if( $lang->cml_default ) {
             $slug = "";
             echo "<i>(" . __( 'Default', "ceceppaml" ) . ")</i>&nbsp;";
-          } else 
+          } else
             $slug = $lang->cml_language_slug . "/";
 
           echo CMLUtils::home_url() .  "/{$slug}<br />";
         }
         ?>
-        
+
       </dd>
       <dt><?php _e( 'Pre-Domain', 'ceceppaml' ) ?></dt>
         <dd>en.examle.com</dd>
@@ -186,12 +186,20 @@ function cml_admin_options_categories_tags() {
 
 ?>
   <div id="minor-publishing">
-  
+
     <div class="cml-checkbox">
       <input type="checkbox" id="categories" name="categories" value="1" <?php checked( $_cml_settings[ 'cml_option_translate_category_url' ], true ) ?> />
       <label for="categories"><span>||</span></label>
     </div>
     <label for="categories"><?php _e('Translate categoriy url', 'ceceppaml') ?>&nbsp;</label>
+
+    <br />
+    <div class="cml-checkbox">
+      <input type="checkbox" id="category-slug" name="category-slug" value="1" <?php checked( $_cml_settings[ 'cml_option_translate_category_slug' ], true ) ?> />
+      <label for="category-slug"><span>||</span></label>
+    </div>
+    <label for="category-slug"><?php _e('Translate category slug', 'ceceppaml') ?>&nbsp;</label>
+
   </div>
 
   <div id="major-publishing-actions" class="cml-description">
@@ -269,12 +277,12 @@ function cml_admin_options_show_notice() {
         </li>
       </ul>
     </div>
-    
+
     <div>
       <strong><?php _e( 'Cusomize notice:', 'ceceppaml' ) ?></strong><br />
       <dl class="cml-dl-list">
         <dt>
-            <a href="<?php echo add_query_arg( array( "page" => "ceceppaml-translations-page" ) ) ?>">
+            <a href="<?php echo esc_url( add_query_arg( array( "page" => "ceceppaml-translations-page" ) ) ) ?>">
               <?php _e( 'Click here for translate notice', 'ceceppaml' ); ?>
             </a>
         </dt>
@@ -299,9 +307,9 @@ function cml_admin_options_show_notice() {
   <div id="major-publishing-actions" class="cml-description <?php echo isset( $_GET[ 'wstep' ] ) ? "active" : "" ?>">
     <?php _e( 'Notice visitor that post/page that is visiting is available in his language', 'ceceppaml' ); ?>
     <br ><br />
-    <a href="<?php echo add_query_arg( array( "page" => "ceceppaml-translations-page" ) ) ?>">
+    <a href="<?php echo esc_url( add_query_arg( array( "page" => "ceceppaml-translations-page" ) ) ) ?>">
       <?php _e( 'Click here for translate notice', 'ceceppaml' ); ?>
-    </a>    
+    </a>
   </div>
 
   <?php
@@ -339,7 +347,7 @@ function cml_admin_options_change_locale() {
     </div>
     <label for="change-locale"><?php _e('Set the language of wordpress, in according of selected language', 'ceceppaml') ?></label>
   </div>
-  
+
   <div id="major-publishing-actions" class="cml-description">
     <?php _e( 'Change wordpress locale in according to current language.', 'ceceppaml' ); ?><br />
     <?php _e( 'If enabled language of all plugins and theme will switch in current language, if a translation exists', 'ceceppaml' ); ?>
@@ -358,7 +366,7 @@ function cml_admin_options_translate_media() {
     </div>
     <label for="translate-media"><?php _e('Add [cml_media] shortcode to media inserted in editor', 'ceceppaml') ?></label>
   </div>
-  
+
   <div id="major-publishing-actions" class="cml-description">
     <?php _e( 'If enabled the plugin will insert inside [cml_media] shortcode to allow "alt" attribute to be translated in frontend', 'ceceppaml' ); ?><br />
     <br />
